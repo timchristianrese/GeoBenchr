@@ -1,5 +1,5 @@
-resource "google_compute_instance" "casssut" {
-  name         = "cassandra-under-test"
+resource "google_compute_instance" "sut" {
+  name         = "accumulo-under-test"
   machine_type = "n2-standard-8"
   zone         = "europe-west2-c"
   tags         = [ "sut" ]
@@ -25,7 +25,7 @@ resource "google_compute_instance" "casssut" {
   }
 
   metadata = {
-    system-under-test = "cassandra"
+    system-under-test = "accumulo"
     ssh-keys = "${var.gcp_ssh_user}:${file(var.gcp_ssh_pub_key_file)}"
   }
 

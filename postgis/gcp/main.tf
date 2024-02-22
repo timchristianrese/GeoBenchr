@@ -1,5 +1,5 @@
 resource "google_compute_instance" "sut" {
-  name         = "system-under-test"
+  name         = "postgis-under-test"
   machine_type = "n2-standard-8"
   zone         = "europe-west2-c"
   tags         = [ "sut" ]
@@ -31,19 +31,4 @@ resource "google_compute_instance" "sut" {
 
   metadata_startup_script = "${file("../scripts/single_start.sh")}"
 
-}
-
-resource "google_compute_firewall" "ssh-rule" {
-  name = "ssh-access"
-  network = google_compute_network.vpc_network.name
-  allow {
-    protocol = "tcp"
-    ports = ["22"]
-  }
-  target_tags = ["sut"]
-  source_ranges = ["0.0.0.0/0"]
-}
-
-resource "google_compute_network" "vpc_network" {
-  name = "sut-network"
 }
