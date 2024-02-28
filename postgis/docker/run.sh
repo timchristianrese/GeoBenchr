@@ -1,1 +1,0 @@
-docker run --name postgis-docker -e POSTGRES_PASSWORD=password -d postgis/postgis

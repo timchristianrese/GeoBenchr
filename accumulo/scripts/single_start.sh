@@ -30,3 +30,20 @@ wget https://dlcdn.apache.org/accumulo/2.1.2/accumulo-2.1.2-src.tar.gz
 tar xzf accumulo-2.1.2-bin.tar.gz
 cd accumulo-2.1.2
 sudo ./bin/start_all.sh  
+
+#geomesa
+export TAG="4.0.1"
+export VERSION="2.12-${TAG}" # note: 2.12 is the Scala build version
+wget "https://github.com/locationtech/geomesa/releases/download/geomesa-${TAG}/geomesa-accumulo_${VERSION}-bin.tar.gz"
+tar xvf geomesa-accumulo_${VERSION}-bin.tar.gz
+cd geomesa-accumulo_${VERSION}
+
+hadoop fs -mkdir /accumulo/classpath/myNamespace
+hadoop fs -put \
+  geomesa-accumulo_${VERSION}/dist/accumulo/geomesa-accumulo-distributed-runtime_${VERSION}.jar \
+  /accumulo/classpath/myNamespace/
+
+#> createnamespace myNamespace
+#> grant NameSpace.CREATE_TABLE -ns myNamespace -u myUser
+#> config -s general.vfs.context.classpath.myNamespace=hdfs://NAME_NODE_FDQN:9000/accumulo/classpath/myNamespace/[^.].*.jar
+#> config -ns myNamespace -s table.classpath.context=myNamespace

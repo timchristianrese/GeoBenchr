@@ -3,12 +3,18 @@ resource "google_storage_bucket" "simra_data" {
   location      = "EU"
   force_destroy = true
 
-  uniform_bucket_level_access = true
-
+  uniform_bucket_level_access = false
   lifecycle {
       prevent_destroy = true
   }
 }
+
+resource "google_storage_bucket_iam_member" "member" {
+  bucket = google_storage_bucket.simra_data.name
+  role   = "roles/storage.objectViewer"
+  member = "allUsers"
+}
+
 
 resource "google_storage_bucket_object" "simra" {
     source       = "../data/Berlin_102022_07_2023.zip"
@@ -36,4 +42,8 @@ resource "google_compute_firewall" "ssh-rule" {
 
 resource "google_compute_network" "vpc_network" {
   name = "sut-network"
+}
+
+output "vpcname" {
+  value = google_compute_network.vpc_network.name
 }

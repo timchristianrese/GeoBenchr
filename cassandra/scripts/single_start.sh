@@ -12,8 +12,6 @@ export CASSANDRA_HOME="/usr/share/cassandra/lib"
 wget "https://github.com/locationtech/geomesa/releases/download/geomesa-4.0.5/geomesa-cassandra_2.12-4.0.5-bin.tar.gz"
 tar xvf geomesa-cassandra_2.12-4.0.5-bin.tar.gz
 cd geomesa-cassandra_2.12-4.0.5/
-export TAG="4.0.5"
-export VERSION="2.12-${TAG}"
 ./bin/install-dependencies.sh
 ./bin/install-shapefile-support.sh
 bin/geomesa-cassandra

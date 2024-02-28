@@ -1,3 +1,11 @@
+data "terraform_remote_state" "main_state" {
+  backend = "local"
+
+  config = {
+    path = "../../base/terraform.tfstate"
+  }
+}
+
 resource "google_compute_instance" "sut" {
   name         = "postgis-under-test"
   machine_type = "n2-standard-8"
@@ -17,7 +25,7 @@ resource "google_compute_instance" "sut" {
   }
 
   network_interface {
-    network = google_compute_network.vpc_network.name
+    network = data.terraform_remote_state.main_state.outputs.vpcname
 
     access_config {
       // Ephemeral public IP
