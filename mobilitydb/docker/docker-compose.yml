@@ -1,0 +1,123 @@
+###
+# Start with: docker-compose -f misc/docker/docker-compose.yml up -d
+###
+
+###
+# Stop with: docker-compose -f misc/docker/docker-compose.yml down
+###
+
+###
+# Delete with: docker-compose -f misc/docker/docker-compose.yml rm
+###
+
+version: '3.1'
+
+services:
+  coordinator:
+    platform: linux/amd64
+    image: docker.io/govner/mobdb
+    tty: true
+    hostname: coordinator
+    ports:
+      - 2180:2181
+      - 10080:10085
+      - 50500:50505
+      - 5432:5432
+    volumes:
+       - ./data/:/temp/data/
+       - coord_config:/etc/postgresql/
+       - primary_data:/var/lib/postgresql/
+    networks:
+      - mobnet
+  worker1:
+    platform: linux/amd64
+    image: docker.io/govner/mobdb
+    tty: true
+    hostname: worker1
+    ports:
+      - 2181:2181
+      - 10084:10085
+      - 50504:50505
+      - 25433:5432
+    volumes:
+       - dis_config1:/etc/postgresql/
+       - dis_data1:/var/lib/postgresql/
+    networks:
+      - mobnet
+  worker2:
+    platform: linux/amd64
+    image: docker.io/govner/mobdb
+    tty: true
+    hostname: worker2
+    ports:
+      - 2182:2181
+      - 10083:10085
+      - 50508:50505
+      - 25434:5432
+    volumes:
+       - dis_config2:/etc/postgresql/
+       - dis_data2:/var/lib/postgresql/
+    networks:
+      - mobnet
+  worker3:
+    platform: linux/amd64
+    image: docker.io/govner/mobdb
+    tty: true
+    hostname: worker3
+    ports:
+      - 2183:2181
+      - 10086:10085
+      - 50507:50505
+      - 25435:5432
+    volumes:
+       - dis_config3:/etc/postgresql/
+       - dis_data3:/var/lib/postgresql/
+    networks:
+      - mobnet
+  worker4:
+    platform: linux/amd64
+    image: docker.io/govner/mobdb
+    tty: true
+    hostname: worker4
+    ports:
+      - 2184:2181
+      - 10087:10085
+      - 50506:50505
+      - 25436:5432
+    volumes:
+       - dis_config4:/etc/postgresql/  
+       - dis_data4:/var/lib/postgresql/
+    networks:
+      - mobnet
+  worker5:
+    platform: linux/amd64
+    image: docker.io/govner/mobdb
+    tty: true
+    hostname: worker5
+    ports:
+      - 2185:2181
+      - 10088:10085
+      - 50510:50505
+      - 25437:5432
+    volumes:
+      - dis_config5:/etc/postgresql/
+      - dis_data5:/var/lib/postgresql/
+    networks:
+      - mobnet
+volumes:
+  coord_config:
+  dis_config1:
+  dis_config2:
+  dis_config3:
+  dis_config4:
+  dis_config5:
+  primary_data:
+  dis_data1:
+  dis_data2:
+  dis_data3:
+  dis_data4:
+  dis_data5:
+
+networks:
+  mobnet:
+    driver: bridge

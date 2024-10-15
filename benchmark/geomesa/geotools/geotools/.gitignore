@@ -1,0 +1,2 @@
+#keep the target folder, but ignore all files in it
+target/*
