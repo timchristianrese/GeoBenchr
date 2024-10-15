@@ -1,9 +1,9 @@
 # main.tf
 
 provider "google" {
-  project = "geobenchr-benchmark"
+  project = var.project
   region  = var.region
-  zone    = "europe-west4-a"
+  zone    = var.zone
 }
 
 data "local_file" "ssh_public_key" {

@@ -2,7 +2,7 @@
 ## Logging into the Google Cloud
 Please follow the general documentation found in the repository README to help setup initial connection from the command line with `gcloud`.
 ## Setting up machine infrastructure
-You will at least need to change the variable `gcp_ssh_pub_key_file` as this links to your local public ssh key found on your machine.
+You will at least need to change the variable `gcp_ssh_pub_key_file` and `project` as this links to your local public ssh key found on your machine and to a GCloud project you won't have access to.
 ```
 terraform init
 terraform apply --auto-approve

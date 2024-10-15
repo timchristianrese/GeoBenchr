@@ -1,4 +1,4 @@
-# Geobenchr for Geomesa-Accumulo (Single-Node)
+# Geobenchr for Geomesa-Accumulo (Multi-Node)
 ## Logging into the Google Cloud
 Please follow the general documentation found in the repository README to help setup initial connection from the command line with `gcloud`.
 ## Setting up machine infrastructure

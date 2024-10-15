@@ -8,6 +8,9 @@ variable "zone" {
 variable "gcp_ssh_user" {
     default = "manager"
 }
+variable "project" {
+    default = "geobenchr-benchmark"
+}
 # NEED TO ADJUST THIS ON YOUR DEVICE, BECAUSE THIS IS THE PATH TO YOUR SSH PUBLIC KEY
 variable "gcp_ssh_pub_key_file" {
     default = "/Users/gov/.ssh/id_ed25519.pub"
