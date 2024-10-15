@@ -1,11 +1,13 @@
 /geobenchr-paper/*
 #ignore all terraform files in the repository, also in all subfolders
+
 *.tfstate
 *.tfstate.backup
 *.tfvars
 *.tfplan
 *.tfout
-# Ignore all files in the benchmark
-# Ignore all files in the geobenchr-paper folder
-/geobenchr-paper/*
-/tmp/*
+.terraform/*
+# ignore all .terraform directories in the repository
+**/.terraform/
+#.DS_Store files are created by macOS and should be ignored
+.DS_Store
