@@ -131,9 +131,10 @@ python3 runMiniBenchmark.py $GCP_IP 5432
 ## Benchmark client usage
 
 ### Load Benchmark onto client
+```
 GCP_IP2=$(terraform output -raw external_ip_client)
 SSH_USER2=$(terraform output -raw ssh_user)
 #copy the benchmark code to the benchmark machine
 scp -r ../../benchmark/mobilitydb/* $SSH_USER2@$GCP_IP2:/tmp/
 ssh $SSH_USER2@$GCP_IP2
-
+```
