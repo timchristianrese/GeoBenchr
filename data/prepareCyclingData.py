@@ -172,7 +172,7 @@ def create_geomesa_trip_data():
         rider_id = ""
         time_list = "\""
         multiline = "MULTILINESTRING("
-        add_string = ""
+        add_string = "("
         with open(input_file, 'r') as file:
             write_data = ""
             #read as csv file
@@ -184,11 +184,11 @@ def create_geomesa_trip_data():
                     ride_id = line[0]
                     rider_id = line[1]
                     add_string = f"{line[3]} {line[2]},"
-                    time_list+= f"{line[7]} "
+                    time_list+= f"{line[7]}, "
                     continue
                 elif ride_id == line[0]:
                     add_string += f"{line[3]} {line[2]},"
-                    time_list+= f"{line[7]} "
+                    time_list+= f"{line[7]}, "
                 else:
                     #finish the strings and arrays, write them, and then empty them
                     #remove the last char from lat_string and long_string
