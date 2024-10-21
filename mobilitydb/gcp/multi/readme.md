@@ -12,16 +12,19 @@ export GCP_IP=$(terraform output -raw external_ip_sut_manager)
 ## Copy files for tests onto the machine
 Ensure that you have run the data preparation script found in the `data` folder.
 ### Copy all files (Warning: Will take a while)
+```
 scp ../../../data/merged\* $SSH_USER@$GCP_IP:/tmp/
 scp ../../../data/trips\* $SSH_USER@$GCP_IP:/tmp/
+```
 ### Copy a sample set for smaller tests
+```
 scp ../../../data/merged00.csv $SSH_USER@$GCP_IP:/tmp/
 scp ../../../data/merged01.csv $SSH_USER@$GCP_IP:/tmp/
 scp ../../../data/merged02.csv $SSH_USER@$GCP_IP:/tmp/
 scp ../../../data/trips_merged00.csv $SSH_USER@$GCP_IP:/tmp/
 scp ../../../data/trips_merged01.csv $SSH_USER@$GCP_IP:/tmp/
 scp ../../../data/trips_merged02.csv $SSH_USER@$GCP_IP:/tmp/
-
+```
 ## Connect to the manager and configure Citus to work properly
 ```
 ssh $SSH_USER@$GCP_IP

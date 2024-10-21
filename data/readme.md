@@ -11,3 +11,20 @@ trips_merged*.csv (MobilityDB trip data)
 geomesa_merged*.csv (GeoMesa point data)
 geomesa_trips_geomesa_merged*.csv (GeoMesa trip data)
 ```
+
+## Usage
+The script has varying functions that serve different purposes:
+- merge_files("SimRa")
+  Merges single trips into larger files
+- trim_csv_files()
+Trims empty lines and unneccesary columns
+- convert_timestamp()
+Converts the timestamp to something usable
+- create_geomesa_data()
+Adjusts the files to be usable for GeoMesa
+- create_trip_data()
+Creates trip data for MobilityDB
+- create_geomesa_trip_data()
+Creates trip data for GeoMesa 
+
+# Flight

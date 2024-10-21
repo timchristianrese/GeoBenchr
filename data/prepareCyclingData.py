@@ -168,14 +168,11 @@ def create_geomesa_trip_data():
     files = glob.glob('geomesa_merged*')
     for input_file in files:
         output_file = 'geomesa_trips_' + input_file
-        start_lat = ""
-        start_lon = ""
-        end_lat = ""
-        end_lon = ""
-        start_time = ""
-        end_time = ""
         ride_id = ""
         rider_id = ""
+        time_list = "\""
+        multiline = "MULTILINESTRING("
+        add_string = ""
         with open(input_file, 'r') as file:
             write_data = ""
             #read as csv file
@@ -183,31 +180,35 @@ def create_geomesa_trip_data():
             filedata = csv.reader(file, delimiter=',')
             for line in filedata:
                 #handle first line
-                if start_lat == "":
+                if ride_id == "":
                     ride_id = line[0]
                     rider_id = line[1]
-                    start_lat = line[2]
-                    start_lon = line[3]
-                    start_time = line[7]
+                    add_string = f"{line[3]} {line[2]},"
+                    time_list+= f"{line[7]} "
                     continue
                 elif ride_id == line[0]:
-                    end_time = line[7]
-                    end_lat = line[2]
-                    end_lon = line[3]
-                    write_data += f"{ride_id},{rider_id},{start_lat},{start_lon},{end_lat},{end_lon},{start_time},{end_time}\n"
-                    start_lat = end_lat
-                    start_lon = end_lon
-                    start_time = end_time
+                    add_string += f"{line[3]} {line[2]},"
+                    time_list+= f"{line[7]} "
                 else:
+                    #finish the strings and arrays, write them, and then empty them
+                    #remove the last char from lat_string and long_string
+                    add_string = add_string[:-1]+")"
+                    time_list = time_list[:-1]+"\""
+                    string_to_write = multiline + add_string+")"
+                    write_data = f"{ride_id};{rider_id};{string_to_write};{time_list}\n"
+                    
                     with open(output_file, 'a') as file:
-                        file.write(write_data)
+                       file.write(write_data)
                     ride_id = line[0]
                     rider_id = line[1]
-                    start_lat = line[2]
-                    start_lon = line[3]
-                    start_time = line[7]
+                    time_list = "\""
+                    add_string = "("
                     write_data = ""
             #write the last lines after file ends
+            add_string = add_string[:-1]+")"
+            time_list = time_list[:-1]+"\""
+            string_to_write = multiline + add_string+")"
+            write_data = f"{ride_id};{rider_id};{string_to_write};{time_list}\n"
             with open(output_file, 'a') as file:
                 file.write(write_data)
         print(f'Geomesa trip data written to {output_file}')

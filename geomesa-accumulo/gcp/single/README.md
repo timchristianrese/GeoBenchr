@@ -24,18 +24,10 @@ scp ../../../data/geomesa_merged00.csv $SSH_USER@$GCP_IP:~/
 scp ../../../data/geomesa_merged01.csv $SSH_USER@$GCP_IP:~/ 
 scp ../../../data/geomesa_merged02.csv $SSH_USER@$GCP_IP:~/ 
 scp ../../../data/geomesa_merged03.csv $SSH_USER@$GCP_IP:~/ 
-scp ../../../data/geomesa_merged04.csv $SSH_USER@$GCP_IP:~/ 
-scp ../../../data/geomesa_merged05.csv $SSH_USER@$GCP_IP:~/ 
-scp ../../../data/geomesa_merged06.csv $SSH_USER@$GCP_IP:~/ 
-scp ../../../data/geomesa_merged07.csv $SSH_USER@$GCP_IP:~/ 
 scp ../../../data/geomesa_trips_geomesa_merged00.csv $SSH_USER@$GCP_IP:~/ 
 scp ../../../data/geomesa_trips_geomesa_merged01.csv $SSH_USER@$GCP_IP:~/ 
 scp ../../../data/geomesa_trips_geomesa_merged02.csv $SSH_USER@$GCP_IP:~/ 
 scp ../../../data/geomesa_trips_geomesa_merged03.csv $SSH_USER@$GCP_IP:~/ 
-scp ../../../data/geomesa_trips_geomesa_merged04.csv $SSH_USER@$GCP_IP:~/ 
-scp ../../../data/geomesa_trips_geomesa_merged05.csv $SSH_USER@$GCP_IP:~/ 
-scp ../../../data/geomesa_trips_geomesa_merged06.csv $SSH_USER@$GCP_IP:~/ 
-scp ../../../data/geomesa_trips_geomesa_merged07.csv $SSH_USER@$GCP_IP:~/ 
 ```
 ## Setup the machine to properly run GeoMesa
 Connect to the machine and run the manager script (If we were to pass the script as a startup script, it runs with the `root` account, which can cause some problems with Hadoop):
@@ -55,12 +47,13 @@ Here we create SimpleFeatureType schemas, which GeoMesa uses for storing spatiot
 ```
 ssh $SSH_USER@$GCP_IP 'cd /opt/geomesa-accumulo; bin/geomesa-accumulo create-schema -i test -z localhost -u root  -p test -c example -s "ride_id:Integer:index=full,rider_id:Integer:index=full,latitude:Double,longitude:Double,geom:Point:srid=4326,x:Double,y:Double,z:Double,timestamp:Date" -f ride_data'
 
-ssh $SSH_USER@$GCP_IP 'cd /opt/geomesa-accumulo; bin/geomesa-accumulo create-schema -i test -z localhost -u root  -p test -c example -s "ride_id:Integer:index=full,rider_id:Integer:index=full,trip:LineString:srid=4326,start_timestamp:Date, end_timestamp:Date" -f trip_data'
+ssh $SSH_USER@$GCP_IP 'cd /opt/geomesa-accumulo; bin/geomesa-accumulo create-schema -i test -z localhost -u root  -p test -c example -s "ride_id:Integer:index=full,rider_id:Integer:index=full,trip:MultiLineString:srid=4326,timestamp:List[Date]" -f trip_data'
 ```
 ### Setup a csv converter to convert the data into the correct format
-
+```
 scp ../../converter/ride_data.converter $SSH_USER@$GCP_IP:/opt/geomesa-accumulo
-scp ../../converter/trip_data.converter $SSH_USER@$GCP_IP:/opt/geomesa-accumulo
+scp ../../converter/trip_data_new.converter $SSH_USER@$GCP_IP:/opt/geomesa-accumulo
+```
 ### Ingest data
 If you want to ingest all data:
 ```
@@ -73,19 +66,11 @@ ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt
 ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/ride_data.converter -c example -i test -z localhost -u root -p test -f ride_data ~/geomesa_merged01.csv'
 ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/ride_data.converter -c example -i test -z localhost -u root -p test -f ride_data ~/geomesa_merged02.csv'
 ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/ride_data.converter -c example -i test -z localhost -u root -p test -f ride_data ~/geomesa_merged03.csv'
-ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/ride_data.converter -c example -i test -z localhost -u root -p test -f ride_data ~/geomesa_merged04.csv'
-ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/ride_data.converter -c example -i test -z localhost -u root -p test -f ride_data ~/geomesa_merged05.csv'
-ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/ride_data.converter -c example -i test -z localhost -u root -p test -f ride_data ~/geomesa_merged06.csv'
-ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/ride_data.converter -c example -i test -z localhost -u root -p test -f ride_data ~/geomesa_merged07.csv'
 
-ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/trip_data.converter -c example -i test -z localhost -u root -p test -f trip_data ~/geomesa_trips_geomesa_merged00.csv'
+ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/trip_data_new.converter -c example -i test -z localhost -u root -p test -f trip_data ~/geomesa_trips_geomesa_merged00.csv'
 ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/trip_data.converter -c example -i test -z localhost -u root -p test -f trip_data ~/geomesa_trips_geomesa_merged01.csv'
 ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/trip_data.converter -c example -i test -z localhost -u root -p test -f trip_data ~/geomesa_trips_geomesa_merged02.csv'
 ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/trip_data.converter -c example -i test -z localhost -u root -p test -f trip_data ~/geomesa_trips_geomesa_merged03.csv'
-ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/trip_data.converter -c example -i test -z localhost -u root -p test -f trip_data ~/geomesa_trips_geomesa_merged04.csv'
-ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/trip_data.converter -c example -i test -z localhost -u root -p test -f trip_data ~/geomesa_trips_geomesa_merged05.csv'
-ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/trip_data.converter -c example -i test -z localhost -u root -p test -f trip_data ~/geomesa_trips_geomesa_merged06.csv'
-ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/trip_data.converter -c example -i test -z localhost -u root -p test -f trip_data ~/geomesa_trips_geomesa_merged07.csv'
 ```
 
 ## Check if GeoMesa setup is complete by running a simple export that gets 50 values
