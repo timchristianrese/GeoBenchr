@@ -56,7 +56,7 @@ resource "google_compute_instance" "mobdb_manager" {
 }
 
 resource "google_compute_instance" "mobdb_worker" {
-  count        = 1
+  count        = var.worker_count
   name         = "mobdb-worker-${count.index}"
   machine_type = var.worker_machine_type
   zone         = var.zone
@@ -117,6 +117,9 @@ output "external_ip_sut_workers" {
 
 output "ssh_user" {
   value = var.gcp_ssh_user
+}
+output "worker_count" {
+  value = var.worker_count
 }
 
 # output "external_ip_client" {
