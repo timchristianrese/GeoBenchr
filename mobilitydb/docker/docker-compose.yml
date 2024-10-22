@@ -19,9 +19,6 @@ services:
     tty: true
     hostname: coordinator
     ports:
-      - 2180:2181
-      - 10080:10085
-      - 50500:50505
       - 5432:5432
     volumes:
        - ./data/:/temp/data/
@@ -35,9 +32,6 @@ services:
     tty: true
     hostname: worker1
     ports:
-      - 2181:2181
-      - 10084:10085
-      - 50504:50505
       - 25433:5432
     volumes:
        - dis_config1:/etc/postgresql/
@@ -50,9 +44,6 @@ services:
     tty: true
     hostname: worker2
     ports:
-      - 2182:2181
-      - 10083:10085
-      - 50508:50505
       - 25434:5432
     volumes:
        - dis_config2:/etc/postgresql/
@@ -65,9 +56,6 @@ services:
     tty: true
     hostname: worker3
     ports:
-      - 2183:2181
-      - 10086:10085
-      - 50507:50505
       - 25435:5432
     volumes:
        - dis_config3:/etc/postgresql/
@@ -80,9 +68,6 @@ services:
     tty: true
     hostname: worker4
     ports:
-      - 2184:2181
-      - 10087:10085
-      - 50506:50505
       - 25436:5432
     volumes:
        - dis_config4:/etc/postgresql/  
@@ -95,9 +80,6 @@ services:
     tty: true
     hostname: worker5
     ports:
-      - 2185:2181
-      - 10088:10085
-      - 50510:50505
       - 25437:5432
     volumes:
       - dis_config5:/etc/postgresql/
