@@ -11,3 +11,4 @@
 **/.terraform/
 #.DS_Store files are created by macOS and should be ignored
 .DS_Store
+mobilitydb/docker/
