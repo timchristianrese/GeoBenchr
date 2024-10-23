@@ -212,6 +212,7 @@ def create_geomesa_trip_data():
             with open(output_file, 'a') as file:
                 file.write(write_data)
         print(f'Geomesa trip data written to {output_file}')
+        
 merge_files("SimRa")
 trim_csv_files()
 convert_timestamp()

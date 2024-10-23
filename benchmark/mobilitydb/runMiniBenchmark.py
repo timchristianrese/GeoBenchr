@@ -270,7 +270,7 @@ def execute_query(query="SELECT * FROM cycling_data " , query_type = "surroundin
             case "bounding_box":
                 cursor = connection.cursor()
                 poslong, poslat = generate_random_position_in_Berlin()
-                query_addition = f"WHERE ST_Intersects(cycling_data.point_geom::geography, ST_MakeEnvelope({poslong-0.1}, {poslat-0.1}, {poslong+0.1}, {poslat+0.1}, 4326)::geography);"
+                query_addition = f"WHERE ST_Intersects(cycling_data.point_geom::geography, ST_MakeEnvelope({poslong-0.1}, {poslat-0.1}, {poslong+0.1}, {poslat+0.1}, 4326)::geography) LIMIT {limit};"
                 query = query + query_addition
                 print(query)
                 start = time.time()
@@ -291,7 +291,7 @@ def execute_query(query="SELECT * FROM cycling_data " , query_type = "surroundin
                 lat2 , lon2 = generate_random_position_in_Berlin()
                 lat3 , lon3 = generate_random_position_in_Berlin()
                 lat4 , lon4 = generate_random_position_in_Berlin()
-                query_addition = f"WHERE ST_Intersects(cycling_data.point_geom::geography, ST_GeomFromText('POLYGON(({lon1} {lat1}, {lon2} {lat2}, {lon3} {lat3}, {lon1} {lat1}))', 4326)::geography);"
+                query_addition = f"WHERE ST_Intersects(cycling_data.point_geom::geography, ST_GeomFromText('POLYGON(({lon1} {lat1}, {lon2} {lat2}, {lon3} {lat3}, {lon1} {lat1}))', 4326)::geography) LIMIT {limit};"
                 query = query + query_addition
                 start = time.time()
                 cursor.execute(query)
@@ -399,7 +399,7 @@ def execute_query(query="SELECT * FROM cycling_data " , query_type = "surroundin
                 cursor = connection.cursor()
                 # define start and end time for the query
                 start_time = "2023-07-01 00:00:00"
-                query_addition = f"WHERE timestamp BETWEEN '{start_time}' - INTERVAL '1 hour' AND '{start_time} + INTERVAL '1 hour';"
+                query_addition = f"WHERE timestamp BETWEEN '{start_time}' - INTERVAL '1 hour' AND '{start_time} + INTERVAL '1 hour' LIMIT {limit};"
                 query = query + query_addition
                 start = time.time()
                 cursor.execute(query)
@@ -417,7 +417,7 @@ def execute_query(query="SELECT * FROM cycling_data " , query_type = "surroundin
                 start_time = "2023-07-01 00:00:00"
                 end_time = "2023-07-01 01:00:00"
                 poslong, poslat = generate_random_position_in_Berlin()
-                query_addition = f"WHERE timestamp BETWEEN '{start_time}' AND '{end_time}' AND ST_DWithin(cycling_data.point_geom::geography,ST_SetSRID(ST_MakePoint({poslong},{poslat}), 4326)::geography, 5000);"
+                query_addition = f"WHERE timestamp BETWEEN '{start_time}' AND '{end_time}' AND ST_DWithin(cycling_data.point_geom::geography,ST_SetSRID(ST_MakePoint({poslong},{poslat}), 4326)::geography, 5000) LIMIT {limit};"
                 query = query + query_addition
                 start = time.time()
                 cursor.execute(query)
