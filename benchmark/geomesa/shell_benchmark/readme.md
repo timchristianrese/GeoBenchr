@@ -21,10 +21,6 @@ Gets data points surrounding a generated data point
 gets intersections of rides
 - "intersections"
 Gets intersections of a specific ride_id
-- "insert_ride"
-Inserts rides into the table
-- "bulk_insert_rides"
-Inserts more rides into the table
 - "bounding_box"
 Gets data contained by a bounding box
 - "polygonal_area"
@@ -33,12 +29,6 @@ Gets data defined by a polygonal area
 Gets data in a certain time interval
 - "get_trip"
 Gets a specific trip
-- "get_trip_length"
-Gets the length of a trip
-- "get_trip_duration"
-Gets the duration of the trip
-- "get_trip_speed"
-Gets the trip speed at each data point
 
 ## Usage
 The `run_threads` function takes three parameters:
