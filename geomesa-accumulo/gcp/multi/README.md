@@ -122,8 +122,11 @@ Open a second terminal in the current folder
 ```
 export SSH_USER=$(terraform output -raw ssh_user)
 export GCP_IP=$(terraform output -raw external_ip_sut_manager)
+cd ../../../benchmark/geomesa/shell_benchmark
+python runMiniBenchmark $GCP_IP multi
 ```
 ## Check and setup benchmark client
+### Not functional as of yet
 Run this again from your local device.
 ```
 GCP_IP2=$(terraform output -raw external_ip_client)

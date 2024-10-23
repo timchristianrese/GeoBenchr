@@ -435,15 +435,15 @@ ssh_trip = f"ssh {ssh_user}@{ip} '/opt/geomesa-accumulo/bin/geomesa-accumulo exp
 
 
 #Run the benchmark
-#run_threads(1, "surrounding", -1)
-#run_threads(1, "ride_traffic", -1)
-#run_threads(1, "intersections", -1)
+run_threads(1, "surrounding", -1)
+run_threads(1, "ride_traffic", -1)
+run_threads(1, "intersections", -1)
 #run_threads(1, "insert_ride", -1)
 #run_threads(1, "bulk_insert_rides", -1)
 run_threads(1, "bounding_box", -1)
-#run_threads(1, "polygonal_area", -1)
+run_threads(1, "polygonal_area", -1)
 run_threads(1, "time_interval", -1)
-run_threads(1, "get_trip", -1)
+#run_threads(1, "get_trip", -1)
 #run_threads(1, "get_trip_length", -1)
 #run_threads(1, "get_trip_duration", -1)
 #run_threads(1, "get_trip_speed", -1)
