@@ -1,0 +1,24 @@
+geomesa: {
+  converters: {
+  "ride-data" = {
+      type   = "delimited-text",
+      format = "CSV",
+      options = {
+        skip-lines = 0
+        delimiter  = ","
+      }
+      id-field = "uuid()",  
+      fields = [
+        { name = "ride_id",    transform = "$1::int"     }  
+        { name = "rider_id",   transform = "$2::int"     }  
+        { name = "latitude",   transform = "$3::double"  }  
+        { name = "longitude",  transform = "$4::double"  }  
+        { name = "geom",       transform = "point($longitude, $latitude)" }  
+        { name = "x",          transform = "$5::double"  }  
+        { name = "y",          transform = "$6::double"  }  
+        { name = "z",          transform = "$7::double"  }  
+        { name = "timestamp",  transform = "dateHourMinuteSecondMillis($8)" }
+      ]
+      }
+  }
+}
