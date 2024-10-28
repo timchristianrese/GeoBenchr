@@ -10,9 +10,10 @@ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 chmod 0600 ~/.ssh/authorized_keys
 
 #install zookeeper
-wget https://downloads.apache.org/zookeeper/zookeeper-3.9.2/apache-zookeeper-3.9.2-bin.tar.gz
-tar -xvf apache-zookeeper-3.9.2-bin.tar.gz
-sudo mv apache-zookeeper-3.9.2-bin /opt/zookeeper
+export ZOOKEEPER_VERSION="3.9.3"
+wget https://downloads.apache.org/zookeeper/zookeeper-${ZOOKEEPER_VERSION}/apache-zookeeper-${ZOOKEEPER_VERSION}-bin.tar.gz
+tar -xvf apache-zookeeper-${ZOOKEEPER_VERSION}-bin.tar.gz
+sudo mv apache-zookeeper-${ZOOKEEPER_VERSION}-bin /opt/zookeeper
 cd /opt/zookeeper
 cp conf/zoo_sample.cfg conf/zoo.cfg
 bin/zkServer.sh start
@@ -22,9 +23,10 @@ bin/zkServer.sh start
 
 #install hadoop
 cd ~
-wget https://dlcdn.apache.org/hadoop/common/hadoop-3.4.0/hadoop-3.4.0.tar.gz
-tar -xvf hadoop-3.4.0.tar.gz
-sudo mv hadoop-3.4.0 /opt/hadoop
+export HADOOP_VERSION="3.4.0"
+wget https://dlcdn.apache.org/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
+tar -xvf hadoop-${HADOOP_VERSION}.tar.gz
+sudo mv hadoop-${HADOOP_VERSION} /opt/hadoop
 cd /opt/hadoop
 mkdir namenode
 echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> etc/hadoop/hadoop-env.sh
@@ -133,9 +135,10 @@ export PDSH_RCMD_TYPE=ssh
 
 #install accumulo 
 cd ~
-wget https://dlcdn.apache.org/accumulo/2.1.3/accumulo-2.1.3-bin.tar.gz
-tar -xvf accumulo-2.1.3-bin.tar.gz
-sudo mv accumulo-2.1.3 /opt/accumulo
+export ACCUMULO_VERSION="2.1.3"
+wget https://dlcdn.apache.org/accumulo/${ACCUMULO_VERSION}/accumulo-${ACCUMULO_VERSION}-bin.tar.gz
+tar -xvf accumulo-${ACCUMULO_VERSION}-bin.tar.gz
+sudo mv accumulo-${ACCUMULO_VERSION} /opt/accumulo
 cd /opt/accumulo
 echo "JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> conf/accumulo-env.sh
 bin/accumulo-util build-native

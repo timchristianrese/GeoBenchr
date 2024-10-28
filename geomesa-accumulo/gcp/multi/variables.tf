@@ -26,7 +26,7 @@ variable "benchmark_client_machine_type" {
   
 }
 variable "worker_count" {
-    default = 2
+    default = 1
 }
 variable "benchmark_client_count" {
     default = 0
