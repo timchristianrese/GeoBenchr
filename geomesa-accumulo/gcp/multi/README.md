@@ -82,7 +82,7 @@ Here we create SimpleFeatureType schemas, which GeoMesa uses for storing spatiot
 ```
 ssh $SSH_USER@$GCP_IP 'cd /opt/geomesa-accumulo; bin/geomesa-accumulo create-schema -i test -z localhost -u root  -p test -c example -s "ride_id:Integer:index=full,rider_id:Integer:index=full,latitude:Double,longitude:Double,geom:Point:srid=4326,x:Double,y:Double,z:Double,timestamp:Date" -f ride_data'
 
-ssh $SSH_USER@$GCP_IP 'cd /opt/geomesa-accumulo; bin/geomesa-accumulo create-schema -i test -z localhost -u root  -p test -c example -s "ride_id:Integer:index=full,rider_id:Integer:index=full,trip:LineString:srid=4326,start_timestamp:Date, end_timestamp:Date" -f trip_data'
+ssh $SSH_USER@$GCP_IP 'cd /opt/geomesa-accumulo; bin/geomesa-accumulo create-schema -i test -z localhost -u root  -p test -c example -s "ride_id:Integer:index=full,rider_id:Integer:index=full,trip:MultiLineString:srid=4326,timestamp:List[Date]" -f trip_data'
 ```
 ### Setup a csv converter to convert the data into the correct format
 ```
