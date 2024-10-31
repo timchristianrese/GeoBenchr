@@ -29,6 +29,14 @@ for ((i=1; i<=length; i++)); do
 done
 
 ```
+In the current state, you need to add the external IP to your local /etc/hosts file in order for the requests to correctly be able to access the tablet servers:
+```
+for ((i=1; i<=length; i++)); do
+    var="machine_$i"
+    ip=$(eval echo \$$var)
+    echo "$ip accumulo-worker-$((i-1))" >> /etc/hosts
+done
+```
 Run the configuration scripts (If we were to pass the scripts as startup scripts, they run with the `root` account, which can cause some problems with Hadoop):
 ```
 ssh $SSH_USER@$GCP_IP "chmod +x ~/startManager.sh; ~/startManager.sh $WORKER_COUNT"
