@@ -29,13 +29,23 @@ for ((i=1; i<=length; i++)); do
 done
 
 ```
-In the current state, you need to add the external IP to your local /etc/hosts file in order for the requests to correctly be able to access the tablet servers:
+In the current state, you need to add the external IP to your local /etc/hosts file in order for the requests to correctly be able to access the tablet servers. This is a pain in the butt and not really production usable, but its what works for now. The step below will do so (depending on your set permissions, you might have to set these manually):
 ```
 for ((i=1; i<=length; i++)); do
     var="machine_$i"
     ip=$(eval echo \$$var)
     echo "$ip accumulo-worker-$((i-1))" >> /etc/hosts
 done
+```
+Setting them manually: 
+``` 
+sudo vi /etc/hosts
+```
+Add them in the following format (you can get the external ips using `terraform output`, with the external IPs being in order from 0 to n-1 workers from top to bottom as they are displayed):
+```
+<External_IP> <accumulo-worker-0>
+<External_IP1> <accumulo-worker-1>
+<External_IP2cd> <accumulo-worker-2>
 ```
 Run the configuration scripts (If we were to pass the scripts as startup scripts, they run with the `root` account, which can cause some problems with Hadoop):
 ```
