@@ -136,7 +136,16 @@ ssh $SSH_USER@$GCP_IP '/opt/geomesa-accumulo/bin/geomesa-accumulo export -i test
 
 
 ## Local Benchmark experiment
-Open a second terminal in the current folder
+#### GeoTools
+Running this benchmark requires JDK 11 and Maven to be installed on your machine. Open a second terminal in the current folder:
+```
+export GCP_IP=$(terraform output -raw external_ip_sut_manager)
+cd ../../../benchmark/geomesa/geotools/geootools
+mvn clean install
+java -jar target/geobenchr-1.0.jar test root test example $GCP_IP
+```
+#### Shell
+Running this benchmark requires Python to be installed. Open a second terminal in the current folder
 ```
 export SSH_USER=$(terraform output -raw ssh_user)
 export GCP_IP=$(terraform output -raw external_ip_sut_manager)
