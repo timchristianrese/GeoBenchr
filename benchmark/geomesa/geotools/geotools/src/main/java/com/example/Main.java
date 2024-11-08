@@ -7,11 +7,7 @@ import java.util.concurrent.CountDownLatch;
 
 import org.geotools.api.data.DataStore;
 import org.geotools.api.data.DataStoreFinder;
-import org.geotools.api.data.SimpleFeatureSource;
-import org.geotools.api.feature.simple.SimpleFeatureType;
-import org.geotools.api.feature.type.AttributeDescriptor;
 import org.geotools.api.filter.Filter;
-import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.filter.text.cql2.CQL;
 
 public class Main {
@@ -99,25 +95,157 @@ class Task implements Runnable {
                 DataStore dataStore = DataStoreFinder.getDataStore(parameters);
                 System.out.println("Connected to the datastore "+dataStore);
                 for (String str : dataStore.getTypeNames()) {
-                    System.out.println("Feature: "+str);
-                    SimpleFeatureSource source = dataStore.getFeatureSource(str);
-                    System.out.println("This is the source: "+source);
+                    //System.out.println("Feature: "+str);
+                    //SimpleFeatureSource source = dataStore.getFeatureSource(str);
+                    //System.out.println("This is the source: "+source);
                     Filter filter=null;
-                    Filter filter2=null;
                     
-                    try {
-                        filter= CQL.toFilter("rider_id <= 27");
-                        filter2 = CQL.toFilter("rider_id <= 5");
-                    }catch(Exception e){
-                        System.out.println("Failed to set filter");
+                    //switch case for different query types
+                    //spatial
+                    String startTime;
+                    String endTime;
+                    String midTime;
+                    Double lat;
+                    Double lon;
+                    switch(queryType){
+                        case "surrounding":
+                            try {
+                                lat = Math.floor(Math.random() * (52.58061313-52.42922077))+52.42922077;
+                                lon = Math.floor(Math.random() * (13.50421822-13.22833252))+13.22833252;
+                                filter= CQL.toFilter("DWITHIN(geom, POINT("+lat+" "+lon+"), 2, kilometers)");
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                        case "ride_traffic":
+                            //requires multiple queries
+                            //generate random number between 0 and 300
+                            Integer ride_id = (int) Math.floor(Math.random() * 300);
+                            try {
+                                filter= CQL.toFilter("ride_id = "+ride_id);
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                            //run query here, and then build second filter
+                        // case "intersections":
+                        //     try {
+                        //         filter= CQL.toFilter("");
+                        //     }catch(Exception e){
+                        //         System.out.println("Failed to set filter");
+                        //     }
+                        case "bounding_box":
+                            try {
+                                filter= CQL.toFilter("BBBOX(geom, 13.22833252, 52.42922077, 13.50421822, 52.58061313, 'EPSG:4326')");
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                        case "polygonal_area":
+                            try {
+                                filter= CQL.toFilter("WITHIN(geom, POLYGON((13.22833252 52.42922077, 13.50421822 52.42922077, 13.50421822 52.58061313, 13.22833252 52.58061313, 13.22833252 52.42922077)))");
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                        //temporal
+                        case "time_slice":
+                            startTime = "2023-07-01T00:00:00Z";
+                            endTime = "2023-07-01T23:59:59Z";
+                            try {
+                                filter= CQL.toFilter("timestamp BETWEEN "+startTime+" AND "+endTime);
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                        case "interval_around_timestamp":
+                            midTime = "2023-07-01T12:00:00Z";
+                            //set interval around timestamp to 1 hour, i.e. 3600000ms
+
+                            String interval = "3600000"; 
+                            try {
+                                filter= CQL.toFilter("timestamp BETWEEN "+midTime+"-"+interval+" AND "+midTime+"+"+interval);
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                        //same functionality, can be potentially taken out?
+                        // case "relative_time":
+                        //     try {
+                        //         filter= CQL.toFilter("");
+                        //     }catch(Exception e){
+                        //         System.out.println("Failed to set filter");
+                        //     }
+                        //     case "recurring":
+                        //     try {
+                        //         filter= CQL.toFilter("");
+                        //     }catch(Exception e){
+                        //         System.out.println("Failed to set filter");
+                        //     }
+                        // //spatiotemporal
+                        case "get_trip":
+                            try {
+                                filter= CQL.toFilter("ride_id = "+(int) Math.floor(Math.random() * 300));
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                        //not possible within the current point data schema, would require programming outside of the query
+                        case "get_trip_length":
+                            try {
+                                filter= CQL.toFilter("");
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                        //get first point of trip and last point of trip, calculate time difference
+                        case "get_trip_duration":
+                            try {
+                                filter= CQL.toFilter("");
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                        //requires programming outside of the query to calculate speed
+                        case "get_trip_speed":
+                            try {
+                                filter= CQL.toFilter("");
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                        case "get_trips_in_time_and_area":
+                            startTime = "2023-07-01T00:00:00Z";
+                            endTime = "2023-07-01T23:59:59Z";
+                            lat = Math.floor(Math.random() * (52.58061313-52.42922077))+52.42922077;
+                            lon = Math.floor(Math.random() * (13.50421822-13.22833252))+13.22833252;
+                            try {
+                                filter= CQL.toFilter("timestamp BETWEEN "+startTime+" AND "+endTime+" AND DWITHIN(geom, POINT("+lat+" "+lon+"), 2, kilometers)");
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                        //attribute
+                        case "value":
+                            //generate rider id between 0 and 30
+                            Integer rider_id = (int) Math.floor(Math.random() * 30);
+                            try {
+                                filter= CQL.toFilter("rider_id = "+rider_id);
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                        case "value_threshold":
+                            //generate rider id between 0 and 30
+                            rider_id = (int) Math.floor(Math.random() * 30);
+                            try {
+                                filter= CQL.toFilter("rider_id <= "+rider_id);
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+                        //complex, i.e value and spatiotemporal
+                        case "value_and_spatiotemporal":
+                            rider_id = (int) Math.floor(Math.random() * 30);
+                            startTime = "2023-07-01T00:00:00Z";
+                            endTime = "2023-07-01T23:59:59Z";
+                            lat = Math.floor(Math.random() * (52.58061313-52.42922077))+52.42922077;
+                            lon = Math.floor(Math.random() * (13.50421822-13.22833252))+13.22833252;
+                            try {
+                                filter= CQL.toFilter("rider_id = "+rider_id+" AND timestamp BETWEEN "+startTime+" AND "+endTime+" AND DWITHIN(geom, POINT("+lat+" "+lon+"), 2, kilometers)");
+                            }catch(Exception e){
+                                System.out.println("Failed to set filter");
+                            }
+
                     }
-                    System.out.println("This is the filter: "+filter);
-                    SimpleFeatureCollection allFeatures = source.getFeatures( filter2 );
-                    SimpleFeatureCollection limitedFeatures = source.getFeatures( filter );
-                    SimpleFeatureType schema = source.getSchema();
-                    for (AttributeDescriptor descriptor : schema.getAttributeDescriptors()) {
-                    System.out.println(descriptor.getLocalName() + " - " + descriptor.getType().getBinding());
-                    }
+                    
                 }
                 dataStore.dispose();
             } catch (IOException e) {

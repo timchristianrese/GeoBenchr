@@ -58,7 +58,7 @@ resource "google_compute_instance" "benchmark_client" {
 resource "google_compute_instance" "accumulo_manager" {
   name         = "accumulo-namenode-manager"
   # choose instance type that does not allow boosting
-  machine_type = "n4-standard-4"
+  machine_type = var.manager_machine_type
   zone         = var.zone
 
   boot_disk {
