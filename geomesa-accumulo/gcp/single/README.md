@@ -108,7 +108,7 @@ Add them in the following format (you can get the external ips using `terraform 
 Running this benchmark requires JDK 11 and Maven to be installed on your machine. Open a second terminal in the current folder:
 ```
 export GCP_IP=$(terraform output -raw external_ip_sut_manager)
-cd ../../../benchmark/geomesa/geotools/geootools
+cd ../../../benchmark/geomesa/geotools/geotools
 mvn clean install
 java -jar target/geobenchr-1.0.jar test root test example $GCP_IP
 ```

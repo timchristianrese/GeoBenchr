@@ -16,9 +16,21 @@ Please refer to the `readme` found in the respective folder for the system you w
 ### Included Datasets
 As of now, Geobenchr relies on  data from SimRa, a cycling application. A script to convert data into a format that is usable for both databases can be found in the `data`folder.  Data can be gotten from the GitHub repository or the DepositOnce site behind it: https://github.com/simra-project/dataset?tab=readme-ov-file/ or as an example from DepositOnce: https://depositonce.tu-berlin.de/items/212ae8b8-7376-47c1-bae2-09103c622de2 
 We also include aviation data, which is semi-publically available (pending a registration with the service). We plan on swapping to a more detailed dataset for our aviation application in the future, as flight data here is given with large gaps.
-
+## Evaluated Databases
+As of now, GeoBenchr supports the following database systems:
+- GeoMesa-Accumulo
+- MobilityDB
+- PostGIS
+## Evaluated Data Formats
+Applications may save their data in varying formats, which is why GeoBenchr evaluates three different data structures across its benchmark:
+- Point data  
+Each given point is saved separately of one another with its location and timestamp, along with its other attributes.
+- Trip data  
+While this is not relevant for all spatiotemporal data, many use cases include a moving object that creates a trip. Collected points along the way are stored as a single row within the database, along with all locations and timestamps
+- Segmented trip data  
+Storing an entire trip may become a hassle and inefficient, especially when a trip includes a large amount of points. Therefore, an alternative is to save data as a segmented line, which in combination with the other segments form the entire trip. A point is saved with its next (i.e the next generated) point, along with start and end timestamps of that line. 
 ## Application Benchmark Queries 
-Our benchmark aims to support various query types, as applications may have varying requests to a database depending on the kind of application. While several query types are discussed, we focus on those listed below. Additionally, we differ between queries which require near-realtime responses and ones used for an analysis aspect. All of the queries listed below can be formulated both as realtime and analysis queries, depending on the scope.
+Our benchmark aims to support various query types, as applications may have varying requests to a database depending on the kind of application. The queries below are in our opionion commonly implemented in applications relying on spatiotemporal data
 1. Spatial Queries
 - Bounding Box Queries: Retrieve data within a defined rectangular area.  
 - Polygonal Queries: Retrieve data within a specified polygonal area.  

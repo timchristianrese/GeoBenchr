@@ -24,6 +24,10 @@ import org.geotools.data.DefaultTransaction;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.filter.text.cql2.CQL;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -40,13 +44,13 @@ public class Main {
         String zookeepers = args[4];
         String queryType = args[5];
         Integer threadCount = Integer.parseInt(args[6]);
+        Integer limit = Integer.parseInt(args[7]);
+        System.out.println("Thread Count: "+threadCount);
 
+        
         CyclicBarrier barrier = new CyclicBarrier(threadCount, () -> {
             System.out.println("All threads reached the barrier and will proceed together.");
         });
-
-        
-        Integer limit = Integer.parseInt(args[7]);
         CountDownLatch startLatch = new CountDownLatch(1); // Latch to control start of all threads
 
         for (int i = 0; i < threadCount; i++) {
@@ -93,11 +97,6 @@ class Task implements Runnable {
         try {
             startLatch.await(); // Wait until latch is counted down to 0
             System.out.println("Thread " + threadNumber + " is running.");
-            System.out.println("Instance Name: "+instanceName);
-            System.out.println("Username: "+username);
-            System.out.println("Password: "+password);
-            System.out.println("Catalog: "+catalog);
-            System.out.println("Zookeepers: "+zookeepers);
             Map<String, String> parameters = new HashMap<>();
             parameters.put("accumulo.instance.name", instanceName);
             parameters.put("accumulo.user", username);
@@ -119,15 +118,16 @@ class Task implements Runnable {
                 } catch (ClassCastException e) {
                     throw new IOException("Feature source does not support writing");
                 }
-
+                
                 System.out.println("Connected to the datastore "+dataStore);
                 for (String str : dataStore.getTypeNames()) {
                     //System.out.println("Feature: "+str);
                     //SimpleFeatureSource source = dataStore.getFeatureSource(str);
                     //System.out.println("This is the source: "+source);
+                }
                     Filter filter=null;
                     
-                    //switch case for different query types
+                    
                     //spatial
                     String startTime;
                     String endTime;
@@ -142,44 +142,55 @@ class Task implements Runnable {
                     String formattedTimestamp = specificTimestamp.format(DateTimeFormatter.ISO_INSTANT);
 
                     System.out.println(formattedTimestamp);
-                    Integer writes = 20000;
+                    Integer writes = limit;
                     SimpleFeatureType featureType = dataStore.getSchema(featureTypeName);
                     SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(featureType);
                     List<SimpleFeature> features = new ArrayList<>();
+                    Point point;
+
+
+                    //switch case for different query types
                     switch(queryType){
                         //insert just a single point
-                        case "single_insert":
-                            try {
-                                featureType = dataStore.getSchema("ride_data");
-                                featureBuilder = new SimpleFeatureBuilder(featureType);
-                                featureBuilder.set("rider_id", (int) Math.floor(Math.random() * 30));
-                                featureBuilder.set("ride_id", (int) Math.floor(Math.random() * 300));
-                                featureBuilder.set("latitude", startLat);
-                                featureBuilder.set("longitude", startLon);
-                                featureBuilder.set("geom", "POINT("+startLon+" "+startLat+")");
-                                featureBuilder.set("x", "0");
-                                featureBuilder.set("y", "0");
-                                featureBuilder.set("z", "0");
-                                featureBuilder.set("timestamp", formattedTimestamp);
-                                SimpleFeature feature = featureBuilder.buildFeature("ride_data.feature-single-1");
-                                Transaction transaction = new DefaultTransaction("writeTransaction");
-                                barrier.await();
-                                try {
-                                    featureStore.setTransaction(transaction);
-                                    featureStore.addFeatures(DataUtilities.collection(feature));
-                                    transaction.commit();
-                                } catch (Exception e) {
-                                    transaction.rollback();
-                                    e.printStackTrace();
-                                } finally {
-                                    transaction.close();
-                                }
-                            } catch (Exception e) {
-                            }
+                        // case "single_insert":
+                        //     try {
+                        //         featureType = dataStore.getSchema(featureTypeName);
+                        //         featureBuilder.set("ride_id", (int) Math.floor(Math.random() * 300));
+                        //         featureBuilder.set("rider_id", (int) Math.floor(Math.random() * 30));
+                        //         featureBuilder.set("latitude", startLat);
+                        //         featureBuilder.set("longitude", startLon);
+                        //         point = new GeometryFactory().createPoint(new Coordinate(startLon, startLat));
+                        //         featureBuilder.set("geom", point);
+                        //         featureBuilder.set("x", "0");
+                        //         featureBuilder.set("y", "0");
+                        //         featureBuilder.set("z", "0");
+                        //         featureBuilder.set("timestamp", formattedTimestamp);
+                        //         SimpleFeature feature = featureBuilder.buildFeature("ride_data.feature-single-1");
+                        //         Transaction transaction = new DefaultTransaction("writeTransaction");
+                        //         barrier.await();
+                        //         try {
+                                    
+                        //             //end the timer
+                                    
+                        //             featureStore.setTransaction(transaction);
+                        //             long start = System.currentTimeMillis();
+                        //             featureStore.addFeatures(DataUtilities.collection(feature));
+                        //             transaction.commit();
+                        //             long end = System.currentTimeMillis();
+                        //             long duration = end - start;
+                        //             System.out.println("Wrote a single feature to the database in "+duration+"ms");
+                        //         } catch (Exception e) {
+                        //             transaction.rollback();
+                        //             e.printStackTrace();
+                        //         } finally {
+                        //             transaction.close();
+                        //         }
+                        //     } catch (Exception e) {
+                        // }
+                        // break;
                         //insert queries
-                        case "insert": 
+                        case "bulk_insert": 
                             try {
-                                
                                 featureType = dataStore.getSchema("ride_data");
                                 //generate random start point within Berlin
                                 for (int i = 0; i < writes; i++) {
@@ -191,7 +202,8 @@ class Task implements Runnable {
                                     featureBuilder.set("ride_id", (int) Math.floor(Math.random() * 300));
                                     featureBuilder.set("latitude", startLat);
                                     featureBuilder.set("longitude", startLon);
-                                    featureBuilder.set("geom", "POINT("+startLon+" "+startLat+")");
+                                    point = new GeometryFactory().createPoint(new Coordinate(startLon, startLat));
+                                    featureBuilder.set("geom", point);
                                     featureBuilder.set("x", "0");
                                     featureBuilder.set("y", "0");
                                     featureBuilder.set("z", "0");
@@ -209,11 +221,15 @@ class Task implements Runnable {
                                 }
                                 //set number of writes that should be done
                                 Transaction transaction = new DefaultTransaction("batchWriteTransaction");
-                                barrier.await();
                                 try {
                                     featureStore.setTransaction(transaction);
+                                    barrier.await();
+                                    long start = System.currentTimeMillis();
                                     featureStore.addFeatures(DataUtilities.collection(features));
                                     transaction.commit();
+                                    long end = System.currentTimeMillis();
+                                    long duration = end - start;
+                                    System.out.println("Wrote "+writes+" features to the database in "+duration+"ms");
                                 } catch (Exception e) {
                                     transaction.rollback();
                                     e.printStackTrace();
@@ -223,7 +239,8 @@ class Task implements Runnable {
                                 //don't create a read filter,    but instead write to the database
                             }catch(Exception e){
                                 System.out.println("Failed to write to the database");
-                        }
+                            }
+                        break;
                         case "surrounding":
                             try {
                                 lat = Math.floor(Math.random() * (52.58061313-52.42922077))+52.42922077;
@@ -232,6 +249,7 @@ class Task implements Runnable {
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                        break;
                         case "ride_traffic":
                             //requires multiple queries
                             //generate random number between 0 and 300
@@ -248,18 +266,21 @@ class Task implements Runnable {
                         //     }catch(Exception e){
                         //         System.out.println("Failed to set filter");
                         //     }
+                        break;
                         case "bounding_box":
                             try {
                                 filter= CQL.toFilter("BBBOX(geom, 13.22833252, 52.42922077, 13.50421822, 52.58061313, 'EPSG:4326')");
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                        break;
                         case "polygonal_area":
                             try {
                                 filter= CQL.toFilter("WITHIN(geom, POLYGON((13.22833252 52.42922077, 13.50421822 52.42922077, 13.50421822 52.58061313, 13.22833252 52.58061313, 13.22833252 52.42922077)))");
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                        break;
                         //temporal
                         case "time_slice":
                             startTime = "2023-07-01T00:00:00Z";
@@ -269,6 +290,7 @@ class Task implements Runnable {
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                        break;
                         case "interval_around_timestamp":
                             midTime = "2023-07-01T12:00:00Z";
                             //set interval around timestamp to 1 hour, i.e. 3600000ms
@@ -279,6 +301,7 @@ class Task implements Runnable {
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                            break;
                         //same functionality, can be potentially taken out?
                         // case "relative_time":
                         //     try {
@@ -299,6 +322,7 @@ class Task implements Runnable {
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                            break;
                         //not possible within the current point data schema, would require programming outside of the query
                         case "get_trip_length":
                             try {
@@ -306,6 +330,7 @@ class Task implements Runnable {
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                            break;
                         //get first point of trip and last point of trip, calculate time difference
                         case "get_trip_duration":
                             try {
@@ -313,6 +338,7 @@ class Task implements Runnable {
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                            break;
                         //requires programming outside of the query to calculate speed
                         case "get_trip_speed":
                             try {
@@ -320,6 +346,7 @@ class Task implements Runnable {
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                            break;
                         case "get_trips_in_time_and_area":
                             startTime = "2023-07-01T00:00:00Z";
                             endTime = "2023-07-01T23:59:59Z";
@@ -330,6 +357,7 @@ class Task implements Runnable {
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                            break;
                         //attribute
                         case "value":
                             //generate rider id between 0 and 30
@@ -339,6 +367,7 @@ class Task implements Runnable {
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                            break;
                         case "value_threshold":
                             //generate rider id between 0 and 30
                             rider_id = (int) Math.floor(Math.random() * 30);
@@ -347,6 +376,7 @@ class Task implements Runnable {
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                            break;
                         //complex, i.e value and spatiotemporal
                         case "value_and_spatiotemporal":
                             rider_id = (int) Math.floor(Math.random() * 30);
@@ -359,10 +389,11 @@ class Task implements Runnable {
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
+                            break;
                     }
                     //run the query
                     for (String name : dataStore.getTypeNames()) {
-                        System.out.println("Feature: "+name);
+                        //System.out.println("Feature: "+name);
                         SimpleFeatureSource source = dataStore.getFeatureSource(name);
                         //start the timer
                         long start = System.currentTimeMillis();
@@ -379,7 +410,7 @@ class Task implements Runnable {
                     // System.out.println("This is the filter: "+filter);
                     // System.out.println("This is the limit: "+limit);
                     
-                }
+                
                 dataStore.dispose();
             } catch (IOException e) {
                 System.out.println("Error connecting to the datastore");
