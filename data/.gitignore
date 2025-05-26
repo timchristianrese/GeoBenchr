@@ -1,3 +1,4 @@
-*merged*
-SimRa/**/VM2*
-# any folder starting with Berlin, but not files
+#ignore everything in processed, raw and Simra
+processed/*
+raw/*
+SimRa/*

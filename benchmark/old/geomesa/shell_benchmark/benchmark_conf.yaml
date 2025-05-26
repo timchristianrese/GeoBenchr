@@ -1,0 +1,85 @@
+#create a sample benchmark configuration file, which has variables that define the benchmark parameters.
+# The benchmark configuration file is used to define the benchmark parameters, such as the number of threads, the number of iterations, and the number of features to ingest
+surrounding:
+  name: surrounding
+  threads: 2
+  query:  f"DWITHIN(cycling_data.point_geom, POINT({poslong} {poslat}), 5000, meters)"
+  limit: 50
+
+ride_traffic:
+  name: ride_traffic
+  threads: 2
+  query:
+  limit: 50
+
+intersections:
+  name: intersections
+  threads: 2
+  query: 
+  limit: 50
+
+insert_ride:
+  name: insert_ride
+  threads: 2
+  query: 
+  limit: 10
+
+bulk_insert_rides:
+  name: bulk_insert_rides
+  threads: 1
+  query: 
+  limit: 10
+
+bounding_box:
+  name: bounding_box
+  threads: 2
+  query: 
+  limit: 50
+
+polygonal_area:
+  name: polygonal_area
+  threads: 2
+  query: 
+  limit: 50
+
+time_interval:
+  name: time_interval
+  threads: 2
+  query:
+  limit: 50
+
+get_trip:
+  name: get_trip
+  threads: 2
+  query: 
+  limit: 50
+
+get_trip_length:
+  name: get_trip_length
+  threads: 2
+  query: 
+  limit: 50
+
+get_trip_duration:
+  name: get_trip_duration
+  threads: 2
+  query: 
+  limit: 50
+
+get_trip_speed:
+  name: get_trip_speed
+  threads: 2
+  query: 
+  limit: 50
+  
+interval_around_timestamp:
+  name: interval_around_timestamp
+  threads: 2
+  query: 
+  limit: 50
+
+spatiotemporal:
+  name: spatiotemporal
+  threads: 2
+  query: 
+  limit: 50

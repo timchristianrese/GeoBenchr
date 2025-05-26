@@ -32,23 +32,5 @@ Storing an entire trip may become a hassle and inefficient, especially when a tr
 ## Application Benchmark Queries 
 Our benchmark aims to support various query types, as applications may have varying requests to a database depending on the kind of application. The queries below are in our opionion commonly implemented in applications relying on spatiotemporal data
 1. Spatial Queries
-- Bounding Box Queries: Retrieve data within a defined rectangular area.  
-- Polygonal Queries: Retrieve data within a specified polygonal area.  
-- Proximity Queries: Retrieve data within a certain distance from a point or line.  
-- Intersection Queries: Retrieve data that intersects with a specified geometry.  
 2. Temporal Queries
-- Time Slice Queries: Retrieve data for a specific time or timestamp.  
-- Time Range Queries: Retrieve data within a specified time range.  
-- Relative Time Queries: Retrieve data relative to the current time, such as the last hour, day, or week.  
-- Recurring Time Queries: Retrieve data that matches recurring time intervals, such as daily, weekly, or monthly patterns.  
 3. Spatiotemporal Queries
-- Spatiotemporal Range Queries: Retrieve data within a specified spatial area and time range.  
-- Trajectory Queries: Retrieve data that follows a moving object's path over time.  
-- Historical Spatiotemporal Queries: Retrieve past data for specified locations and times.  
-- Predictive Queries: Retrieve forecasted data based on historical patterns in both space and time.  
-4. Attribute Queries
-- Value-Based Queries: Retrieve data based on specific attribute values or ranges.  
-- Statistical Queries: Retrieve aggregated or statistical summaries of data, such as averages, counts, or sums, within specified spatiotemporal extents.  
-- Threshold Queries: Retrieve data where attribute values exceed or fall below certain thresholds.
-5. Combined Queries
-- Complex Queries: Combine spatiotemporal and attribute conditions to retrieve data that meets multiple criteria.  
