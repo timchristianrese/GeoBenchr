@@ -55,7 +55,7 @@ def plot_multiple_trajectories_on_map(filepaths, base_data_path, output_file="ma
             all_coords.extend(coords)
 
     if not all_coords:
-        print("Aucune coordonnée trouvée.")
+        print("No coords found")
         return
 
     # center map on first point
