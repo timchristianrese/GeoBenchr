@@ -32,6 +32,21 @@ queryConfigs:
     repetition: 10
     parameters:
       - day
+  #use
+  - name: timeIntervalWithMostIncidentsDuringDay
+    use: True
+    type: temporal
+    sql: >
+      SELECT STRFTIME('%H:00', datetime(i.ts / 1000, 'unixepoch')) AS hour_interval,
+      COUNT(*) AS incident_count
+      FROM incidents i
+      WHERE i.incident != 0 AND DATE(datetime(i.ts / 1000, 'unixepoh')) = :day
+      GROUP BY hour_interval
+      ORDER BY incident_count DESC
+      LIMIT 1;
+    repetition: 10
+    parameters:
+      - day
 
 
   # Spatial queries
@@ -63,6 +78,34 @@ queryConfigs:
     repetition: 10
     parameters:
       - district
+
+  #use
+  - name: placeWithMostIncidentsInDistrict
+    use: True
+    type: spatial
+    sql: >
+      WITH incident_points AS (
+      SELECT i.key,
+      ST_MakePoint(i.lon, i.lat)::geometry AS geom
+      FROM incidents i
+      JOIN districts d
+      ON ST_Within(ST_MakePoint(i.lon, i.lat), d.geom)
+      WHERE d.name = :district),
+      clusters AS (
+      SELECT key, geom,
+      ST_ClusterWithin(geom, :distance) OVER () AS cluster
+      FROM incident_points)
+      SELECT COUNT(*) as incident_count,
+      ST_AsText(ST_Centroid(ST_Collect(geom))) AS cluster_center
+      FROM clusters
+      GROUP BY cluster
+      ORDER BY incident_count DESC
+      LIMIT 1;
+
+    repetition: 10
+    parameters:
+      - district
+      - distance
 
 
   # Spatiotemporal queries
@@ -107,3 +150,18 @@ queryConfigs:
     repetition: 10
     parameters:
       - period_medium
+
+  - name: incidentsNextUniversityInPeriod
+    use: True
+    type: spatiotemporal
+    sql: >
+      SELECT *
+      FROM incidents i
+      JOIN universities u
+      ON ST_DWithin(ST_MakePoint(i.lon, i.lat), u.geom, 0.001)
+      WHERE DATE(datetime(i.ts / 1000, 'unixepoh')) && :period_medium
+      AND u.name = :university;
+    repetition: 10
+    parameters:
+      - period_medium
+      - university
