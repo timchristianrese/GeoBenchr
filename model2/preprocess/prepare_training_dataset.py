@@ -8,12 +8,15 @@ vocab_path = os.path.join(base_dir, "..", "data", "training", "node_vocab.json")
 
 os.makedirs(os.path.dirname(output_dataset), exist_ok=True)
 
+print("start")
+
 # Containers for all sequences and all unique node IDs
 all_sequences = []
 node_set = set()
 
 # Read each processed JSON trajectory file
 for i, filename in enumerate(os.listdir(input_dir)):
+    print("one more file")
     if filename.endswith(".json"):
         print(f"Lecture fichier {i}: {filename}")
         with open(os.path.join(input_dir, filename)) as f:
