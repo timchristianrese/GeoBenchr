@@ -27,16 +27,17 @@ def return_param_values(sql, params, rnd) -> List[Any]:
     formatter = "%Y-%m-%d %H:%M:%S"  # Default formatter for datetime
     for param in params:
         replacement = {
-            "period_short": lambda: generate_random_time_span(rnd, 2023, mode=1),
-            "period_medium": lambda: generate_random_time_span(rnd, 2023, mode=2),
-            "period_long": lambda: generate_random_time_span(rnd, 2023, mode=3),
-            "period": lambda: generate_random_time_span(rnd, 2023),
+            "period_short": lambda: generate_random_time_span(rnd, 2017, mode=1),
+            "period_medium": lambda: generate_random_time_span(rnd, 2017, mode=2),
+            "period_long": lambda: generate_random_time_span(rnd, 2017, mode=3),
+            "period": lambda: generate_random_time_span(rnd, 2017),
             "instant": lambda: generate_random_timestamp(rnd),
-            "day": lambda: get_random_day(rnd, 2023),
-            "city": lambda: get_random_place("cities", rnd),
-            "municipality": lambda: get_random_place("municipalities", rnd),
-            "county": lambda: get_random_place("counties", rnd),
-            "district": lambda: get_random_place("districts", rnd),
+            "day": lambda: get_random_day(rnd, 2017),
+            "hour": lambda: get_random_hour(rnd),
+            "harbour": lambda: get_random_place("harbours", rnd),
+            "harbour2": lambda: get_random_place("harbours", rnd),
+            "island": lambda: get_random_place("islands-wkt", rnd),
+            "region": lambda: get_random_place("regions-wkt", rnd),
             "point": lambda: get_random_point(rnd, [[6.212909, 52.241256], [8.752841, 50.53438]]),
             "radius": lambda: (rnd.uniform(2.0, 10.0) * 10) / (1000 * 6378),
             "low_altitude": lambda: rnd.randint(50, 150) * 10,
@@ -65,6 +66,9 @@ def get_random_day(rnd: random.Random, year: int) -> str:
     delta = end_date - start_date
     random_day = start_date + timedelta(days=rnd.randint(0, delta.days))
     return random_day.strftime("%Y-%m-%d")
+
+def get_random_hour(rnd: random.Random) -> int:
+    return rnd.randint(0,23)
 
 def generate_random_timestamp(rnd: random.Random) -> str:
     year = 2023
