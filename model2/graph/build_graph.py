@@ -12,7 +12,7 @@ def load_or_build_graph(place="Berlin, Germany", graph_filename="berlin_bike.gra
     if os.path.exists(graph_path):
         print("Loading existing graph")
         G = ox.load_graphml(graph_path)
-        print("graph chargé")
+        print("graph loaded")
     else:
         # Otherwise, download it from OpenStreetMap
         print("Downloading the graph from OpenStreetMap")

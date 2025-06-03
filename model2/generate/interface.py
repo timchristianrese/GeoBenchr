@@ -10,7 +10,6 @@ import networkx as nx
 from torch.nn.functional import softmax
 from models.lstm_traj_model import LSTMTripPredictor
 
-
 class TrajectoryGenerator:
     def __init__(self, seq_len=10, embedding_dim=64, hidden_dim=128, max_len=50):
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -58,11 +57,11 @@ class TrajectoryGenerator:
             neighbor in self.node_to_index for neighbor in self.G.neighbors(n)
         )]
         if not valid_starts:
-            print("Aucun nœud de départ valide disponible.")
+            print("No starting node available")
             return []
 
         start_node = np.random.choice(valid_starts)
-        print(f"Départ depuis le noeud {start_node}")
+        print(f"Starting on node {start_node}")
 
         node_ids = [start_node]
         visited = set([start_node])
@@ -90,7 +89,7 @@ class TrajectoryGenerator:
             neighbors = [n for n in self.G.neighbors(current_node) if n in self.node_to_index]
 
             if not neighbors:
-                print(f"Aucun voisin pour le nœud {current_node}")
+                print(f"No neighbor for node : {current_node}")
                 break
 
             neighbor_indices = [self.node_to_index[n] for n in neighbors]
@@ -117,8 +116,8 @@ class TrajectoryGenerator:
                 if 'x' in data and 'y' in data:
                     coords.append((float(data['y']), float(data['x'])))
                 else:
-                    print(f"Avertissement : nœud {node_id} sans coordonnées GPS.")
+                    print(f"Be careful: node {node_id} does not have GPS coord")
             else:
-                print(f"Avertissement : nœud {node_id} introuvable dans le graphe.")
+                print(f"Be careful : node {node_id} is not in the graph")
 
         return coords
