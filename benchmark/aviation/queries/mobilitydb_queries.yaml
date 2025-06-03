@@ -1,0 +1,2350 @@
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-04-21'::timestamp, DATE '2023-04-21' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Neunkirchen-Seelscheid' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-04-21'
+  - Gem Neunkirchen-Seelscheid
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-12-23 22:04:29]') AND eintersects(attime(f.trip, timestamptz '[2023-12-23 22:04:29]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-12-23 22:04:29'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-02-15 22:08:15, 2023-02-28 01:04:53]'), c.geom, 4.392125780747754e-06) WHERE c.name = '27.38' AND f.trip && tstzspan '[2023-02-15 22:08:15, 2023-02-28 01:04:53]';
+  params:
+  - - '2023-02-15 22:08:15'
+    - '2023-02-28 01:04:53'
+  - '27.38'
+  - 4.392125780747754e-06
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-11-12'::timestamp, DATE '2023-11-12' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Wipperfuerth' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-11-12'
+  - Gem Wipperfuerth
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-07-30 19:07:56]') AND eintersects(attime(f.trip, timestamptz '[2023-07-30 19:07:56]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-07-30 19:07:56'
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-11-13'::timestamp, DATE '2023-11-13' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Lengerich' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-11-13'
+  - Gem Lengerich
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-11-03'::timestamp, DATE '2023-11-03' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Langenberg' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-11-03'
+  - Gem Langenberg
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-06-25 19:21:10]') AND eintersects(attime(f.trip, timestamptz '[2023-06-25 19:21:10]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-06-25 19:21:10'
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Coesfeld' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-03-23 14:11:03, 2023-03-24 02:34:31]') AND eintersects(attime(f.trip, tstzspan '[2023-03-23 14:11:03, 2023-03-24 02:34:31]'), k.geom);
+  params:
+  - - '2023-03-23 14:11:03'
+    - '2023-03-24 02:34:31'
+  - Krs Coesfeld
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Maerkischer Kreis' AND f.trip && stbox(k.geom, tstzspan '[2023-05-24 02:52:20, 2023-05-29 13:02:57]') AND eintersects(attime(f.trip, tstzspan '[2023-05-24 02:52:20, 2023-05-29 13:02:57]'), k.geom);
+  params:
+  - - '2023-05-24 02:52:20'
+    - '2023-05-29 13:02:57'
+  - Krs Maerkischer Kreis
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-04-22 18:45:30, 2023-05-02 02:30:58]'), c.geom, 7.075288961631106e-06) WHERE c.name = '78.95' AND f.trip && tstzspan '[2023-04-22 18:45:30, 2023-05-02 02:30:58]';
+  params:
+  - - '2023-04-22 18:45:30'
+    - '2023-05-02 02:30:58'
+  - '78.95'
+  - 7.075288961631106e-06
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-03 14:57:51, 2023-11-15 17:53:26]') #< 750 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-03 14:57:51, 2023-11-15 17:53:26]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-11-03 14:57:51, 2023-11-15 17:53:26]') WHERE g.name = 'Gem Schalksmuehle' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-03 14:57:51, 2023-11-15 17:53:26]') #< 750 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-03 14:57:51, 2023-11-15 17:53:26]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-11-03 14:57:51'
+    - '2023-11-15 17:53:26'
+  - Gem Schalksmuehle
+  - 750
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-11-13 23:56:47, 2023-11-28 09:20:25]'), c.geom, 5.9387234338087904e-06) WHERE c.name = '53.27' AND f.trip && tstzspan '[2023-11-13 23:56:47, 2023-11-28 09:20:25]';
+  params:
+  - - '2023-11-13 23:56:47'
+    - '2023-11-28 09:20:25'
+  - '53.27'
+  - 5.9387234338087904e-06
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-09-04 08:49:23, 2023-09-16 00:27:29]'), c.geom, 1.039412375719014e-05) WHERE c.name = '57.42' AND f.trip && tstzspan '[2023-09-04 08:49:23, 2023-09-16 00:27:29]';
+  params:
+  - - '2023-09-04 08:49:23'
+    - '2023-09-16 00:27:29'
+  - '57.42'
+  - 1.039412375719014e-05
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Hochsauerlandkreis' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-02-08 01:36:14, 2023-02-09 10:25:07]') AND eintersects(attime(f.trip, tstzspan '[2023-02-08 01:36:14, 2023-02-09 10:25:07]'), k.geom);
+  params:
+  - - '2023-02-08 01:36:14'
+    - '2023-02-09 10:25:07'
+  - Krs Hochsauerlandkreis
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-03-22'::timestamp, DATE '2023-03-22' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Luedinghausen' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-03-22'
+  - Gem Luedinghausen
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Wuppertal' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-11-01 10:30:06, 2023-11-01 12:50:00]') AND eintersects(attime(f.trip, tstzspan '[2023-11-01 10:30:06, 2023-11-01 12:50:00]'), k.geom);
+  params:
+  - - '2023-11-01 10:30:06'
+    - '2023-11-01 12:50:00'
+  - Krs Wuppertal
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Oberhausen' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-01-04 19:25:56, 2023-01-06 12:46:23]') AND eintersects(attime(f.trip, tstzspan '[2023-01-04 19:25:56, 2023-01-06 12:46:23]'), k.geom);
+  params:
+  - - '2023-01-04 19:25:56'
+    - '2023-01-06 12:46:23'
+  - Krs Oberhausen
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-03-18 06:44:03, 2023-03-23 13:03:52]'), c.geom, 7.965508715037605e-06) WHERE c.name = '67.42' AND f.trip && tstzspan '[2023-03-18 06:44:03, 2023-03-23 13:03:52]';
+  params:
+  - - '2023-03-18 06:44:03'
+    - '2023-03-23 13:03:52'
+  - '67.42'
+  - 7.965508715037605e-06
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-04-17'::timestamp, DATE '2023-04-17' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Arnsberg' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-04-17'
+  - Gem Arnsberg
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-02-20 19:50:38, 2023-03-02 04:19:29]'), c.geom, 1.271454785623806e-05) WHERE c.name = '192.86' AND f.trip && tstzspan '[2023-02-20 19:50:38, 2023-03-02 04:19:29]';
+  params:
+  - - '2023-02-20 19:50:38'
+    - '2023-03-02 04:19:29'
+  - '192.86'
+  - 1.271454785623806e-05
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-08 23:27:42, 2023-10-15 12:20:55]') #< 1280 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-08 23:27:42, 2023-10-15 12:20:55]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-10-08 23:27:42, 2023-10-15 12:20:55]') WHERE g.name = 'Gem Enger' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-08 23:27:42, 2023-10-15 12:20:55]') #< 1280 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-08 23:27:42, 2023-10-15 12:20:55]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-10-08 23:27:42'
+    - '2023-10-15 12:20:55'
+  - Gem Enger
+  - 1280
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-09-04 10:25:38]') AND eintersects(attime(f.trip, timestamptz '[2023-09-04 10:25:38]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-09-04 10:25:38'
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-23 05:29:39, 2023-12-06 12:18:48]') #< 950 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-23 05:29:39, 2023-12-06 12:18:48]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-11-23 05:29:39, 2023-12-06 12:18:48]') WHERE g.name = 'Gem Bueren' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-23 05:29:39, 2023-12-06 12:18:48]') #< 950 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-23 05:29:39, 2023-12-06 12:18:48]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-11-23 05:29:39'
+    - '2023-12-06 12:18:48'
+  - Gem Bueren
+  - 950
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-10-08'::timestamp, DATE '2023-10-08' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Essen' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-10-08'
+  - Gem Essen
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Coesfeld' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-09-06 22:53:49, 2023-09-08 13:48:39]') AND eintersects(attime(f.trip, tstzspan '[2023-09-06 22:53:49, 2023-09-08 13:48:39]'), k.geom);
+  params:
+  - - '2023-09-06 22:53:49'
+    - '2023-09-08 13:48:39'
+  - Krs Coesfeld
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-10-31 00:05:23, 2023-11-05 04:03:54]'), c.geom, 8.357907350163941e-06) WHERE c.name = '118.16' AND f.trip && tstzspan '[2023-10-31 00:05:23, 2023-11-05 04:03:54]';
+  params:
+  - - '2023-10-31 00:05:23'
+    - '2023-11-05 04:03:54'
+  - '118.16'
+  - 8.357907350163941e-06
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Rheinisch-Bergischer Kreis' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-12-29 03:03:00, 2023-12-30 06:19:25]') AND eintersects(attime(f.trip, tstzspan '[2023-12-29 03:03:00, 2023-12-30 06:19:25]'), k.geom);
+  params:
+  - - '2023-12-29 03:03:00'
+    - '2023-12-30 06:19:25'
+  - Krs Rheinisch-Bergischer Kreis
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Solingen' AND f.trip && stbox(k.geom, tstzspan '[2023-05-05 00:11:40, 2023-05-19 05:30:12]') AND eintersects(attime(f.trip, tstzspan '[2023-05-05 00:11:40, 2023-05-19 05:30:12]'), k.geom);
+  params:
+  - - '2023-05-05 00:11:40'
+    - '2023-05-19 05:30:12'
+  - Krs Solingen
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Staedteregion Aachen' AND f.trip && stbox(k.geom, tstzspan '[2023-03-15 01:50:19, 2023-03-22 15:06:16]') AND eintersects(attime(f.trip, tstzspan '[2023-03-15 01:50:19, 2023-03-22 15:06:16]'), k.geom);
+  params:
+  - - '2023-03-15 01:50:19'
+    - '2023-03-22 15:06:16'
+  - Krs Staedteregion Aachen
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-12 12:42:18, 2023-09-24 11:14:43]') #< 670 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-12 12:42:18, 2023-09-24 11:14:43]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-09-12 12:42:18, 2023-09-24 11:14:43]') WHERE g.name = 'Gem Haltern am See' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-12 12:42:18, 2023-09-24 11:14:43]') #< 670 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-12 12:42:18, 2023-09-24 11:14:43]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-09-12 12:42:18'
+    - '2023-09-24 11:14:43'
+  - Gem Haltern am See
+  - 670
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Hochsauerlandkreis' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-12-12 14:54:50, 2023-12-13 14:11:20]') AND eintersects(attime(f.trip, tstzspan '[2023-12-12 14:54:50, 2023-12-13 14:11:20]'), k.geom);
+  params:
+  - - '2023-12-12 14:54:50'
+    - '2023-12-13 14:11:20'
+  - Krs Hochsauerlandkreis
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Olpe' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-10-21 13:39:48, 2023-10-22 04:55:29]') AND eintersects(attime(f.trip, tstzspan '[2023-10-21 13:39:48, 2023-10-22 04:55:29]'), k.geom);
+  params:
+  - - '2023-10-21 13:39:48'
+    - '2023-10-22 04:55:29'
+  - Krs Olpe
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-06-27'::timestamp, DATE '2023-06-27' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Schmallenberg' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-06-27'
+  - Gem Schmallenberg
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-03-15 16:25:54]') AND eintersects(attime(f.trip, timestamptz '[2023-03-15 16:25:54]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-03-15 16:25:54'
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-07-14 12:34:03]') AND eintersects(attime(f.trip, timestamptz '[2023-07-14 12:34:03]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-07-14 12:34:03'
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-12-15'::timestamp, DATE '2023-12-15' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Stadtlohn' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-12-15'
+  - Gem Stadtlohn
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-03-24'::timestamp, DATE '2023-03-24' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Hamm' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-03-24'
+  - Gem Hamm
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Duisburg' AND f.trip && stbox(k.geom, tstzspan '[2023-07-17 04:01:14, 2023-07-29 20:16:20]') AND eintersects(attime(f.trip, tstzspan '[2023-07-17 04:01:14, 2023-07-29 20:16:20]'), k.geom);
+  params:
+  - - '2023-07-17 04:01:14'
+    - '2023-07-29 20:16:20'
+  - Krs Duisburg
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-07-07 09:01:43]') AND eintersects(attime(f.trip, timestamptz '[2023-07-07 09:01:43]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-07-07 09:01:43'
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-07 04:23:12, 2023-09-10 03:38:54]') #< 1350 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-07 04:23:12, 2023-09-10 03:38:54]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-09-07 04:23:12, 2023-09-10 03:38:54]') WHERE g.name = 'Gem Hamminkeln' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-07 04:23:12, 2023-09-10 03:38:54]') #< 1350 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-07 04:23:12, 2023-09-10 03:38:54]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-09-07 04:23:12'
+    - '2023-09-10 03:38:54'
+  - Gem Hamminkeln
+  - 1350
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-07-24 15:53:45, 2023-07-29 15:13:32]'), c.geom, 4.481620565015238e-06) WHERE c.name = '23.4' AND f.trip && tstzspan '[2023-07-24 15:53:45, 2023-07-29 15:13:32]';
+  params:
+  - - '2023-07-24 15:53:45'
+    - '2023-07-29 15:13:32'
+  - '23.4'
+  - 4.481620565015238e-06
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Mettmann' AND f.trip && stbox(k.geom, tstzspan '[2023-12-16 10:15:37, 2023-12-22 19:31:42]') AND eintersects(attime(f.trip, tstzspan '[2023-12-16 10:15:37, 2023-12-22 19:31:42]'), k.geom);
+  params:
+  - - '2023-12-16 10:15:37'
+    - '2023-12-22 19:31:42'
+  - Krs Mettmann
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-11-25 10:31:52, 2023-11-28 07:27:56]'), c.geom, 1.1210617797036493e-05) WHERE c.name = '232.82' AND f.trip && tstzspan '[2023-11-25 10:31:52, 2023-11-28 07:27:56]';
+  params:
+  - - '2023-11-25 10:31:52'
+    - '2023-11-28 07:27:56'
+  - '232.82'
+  - 1.1210617797036493e-05
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Wuppertal' AND f.trip && stbox(k.geom, tstzspan '[2023-02-21 06:37:15, 2023-03-03 06:41:50]') AND eintersects(attime(f.trip, tstzspan '[2023-02-21 06:37:15, 2023-03-03 06:41:50]'), k.geom);
+  params:
+  - - '2023-02-21 06:37:15'
+    - '2023-03-03 06:41:50'
+  - Krs Wuppertal
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-12-31 12:25:35, 2023-12-31 23:59:59]') #< 1330 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-12-31 12:25:35, 2023-12-31 23:59:59]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-12-31 12:25:35, 2023-12-31 23:59:59]') WHERE g.name = 'Gem Wermelskirchen' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-12-31 12:25:35, 2023-12-31 23:59:59]') #< 1330 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-12-31 12:25:35, 2023-12-31 23:59:59]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-12-31 12:25:35'
+    - '2023-12-31 23:59:59'
+  - Gem Wermelskirchen
+  - 1330
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-07-02 22:46:01]') AND eintersects(attime(f.trip, timestamptz '[2023-07-02 22:46:01]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-07-02 22:46:01'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Herne' AND f.trip && stbox(k.geom, tstzspan '[2023-04-27 03:53:55, 2023-05-07 09:39:46]') AND eintersects(attime(f.trip, tstzspan '[2023-04-27 03:53:55, 2023-05-07 09:39:46]'), k.geom);
+  params:
+  - - '2023-04-27 03:53:55'
+    - '2023-05-07 09:39:46'
+  - Krs Herne
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-07-04 12:42:25]') AND eintersects(attime(f.trip, timestamptz '[2023-07-04 12:42:25]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-07-04 12:42:25'
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Euskirchen' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-01-29 22:31:18, 2023-01-30 09:44:29]') AND eintersects(attime(f.trip, tstzspan '[2023-01-29 22:31:18, 2023-01-30 09:44:29]'), k.geom);
+  params:
+  - - '2023-01-29 22:31:18'
+    - '2023-01-30 09:44:29'
+  - Krs Euskirchen
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-01-21 09:58:57]') AND eintersects(attime(f.trip, timestamptz '[2023-01-21 09:58:57]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-01-21 09:58:57'
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-06-26 12:49:30]') AND eintersects(attime(f.trip, timestamptz '[2023-06-26 12:49:30]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-06-26 12:49:30'
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-05-18 08:23:35, 2023-05-22 20:41:34]') #< 570 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-05-18 08:23:35, 2023-05-22 20:41:34]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-05-18 08:23:35, 2023-05-22 20:41:34]') WHERE g.name = 'Gem Selm' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-05-18 08:23:35, 2023-05-22 20:41:34]') #< 570 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-05-18 08:23:35, 2023-05-22 20:41:34]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-05-18 08:23:35'
+    - '2023-05-22 20:41:34'
+  - Gem Selm
+  - 570
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-08-30'::timestamp, DATE '2023-08-30' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Meinerzhagen' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-08-30'
+  - Gem Meinerzhagen
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-09-11'::timestamp, DATE '2023-09-11' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Lippstadt' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-09-11'
+  - Gem Lippstadt
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-06-16 03:07:40, 2023-06-29 05:35:27]'), c.geom, 6.856739118421426e-06) WHERE c.name = '64.8' AND f.trip && tstzspan '[2023-06-16 03:07:40, 2023-06-29 05:35:27]';
+  params:
+  - - '2023-06-16 03:07:40'
+    - '2023-06-29 05:35:27'
+  - '64.8'
+  - 6.856739118421426e-06
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-04-17 16:36:28, 2023-04-27 22:13:11]') #< 860 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-04-17 16:36:28, 2023-04-27 22:13:11]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-04-17 16:36:28, 2023-04-27 22:13:11]') WHERE g.name = 'Gem Reichshof' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-04-17 16:36:28, 2023-04-27 22:13:11]') #< 860 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-04-17 16:36:28, 2023-04-27 22:13:11]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-04-17 16:36:28'
+    - '2023-04-27 22:13:11'
+  - Gem Reichshof
+  - 860
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Bonn' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-10-31 17:21:13, 2023-11-01 16:28:11]') AND eintersects(attime(f.trip, tstzspan '[2023-10-31 17:21:13, 2023-11-01 16:28:11]'), k.geom);
+  params:
+  - - '2023-10-31 17:21:13'
+    - '2023-11-01 16:28:11'
+  - Krs Bonn
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-08-03'::timestamp, DATE '2023-08-03' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Bottrop' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-08-03'
+  - Gem Bottrop
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-10-04'::timestamp, DATE '2023-10-04' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Schleiden' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-10-04'
+  - Gem Schleiden
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-09-11'::timestamp, DATE '2023-09-11' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Schwerte' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-09-11'
+  - Gem Schwerte
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-03-09 20:44:20, 2023-03-20 17:50:28]'), c.geom, 6.451615428714808e-06) WHERE c.name = '76.92' AND f.trip && tstzspan '[2023-03-09 20:44:20, 2023-03-20 17:50:28]';
+  params:
+  - - '2023-03-09 20:44:20'
+    - '2023-03-20 17:50:28'
+  - '76.92'
+  - 6.451615428714808e-06
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Steinfurt' AND f.trip && stbox(k.geom, tstzspan '[2023-06-09 20:22:40, 2023-06-16 16:38:15]') AND eintersects(attime(f.trip, tstzspan '[2023-06-09 20:22:40, 2023-06-16 16:38:15]'), k.geom);
+  params:
+  - - '2023-06-09 20:22:40'
+    - '2023-06-16 16:38:15'
+  - Krs Steinfurt
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-05-30 09:18:25]') AND eintersects(attime(f.trip, timestamptz '[2023-05-30 09:18:25]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-05-30 09:18:25'
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Mettmann' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-08-13 16:47:49, 2023-08-15 08:46:01]') AND eintersects(attime(f.trip, tstzspan '[2023-08-13 16:47:49, 2023-08-15 08:46:01]'), k.geom);
+  params:
+  - - '2023-08-13 16:47:49'
+    - '2023-08-15 08:46:01'
+  - Krs Mettmann
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-09 15:27:28, 2023-09-20 16:01:15]') #< 1070 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-09 15:27:28, 2023-09-20 16:01:15]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-09-09 15:27:28, 2023-09-20 16:01:15]') WHERE g.name = 'Gem Simmerath' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-09 15:27:28, 2023-09-20 16:01:15]') #< 1070 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-09 15:27:28, 2023-09-20 16:01:15]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-09-09 15:27:28'
+    - '2023-09-20 16:01:15'
+  - Gem Simmerath
+  - 1070
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Staedteregion Aachen' AND f.trip && stbox(k.geom, tstzspan '[2023-04-26 06:14:30, 2023-04-29 16:39:26]') AND eintersects(attime(f.trip, tstzspan '[2023-04-26 06:14:30, 2023-04-29 16:39:26]'), k.geom);
+  params:
+  - - '2023-04-26 06:14:30'
+    - '2023-04-29 16:39:26'
+  - Krs Staedteregion Aachen
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-07-01 09:12:29]') AND eintersects(attime(f.trip, timestamptz '[2023-07-01 09:12:29]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-07-01 09:12:29'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-11-25 14:47:18, 2023-11-28 20:05:58]'), c.geom, 1.2608292252866261e-05) WHERE c.name = '118.16' AND f.trip && tstzspan '[2023-11-25 14:47:18, 2023-11-28 20:05:58]';
+  params:
+  - - '2023-11-25 14:47:18'
+    - '2023-11-28 20:05:58'
+  - '118.16'
+  - 1.2608292252866261e-05
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-04-05 14:54:09]') AND eintersects(attime(f.trip, timestamptz '[2023-04-05 14:54:09]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-04-05 14:54:09'
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-02-24 19:25:12, 2023-03-09 01:59:02]') #< 1290 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-02-24 19:25:12, 2023-03-09 01:59:02]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-02-24 19:25:12, 2023-03-09 01:59:02]') WHERE g.name = 'Gem Schalksmuehle' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-02-24 19:25:12, 2023-03-09 01:59:02]') #< 1290 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-02-24 19:25:12, 2023-03-09 01:59:02]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-02-24 19:25:12'
+    - '2023-03-09 01:59:02'
+  - Gem Schalksmuehle
+  - 1290
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-02-14 07:59:52]') AND eintersects(attime(f.trip, timestamptz '[2023-02-14 07:59:52]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-02-14 07:59:52'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Dortmund' AND f.trip && stbox(k.geom, tstzspan '[2023-01-24 12:06:45, 2023-02-03 09:35:47]') AND eintersects(attime(f.trip, tstzspan '[2023-01-24 12:06:45, 2023-02-03 09:35:47]'), k.geom);
+  params:
+  - - '2023-01-24 12:06:45'
+    - '2023-02-03 09:35:47'
+  - Krs Dortmund
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Staedteregion Aachen' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-12-10 07:03:02, 2023-12-10 08:03:12]') AND eintersects(attime(f.trip, tstzspan '[2023-12-10 07:03:02, 2023-12-10 08:03:12]'), k.geom);
+  params:
+  - - '2023-12-10 07:03:02'
+    - '2023-12-10 08:03:12'
+  - Krs Staedteregion Aachen
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-12-09 12:10:51]') AND eintersects(attime(f.trip, timestamptz '[2023-12-09 12:10:51]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-12-09 12:10:51'
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-02-03 12:12:44]') AND eintersects(attime(f.trip, timestamptz '[2023-02-03 12:12:44]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-02-03 12:12:44'
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-11-20 12:13:49]') AND eintersects(attime(f.trip, timestamptz '[2023-11-20 12:13:49]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-11-20 12:13:49'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-07-31 10:11:51, 2023-08-06 02:18:48]'), c.geom, 5.676731699317093e-06) WHERE c.name = '60.34' AND f.trip && tstzspan '[2023-07-31 10:11:51, 2023-08-06 02:18:48]';
+  params:
+  - - '2023-07-31 10:11:51'
+    - '2023-08-06 02:18:48'
+  - '60.34'
+  - 5.676731699317093e-06
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-10-13 19:48:00]') AND eintersects(attime(f.trip, timestamptz '[2023-10-13 19:48:00]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-10-13 19:48:00'
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Heinsberg' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-04-05 18:41:00, 2023-04-07 10:23:55]') AND eintersects(attime(f.trip, tstzspan '[2023-04-05 18:41:00, 2023-04-07 10:23:55]'), k.geom);
+  params:
+  - - '2023-04-05 18:41:00'
+    - '2023-04-07 10:23:55'
+  - Krs Heinsberg
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Rhein-Kreis Neuss' AND f.trip && stbox(k.geom, tstzspan '[2023-08-17 23:55:01, 2023-08-20 23:41:05]') AND eintersects(attime(f.trip, tstzspan '[2023-08-17 23:55:01, 2023-08-20 23:41:05]'), k.geom);
+  params:
+  - - '2023-08-17 23:55:01'
+    - '2023-08-20 23:41:05'
+  - Krs Rhein-Kreis Neuss
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-01-19'::timestamp, DATE '2023-01-19' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Lohmar' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-01-19'
+  - Gem Lohmar
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Euskirchen' AND f.trip && stbox(k.geom, tstzspan '[2023-08-01 11:34:30, 2023-08-10 19:08:39]') AND eintersects(attime(f.trip, tstzspan '[2023-08-01 11:34:30, 2023-08-10 19:08:39]'), k.geom);
+  params:
+  - - '2023-08-01 11:34:30'
+    - '2023-08-10 19:08:39'
+  - Krs Euskirchen
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-06-15 23:19:35, 2023-06-18 01:21:43]'), c.geom, 1.0502539436217717e-05) WHERE c.name = '37.33' AND f.trip && tstzspan '[2023-06-15 23:19:35, 2023-06-18 01:21:43]';
+  params:
+  - - '2023-06-15 23:19:35'
+    - '2023-06-18 01:21:43'
+  - '37.33'
+  - 1.0502539436217717e-05
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Hochsauerlandkreis' AND f.trip && stbox(k.geom, tstzspan '[2023-04-23 04:47:15, 2023-05-04 12:59:49]') AND eintersects(attime(f.trip, tstzspan '[2023-04-23 04:47:15, 2023-05-04 12:59:49]'), k.geom);
+  params:
+  - - '2023-04-23 04:47:15'
+    - '2023-05-04 12:59:49'
+  - Krs Hochsauerlandkreis
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Guetersloh' AND f.trip && stbox(k.geom, tstzspan '[2023-05-11 12:46:48, 2023-05-22 11:54:18]') AND eintersects(attime(f.trip, tstzspan '[2023-05-11 12:46:48, 2023-05-22 11:54:18]'), k.geom);
+  params:
+  - - '2023-05-11 12:46:48'
+    - '2023-05-22 11:54:18'
+  - Krs Guetersloh
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Rhein-Kreis Neuss' AND f.trip && stbox(k.geom, tstzspan '[2023-09-18 01:48:51, 2023-09-27 01:08:55]') AND eintersects(attime(f.trip, tstzspan '[2023-09-18 01:48:51, 2023-09-27 01:08:55]'), k.geom);
+  params:
+  - - '2023-09-18 01:48:51'
+    - '2023-09-27 01:08:55'
+  - Krs Rhein-Kreis Neuss
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-03-04 14:36:37, 2023-03-07 22:43:42]'), c.geom, 1.1164466323212463e-05) WHERE c.name = '97.84' AND f.trip && tstzspan '[2023-03-04 14:36:37, 2023-03-07 22:43:42]';
+  params:
+  - - '2023-03-04 14:36:37'
+    - '2023-03-07 22:43:42'
+  - '97.84'
+  - 1.1164466323212463e-05
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Oberbergischer Kreis' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-05-26 07:59:45, 2023-05-26 10:22:07]') AND eintersects(attime(f.trip, tstzspan '[2023-05-26 07:59:45, 2023-05-26 10:22:07]'), k.geom);
+  params:
+  - - '2023-05-26 07:59:45'
+    - '2023-05-26 10:22:07'
+  - Krs Oberbergischer Kreis
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Staedteregion Aachen' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-12-23 16:15:45, 2023-12-24 14:18:57]') AND eintersects(attime(f.trip, tstzspan '[2023-12-23 16:15:45, 2023-12-24 14:18:57]'), k.geom);
+  params:
+  - - '2023-12-23 16:15:45'
+    - '2023-12-24 14:18:57'
+  - Krs Staedteregion Aachen
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-29 08:01:26, 2023-04-05 08:52:07]') #< 1460 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-29 08:01:26, 2023-04-05 08:52:07]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-03-29 08:01:26, 2023-04-05 08:52:07]') WHERE g.name = 'Gem Engelskirchen' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-29 08:01:26, 2023-04-05 08:52:07]') #< 1460 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-29 08:01:26, 2023-04-05 08:52:07]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-03-29 08:01:26'
+    - '2023-04-05 08:52:07'
+  - Gem Engelskirchen
+  - 1460
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Solingen' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-02-20 15:23:54, 2023-02-21 12:47:19]') AND eintersects(attime(f.trip, tstzspan '[2023-02-20 15:23:54, 2023-02-21 12:47:19]'), k.geom);
+  params:
+  - - '2023-02-20 15:23:54'
+    - '2023-02-21 12:47:19'
+  - Krs Solingen
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Rhein-Erft-Kreis' AND f.trip && stbox(k.geom, tstzspan '[2023-05-03 17:10:09, 2023-05-11 02:56:03]') AND eintersects(attime(f.trip, tstzspan '[2023-05-03 17:10:09, 2023-05-11 02:56:03]'), k.geom);
+  params:
+  - - '2023-05-03 17:10:09'
+    - '2023-05-11 02:56:03'
+  - Krs Rhein-Erft-Kreis
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-12-16 21:04:37, 2023-12-26 16:28:20]'), c.geom, 9.60674547753736e-06) WHERE c.name = '184.49' AND f.trip && tstzspan '[2023-12-16 21:04:37, 2023-12-26 16:28:20]';
+  params:
+  - - '2023-12-16 21:04:37'
+    - '2023-12-26 16:28:20'
+  - '184.49'
+  - 9.60674547753736e-06
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-05-27 12:05:38, 2023-06-02 00:17:42]'), c.geom, 1.531624034688618e-05) WHERE c.name = '27.82' AND f.trip && tstzspan '[2023-05-27 12:05:38, 2023-06-02 00:17:42]';
+  params:
+  - - '2023-05-27 12:05:38'
+    - '2023-06-02 00:17:42'
+  - '27.82'
+  - 1.531624034688618e-05
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-05-08 18:57:17, 2023-05-16 04:53:24]') #< 1280 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-05-08 18:57:17, 2023-05-16 04:53:24]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-05-08 18:57:17, 2023-05-16 04:53:24]') WHERE g.name = 'Gem Lemgo' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-05-08 18:57:17, 2023-05-16 04:53:24]') #< 1280 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-05-08 18:57:17, 2023-05-16 04:53:24]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-05-08 18:57:17'
+    - '2023-05-16 04:53:24'
+  - Gem Lemgo
+  - 1280
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-09-04'::timestamp, DATE '2023-09-04' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Bielefeld' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-09-04'
+  - Gem Bielefeld
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-11-06 12:46:29]') AND eintersects(attime(f.trip, timestamptz '[2023-11-06 12:46:29]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-11-06 12:46:29'
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Olpe' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-04-11 09:03:48, 2023-04-12 17:48:08]') AND eintersects(attime(f.trip, tstzspan '[2023-04-11 09:03:48, 2023-04-12 17:48:08]'), k.geom);
+  params:
+  - - '2023-04-11 09:03:48'
+    - '2023-04-12 17:48:08'
+  - Krs Olpe
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-10-29 02:09:15]') AND eintersects(attime(f.trip, timestamptz '[2023-10-29 02:09:15]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-10-29 02:09:15'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Soest' AND f.trip && stbox(k.geom, tstzspan '[2023-11-20 18:24:46, 2023-11-29 00:11:11]') AND eintersects(attime(f.trip, tstzspan '[2023-11-20 18:24:46, 2023-11-29 00:11:11]'), k.geom);
+  params:
+  - - '2023-11-20 18:24:46'
+    - '2023-11-29 00:11:11'
+  - Krs Soest
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-10-03'::timestamp, DATE '2023-10-03' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Kirchlengern' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-10-03'
+  - Gem Kirchlengern
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Dueren' AND f.trip && stbox(k.geom, tstzspan '[2023-01-03 07:33:26, 2023-01-07 04:07:36]') AND eintersects(attime(f.trip, tstzspan '[2023-01-03 07:33:26, 2023-01-07 04:07:36]'), k.geom);
+  params:
+  - - '2023-01-03 07:33:26'
+    - '2023-01-07 04:07:36'
+  - Krs Dueren
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-01-26 21:28:05, 2023-02-06 13:25:39]'), c.geom, 1.4457086032021146e-05) WHERE c.name = '55.84' AND f.trip && tstzspan '[2023-01-26 21:28:05, 2023-02-06 13:25:39]';
+  params:
+  - - '2023-01-26 21:28:05'
+    - '2023-02-06 13:25:39'
+  - '55.84'
+  - 1.4457086032021146e-05
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-12-11 00:31:51, 2023-12-19 06:16:42]') #< 1280 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-12-11 00:31:51, 2023-12-19 06:16:42]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-12-11 00:31:51, 2023-12-19 06:16:42]') WHERE g.name = 'Gem Bueren' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-12-11 00:31:51, 2023-12-19 06:16:42]') #< 1280 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-12-11 00:31:51, 2023-12-19 06:16:42]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-12-11 00:31:51'
+    - '2023-12-19 06:16:42'
+  - Gem Bueren
+  - 1280
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-11-22 08:37:08]') AND eintersects(attime(f.trip, timestamptz '[2023-11-22 08:37:08]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-11-22 08:37:08'
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Lippe' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-12-29 17:22:49, 2023-12-30 09:18:13]') AND eintersects(attime(f.trip, tstzspan '[2023-12-29 17:22:49, 2023-12-30 09:18:13]'), k.geom);
+  params:
+  - - '2023-12-29 17:22:49'
+    - '2023-12-30 09:18:13'
+  - Krs Lippe
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-29 07:00:10, 2023-04-03 00:23:01]') #< 1370 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-29 07:00:10, 2023-04-03 00:23:01]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-03-29 07:00:10, 2023-04-03 00:23:01]') WHERE g.name = 'Gem Merzenich' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-29 07:00:10, 2023-04-03 00:23:01]') #< 1370 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-29 07:00:10, 2023-04-03 00:23:01]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-03-29 07:00:10'
+    - '2023-04-03 00:23:01'
+  - Gem Merzenich
+  - 1370
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Koeln' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-10-03 03:31:10, 2023-10-05 01:29:03]') AND eintersects(attime(f.trip, tstzspan '[2023-10-03 03:31:10, 2023-10-05 01:29:03]'), k.geom);
+  params:
+  - - '2023-10-03 03:31:10'
+    - '2023-10-05 01:29:03'
+  - Krs Koeln
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Hochsauerlandkreis' AND f.trip && stbox(k.geom, tstzspan '[2023-04-22 18:40:41, 2023-05-01 06:00:12]') AND eintersects(attime(f.trip, tstzspan '[2023-04-22 18:40:41, 2023-05-01 06:00:12]'), k.geom);
+  params:
+  - - '2023-04-22 18:40:41'
+    - '2023-05-01 06:00:12'
+  - Krs Hochsauerlandkreis
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-05-17'::timestamp, DATE '2023-05-17' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Sprockhoevel' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-05-17'
+  - Gem Sprockhoevel
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-06-14'::timestamp, DATE '2023-06-14' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Iserlohn' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-06-14'
+  - Gem Iserlohn
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-08-31 03:23:12, 2023-09-11 09:53:34]'), c.geom, 8.302854072325555e-06) WHERE c.name = '57.42' AND f.trip && tstzspan '[2023-08-31 03:23:12, 2023-09-11 09:53:34]';
+  params:
+  - - '2023-08-31 03:23:12'
+    - '2023-09-11 09:53:34'
+  - '57.42'
+  - 8.302854072325555e-06
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-19 01:47:25, 2023-09-26 03:14:43]') #< 860 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-19 01:47:25, 2023-09-26 03:14:43]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-09-19 01:47:25, 2023-09-26 03:14:43]') WHERE g.name = 'Gem Heek' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-19 01:47:25, 2023-09-26 03:14:43]') #< 860 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-19 01:47:25, 2023-09-26 03:14:43]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-09-19 01:47:25'
+    - '2023-09-26 03:14:43'
+  - Gem Heek
+  - 860
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-08-25 08:24:03]') AND eintersects(attime(f.trip, timestamptz '[2023-08-25 08:24:03]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-08-25 08:24:03'
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-02-16 21:26:47, 2023-02-20 22:35:09]') #< 970 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-02-16 21:26:47, 2023-02-20 22:35:09]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-02-16 21:26:47, 2023-02-20 22:35:09]') WHERE g.name = 'Gem Lengerich' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-02-16 21:26:47, 2023-02-20 22:35:09]') #< 970 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-02-16 21:26:47, 2023-02-20 22:35:09]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-02-16 21:26:47'
+    - '2023-02-20 22:35:09'
+  - Gem Lengerich
+  - 970
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Minden-Luebbecke' AND f.trip && stbox(k.geom, tstzspan '[2023-01-24 19:41:23, 2023-01-28 06:58:32]') AND eintersects(attime(f.trip, tstzspan '[2023-01-24 19:41:23, 2023-01-28 06:58:32]'), k.geom);
+  params:
+  - - '2023-01-24 19:41:23'
+    - '2023-01-28 06:58:32'
+  - Krs Minden-Luebbecke
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Leverkusen' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-10-10 23:22:23, 2023-10-11 01:14:15]') AND eintersects(attime(f.trip, tstzspan '[2023-10-10 23:22:23, 2023-10-11 01:14:15]'), k.geom);
+  params:
+  - - '2023-10-10 23:22:23'
+    - '2023-10-11 01:14:15'
+  - Krs Leverkusen
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-09-18 11:51:35]') AND eintersects(attime(f.trip, timestamptz '[2023-09-18 11:51:35]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-09-18 11:51:35'
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-05 15:39:16, 2023-10-16 07:27:39]') #< 730 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-05 15:39:16, 2023-10-16 07:27:39]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-10-05 15:39:16, 2023-10-16 07:27:39]') WHERE g.name = 'Gem Bad Honnef' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-05 15:39:16, 2023-10-16 07:27:39]') #< 730 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-05 15:39:16, 2023-10-16 07:27:39]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-10-05 15:39:16'
+    - '2023-10-16 07:27:39'
+  - Gem Bad Honnef
+  - 730
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-11 03:09:59, 2023-09-15 12:12:49]') #< 1000 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-11 03:09:59, 2023-09-15 12:12:49]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-09-11 03:09:59, 2023-09-15 12:12:49]') WHERE g.name = 'Gem Aachen' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-11 03:09:59, 2023-09-15 12:12:49]') #< 1000 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-11 03:09:59, 2023-09-15 12:12:49]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-09-11 03:09:59'
+    - '2023-09-15 12:12:49'
+  - Gem Aachen
+  - 1000
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-05-20 08:12:55]') AND eintersects(attime(f.trip, timestamptz '[2023-05-20 08:12:55]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-05-20 08:12:55'
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-06-10 08:04:33, 2023-06-24 21:42:39]') #< 1270 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-06-10 08:04:33, 2023-06-24 21:42:39]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-06-10 08:04:33, 2023-06-24 21:42:39]') WHERE g.name = 'Gem Emmerich am Rhein' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-06-10 08:04:33, 2023-06-24 21:42:39]') #< 1270 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-06-10 08:04:33, 2023-06-24 21:42:39]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-06-10 08:04:33'
+    - '2023-06-24 21:42:39'
+  - Gem Emmerich am Rhein
+  - 1270
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-04-04 09:10:02, 2023-04-06 22:31:14]'), c.geom, 1.1625677686449886e-05) WHERE c.name = '168.71' AND f.trip && tstzspan '[2023-04-04 09:10:02, 2023-04-06 22:31:14]';
+  params:
+  - - '2023-04-04 09:10:02'
+    - '2023-04-06 22:31:14'
+  - '168.71'
+  - 1.1625677686449886e-05
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-10-27'::timestamp, DATE '2023-10-27' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Herscheid' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-10-27'
+  - Gem Herscheid
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-01-10'::timestamp, DATE '2023-01-10' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Bad Honnef' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-01-10'
+  - Gem Bad Honnef
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-08-20'::timestamp, DATE '2023-08-20' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Kirchlengern' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-08-20'
+  - Gem Kirchlengern
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Mettmann' AND f.trip && stbox(k.geom, tstzspan '[2023-05-09 04:49:52, 2023-05-16 13:07:32]') AND eintersects(attime(f.trip, tstzspan '[2023-05-09 04:49:52, 2023-05-16 13:07:32]'), k.geom);
+  params:
+  - - '2023-05-09 04:49:52'
+    - '2023-05-16 13:07:32'
+  - Krs Mettmann
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Coesfeld' AND f.trip && stbox(k.geom, tstzspan '[2023-04-03 23:25:49, 2023-04-11 23:17:44]') AND eintersects(attime(f.trip, tstzspan '[2023-04-03 23:25:49, 2023-04-11 23:17:44]'), k.geom);
+  params:
+  - - '2023-04-03 23:25:49'
+    - '2023-04-11 23:17:44'
+  - Krs Coesfeld
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-01-08 17:33:38, 2023-01-13 17:15:08]'), c.geom, 6.030790762080195e-06) WHERE c.name = '303' AND f.trip && tstzspan '[2023-01-08 17:33:38, 2023-01-13 17:15:08]';
+  params:
+  - - '2023-01-08 17:33:38'
+    - '2023-01-13 17:15:08'
+  - '303'
+  - 6.030790762080195e-06
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Herne' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-03-22 15:47:16, 2023-03-23 03:30:06]') AND eintersects(attime(f.trip, tstzspan '[2023-03-22 15:47:16, 2023-03-23 03:30:06]'), k.geom);
+  params:
+  - - '2023-03-22 15:47:16'
+    - '2023-03-23 03:30:06'
+  - Krs Herne
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-12-20 23:44:26, 2023-12-31 23:59:59]'), c.geom, 7.583145981357348e-06) WHERE c.name = '74.9' AND f.trip && tstzspan '[2023-12-20 23:44:26, 2023-12-31 23:59:59]';
+  params:
+  - - '2023-12-20 23:44:26'
+    - '2023-12-31 23:59:59'
+  - '74.9'
+  - 7.583145981357348e-06
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Borken' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-12-23 23:21:34, 2023-12-25 01:48:42]') AND eintersects(attime(f.trip, tstzspan '[2023-12-23 23:21:34, 2023-12-25 01:48:42]'), k.geom);
+  params:
+  - - '2023-12-23 23:21:34'
+    - '2023-12-25 01:48:42'
+  - Krs Borken
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Soest' AND f.trip && stbox(k.geom, tstzspan '[2023-04-28 03:35:08, 2023-05-01 12:29:28]') AND eintersects(attime(f.trip, tstzspan '[2023-04-28 03:35:08, 2023-05-01 12:29:28]'), k.geom);
+  params:
+  - - '2023-04-28 03:35:08'
+    - '2023-05-01 12:29:28'
+  - Krs Soest
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-03-26'::timestamp, DATE '2023-03-26' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Bornheim' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-03-26'
+  - Gem Bornheim
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-01-13 23:00:47, 2023-01-23 02:21:53]'), c.geom, 1.5650859504959522e-05) WHERE c.name = '171' AND f.trip && tstzspan '[2023-01-13 23:00:47, 2023-01-23 02:21:53]';
+  params:
+  - - '2023-01-13 23:00:47'
+    - '2023-01-23 02:21:53'
+  - '171'
+  - 1.5650859504959522e-05
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Soest' AND f.trip && stbox(k.geom, tstzspan '[2023-09-12 06:46:10, 2023-09-19 13:21:34]') AND eintersects(attime(f.trip, tstzspan '[2023-09-12 06:46:10, 2023-09-19 13:21:34]'), k.geom);
+  params:
+  - - '2023-09-12 06:46:10'
+    - '2023-09-19 13:21:34'
+  - Krs Soest
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Wuppertal' AND f.trip && stbox(k.geom, tstzspan '[2023-04-09 13:08:48, 2023-04-13 06:08:36]') AND eintersects(attime(f.trip, tstzspan '[2023-04-09 13:08:48, 2023-04-13 06:08:36]'), k.geom);
+  params:
+  - - '2023-04-09 13:08:48'
+    - '2023-04-13 06:08:36'
+  - Krs Wuppertal
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Rheinisch-Bergischer Kreis' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-09-08 07:54:40, 2023-09-09 05:30:21]') AND eintersects(attime(f.trip, tstzspan '[2023-09-08 07:54:40, 2023-09-09 05:30:21]'), k.geom);
+  params:
+  - - '2023-09-08 07:54:40'
+    - '2023-09-09 05:30:21'
+  - Krs Rheinisch-Bergischer Kreis
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Kleve' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-03-15 08:12:52, 2023-03-15 11:22:02]') AND eintersects(attime(f.trip, tstzspan '[2023-03-15 08:12:52, 2023-03-15 11:22:02]'), k.geom);
+  params:
+  - - '2023-03-15 08:12:52'
+    - '2023-03-15 11:22:02'
+  - Krs Kleve
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-23 17:32:10, 2023-11-05 03:15:19]') #< 610 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-23 17:32:10, 2023-11-05 03:15:19]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-10-23 17:32:10, 2023-11-05 03:15:19]') WHERE g.name = 'Gem Dortmund' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-23 17:32:10, 2023-11-05 03:15:19]') #< 610 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-23 17:32:10, 2023-11-05 03:15:19]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-10-23 17:32:10'
+    - '2023-11-05 03:15:19'
+  - Gem Dortmund
+  - 610
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-02-12'::timestamp, DATE '2023-02-12' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Steinheim' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-02-12'
+  - Gem Steinheim
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-12-25'::timestamp, DATE '2023-12-25' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Schwerte' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-12-25'
+  - Gem Schwerte
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-01-31 07:05:07, 2023-02-06 18:44:51]') #< 780 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-01-31 07:05:07, 2023-02-06 18:44:51]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-01-31 07:05:07, 2023-02-06 18:44:51]') WHERE g.name = 'Gem Ahlen' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-01-31 07:05:07, 2023-02-06 18:44:51]') #< 780 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-01-31 07:05:07, 2023-02-06 18:44:51]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-01-31 07:05:07'
+    - '2023-02-06 18:44:51'
+  - Gem Ahlen
+  - 780
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-12-30'::timestamp, DATE '2023-12-30' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Bedburg-Hau' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-12-30'
+  - Gem Bedburg-Hau
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-07-02 04:19:50, 2023-07-05 12:01:01]'), c.geom, 1.2899778487623569e-05) WHERE c.name = '34.92' AND f.trip && tstzspan '[2023-07-02 04:19:50, 2023-07-05 12:01:01]';
+  params:
+  - - '2023-07-02 04:19:50'
+    - '2023-07-05 12:01:01'
+  - '34.92'
+  - 1.2899778487623569e-05
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-01-30 15:07:24, 2023-02-14 08:35:41]'), c.geom, 1.1713224447576918e-05) WHERE c.name = '42.73' AND f.trip && tstzspan '[2023-01-30 15:07:24, 2023-02-14 08:35:41]';
+  params:
+  - - '2023-01-30 15:07:24'
+    - '2023-02-14 08:35:41'
+  - '42.73'
+  - 1.1713224447576918e-05
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Warendorf' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-02-12 12:26:37, 2023-02-13 02:39:27]') AND eintersects(attime(f.trip, tstzspan '[2023-02-12 12:26:37, 2023-02-13 02:39:27]'), k.geom);
+  params:
+  - - '2023-02-12 12:26:37'
+    - '2023-02-13 02:39:27'
+  - Krs Warendorf
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-10-25 19:16:11, 2023-10-29 06:50:24]'), c.geom, 8.101450581685845e-06) WHERE c.name = '145.4' AND f.trip && tstzspan '[2023-10-25 19:16:11, 2023-10-29 06:50:24]';
+  params:
+  - - '2023-10-25 19:16:11'
+    - '2023-10-29 06:50:24'
+  - '145.4'
+  - 8.101450581685845e-06
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-07-28 08:52:13, 2023-08-06 04:35:21]') #< 1410 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-07-28 08:52:13, 2023-08-06 04:35:21]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-07-28 08:52:13, 2023-08-06 04:35:21]') WHERE g.name = 'Gem Wuerselen' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-07-28 08:52:13, 2023-08-06 04:35:21]') #< 1410 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-07-28 08:52:13, 2023-08-06 04:35:21]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-07-28 08:52:13'
+    - '2023-08-06 04:35:21'
+  - Gem Wuerselen
+  - 1410
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Euskirchen' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-05-09 18:31:34, 2023-05-11 10:03:27]') AND eintersects(attime(f.trip, tstzspan '[2023-05-09 18:31:34, 2023-05-11 10:03:27]'), k.geom);
+  params:
+  - - '2023-05-09 18:31:34'
+    - '2023-05-11 10:03:27'
+  - Krs Euskirchen
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-09-19 21:55:24]') AND eintersects(attime(f.trip, timestamptz '[2023-09-19 21:55:24]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-09-19 21:55:24'
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-22 04:18:44, 2023-10-25 18:14:25]') #< 1470 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-22 04:18:44, 2023-10-25 18:14:25]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-10-22 04:18:44, 2023-10-25 18:14:25]') WHERE g.name = 'Gem Stolberg (Rhld.)' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-22 04:18:44, 2023-10-25 18:14:25]') #< 1470 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-22 04:18:44, 2023-10-25 18:14:25]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-10-22 04:18:44'
+    - '2023-10-25 18:14:25'
+  - Gem Stolberg (Rhld.)
+  - 1470
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-02-05'::timestamp, DATE '2023-02-05' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Juelich' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-02-05'
+  - Gem Juelich
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Hagen' AND f.trip && stbox(k.geom, tstzspan '[2023-11-07 11:07:35, 2023-11-09 20:52:51]') AND eintersects(attime(f.trip, tstzspan '[2023-11-07 11:07:35, 2023-11-09 20:52:51]'), k.geom);
+  params:
+  - - '2023-11-07 11:07:35'
+    - '2023-11-09 20:52:51'
+  - Krs Hagen
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-03-31 00:32:00]') AND eintersects(attime(f.trip, timestamptz '[2023-03-31 00:32:00]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-03-31 00:32:00'
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-08-19 00:03:33]') AND eintersects(attime(f.trip, timestamptz '[2023-08-19 00:03:33]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-08-19 00:03:33'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-03-06 08:15:16, 2023-03-10 10:29:55]'), c.geom, 1.1799382822074664e-05) WHERE c.name = '193.45' AND f.trip && tstzspan '[2023-03-06 08:15:16, 2023-03-10 10:29:55]';
+  params:
+  - - '2023-03-06 08:15:16'
+    - '2023-03-10 10:29:55'
+  - '193.45'
+  - 1.1799382822074664e-05
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-01-26 20:46:41]') AND eintersects(attime(f.trip, timestamptz '[2023-01-26 20:46:41]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-01-26 20:46:41'
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-03-20 17:53:47]') AND eintersects(attime(f.trip, timestamptz '[2023-03-20 17:53:47]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-03-20 17:53:47'
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Guetersloh' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-11-03 12:46:27, 2023-11-04 05:55:20]') AND eintersects(attime(f.trip, tstzspan '[2023-11-03 12:46:27, 2023-11-04 05:55:20]'), k.geom);
+  params:
+  - - '2023-11-03 12:46:27'
+    - '2023-11-04 05:55:20'
+  - Krs Guetersloh
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Soest' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-07-21 19:41:42, 2023-07-23 01:58:15]') AND eintersects(attime(f.trip, tstzspan '[2023-07-21 19:41:42, 2023-07-23 01:58:15]'), k.geom);
+  params:
+  - - '2023-07-21 19:41:42'
+    - '2023-07-23 01:58:15'
+  - Krs Soest
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-18 20:55:07, 2023-11-28 17:32:01]') #< 1440 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-18 20:55:07, 2023-11-28 17:32:01]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-11-18 20:55:07, 2023-11-28 17:32:01]') WHERE g.name = 'Gem Hoevelhof' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-18 20:55:07, 2023-11-28 17:32:01]') #< 1440 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-18 20:55:07, 2023-11-28 17:32:01]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-11-18 20:55:07'
+    - '2023-11-28 17:32:01'
+  - Gem Hoevelhof
+  - 1440
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Olpe' AND f.trip && stbox(k.geom, tstzspan '[2023-02-02 18:31:17, 2023-02-10 15:50:37]') AND eintersects(attime(f.trip, tstzspan '[2023-02-02 18:31:17, 2023-02-10 15:50:37]'), k.geom);
+  params:
+  - - '2023-02-02 18:31:17'
+    - '2023-02-10 15:50:37'
+  - Krs Olpe
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-08-06'::timestamp, DATE '2023-08-06' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Bielefeld' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-08-06'
+  - Gem Bielefeld
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-09-03 05:51:01, 2023-09-12 03:32:46]'), c.geom, 3.3407331607115992e-06) WHERE c.name = '160.4' AND f.trip && tstzspan '[2023-09-03 05:51:01, 2023-09-12 03:32:46]';
+  params:
+  - - '2023-09-03 05:51:01'
+    - '2023-09-12 03:32:46'
+  - '160.4'
+  - 3.3407331607115992e-06
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-04-14 20:47:57]') AND eintersects(attime(f.trip, timestamptz '[2023-04-14 20:47:57]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-04-14 20:47:57'
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-12-15 14:08:17]') AND eintersects(attime(f.trip, timestamptz '[2023-12-15 14:08:17]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-12-15 14:08:17'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Warendorf' AND f.trip && stbox(k.geom, tstzspan '[2023-09-07 20:33:38, 2023-09-14 08:58:56]') AND eintersects(attime(f.trip, tstzspan '[2023-09-07 20:33:38, 2023-09-14 08:58:56]'), k.geom);
+  params:
+  - - '2023-09-07 20:33:38'
+    - '2023-09-14 08:58:56'
+  - Krs Warendorf
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Recklinghausen' AND f.trip && stbox(k.geom, tstzspan '[2023-08-14 01:55:42, 2023-08-25 12:44:30]') AND eintersects(attime(f.trip, tstzspan '[2023-08-14 01:55:42, 2023-08-25 12:44:30]'), k.geom);
+  params:
+  - - '2023-08-14 01:55:42'
+    - '2023-08-25 12:44:30'
+  - Krs Recklinghausen
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Olpe' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-06-09 17:52:13, 2023-06-10 11:35:05]') AND eintersects(attime(f.trip, tstzspan '[2023-06-09 17:52:13, 2023-06-10 11:35:05]'), k.geom);
+  params:
+  - - '2023-06-09 17:52:13'
+    - '2023-06-10 11:35:05'
+  - Krs Olpe
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-22 15:04:42, 2023-03-24 23:31:09]') #< 1240 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-22 15:04:42, 2023-03-24 23:31:09]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-03-22 15:04:42, 2023-03-24 23:31:09]') WHERE g.name = 'Gem Neuss' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-22 15:04:42, 2023-03-24 23:31:09]') #< 1240 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-22 15:04:42, 2023-03-24 23:31:09]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-03-22 15:04:42'
+    - '2023-03-24 23:31:09'
+  - Gem Neuss
+  - 1240
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-24 18:40:18, 2023-09-28 16:46:35]') #< 590 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-24 18:40:18, 2023-09-28 16:46:35]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-09-24 18:40:18, 2023-09-28 16:46:35]') WHERE g.name = 'Gem Ruppichteroth' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-24 18:40:18, 2023-09-28 16:46:35]') #< 590 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-24 18:40:18, 2023-09-28 16:46:35]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-09-24 18:40:18'
+    - '2023-09-28 16:46:35'
+  - Gem Ruppichteroth
+  - 590
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Unna' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-11-26 22:31:35, 2023-11-28 00:00:39]') AND eintersects(attime(f.trip, tstzspan '[2023-11-26 22:31:35, 2023-11-28 00:00:39]'), k.geom);
+  params:
+  - - '2023-11-26 22:31:35'
+    - '2023-11-28 00:00:39'
+  - Krs Unna
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-11-23 07:05:17]') AND eintersects(attime(f.trip, timestamptz '[2023-11-23 07:05:17]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-11-23 07:05:17'
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-12 01:27:14, 2023-09-19 23:55:09]') #< 1370 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-12 01:27:14, 2023-09-19 23:55:09]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-09-12 01:27:14, 2023-09-19 23:55:09]') WHERE g.name = 'Gem Soest' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-09-12 01:27:14, 2023-09-19 23:55:09]') #< 1370 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-09-12 01:27:14, 2023-09-19 23:55:09]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-09-12 01:27:14'
+    - '2023-09-19 23:55:09'
+  - Gem Soest
+  - 1370
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Rheinisch-Bergischer Kreis' AND f.trip && stbox(k.geom, tstzspan '[2023-11-12 17:49:41, 2023-11-22 14:24:36]') AND eintersects(attime(f.trip, tstzspan '[2023-11-12 17:49:41, 2023-11-22 14:24:36]'), k.geom);
+  params:
+  - - '2023-11-12 17:49:41'
+    - '2023-11-22 14:24:36'
+  - Krs Rheinisch-Bergischer Kreis
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Soest' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-05-27 22:16:41, 2023-05-29 15:25:21]') AND eintersects(attime(f.trip, tstzspan '[2023-05-27 22:16:41, 2023-05-29 15:25:21]'), k.geom);
+  params:
+  - - '2023-05-27 22:16:41'
+    - '2023-05-29 15:25:21'
+  - Krs Soest
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-02-19 01:48:29, 2023-02-25 08:38:43]'), c.geom, 6.954991498923289e-06) WHERE c.name = '95.3' AND f.trip && tstzspan '[2023-02-19 01:48:29, 2023-02-25 08:38:43]';
+  params:
+  - - '2023-02-19 01:48:29'
+    - '2023-02-25 08:38:43'
+  - '95.3'
+  - 6.954991498923289e-06
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-10-18 03:37:55, 2023-10-24 11:09:23]'), c.geom, 1.195238513539295e-05) WHERE c.name = '232.82' AND f.trip && tstzspan '[2023-10-18 03:37:55, 2023-10-24 11:09:23]';
+  params:
+  - - '2023-10-18 03:37:55'
+    - '2023-10-24 11:09:23'
+  - '232.82'
+  - 1.195238513539295e-05
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-09-15'::timestamp, DATE '2023-09-15' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Rees' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-09-15'
+  - Gem Rees
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Rhein-Sieg-Kreis' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-07-18 03:07:30, 2023-07-18 04:35:05]') AND eintersects(attime(f.trip, tstzspan '[2023-07-18 03:07:30, 2023-07-18 04:35:05]'), k.geom);
+  params:
+  - - '2023-07-18 03:07:30'
+    - '2023-07-18 04:35:05'
+  - Krs Rhein-Sieg-Kreis
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Coesfeld' AND f.trip && stbox(k.geom, tstzspan '[2023-06-20 11:48:48, 2023-06-27 21:15:05]') AND eintersects(attime(f.trip, tstzspan '[2023-06-20 11:48:48, 2023-06-27 21:15:05]'), k.geom);
+  params:
+  - - '2023-06-20 11:48:48'
+    - '2023-06-27 21:15:05'
+  - Krs Coesfeld
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Herford' AND f.trip && stbox(k.geom, tstzspan '[2023-08-23 20:30:34, 2023-09-02 22:23:24]') AND eintersects(attime(f.trip, tstzspan '[2023-08-23 20:30:34, 2023-09-02 22:23:24]'), k.geom);
+  params:
+  - - '2023-08-23 20:30:34'
+    - '2023-09-02 22:23:24'
+  - Krs Herford
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-04-16 22:20:45, 2023-04-21 11:04:08]'), c.geom, 5.167055741127983e-06) WHERE c.name = '137.39' AND f.trip && tstzspan '[2023-04-16 22:20:45, 2023-04-21 11:04:08]';
+  params:
+  - - '2023-04-16 22:20:45'
+    - '2023-04-21 11:04:08'
+  - '137.39'
+  - 5.167055741127983e-06
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-14 14:51:32, 2023-11-19 23:35:02]') #< 990 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-14 14:51:32, 2023-11-19 23:35:02]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-11-14 14:51:32, 2023-11-19 23:35:02]') WHERE g.name = 'Gem Geseke' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-14 14:51:32, 2023-11-19 23:35:02]') #< 990 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-14 14:51:32, 2023-11-19 23:35:02]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-11-14 14:51:32'
+    - '2023-11-19 23:35:02'
+  - Gem Geseke
+  - 990
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-29 01:43:12, 2023-11-11 09:15:57]') #< 1020 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-29 01:43:12, 2023-11-11 09:15:57]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-10-29 01:43:12, 2023-11-11 09:15:57]') WHERE g.name = 'Gem Monheim am Rhein' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-29 01:43:12, 2023-11-11 09:15:57]') #< 1020 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-29 01:43:12, 2023-11-11 09:15:57]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-10-29 01:43:12'
+    - '2023-11-11 09:15:57'
+  - Gem Monheim am Rhein
+  - 1020
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-03-07 23:15:12, 2023-03-11 19:44:39]'), c.geom, 4.724990676660321e-06) WHERE c.name = '73.79' AND f.trip && tstzspan '[2023-03-07 23:15:12, 2023-03-11 19:44:39]';
+  params:
+  - - '2023-03-07 23:15:12'
+    - '2023-03-11 19:44:39'
+  - '73.79'
+  - 4.724990676660321e-06
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Bottrop' AND f.trip && stbox(k.geom, tstzspan '[2023-06-15 17:07:40, 2023-06-27 08:24:19]') AND eintersects(attime(f.trip, tstzspan '[2023-06-15 17:07:40, 2023-06-27 08:24:19]'), k.geom);
+  params:
+  - - '2023-06-15 17:07:40'
+    - '2023-06-27 08:24:19'
+  - Krs Bottrop
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-01-29'::timestamp, DATE '2023-01-29' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Ibbenbueren' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-01-29'
+  - Gem Ibbenbueren
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-31 10:48:46, 2023-04-14 12:17:00]') #< 1410 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-31 10:48:46, 2023-04-14 12:17:00]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-03-31 10:48:46, 2023-04-14 12:17:00]') WHERE g.name = 'Gem Doerentrup' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-31 10:48:46, 2023-04-14 12:17:00]') #< 1410 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-31 10:48:46, 2023-04-14 12:17:00]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-03-31 10:48:46'
+    - '2023-04-14 12:17:00'
+  - Gem Doerentrup
+  - 1410
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Rhein-Kreis Neuss' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-05-11 16:53:58, 2023-05-11 19:23:34]') AND eintersects(attime(f.trip, tstzspan '[2023-05-11 16:53:58, 2023-05-11 19:23:34]'), k.geom);
+  params:
+  - - '2023-05-11 16:53:58'
+    - '2023-05-11 19:23:34'
+  - Krs Rhein-Kreis Neuss
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Hoexter' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-09-18 17:01:35, 2023-09-18 19:50:49]') AND eintersects(attime(f.trip, tstzspan '[2023-09-18 17:01:35, 2023-09-18 19:50:49]'), k.geom);
+  params:
+  - - '2023-09-18 17:01:35'
+    - '2023-09-18 19:50:49'
+  - Krs Hoexter
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Paderborn' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-05-15 15:25:06, 2023-05-16 06:39:36]') AND eintersects(attime(f.trip, tstzspan '[2023-05-15 15:25:06, 2023-05-16 06:39:36]'), k.geom);
+  params:
+  - - '2023-05-15 15:25:06'
+    - '2023-05-16 06:39:36'
+  - Krs Paderborn
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-10-20 09:30:38, 2023-10-27 13:17:47]'), c.geom, 1.3179685949551592e-05) WHERE c.name = '119.37' AND f.trip && tstzspan '[2023-10-20 09:30:38, 2023-10-27 13:17:47]';
+  params:
+  - - '2023-10-20 09:30:38'
+    - '2023-10-27 13:17:47'
+  - '119.37'
+  - 1.3179685949551592e-05
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-09-22'::timestamp, DATE '2023-09-22' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Neunkirchen-Seelscheid' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-09-22'
+  - Gem Neunkirchen-Seelscheid
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-11-27'::timestamp, DATE '2023-11-27' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Boenen' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-11-27'
+  - Gem Boenen
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Oberhausen' AND f.trip && stbox(k.geom, tstzspan '[2023-10-09 04:19:46, 2023-10-21 01:30:48]') AND eintersects(attime(f.trip, tstzspan '[2023-10-09 04:19:46, 2023-10-21 01:30:48]'), k.geom);
+  params:
+  - - '2023-10-09 04:19:46'
+    - '2023-10-21 01:30:48'
+  - Krs Oberhausen
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Staedteregion Aachen' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-05-06 19:42:16, 2023-05-08 10:54:30]') AND eintersects(attime(f.trip, tstzspan '[2023-05-06 19:42:16, 2023-05-08 10:54:30]'), k.geom);
+  params:
+  - - '2023-05-06 19:42:16'
+    - '2023-05-08 10:54:30'
+  - Krs Staedteregion Aachen
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-12-20'::timestamp, DATE '2023-12-20' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Waltrop' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-12-20'
+  - Gem Waltrop
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Moenchengladbach' AND f.trip && stbox(k.geom, tstzspan '[2023-05-28 23:14:26, 2023-06-08 14:16:46]') AND eintersects(attime(f.trip, tstzspan '[2023-05-28 23:14:26, 2023-06-08 14:16:46]'), k.geom);
+  params:
+  - - '2023-05-28 23:14:26'
+    - '2023-06-08 14:16:46'
+  - Krs Moenchengladbach
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-06-11 08:34:33]') AND eintersects(attime(f.trip, timestamptz '[2023-06-11 08:34:33]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-06-11 08:34:33'
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-02-15'::timestamp, DATE '2023-02-15' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Wilnsdorf' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-02-15'
+  - Gem Wilnsdorf
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Mettmann' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-10-23 04:20:16, 2023-10-23 09:25:40]') AND eintersects(attime(f.trip, tstzspan '[2023-10-23 04:20:16, 2023-10-23 09:25:40]'), k.geom);
+  params:
+  - - '2023-10-23 04:20:16'
+    - '2023-10-23 09:25:40'
+  - Krs Mettmann
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Paderborn' AND f.trip && stbox(k.geom, tstzspan '[2023-05-01 00:10:38, 2023-05-04 22:36:44]') AND eintersects(attime(f.trip, tstzspan '[2023-05-01 00:10:38, 2023-05-04 22:36:44]'), k.geom);
+  params:
+  - - '2023-05-01 00:10:38'
+    - '2023-05-04 22:36:44'
+  - Krs Paderborn
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Euskirchen' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-03-18 07:27:10, 2023-03-18 11:47:54]') AND eintersects(attime(f.trip, tstzspan '[2023-03-18 07:27:10, 2023-03-18 11:47:54]'), k.geom);
+  params:
+  - - '2023-03-18 07:27:10'
+    - '2023-03-18 11:47:54'
+  - Krs Euskirchen
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-03-03 17:33:27]') AND eintersects(attime(f.trip, timestamptz '[2023-03-03 17:33:27]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-03-03 17:33:27'
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-09-03 08:47:39]') AND eintersects(attime(f.trip, timestamptz '[2023-09-03 08:47:39]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-09-03 08:47:39'
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-05-11 01:42:35]') AND eintersects(attime(f.trip, timestamptz '[2023-05-11 01:42:35]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-05-11 01:42:35'
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Coesfeld' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-11-08 04:55:13, 2023-11-08 13:05:45]') AND eintersects(attime(f.trip, tstzspan '[2023-11-08 04:55:13, 2023-11-08 13:05:45]'), k.geom);
+  params:
+  - - '2023-11-08 04:55:13'
+    - '2023-11-08 13:05:45'
+  - Krs Coesfeld
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Viersen' AND f.trip && stbox(k.geom, tstzspan '[2023-10-09 22:20:45, 2023-10-22 22:31:40]') AND eintersects(attime(f.trip, tstzspan '[2023-10-09 22:20:45, 2023-10-22 22:31:40]'), k.geom);
+  params:
+  - - '2023-10-09 22:20:45'
+    - '2023-10-22 22:31:40'
+  - Krs Viersen
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Soest' AND f.trip && stbox(k.geom, tstzspan '[2023-12-07 06:55:50, 2023-12-19 21:46:02]') AND eintersects(attime(f.trip, tstzspan '[2023-12-07 06:55:50, 2023-12-19 21:46:02]'), k.geom);
+  params:
+  - - '2023-12-07 06:55:50'
+    - '2023-12-19 21:46:02'
+  - Krs Soest
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-11-16'::timestamp, DATE '2023-11-16' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Ibbenbueren' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-11-16'
+  - Gem Ibbenbueren
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-06 22:28:21, 2023-11-12 20:30:04]') #< 1160 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-06 22:28:21, 2023-11-12 20:30:04]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-11-06 22:28:21, 2023-11-12 20:30:04]') WHERE g.name = 'Gem Dinslaken' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-06 22:28:21, 2023-11-12 20:30:04]') #< 1160 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-06 22:28:21, 2023-11-12 20:30:04]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-11-06 22:28:21'
+    - '2023-11-12 20:30:04'
+  - Gem Dinslaken
+  - 1160
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-04-16'::timestamp, DATE '2023-04-16' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Detmold' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-04-16'
+  - Gem Detmold
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-06-30 05:55:56, 2023-07-07 06:11:56]') #< 510 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-06-30 05:55:56, 2023-07-07 06:11:56]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-06-30 05:55:56, 2023-07-07 06:11:56]') WHERE g.name = 'Gem Vlotho' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-06-30 05:55:56, 2023-07-07 06:11:56]') #< 510 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-06-30 05:55:56, 2023-07-07 06:11:56]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-06-30 05:55:56'
+    - '2023-07-07 06:11:56'
+  - Gem Vlotho
+  - 510
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Koeln' AND f.trip && stbox(k.geom, tstzspan '[2023-12-15 18:08:07, 2023-12-17 22:08:14]') AND eintersects(attime(f.trip, tstzspan '[2023-12-15 18:08:07, 2023-12-17 22:08:14]'), k.geom);
+  params:
+  - - '2023-12-15 18:08:07'
+    - '2023-12-17 22:08:14'
+  - Krs Koeln
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-05-06 02:18:38]') AND eintersects(attime(f.trip, timestamptz '[2023-05-06 02:18:38]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-05-06 02:18:38'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Mettmann' AND f.trip && stbox(k.geom, tstzspan '[2023-03-12 23:07:00, 2023-03-25 07:32:25]') AND eintersects(attime(f.trip, tstzspan '[2023-03-12 23:07:00, 2023-03-25 07:32:25]'), k.geom);
+  params:
+  - - '2023-03-12 23:07:00'
+    - '2023-03-25 07:32:25'
+  - Krs Mettmann
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Muelheim a.d. Ruhr' AND f.trip && stbox(k.geom, tstzspan '[2023-01-01 00:00:01, 2023-01-11 04:46:30]') AND eintersects(attime(f.trip, tstzspan '[2023-01-01 00:00:01, 2023-01-11 04:46:30]'), k.geom);
+  params:
+  - - '2023-01-01 00:00:01'
+    - '2023-01-11 04:46:30'
+  - Krs Muelheim a.d. Ruhr
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-03-18'::timestamp, DATE '2023-03-18' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Brueggen' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-03-18'
+  - Gem Brueggen
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-08-21 02:47:52, 2023-08-26 01:15:37]'), c.geom, 3.3070385911630045e-06) WHERE c.name = '56.2' AND f.trip && tstzspan '[2023-08-21 02:47:52, 2023-08-26 01:15:37]';
+  params:
+  - - '2023-08-21 02:47:52'
+    - '2023-08-26 01:15:37'
+  - '56.2'
+  - 3.3070385911630045e-06
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-02-05 18:44:03, 2023-02-17 14:56:08]'), c.geom, 9.451848878856805e-06) WHERE c.name = '71.36' AND f.trip && tstzspan '[2023-02-05 18:44:03, 2023-02-17 14:56:08]';
+  params:
+  - - '2023-02-05 18:44:03'
+    - '2023-02-17 14:56:08'
+  - '71.36'
+  - 9.451848878856805e-06
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-09-01 20:07:32]') AND eintersects(attime(f.trip, timestamptz '[2023-09-01 20:07:32]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-09-01 20:07:32'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Leverkusen' AND f.trip && stbox(k.geom, tstzspan '[2023-11-23 03:58:53, 2023-11-30 07:46:56]') AND eintersects(attime(f.trip, tstzspan '[2023-11-23 03:58:53, 2023-11-30 07:46:56]'), k.geom);
+  params:
+  - - '2023-11-23 03:58:53'
+    - '2023-11-30 07:46:56'
+  - Krs Leverkusen
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-11-20 19:31:17]') AND eintersects(attime(f.trip, timestamptz '[2023-11-20 19:31:17]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-11-20 19:31:17'
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-01-14'::timestamp, DATE '2023-01-14' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Ennepetal' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-01-14'
+  - Gem Ennepetal
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Oberbergischer Kreis' AND f.trip && stbox(k.geom, tstzspan '[2023-06-25 07:23:56, 2023-07-02 05:52:25]') AND eintersects(attime(f.trip, tstzspan '[2023-06-25 07:23:56, 2023-07-02 05:52:25]'), k.geom);
+  params:
+  - - '2023-06-25 07:23:56'
+    - '2023-07-02 05:52:25'
+  - Krs Oberbergischer Kreis
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-04-22 10:01:53, 2023-04-26 03:49:44]'), c.geom, 1.091480540101828e-05) WHERE c.name = '95.3' AND f.trip && tstzspan '[2023-04-22 10:01:53, 2023-04-26 03:49:44]';
+  params:
+  - - '2023-04-22 10:01:53'
+    - '2023-04-26 03:49:44'
+  - '95.3'
+  - 1.091480540101828e-05
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-09-20 20:32:38]') AND eintersects(attime(f.trip, timestamptz '[2023-09-20 20:32:38]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-09-20 20:32:38'
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Oberbergischer Kreis' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-03-11 04:40:01, 2023-03-12 11:40:09]') AND eintersects(attime(f.trip, tstzspan '[2023-03-11 04:40:01, 2023-03-12 11:40:09]'), k.geom);
+  params:
+  - - '2023-03-11 04:40:01'
+    - '2023-03-12 11:40:09'
+  - Krs Oberbergischer Kreis
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-12-21 08:07:30, 2023-12-30 21:12:31]') #< 1470 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-12-21 08:07:30, 2023-12-30 21:12:31]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-12-21 08:07:30, 2023-12-30 21:12:31]') WHERE g.name = 'Gem Hattingen' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-12-21 08:07:30, 2023-12-30 21:12:31]') #< 1470 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-12-21 08:07:30, 2023-12-30 21:12:31]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-12-21 08:07:30'
+    - '2023-12-30 21:12:31'
+  - Gem Hattingen
+  - 1470
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-27 03:42:30, 2023-12-04 10:41:13]') #< 500 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-27 03:42:30, 2023-12-04 10:41:13]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-11-27 03:42:30, 2023-12-04 10:41:13]') WHERE g.name = 'Gem Nachrodt-Wiblingwerde' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-27 03:42:30, 2023-12-04 10:41:13]') #< 500 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-27 03:42:30, 2023-12-04 10:41:13]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-11-27 03:42:30'
+    - '2023-12-04 10:41:13'
+  - Gem Nachrodt-Wiblingwerde
+  - 500
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Dueren' AND f.trip && stbox(k.geom, tstzspan '[2023-01-26 07:23:10, 2023-02-09 15:11:39]') AND eintersects(attime(f.trip, tstzspan '[2023-01-26 07:23:10, 2023-02-09 15:11:39]'), k.geom);
+  params:
+  - - '2023-01-26 07:23:10'
+    - '2023-02-09 15:11:39'
+  - Krs Dueren
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Mettmann' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-09-02 06:50:56, 2023-09-02 09:36:47]') AND eintersects(attime(f.trip, tstzspan '[2023-09-02 06:50:56, 2023-09-02 09:36:47]'), k.geom);
+  params:
+  - - '2023-09-02 06:50:56'
+    - '2023-09-02 09:36:47'
+  - Krs Mettmann
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-04 13:30:58, 2023-03-18 09:05:59]') #< 1390 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-04 13:30:58, 2023-03-18 09:05:59]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-03-04 13:30:58, 2023-03-18 09:05:59]') WHERE g.name = 'Gem Kevelaer' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-04 13:30:58, 2023-03-18 09:05:59]') #< 1390 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-04 13:30:58, 2023-03-18 09:05:59]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-03-04 13:30:58'
+    - '2023-03-18 09:05:59'
+  - Gem Kevelaer
+  - 1390
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-17 09:30:19, 2023-10-29 18:20:38]') #< 940 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-17 09:30:19, 2023-10-29 18:20:38]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-10-17 09:30:19, 2023-10-29 18:20:38]') WHERE g.name = 'Gem Bottrop' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-17 09:30:19, 2023-10-29 18:20:38]') #< 940 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-17 09:30:19, 2023-10-29 18:20:38]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-10-17 09:30:19'
+    - '2023-10-29 18:20:38'
+  - Gem Bottrop
+  - 940
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-13 17:01:29, 2023-11-19 22:52:56]') #< 1050 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-13 17:01:29, 2023-11-19 22:52:56]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-11-13 17:01:29, 2023-11-19 22:52:56]') WHERE g.name = 'Gem Remscheid' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-13 17:01:29, 2023-11-19 22:52:56]') #< 1050 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-13 17:01:29, 2023-11-19 22:52:56]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-11-13 17:01:29'
+    - '2023-11-19 22:52:56'
+  - Gem Remscheid
+  - 1050
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-02-06 15:41:23]') AND eintersects(attime(f.trip, timestamptz '[2023-02-06 15:41:23]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-02-06 15:41:23'
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-05-18 04:07:29, 2023-05-21 23:59:38]') #< 520 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-05-18 04:07:29, 2023-05-21 23:59:38]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-05-18 04:07:29, 2023-05-21 23:59:38]') WHERE g.name = 'Gem Lichtenau' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-05-18 04:07:29, 2023-05-21 23:59:38]') #< 520 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-05-18 04:07:29, 2023-05-21 23:59:38]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-05-18 04:07:29'
+    - '2023-05-21 23:59:38'
+  - Gem Lichtenau
+  - 520
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-02-22 18:57:24, 2023-03-03 20:18:10]'), c.geom, 1.311855248128993e-05) WHERE c.name = '32.23' AND f.trip && tstzspan '[2023-02-22 18:57:24, 2023-03-03 20:18:10]';
+  params:
+  - - '2023-02-22 18:57:24'
+    - '2023-03-03 20:18:10'
+  - '32.23'
+  - 1.311855248128993e-05
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-04-12'::timestamp, DATE '2023-04-12' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Bueren' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-04-12'
+  - Gem Bueren
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Rheinisch-Bergischer Kreis' AND f.trip && stbox(k.geom, tstzspan '[2023-03-12 04:49:59, 2023-03-16 09:28:24]') AND eintersects(attime(f.trip, tstzspan '[2023-03-12 04:49:59, 2023-03-16 09:28:24]'), k.geom);
+  params:
+  - - '2023-03-12 04:49:59'
+    - '2023-03-16 09:28:24'
+  - Krs Rheinisch-Bergischer Kreis
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-11-08'::timestamp, DATE '2023-11-08' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Brilon' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-11-08'
+  - Gem Brilon
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Steinfurt' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-08-17 16:53:44, 2023-08-19 00:52:37]') AND eintersects(attime(f.trip, tstzspan '[2023-08-17 16:53:44, 2023-08-19 00:52:37]'), k.geom);
+  params:
+  - - '2023-08-17 16:53:44'
+    - '2023-08-19 00:52:37'
+  - Krs Steinfurt
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-12-30'::timestamp, DATE '2023-12-30' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Sundern (Sauerland)' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-12-30'
+  - Gem Sundern (Sauerland)
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-04-05'::timestamp, DATE '2023-04-05' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Tecklenburg' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-04-05'
+  - Gem Tecklenburg
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Bielefeld' AND f.trip && stbox(k.geom, tstzspan '[2023-01-14 20:08:47, 2023-01-27 13:11:05]') AND eintersects(attime(f.trip, tstzspan '[2023-01-14 20:08:47, 2023-01-27 13:11:05]'), k.geom);
+  params:
+  - - '2023-01-14 20:08:47'
+    - '2023-01-27 13:11:05'
+  - Krs Bielefeld
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Rheinisch-Bergischer Kreis' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-01-21 07:13:23, 2023-01-21 13:25:16]') AND eintersects(attime(f.trip, tstzspan '[2023-01-21 07:13:23, 2023-01-21 13:25:16]'), k.geom);
+  params:
+  - - '2023-01-21 07:13:23'
+    - '2023-01-21 13:25:16'
+  - Krs Rheinisch-Bergischer Kreis
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-01-01 09:56:19, 2023-01-09 18:44:15]'), c.geom, 1.2110663620221496e-05) WHERE c.name = '68.8' AND f.trip && tstzspan '[2023-01-01 09:56:19, 2023-01-09 18:44:15]';
+  params:
+  - - '2023-01-01 09:56:19'
+    - '2023-01-09 18:44:15'
+  - '68.8'
+  - 1.2110663620221496e-05
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-10-12 05:42:51]') AND eintersects(attime(f.trip, timestamptz '[2023-10-12 05:42:51]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-10-12 05:42:51'
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-08-14'::timestamp, DATE '2023-08-14' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Bad Berleburg' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-08-14'
+  - Gem Bad Berleburg
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Hoexter' AND f.trip && stbox(k.geom, tstzspan '[2023-06-15 07:56:20, 2023-06-28 23:51:26]') AND eintersects(attime(f.trip, tstzspan '[2023-06-15 07:56:20, 2023-06-28 23:51:26]'), k.geom);
+  params:
+  - - '2023-06-15 07:56:20'
+    - '2023-06-28 23:51:26'
+  - Krs Hoexter
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-06-07 21:01:33, 2023-06-14 08:08:38]'), c.geom, 1.2058468100136986e-05) WHERE c.name = '152.6' AND f.trip && tstzspan '[2023-06-07 21:01:33, 2023-06-14 08:08:38]';
+  params:
+  - - '2023-06-07 21:01:33'
+    - '2023-06-14 08:08:38'
+  - '152.6'
+  - 1.2058468100136986e-05
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-06-21 02:07:41, 2023-06-23 19:17:14]') #< 770 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-06-21 02:07:41, 2023-06-23 19:17:14]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-06-21 02:07:41, 2023-06-23 19:17:14]') WHERE g.name = 'Gem Extertal' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-06-21 02:07:41, 2023-06-23 19:17:14]') #< 770 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-06-21 02:07:41, 2023-06-23 19:17:14]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-06-21 02:07:41'
+    - '2023-06-23 19:17:14'
+  - Gem Extertal
+  - 770
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-01-10'::timestamp, DATE '2023-01-10' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Sassenberg' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-01-10'
+  - Gem Sassenberg
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Dueren' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-10-23 10:23:58, 2023-10-23 18:29:47]') AND eintersects(attime(f.trip, tstzspan '[2023-10-23 10:23:58, 2023-10-23 18:29:47]'), k.geom);
+  params:
+  - - '2023-10-23 10:23:58'
+    - '2023-10-23 18:29:47'
+  - Krs Dueren
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-07-01 14:34:05, 2023-07-16 09:08:09]'), c.geom, 9.502622948110556e-06) WHERE c.name = '61.27' AND f.trip && tstzspan '[2023-07-01 14:34:05, 2023-07-16 09:08:09]';
+  params:
+  - - '2023-07-01 14:34:05'
+    - '2023-07-16 09:08:09'
+  - '61.27'
+  - 9.502622948110556e-06
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-04-23 18:11:28, 2023-04-29 08:35:56]') #< 780 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-04-23 18:11:28, 2023-04-29 08:35:56]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-04-23 18:11:28, 2023-04-29 08:35:56]') WHERE g.name = 'Gem Arnsberg' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-04-23 18:11:28, 2023-04-29 08:35:56]') #< 780 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-04-23 18:11:28, 2023-04-29 08:35:56]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-04-23 18:11:28'
+    - '2023-04-29 08:35:56'
+  - Gem Arnsberg
+  - 780
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-07-27'::timestamp, DATE '2023-07-27' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Lohmar' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-07-27'
+  - Gem Lohmar
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-08-03 07:22:01, 2023-08-13 11:03:17]') #< 810 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-08-03 07:22:01, 2023-08-13 11:03:17]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-08-03 07:22:01, 2023-08-13 11:03:17]') WHERE g.name = 'Gem Wadersloh' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-08-03 07:22:01, 2023-08-13 11:03:17]') #< 810 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-08-03 07:22:01, 2023-08-13 11:03:17]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-08-03 07:22:01'
+    - '2023-08-13 11:03:17'
+  - Gem Wadersloh
+  - 810
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-12 03:47:28, 2023-10-16 11:24:46]') #< 1470 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-12 03:47:28, 2023-10-16 11:24:46]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-10-12 03:47:28, 2023-10-16 11:24:46]') WHERE g.name = 'Gem Ostbevern' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-10-12 03:47:28, 2023-10-16 11:24:46]') #< 1470 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-10-12 03:47:28, 2023-10-16 11:24:46]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-10-12 03:47:28'
+    - '2023-10-16 11:24:46'
+  - Gem Ostbevern
+  - 1470
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Koeln' AND f.trip && stbox(k.geom, tstzspan '[2023-12-16 07:07:40, 2023-12-20 08:29:58]') AND eintersects(attime(f.trip, tstzspan '[2023-12-16 07:07:40, 2023-12-20 08:29:58]'), k.geom);
+  params:
+  - - '2023-12-16 07:07:40'
+    - '2023-12-20 08:29:58'
+  - Krs Koeln
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-03-08 07:05:05, 2023-03-11 04:09:10]'), c.geom, 6.861501821089837e-06) WHERE c.name = '78.08' AND f.trip && tstzspan '[2023-03-08 07:05:05, 2023-03-11 04:09:10]';
+  params:
+  - - '2023-03-08 07:05:05'
+    - '2023-03-11 04:09:10'
+  - '78.08'
+  - 6.861501821089837e-06
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-06-01 07:03:33, 2023-06-14 02:13:54]'), c.geom, 5.755092689297934e-06) WHERE c.name = '45.11' AND f.trip && tstzspan '[2023-06-01 07:03:33, 2023-06-14 02:13:54]';
+  params:
+  - - '2023-06-01 07:03:33'
+    - '2023-06-14 02:13:54'
+  - '45.11'
+  - 5.755092689297934e-06
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-03-14 15:51:04]') AND eintersects(attime(f.trip, timestamptz '[2023-03-14 15:51:04]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-03-14 15:51:04'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-11-20 15:04:26, 2023-11-25 03:33:26]'), c.geom, 1.0928547218652288e-05) WHERE c.name = '145.4' AND f.trip && tstzspan '[2023-11-20 15:04:26, 2023-11-25 03:33:26]';
+  params:
+  - - '2023-11-20 15:04:26'
+    - '2023-11-25 03:33:26'
+  - '145.4'
+  - 1.0928547218652288e-05
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-01-06 08:57:45, 2023-01-16 05:15:07]') #< 1290 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-01-06 08:57:45, 2023-01-16 05:15:07]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-01-06 08:57:45, 2023-01-16 05:15:07]') WHERE g.name = 'Gem Arnsberg' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-01-06 08:57:45, 2023-01-16 05:15:07]') #< 1290 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-01-06 08:57:45, 2023-01-16 05:15:07]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-01-06 08:57:45'
+    - '2023-01-16 05:15:07'
+  - Gem Arnsberg
+  - 1290
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Coesfeld' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-07-10 12:18:31, 2023-07-11 00:54:32]') AND eintersects(attime(f.trip, tstzspan '[2023-07-10 12:18:31, 2023-07-11 00:54:32]'), k.geom);
+  params:
+  - - '2023-07-10 12:18:31'
+    - '2023-07-11 00:54:32'
+  - Krs Coesfeld
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-04-17 12:54:51, 2023-04-26 13:07:47]') #< 1140 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-04-17 12:54:51, 2023-04-26 13:07:47]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-04-17 12:54:51, 2023-04-26 13:07:47]') WHERE g.name = 'Gem Erkrath' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-04-17 12:54:51, 2023-04-26 13:07:47]') #< 1140 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-04-17 12:54:51, 2023-04-26 13:07:47]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-04-17 12:54:51'
+    - '2023-04-26 13:07:47'
+  - Gem Erkrath
+  - 1140
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-03-07 02:12:47]') AND eintersects(attime(f.trip, timestamptz '[2023-03-07 02:12:47]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-03-07 02:12:47'
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Hamm' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-07-20 12:35:03, 2023-07-21 17:13:58]') AND eintersects(attime(f.trip, tstzspan '[2023-07-20 12:35:03, 2023-07-21 17:13:58]'), k.geom);
+  params:
+  - - '2023-07-20 12:35:03'
+    - '2023-07-21 17:13:58'
+  - Krs Hamm
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-07-25'::timestamp, DATE '2023-07-25' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Leverkusen' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-07-25'
+  - Gem Leverkusen
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-10-20 20:54:37, 2023-10-26 03:57:16]'), c.geom, 6.929336193554529e-06) WHERE c.name = '76.24' AND f.trip && tstzspan '[2023-10-20 20:54:37, 2023-10-26 03:57:16]';
+  params:
+  - - '2023-10-20 20:54:37'
+    - '2023-10-26 03:57:16'
+  - '76.24'
+  - 6.929336193554529e-06
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Solingen' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-03-20 11:59:02, 2023-03-20 12:55:28]') AND eintersects(attime(f.trip, tstzspan '[2023-03-20 11:59:02, 2023-03-20 12:55:28]'), k.geom);
+  params:
+  - - '2023-03-20 11:59:02'
+    - '2023-03-20 12:55:28'
+  - Krs Solingen
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-02-01 12:49:19]') AND eintersects(attime(f.trip, timestamptz '[2023-02-01 12:49:19]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-02-01 12:49:19'
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Remscheid' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-01-24 09:27:41, 2023-01-24 15:25:01]') AND eintersects(attime(f.trip, tstzspan '[2023-01-24 09:27:41, 2023-01-24 15:25:01]'), k.geom);
+  params:
+  - - '2023-01-24 09:27:41'
+    - '2023-01-24 15:25:01'
+  - Krs Remscheid
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-09-22 22:57:56, 2023-10-06 16:49:01]'), c.geom, 8.886270072411149e-06) WHERE c.name = '80.11' AND f.trip && tstzspan '[2023-09-22 22:57:56, 2023-10-06 16:49:01]';
+  params:
+  - - '2023-09-22 22:57:56'
+    - '2023-10-06 16:49:01'
+  - '80.11'
+  - 8.886270072411149e-06
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-08-20 13:24:37, 2023-08-29 14:28:06]'), c.geom, 7.468295977236811e-06) WHERE c.name = '73.79' AND f.trip && tstzspan '[2023-08-20 13:24:37, 2023-08-29 14:28:06]';
+  params:
+  - - '2023-08-20 13:24:37'
+    - '2023-08-29 14:28:06'
+  - '73.79'
+  - 7.468295977236811e-06
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Unna' AND f.trip && stbox(k.geom, tstzspan '[2023-01-01 00:00:01, 2023-01-09 23:04:12]') AND eintersects(attime(f.trip, tstzspan '[2023-01-01 00:00:01, 2023-01-09 23:04:12]'), k.geom);
+  params:
+  - - '2023-01-01 00:00:01'
+    - '2023-01-09 23:04:12'
+  - Krs Unna
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-04-20 02:30:48, 2023-04-23 15:44:10]') #< 660 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-04-20 02:30:48, 2023-04-23 15:44:10]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-04-20 02:30:48, 2023-04-23 15:44:10]') WHERE g.name = 'Gem Hennef (Sieg)' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-04-20 02:30:48, 2023-04-23 15:44:10]') #< 660 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-04-20 02:30:48, 2023-04-23 15:44:10]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-04-20 02:30:48'
+    - '2023-04-23 15:44:10'
+  - Gem Hennef (Sieg)
+  - 660
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-06-05 13:37:52]') AND eintersects(attime(f.trip, timestamptz '[2023-06-05 13:37:52]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-06-05 13:37:52'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-07-30 14:46:35, 2023-08-04 18:30:06]'), c.geom, 7.264520718508448e-06) WHERE c.name = '27.82' AND f.trip && tstzspan '[2023-07-30 14:46:35, 2023-08-04 18:30:06]';
+  params:
+  - - '2023-07-30 14:46:35'
+    - '2023-08-04 18:30:06'
+  - '27.82'
+  - 7.264520718508448e-06
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-03-06 05:28:28]') AND eintersects(attime(f.trip, timestamptz '[2023-03-06 05:28:28]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-03-06 05:28:28'
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-12-11'::timestamp, DATE '2023-12-11' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Gladbeck' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-12-11'
+  - Gem Gladbeck
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-08-05 09:41:49, 2023-08-14 23:50:20]') #< 890 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-08-05 09:41:49, 2023-08-14 23:50:20]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-08-05 09:41:49, 2023-08-14 23:50:20]') WHERE g.name = 'Gem Goch' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-08-05 09:41:49, 2023-08-14 23:50:20]') #< 890 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-08-05 09:41:49, 2023-08-14 23:50:20]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-08-05 09:41:49'
+    - '2023-08-14 23:50:20'
+  - Gem Goch
+  - 890
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightid FROM flights f, counties k WHERE k.name = 'Krs Minden-Luebbecke' AND f.trip && stbox(k.geom, tstzspan '[2023-01-08 09:46:04, 2023-01-17 05:51:30]') AND eintersects(attime(f.trip, tstzspan '[2023-01-08 09:46:04, 2023-01-17 05:51:30]'), k.geom);
+  params:
+  - - '2023-01-08 09:46:04'
+    - '2023-01-17 05:51:30'
+  - Krs Minden-Luebbecke
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-05-10 23:05:12]') AND eintersects(attime(f.trip, timestamptz '[2023-05-10 23:05:12]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-05-10 23:05:12'
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-20 06:41:49, 2023-03-29 07:02:12]') #< 930 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-20 06:41:49, 2023-03-29 07:02:12]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-03-20 06:41:49, 2023-03-29 07:02:12]') WHERE g.name = 'Gem Bad Wuennenberg' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-20 06:41:49, 2023-03-29 07:02:12]') #< 930 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-20 06:41:49, 2023-03-29 07:02:12]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-03-20 06:41:49'
+    - '2023-03-29 07:02:12'
+  - Gem Bad Wuennenberg
+  - 930
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-12-06 19:40:17, 2023-12-17 11:58:38]'), c.geom, 8.111284510825829e-06) WHERE c.name = '157.91' AND f.trip && tstzspan '[2023-12-06 19:40:17, 2023-12-17 11:58:38]';
+  params:
+  - - '2023-12-06 19:40:17'
+    - '2023-12-17 11:58:38'
+  - '157.91'
+  - 8.111284510825829e-06
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Staedteregion Aachen' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-12-04 00:15:31, 2023-12-04 07:37:36]') AND eintersects(attime(f.trip, tstzspan '[2023-12-04 00:15:31, 2023-12-04 07:37:36]'), k.geom);
+  params:
+  - - '2023-12-04 00:15:31'
+    - '2023-12-04 07:37:36'
+  - Krs Staedteregion Aachen
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-01 08:48:13, 2023-11-15 09:58:50]') #< 610 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-01 08:48:13, 2023-11-15 09:58:50]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-11-01 08:48:13, 2023-11-15 09:58:50]') WHERE g.name = 'Gem Bottrop' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-11-01 08:48:13, 2023-11-15 09:58:50]') #< 610 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-11-01 08:48:13, 2023-11-15 09:58:50]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-11-01 08:48:13'
+    - '2023-11-15 09:58:50'
+  - Gem Bottrop
+  - 610
+- name: countFlightsAtInstantInDistricts
+  type: spatiotemporal
+  sql: |
+    SELECT b.name, COUNT (*) FROM flights f, districts b WHERE f.trip && stbox(b.geom, timestamptz '[2023-08-30 21:33:28]') AND eintersects(attime(f.trip, timestamptz '[2023-08-30 21:33:28]'), b.geom) GROUP BY b.name;
+  params:
+  - '2023-08-30 21:33:28'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-01-25 00:34:22, 2023-02-02 15:34:02]'), c.geom, 3.646379543339476e-06) WHERE c.name = '65.5' AND f.trip && tstzspan '[2023-01-25 00:34:22, 2023-02-02 15:34:02]';
+  params:
+  - - '2023-01-25 00:34:22'
+    - '2023-02-02 15:34:02'
+  - '65.5'
+  - 3.646379543339476e-06
+- name: flightsWithLocalOriginDestinationInPeriodInCounty
+  type: spatiotemporal
+  sql: |
+    WITH relevant_airports AS ( SELECT a.icao as icao FROM airports a JOIN cities c ON a.city = c.name ) SELECT f.flightid, f.airplanetype, f.origin AS origin_airport, a1.City AS origin_city, f.destination AS destination_airport, a2.City AS destination_city FROM flights f JOIN counties k ON k.name = 'Krs Borken' LEFT JOIN airports a1 ON f.origin = a1.icao LEFT JOIN airports a2 ON f.destination = a2.icao WHERE (f.origin IN (SELECT icao FROM relevant_airports) OR f.destination IN (SELECT icao FROM relevant_airports)) AND f.trip && stbox(k.geom, tstzspan '[2023-11-05 16:38:32, 2023-11-05 22:50:24]') AND eintersects(attime(f.trip, tstzspan '[2023-11-05 16:38:32, 2023-11-05 22:50:24]'), k.geom);
+  params:
+  - - '2023-11-05 16:38:32'
+    - '2023-11-05 22:50:24'
+  - Krs Borken
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-04-27'::timestamp, DATE '2023-04-27' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Werne' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-04-27'
+  - Gem Werne
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-31 12:05:30, 2023-04-10 02:17:10]') #< 850 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-31 12:05:30, 2023-04-10 02:17:10]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-03-31 12:05:30, 2023-04-10 02:17:10]') WHERE g.name = 'Gem Wassenberg' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-03-31 12:05:30, 2023-04-10 02:17:10]') #< 850 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-03-31 12:05:30, 2023-04-10 02:17:10]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-03-31 12:05:30'
+    - '2023-04-10 02:17:10'
+  - Gem Wassenberg
+  - 850
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, tstzspan '[2023-04-02 14:12:50, 2023-04-14 03:58:52]'), c.geom, 1.3085498191196378e-05) WHERE c.name = '80.78' AND f.trip && tstzspan '[2023-04-02 14:12:50, 2023-04-14 03:58:52]';
+  params:
+  - - '2023-04-02 14:12:50'
+    - '2023-04-14 03:58:52'
+  - '80.78'
+  - 1.3085498191196378e-05
+- name: averageHourlyFlightsDuringDayInMunicipality
+  type: spatiotemporal
+  sql: |
+    WITH hours AS ( SELECT generate_series( DATE '2023-11-24'::timestamp, DATE '2023-11-24' + INTERVAL '1 day' - INTERVAL '1 second', INTERVAL '1 hour') AS start_time) SELECT h.start_time, COUNT(f.flightid) AS active_flights FROM hours h JOIN municipalities g ON g.name = 'Gem Grevenbroich' LEFT JOIN flights f ON eintersects(attime(f.trip, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')), g.geom) WHERE f.trip && stbox(g.geom, span(h.start_time, h.start_time + INTERVAL '1 hour' - INTERVAL '1 second')) GROUP BY h.start_time ORDER BY h.start_time;
+  params:
+  - '2023-11-24'
+  - Gem Grevenbroich
+- name: flightDurationInMunicipalityLowAltitudeInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT g.name, f.flightid, f.origin, f.destination, f.airplanetype, duration(whenTrue(attime(f.altitude, tstzspan '[2023-05-27 23:08:14, 2023-06-04 09:40:44]') #< 860 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-05-27 23:08:14, 2023-06-04 09:40:44]'), geometry(g.geom)))) AS totalTimeBelowAltitude FROM municipalities g JOIN flights f ON f.trip && stbox(g.geom, tstzspan '[2023-05-27 23:08:14, 2023-06-04 09:40:44]') WHERE g.name = 'Gem Espelkamp' AND duration(whenTrue(attime(f.altitude, tstzspan '[2023-05-27 23:08:14, 2023-06-04 09:40:44]') #< 860 & tintersects(attime(tgeompoint(f.trip), tstzspan '[2023-05-27 23:08:14, 2023-06-04 09:40:44]'), geometry(g.geom)))) IS NOT NULL;
+  params:
+  - - '2023-05-27 23:08:14'
+    - '2023-06-04 09:40:44'
+  - Gem Espelkamp
+  - 860
