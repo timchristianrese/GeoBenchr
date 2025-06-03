@@ -5,6 +5,15 @@ import csv
 import os
 import yaml
 from dataclasses import dataclass
+import yaml
+from yaml.representer import SafeRepresenter
+import re
+class LiteralString(str): pass
+
+def literal_str_representer(dumper, data):
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+
+yaml.add_representer(LiteralString, literal_str_representer)
 
 @dataclass
 class QueryTask:
@@ -25,6 +34,7 @@ def return_param_values(sql, params, rnd) -> List[Any]:
     parsedSQL = sql
     values = []
     formatter = "%Y-%m-%d %H:%M:%S"  # Default formatter for datetime
+
     for param in params:
         replacement = {
             "period_short": lambda: generate_random_time_span(rnd, 2023, mode=1),
@@ -44,10 +54,26 @@ def return_param_values(sql, params, rnd) -> List[Any]:
         }.get(param, lambda: "")()
 
         if replacement is not None:
+            # Quote strings and timestamps
+            if isinstance(replacement, str):
+                quoted = f"'{replacement}'"
+            elif isinstance(replacement, list):
+                # Handle time periods (start, end timestamps)
+                quoted = ", ".join([f"'{ts}'" for ts in replacement])
+                quoted = f"[{quoted}]"  # For array-style SQL functions like attime()
+            elif isinstance(replacement, (int, float)):
+                quoted = str(replacement)
+            elif isinstance(replacement, list) and all(isinstance(x, (int, float)) for x in replacement):
+                # coordinates or similar
+                quoted = f"ARRAY{replacement}"
+            else:
+                quoted = str(replacement)
+
             values.append(replacement)
-            parsedSQL = parsedSQL.replace(f":{param}", f"{replacement}")
+            parsedSQL = parsedSQL.replace(f":{param}", quoted)
 
     return parsedSQL, values
+
 
 def get_random_point(rnd: random.Random, rectangle: List[List[float]]) -> List[float]:
     upper_left_lon, upper_left_lat = rectangle[0]
@@ -116,23 +142,36 @@ def get_random_place(filename: str, rnd: random.Random) -> Optional[str]:
         return None
 
 
+def convert_to_tstzspan(match):
+    ts1 = match.group(1)
+    ts2 = match.group(2)
+    return f"tstzspan '[{ts1}, {ts2}]'"
+
+def convert_to_timestamptz(match):
+    ts = match.group(1)
+    return f"timestamptz '[{ts}]'"
+
+
+
 def prepare_query_tasks(config, rnd):
     all_queries = []
-    
+
     for query_config in config['queryConfigs']:
         if query_config['use']:
             for _ in range(query_config['repetition']):
-                print(f"Generating query {query_config['name']} of type {query_config['type']}")
-                print(f"Using SQL: {query_config['sql']}")
                 sql, values = return_param_values(
                     query_config['sql'],
                     query_config['parameters'],
-                    rnd, 
+                    rnd,
                 )
+                pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
+                pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
+                sql = re.sub(pattern, convert_to_tstzspan, sql)
+                sql = re.sub(pattern_single, convert_to_timestamptz, sql)
                 all_queries.append(QueryTask(
                     name=query_config['name'],
                     type=query_config['type'],
-                    sql=sql,
+                    sql=LiteralString(sql),  # 👈 Ensures clean multiline SQL
                     params=values
                 ))
 
@@ -140,7 +179,6 @@ def prepare_query_tasks(config, rnd):
         random.shuffle(all_queries)
 
     return all_queries
-
 
 #main function
 if __name__ == "__main__":
@@ -174,13 +212,19 @@ if __name__ == "__main__":
 
     all_queries = prepare_query_tasks(config, main_random)
     #print the first query
-    print("First query:")
-    print(all_queries[0])
     #shuffle the order of the queries
     random.shuffle(all_queries)
     data = [query.__dict__ for query in all_queries]
 
 # Write to YAML file
-    with open("../queries/queries.yaml", "w") as file:
+    with open("../queries/mobilitydb_queries.yaml", "w") as file:
         yaml.dump(data, file, sort_keys=False, allow_unicode=True)
-    #return all_queries
+        #remove all brackets [] from the file
+    # with open("../queries/queries.yaml", "r") as file:
+    #     content = file.read()
+    #     content = content.replace('[', '').replace(']', '')
+    # with open("../queries/queries.yaml", "w") as file:
+    #     file.write(content)
+    # print("Queries written to ../queries/queries.yaml")
+    # #return all_queries
+    #rep

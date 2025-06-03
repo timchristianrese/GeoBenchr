@@ -1,0 +1,153 @@
+#!/bin/bash
+system=$1
+application=$2
+if [ "$system" == "mobilitydb" ]; then
+    echo "Loading data into mobilitydb"
+# Set PostgreSQL connection parameters
+    DB_NAME="postgres"
+    DB_USER="postgres"
+    DB_HOST="localhost"
+    if [ "$application" == "aviation" ]; then
+        psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
+        -- Enable required extensions
+        CREATE EXTENSION IF NOT EXISTS postgis;
+        CREATE EXTENSION IF NOT EXISTS mobilitydb;
+
+        CREATE TABLE flight_points (
+            flightid       BIGINT,
+            airplanetype  TEXT,
+            origin         TEXT,
+            destination    TEXT,
+            geom           GEOGRAPHY(Point, 4326),
+            timestamp            TIMESTAMP,
+            altitude       FLOAT
+        );
+
+        CREATE TABLE IF NOT EXISTS flights (
+            flightid BIGINT,
+            airplanetype TEXT,
+            origin TEXT,
+            destination TEXT,
+            altitude tfloat,
+            trip tgeogpoint
+        );
+
+        CREATE TABLE airports (
+            iata       TEXT,
+            icao       TEXT,
+            name       TEXT,
+            country    TEXT,
+            city       TEXT
+        );
+
+        CREATE TABLE cities (
+            area        FLOAT,
+            latitude    FLOAT,
+            longitude   FLOAT,
+            district    TEXT,
+            name        TEXT,
+            population  INTEGER,
+            geom        GEOGRAPHY(Point, 4326) GENERATED ALWAYS AS (
+                ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)
+            ) STORED
+        );
+        CREATE TABLE counties (
+            name     TEXT,
+            geom  GEOGRAPHY(Polygon, 4326)
+        );
+
+        CREATE TABLE districts (
+            name     TEXT,
+            geom  GEOGRAPHY(Polygon, 4326)
+        );
+
+        CREATE TABLE municipalities (
+            name     TEXT,
+            geom  GEOGRAPHY(Polygon, 4326)
+        );
+EOF
+        psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
+        \copy cities FROM '/home/tim/data/aviation/resources/cities.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+EOF
+        
+
+        for table in counties districts municipalities; do
+            echo "Loading $table..."
+            psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
+        CREATE TABLE IF NOT EXISTS temp_${table}_raw (
+            name TEXT,
+            wkt TEXT
+        );
+        \copy temp_${table}_raw(name, wkt) FROM '/home/tim/data/aviation/resources/${table}-wkt.csv' WITH (FORMAT csv, DELIMITER ';', HEADER true)
+
+        -- Insert parsed WKT into final table
+        INSERT INTO ${table} (name, geom)
+        SELECT name, ST_GeomFromText(wkt, 4326) FROM temp_${table}_raw;
+
+        DROP TABLE IF EXISTS temp_${table}_raw;
+EOF
+    done
+#         done
+        #insert cities
+        
+        echo "Loading flight data..."
+        for file in /home/tim/data/aviation/point*.csv; do
+            echo "Processing $file..."
+            psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
+        -- Use a temp table to parse and cast the input
+        DROP TABLE IF EXISTS temp_flight_raw;
+        CREATE TEMP TABLE temp_flight_raw (
+            flightid BIGINT,
+            airplanetype TEXT,
+            origin TEXT,
+            destination TEXT,
+            geom_txt TEXT,
+            timestamp TIMESTAMP,
+            altitude FLOAT
+        );
+
+        \copy temp_flight_raw FROM '$file' WITH (FORMAT csv, DELIMITER ';', HEADER false)
+        INSERT INTO flight_points (flightid, airplanetype, origin, destination, geom, timestamp, altitude)
+        SELECT
+            flightid,
+            airplanetype,
+            origin,
+            destination,
+            ST_GeomFromText(geom_txt, 4326),
+            timestamp,
+            altitude
+        FROM temp_flight_raw;
+       WITH deduplicated_points AS (
+        SELECT DISTINCT ON (flightid, timestamp)
+            flightid,
+            airplanetype,
+            origin,
+            destination,
+            altitude,
+            timestamp,
+            geom
+        FROM flight_points
+        ORDER BY flightid, timestamp
+    )
+
+    INSERT INTO flights (flightid, airplanetype, origin, destination, altitude, trip)
+    SELECT 
+        flightid,
+        MIN(airplanetype) AS airplanetype,
+        MIN(origin) AS origin,
+        MIN(destination) AS destination,
+        tfloatSeq(
+            array_agg(tfloat(altitude, timestamp) ORDER BY timestamp) 
+            FILTER (WHERE altitude IS NOT NULL),
+            'step'
+        ),
+        tgeogpointseq(
+            array_agg(tgeogpoint(geom, timestamp) ORDER BY timestamp),
+            'linear'
+        )
+    FROM deduplicated_points
+    GROUP BY flightid;
+EOF
+        done
+    fi
+fi

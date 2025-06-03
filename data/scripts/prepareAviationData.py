@@ -73,6 +73,8 @@ def createPointData(directory_path):
         aircraftType = 0;
         originAirport = 0;
         destinationAirport = 0;
+        lastFlightID = 0;
+        
         data = []
         #for each line in the file
         for line in open(filename, 'r'):
@@ -85,6 +87,9 @@ def createPointData(directory_path):
             originAirport = line[2]
             destinationAirport = line[3]
             timestamp = line[4]
+            #check if timestamp is higher than startTime, if not, skip the line
+            if timestamp < startTime and lastFlightID == flightID:
+                continue
             latitude = line[5]
             longitude = line[6]
             startAltitude = line[7]
@@ -92,12 +97,14 @@ def createPointData(directory_path):
             #create a linestring from the points
             linestring = f"POINT({longitude} {latitude})"
             #remove quotes from the linestring
-            #write the gathered values as a single line to data,
+            #write the gathered values as a single line to data
             data += [[flightID, aircraftType, originAirport, destinationAirport, linestring.strip(), timestamp, startAltitude.strip()]]
             startLongitude = line[6]
             startLatitude = line[5]
             startAltitude = line[7] 
             startTime = line[4]
+            lastflightID = line[0]
+
         #once done with the file, write the data to a new file called "trips_"+filename
         with open("../processed/aviation/point_" + os.path.basename(filename), 'w') as file:
             writer = csv.writer(file, delimiter=';')
