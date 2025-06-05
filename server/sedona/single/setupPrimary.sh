@@ -39,7 +39,7 @@ sudo apt install -y openjdk-11-jdk maven git wget unzip
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> ~/.bashrc
 
-SPARK_VERSION="3.5.5"
+SPARK_VERSION="3.5.6"
 HADOOP_VERSION="3"
 SCALA_VERSION="2.12"
 SEDONA_VERSION="1.7.1"
@@ -47,7 +47,7 @@ SEDONA_VERSION="1.7.1"
 echo "Downloading Apache Spark ${SPARK_VERSION}... if need"
 if [ ! -d "/opt/spark" ]; then
     echo "Apache Spark not found. Downloading..."
-    wget https://dlcdn.apache.org/spark/spark-3.5.5/spark-3.5.5-bin-hadoop3.tgz
+    wget https://dlcdn.apache.org/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
     tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
     sudo mv spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} /opt/spark
 
@@ -86,10 +86,10 @@ set -e
 export SPARK_HOME="/opt/spark"
 
 echo "📁 Creating spark-env.sh..."
-cp \$SPARK_HOME/conf/spark-env.sh.template \$SPARK_HOME/conf/spark-env.sh
+cp ${SPARK_HOME}/conf/spark-env.sh.template ${SPARK_HOME}/conf/spark-env.sh
 chmod +x \$SPARK_HOME/conf/spark-env.sh
 
-cat << EOL > \$SPARK_HOME/conf/spark-env.sh
+cat << EOL > ${SPARK_HOME}/conf/spark-env.sh
 export SPARK_MASTER_HOST="${IP}"
 export SPARK_MASTER_PORT=7077
 export SPARK_MASTER_WEBUI_PORT=8080
@@ -99,8 +99,8 @@ EOL
 echo "✅ spark-env.sh configured for public IP: ${IP}"
 
 # Restart Spark to apply the new configuration
-\$SPARK_HOME/sbin/stop-master.sh || true
-\$SPARK_HOME/sbin/start-master.sh
+${SPARK_HOME}/sbin/stop-master.sh || true
+${SPARK_HOME}/sbin/start-master.sh
 EOF
 
 #test run

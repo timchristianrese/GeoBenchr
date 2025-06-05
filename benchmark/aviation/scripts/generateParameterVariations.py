@@ -22,7 +22,7 @@ class QueryTask:
     sql: str
     params: list
 
-def load_config(path="../config/benchConf.yaml"):
+def load_config(path="../config/mobilityDBBenchConf.yaml"):
     try:
         with open(path) as f:
             return yaml.safe_load(f)
@@ -136,6 +136,8 @@ def get_random_place(filename: str, rnd: random.Random) -> Optional[str]:
             if len(reader) <= 1:
                 return None  # No data or only header
             chosen_row = rnd.choice(reader[1:])  # Skip header
+            if filepath.__contains__("cities"):
+                return chosen_row[4]
             return chosen_row[0]  # Return value from column 0 (name)
     except (FileNotFoundError, IndexError) as e:
         print(f"Error reading {filepath}: {e}")
@@ -151,48 +153,108 @@ def convert_to_timestamptz(match):
     ts = match.group(1)
     return f"timestamptz '[{ts}]'"
 
+def convert_between_format(match):
+    """
+    Regex replacement function to convert BETWEEN format.
+    """
+    timestamp1 = match.group(1).strip()
+    timestamp2 = match.group(2).strip()
+    
+    # Validate timestamps (optional)
+    try:
+        datetime.strptime(timestamp1, '%Y-%m-%d %H:%M:%S')
+        datetime.strptime(timestamp2, '%Y-%m-%d %H:%M:%S')
+    except ValueError:
+        # Return original if invalid format
+        return match.group(0)
+    
+    return f"BETWEEN '{timestamp1}' AND '{timestamp2}'"
 
+def process_file(input_file, output_file):
+    """
+    Process a file to convert all BETWEEN clauses to proper SQL format.
+    
+    Args:
+        input_file: Path to input file
+        output_file: Path to output file
+    """
+    # Regex pattern to match BETWEEN [timestamp, timestamp]
+    pattern = re.compile(
+        r"BETWEEN\s*\[\s*'([^']+)'\s*,\s*'([^']+)'\s*\]",
+        re.IGNORECASE
+    )
+    
+    with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+        for line in infile:
+            # Replace all occurrences in each line
+            converted_line = pattern.sub(convert_between_format, line)
+            outfile.write(converted_line)
 
-def prepare_query_tasks(config, rnd):
-    all_queries = []
+def prepare_query_tasks(config, rnd, platform="mobilityDB") -> List[QueryTask]:
+    if platform == "mobilityDB":
+        all_queries = []
 
-    for query_config in config['queryConfigs']:
-        if query_config['use']:
-            for _ in range(query_config['repetition']):
-                sql, values = return_param_values(
-                    query_config['sql'],
-                    query_config['parameters'],
-                    rnd,
-                )
-                pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
-                pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
-                sql = re.sub(pattern, convert_to_tstzspan, sql)
-                sql = re.sub(pattern_single, convert_to_timestamptz, sql)
-                all_queries.append(QueryTask(
-                    name=query_config['name'],
-                    type=query_config['type'],
-                    sql=LiteralString(sql),  # 👈 Ensures clean multiline SQL
-                    params=values
-                ))
+        for query_config in config['queryConfigs']:
+            if query_config['use']:
+                for _ in range(query_config['repetition']):
+                    sql, values = return_param_values(
+                        query_config['sql'],
+                        query_config['parameters'],
+                        rnd,
+                    )
+                    pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
+                    pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
+                    sql = re.sub(pattern, convert_to_tstzspan, sql)
+                    sql = re.sub(pattern_single, convert_to_timestamptz, sql)
+                    all_queries.append(QueryTask(
+                        name=query_config['name'],
+                        type=query_config['type'],
+                        sql=LiteralString(sql),  # 👈 Ensures clean multiline SQL
+                        params=values
+                    ))
 
-    if config['benchmark']['mixed']:
-        random.shuffle(all_queries)
+        if config['benchmark']['mixed']:
+            random.shuffle(all_queries)
 
-    return all_queries
+        return all_queries
+    elif platform == "spatialSQL":
+        all_queries = []
 
+        for query_config in config['queryConfigs']:
+            if query_config['use']:
+                for _ in range(query_config['repetition']):
+                    sql, values = return_param_values(
+                        query_config['sql'],
+                        query_config['parameters'],
+                        rnd,
+                    )
+                    pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
+                    pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
+                    all_queries.append(QueryTask(
+                        name=query_config['name'],
+                        type=query_config['type'],
+                        sql=LiteralString(sql),  # 👈 Ensures clean multiline SQL
+                        params=values
+                    ))
+
+        if config['benchmark']['mixed']:
+            random.shuffle(all_queries)
+
+        return all_queries
 #main function
 if __name__ == "__main__":
-    config = load_config()
-    if not config:
+    mobilityDB_config = load_config("../config/mobilityDBBenchConf.yaml")
+    spatialSQL_config = load_config("../config/spatialSQLBenchConf.yaml")
+    if not mobilityDB_config and not spatialSQL_config:
         exit(1)
     print("Loaded config successfully.")
-    thread_count = config['benchmark']['threads']
-    nodes = config['benchmark']['nodes']
-    sut = config['benchmark']['sut']
-    main_seed = config['benchmark']['random_seed']
-    mixed = config['benchmark']['mixed']
+    thread_count = mobilityDB_config['benchmark']['threads']
+    nodes = mobilityDB_config['benchmark']['nodes']
+    sut = mobilityDB_config['benchmark']['sut']
+    main_seed = mobilityDB_config['benchmark']['random_seed']
+    mixed = mobilityDB_config['benchmark']['mixed']
     distributed = len(nodes) > 1
-    log_responses = config['benchmark']['test']
+    log_responses = mobilityDB_config['benchmark']['test']
     #print these values
     print(f"Using SUT: {sut}")
     print(f"Using nodes: {nodes}")
@@ -210,15 +272,19 @@ if __name__ == "__main__":
     print(f"Mixed queries: {mixed}")
     print(f"Distributed: {distributed}")
 
-    all_queries = prepare_query_tasks(config, main_random)
-    #print the first query
-    #shuffle the order of the queries
-    random.shuffle(all_queries)
-    data = [query.__dict__ for query in all_queries]
+    # mobilityDB_queries = prepare_query_tasks(mobilityDB_config, main_random, "mobilityDB")
+    # random.shuffle(mobilityDB_queries)
+    # mobilityDB_data = [query.__dict__ for query in mobilityDB_queries]
+    # with open("../queries/mobilitydb_queries.yaml", "w") as file:
+    #     yaml.dump(mobilityDB_data, file, sort_keys=False, allow_unicode=True)
 
-# Write to YAML file
-    with open("../queries/mobilitydb_queries.yaml", "w") as file:
-        yaml.dump(data, file, sort_keys=False, allow_unicode=True)
+
+    spatialSQL_queries = prepare_query_tasks(spatialSQL_config, main_random, "spatialSQL")
+    random.shuffle(spatialSQL_queries)
+    spatialSQL_data = [query.__dict__ for query in spatialSQL_queries]
+    with open("../queries/spatialSQL_queries_unprocess.yaml", "w") as file:
+        yaml.dump(spatialSQL_data, file, sort_keys=False, allow_unicode=True)
+    process_file("../queries/spatialSQL_queries_unprocess.yaml", "../queries/spatialSQL_queries.yaml")
         #remove all brackets [] from the file
     # with open("../queries/queries.yaml", "r") as file:
     #     content = file.read()
