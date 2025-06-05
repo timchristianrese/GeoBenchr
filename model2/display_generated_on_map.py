@@ -37,11 +37,15 @@ def random_start_date_2024():
     random_seconds = random.randint(0, int(delta.total_seconds()))
     return start + timedelta(seconds=random_seconds)
 
-def plot_trajectories_on_map(traj_folder, output_file):
+def plot_trajectories_on_map(traj_folder, output_file, max_traj_to_display=None):
     traj_files = glob.glob(os.path.join(traj_folder, "VM2_-*"))
     if not traj_files:
         print(f"No trajectory files found in {traj_folder}")
         return
+
+    # Limit number of trajectories displayed
+    if max_traj_to_display is not None and max_traj_to_display < len(traj_files):
+        traj_files = random.sample(traj_files, max_traj_to_display)
 
     m = folium.Map(location=[52.52, 13.405], zoom_start=13)
 
@@ -51,12 +55,10 @@ def plot_trajectories_on_map(traj_folder, output_file):
             continue
 
         start_date = random_start_date_2024()
-
         min_ts = min(timestamps)
 
         points = []
         for (lat, lon), ts in zip(coords, timestamps):
-            # Calcul date+heure: start_date + (ts - min_ts) in ms
             delta_ms = ts - min_ts
             point_date = start_date + timedelta(milliseconds=delta_ms)
             popup = point_date.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
@@ -71,10 +73,10 @@ def plot_trajectories_on_map(traj_folder, output_file):
 
         color = random_color()
         folium.PolyLine(coords, color=color, weight=3, opacity=0.7,
-                        tooltip=f"{os.path.basename(file_path)} - début {start_date.strftime('%Y-%m-%d %H:%M:%S')}").add_to(m)
+                        tooltip=f"{os.path.basename(file_path)} - start {start_date.strftime('%Y-%m-%d %H:%M:%S')}").add_to(m)
 
-        folium.Marker(coords[0], tooltip=f"Départ - {os.path.basename(file_path)}", icon=folium.Icon(color="green")).add_to(m)
-        folium.Marker(coords[-1], tooltip=f"Arrivée - {os.path.basename(file_path)}", icon=folium.Icon(color="red")).add_to(m)
+        folium.Marker(coords[0], tooltip=f"Start - {os.path.basename(file_path)}", icon=folium.Icon(color="green")).add_to(m)
+        folium.Marker(coords[-1], tooltip=f"End - {os.path.basename(file_path)}", icon=folium.Icon(color="red")).add_to(m)
 
         for p in points:
             p.add_to(m)
@@ -87,4 +89,7 @@ if __name__ == "__main__":
     output_map_file = "./output/generated_trajectories_map.html"
     os.makedirs(os.path.dirname(output_map_file), exist_ok=True)
 
-    plot_trajectories_on_map(traj_folder, output_map_file)
+    # Change this value to control how many trajectories to display
+    max_traj = 200
+
+    plot_trajectories_on_map(traj_folder, output_map_file, max_traj_to_display=max_traj)
