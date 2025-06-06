@@ -272,11 +272,11 @@ if __name__ == "__main__":
     print(f"Mixed queries: {mixed}")
     print(f"Distributed: {distributed}")
 
-    # mobilityDB_queries = prepare_query_tasks(mobilityDB_config, main_random, "mobilityDB")
-    # random.shuffle(mobilityDB_queries)
-    # mobilityDB_data = [query.__dict__ for query in mobilityDB_queries]
-    # with open("../queries/mobilitydb_queries.yaml", "w") as file:
-    #     yaml.dump(mobilityDB_data, file, sort_keys=False, allow_unicode=True)
+    mobilityDB_queries = prepare_query_tasks(mobilityDB_config, main_random, "mobilityDB")
+    random.shuffle(mobilityDB_queries)
+    mobilityDB_data = [query.__dict__ for query in mobilityDB_queries]
+    with open("../queries/mobilitydb_queries.yaml", "w") as file:
+        yaml.dump(mobilityDB_data, file, sort_keys=False, allow_unicode=True)
 
 
     spatialSQL_queries = prepare_query_tasks(spatialSQL_config, main_random, "spatialSQL")

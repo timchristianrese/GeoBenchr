@@ -1,0 +1,66 @@
+package aviation_client;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.sedona.spark.SedonaContext;
+import org.yaml.snakeyaml.Yaml;
+
+public class SedonaExecutor {
+    public static void main(String[] args) {
+
+        // Build base Spark config
+        SparkSession config = SedonaContext.builder()
+            .master("local[*]") // Optional: Remove or replace if running on Spark cluster
+            .appName("SedonaBenchmark")
+            .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+            .config("spark.kryo.registrator", "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+            .getOrCreate();
+        // Activate Sedona SQL extensions
+        SparkSession sedona = SedonaContext.create(config);
+
+        long start = System.currentTimeMillis();
+
+        // Load CSV data
+        Dataset<Row> geoDf = sedona.read()
+        .format("parquet")
+        .load("data/*.parquet"); // use wildcard for multiple files
+
+        geoDf.createOrReplaceTempView("geo_table");
+
+        //Get and read the queries, found in resources, might have to change the path
+        String configPath = "src/main/resources/spatialSQL_queries.yaml";
+        Yaml yaml = new Yaml();
+        InputStream inputStream = new FileInputStream(configPath);
+        System.out.println(inputStream);
+        List<Map<String, Object>> yamlList = yaml.load(inputStream);
+        //iterate over every top level key
+        for (Map<String, Object> entry : yamlList) {
+            String name = (String) entry.get("name");
+            String type = (String) entry.get("type");
+            String sql = (String) entry.get("sql");
+            
+            //run the query
+            //get time before
+            long startQuery = System.currentTimeMillis();
+            Dataset<Row> result = sedona.sql(sql);
+            long endQuery = System.currentTimeMillis();
+            System.out.println("Query " + name + " took " + (endQuery - startQuery) + " ms");
+        // Build a Point geometry from the 5th and 6th columns
+        // String sql = SELECT ST_GeomFromWKT(_c0) AS countyshape, _c
+        // Run sample query
+        // 
+
+        long end = System.currentTimeMillis();
+        System.out.println("Query took " + (end - start) + " ms");
+
+        // Stop Spark
+        sedona.stop();
+        }
+    }
+}
