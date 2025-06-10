@@ -7,12 +7,20 @@ if [ "$system" == "mobilitydb" ]; then
     DB_NAME="postgres"
     DB_USER="postgres"
     DB_HOST="localhost"
+    DB_PASSWORD="test"
+    export PGPASSWORD=$DB_PASSWORD
     if [ "$application" == "aviation" ]; then
-        psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
+        psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST"  <<EOF
         -- Enable required extensions
         CREATE EXTENSION IF NOT EXISTS postgis;
         CREATE EXTENSION IF NOT EXISTS mobilitydb;
-
+        DROP TABLE IF EXISTS flight_points;
+        DROP TABLE IF EXISTS flights;
+        DROP TABLE IF EXISTS airports;
+        DROP TABLE IF EXISTS cities;
+        DROP TABLE IF EXISTS counties;
+        DROP TABLE IF EXISTS districts;
+        DROP TABLE IF EXISTS municipalities;
         CREATE TABLE flight_points (
             flightid       BIGINT,
             airplanetype  TEXT,
@@ -147,6 +155,8 @@ EOF
         )
     FROM deduplicated_points
     GROUP BY flightid;
+    CREATE INDEX IF NOT EXISTS idx_flight_points_geom ON flight_points USING gist (geom);
+    CREATE INDEX IF NOT EXISTS idx_flights_trip ON flights USING gist (trip);
 EOF
         done
     fi

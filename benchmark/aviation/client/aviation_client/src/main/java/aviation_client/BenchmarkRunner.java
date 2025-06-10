@@ -28,7 +28,7 @@ public class BenchmarkRunner {
             // Print the first query in the subset for debugging
             pool.submit(() -> {
                 for (QueryConfig query : subset) {
-                    System.out.printf("Thread %s executing query: %s%n", Thread.currentThread().getName(), query.getName());
+                    // System.out.printf("Thread %s executing query: %s%n", Thread.currentThread().getName(), query.getName());
                     executor.execute(query.getSql(), query.getName());
                 }
             });

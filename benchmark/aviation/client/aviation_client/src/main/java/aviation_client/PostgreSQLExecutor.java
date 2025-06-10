@@ -15,26 +15,31 @@ public class PostgreSQLExecutor implements QueryExecutor {
         this.password = password;
     }
 
-    public void executeQuery(String sql) {
-        try (Connection conn = DriverManager.getConnection(url, user, password);
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                // optionally process result
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    // public void executeQuery(String sql) {
+
+    //     try (Connection conn = DriverManager.getConnection(url, user, password);
+    //          PreparedStatement stmt = conn.prepareStatement(sql);
+    //          ResultSet rs = stmt.executeQuery()) {
+    //         while (rs.next()) {
+    //             // optionally process result
+    //         }
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 
     @Override
     public void execute(String sql, String queryName) {
+        String threadName = Thread.currentThread().getName();
+        System.out.println(threadName + ": Executing SQL query: " + sql);
         try (Connection conn = DriverManager.getConnection(url, user, password);
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                // Optionally process rows
+                //print the count of rows returned
             }
+            //print the number of rows returned
+            System.out.println(threadName + ": Query " + queryName + " executed successfully, returned " + rs.getFetchSize() + " rows.");
         } catch (Exception e) {
             System.err.printf("Error executing query %s: %s%n", queryName, e.getMessage());
         }

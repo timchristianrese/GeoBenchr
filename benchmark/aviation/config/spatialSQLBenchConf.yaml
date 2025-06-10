@@ -139,9 +139,6 @@ queryConfigs:
       AND f.timestamp BETWEEN :period_medium
       AND f.altitude < :low_altitude
       GROUP BY g.name, f.flightid;
-
-
-      '
     repetition: 100
     parameters:
     - period_medium
