@@ -80,27 +80,30 @@ queryConfigs:
       - district
 
   #use
-  - name: placeWithMostIncidentsInDistrict #Modifier avec les trajets qui passent par ce cluster
-    use: False
+  - name: ridesCrossingPlaceWithMostIncidentsInDistrict # In a radius of 500m
+    use: True
     type: spatial
     sql: >
       WITH incident_points AS (
-      SELECT i.key,
-      ST_MakePoint(i.lon, i.lat)::geometry AS geom
+      SELECT i.incident_id, i.geom
       FROM incidents i
       JOIN berlin_districts d
-      ON ST_Within(ST_MakePoint(i.lon, i.lat), d.geom)
+      ON ST_Within(i.geom, d.geom)
       WHERE d.name = :district),
       clusters AS (
-      SELECT key, geom,
+      SELECT incident_id, geom,
       ST_ClusterWithin(geom, :distance) OVER () AS cluster
-      FROM incident_points)
-      SELECT COUNT(*) as incident_count,
-      ST_AsText(ST_Centroid(ST_Collect(geom))) AS cluster_center
+      FROM incident_points),
+      hotspot AS (
+      SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center
       FROM clusters
       GROUP BY cluster
-      ORDER BY incident_count DESC
-      LIMIT 1;
+      ORDER BY COUNT(*) DESC
+      LIMIT 1)
+      SELECT r.ride_id, r.rider_id
+      FROM rides r
+      CROSS JOIN hotspot h
+      WHERE ST_DWithin(trajectory(r.traj), h.cluster_center::geography, 500);
 
     repetition: 10
     parameters:
