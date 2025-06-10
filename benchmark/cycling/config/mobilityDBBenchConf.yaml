@@ -34,7 +34,7 @@ queryConfigs:
       - day
   #use
   - name: timeIntervalWithMostIncidentsDuringDay
-    use: True
+    use: False
     type: temporal
     sql: >
       SELECT STRFTIME('%H:00', datetime(i.ts / 1000, 'unixepoch')) AS hour_interval,
@@ -56,10 +56,10 @@ queryConfigs:
     type: spatial
     sql: >
       SELECT d.name, COUNT(*) AS ride_count
-      FROM districts d
+      FROM berlin_districts d
       JOIN rides r
-      ON r.traj && d.geom
-      WHERE d.name = :district AND st_intersects(r.traj, d.geom)
+      ON ST_Intersects(trajectory(r.traj), d.geom)
+      WHERE d.name = :district
       GROUP BY d.name;
     repetition: 10
     parameters:
@@ -72,23 +72,23 @@ queryConfigs:
     sql: >
       SELECT r.ride_id
       FROM rides r
-      JOIN districts d
-      ON first(r.traj) && d.geom
+      JOIN berlin_districts d
+      ON ST_Intersects(startValue(r.traj), d.geom)
       WHERE d.name = :district;
     repetition: 10
     parameters:
       - district
 
   #use
-  - name: placeWithMostIncidentsInDistrict
-    use: True
+  - name: placeWithMostIncidentsInDistrict #Modifier avec les trajets qui passent par ce cluster
+    use: False
     type: spatial
     sql: >
       WITH incident_points AS (
       SELECT i.key,
       ST_MakePoint(i.lon, i.lat)::geometry AS geom
       FROM incidents i
-      JOIN districts d
+      JOIN berlin_districts d
       ON ST_Within(ST_MakePoint(i.lon, i.lat), d.geom)
       WHERE d.name = :district),
       clusters AS (
@@ -117,7 +117,7 @@ queryConfigs:
       SELECT AVG(duration(r.traj)) AS avg_duration
       FROM rides r
       JOIN universities u
-      ON ST_DWithin(last(r.traj), u.geom, 0.001)
+      ON ST_DWithin(endValue(r.traj), u.geom::geography, 2500)
       WHERE r.traj && :period_medium
       AND u.name = :university;
     repetition: 10
@@ -135,13 +135,13 @@ queryConfigs:
       WHERE r.traj && :period_medium
       AND EXISTS (
       SELECT 1
-      FROM unnest(getTime(r.traj)) AS t
+      FROM unnest(timestamps(r.traj)) AS t
       WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23)
       ),
       ride_districts AS (
       SELECT r.ride_id, d.name
       FROM evening_rides r
-      JOIN districts d ON ST_Intersects(r.traj, d.geom)
+      JOIN berlin_districts d ON ST_Intersects(trajectory(r.traj), d.geom)
       GROUP BY r.ride_id, d.name)
       SELECT ride_id
       FROM ride_districts
@@ -152,7 +152,7 @@ queryConfigs:
       - period_medium
 
   - name: incidentsNextUniversityInPeriod
-    use: True
+    use: False
     type: spatiotemporal
     sql: >
       SELECT *
