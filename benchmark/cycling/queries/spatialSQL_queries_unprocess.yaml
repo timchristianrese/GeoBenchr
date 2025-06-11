@@ -1,0 +1,70 @@
+- name: countActiveRidesInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT COUNT(ride_id) FROM ride_points r WHERE r.timestamp BETWEEN ['2023-05-19 04:14:32', '2023-05-24 10:00:14'];
+  params:
+  - - '2023-05-19 04:14:32'
+    - '2023-05-24 10:00:14'
+- name: countActiveRidesInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT COUNT(ride_id) FROM ride_points r WHERE r.timestamp BETWEEN ['2023-03-12 04:49:59', '2023-03-16 09:28:24'];
+  params:
+  - - '2023-03-12 04:49:59'
+    - '2023-03-16 09:28:24'
+- name: countActiveRidesInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT COUNT(ride_id) FROM ride_points r WHERE r.timestamp BETWEEN ['2023-04-14 23:01:04', '2023-04-17 13:25:20'];
+  params:
+  - - '2023-04-14 23:01:04'
+    - '2023-04-17 13:25:20'
+- name: countActiveRidesInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT COUNT(ride_id) FROM ride_points r WHERE r.timestamp BETWEEN ['2023-08-27 11:55:42', '2023-09-06 05:14:26'];
+  params:
+  - - '2023-08-27 11:55:42'
+    - '2023-09-06 05:14:26'
+- name: countActiveRidesInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT COUNT(ride_id) FROM ride_points r WHERE r.timestamp BETWEEN ['2023-06-04 04:26:35', '2023-06-10 06:58:45'];
+  params:
+  - - '2023-06-04 04:26:35'
+    - '2023-06-10 06:58:45'
+- name: countActiveRidesInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT COUNT(ride_id) FROM ride_points r WHERE r.timestamp BETWEEN ['2023-07-08 21:11:13', '2023-07-18 17:46:08'];
+  params:
+  - - '2023-07-08 21:11:13'
+    - '2023-07-18 17:46:08'
+- name: countActiveRidesInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT COUNT(ride_id) FROM ride_points r WHERE r.timestamp BETWEEN ['2023-10-13 08:21:10', '2023-10-27 13:39:42'];
+  params:
+  - - '2023-10-13 08:21:10'
+    - '2023-10-27 13:39:42'
+- name: countActiveRidesInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT COUNT(ride_id) FROM ride_points r WHERE r.timestamp BETWEEN ['2023-09-13 16:01:02', '2023-09-22 20:54:26'];
+  params:
+  - - '2023-09-13 16:01:02'
+    - '2023-09-22 20:54:26'
+- name: countActiveRidesInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT COUNT(ride_id) FROM ride_points r WHERE r.timestamp BETWEEN ['2023-05-09 04:49:52', '2023-05-16 13:07:32'];
+  params:
+  - - '2023-05-09 04:49:52'
+    - '2023-05-16 13:07:32'
+- name: countActiveRidesInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT COUNT(ride_id) FROM ride_points r WHERE r.timestamp BETWEEN ['2023-01-13 14:10:34', '2023-01-18 13:50:15'];
+  params:
+  - - '2023-01-13 14:10:34'
+    - '2023-01-18 13:50:15'
