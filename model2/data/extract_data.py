@@ -4,6 +4,9 @@ import numpy as np
 from geopy.distance import geodesic
 import json
 
+
+
+# file used to get data from all trajectories, could be used to get an avg speed, avg distance...
 def extract_latlon_timestamp_block(path):
     with open(path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -108,9 +111,9 @@ def analyze_all_trajectories():
     with open(os.path.join(output_dir, "speed_summary.json"), "w") as f:
         json.dump(summary, f, indent=2)
 
-    print("✅ Extraction terminée.")
-    print(f"  → {len(df_stats)} trajectoires analysées")
-    print(f"  → Résumé disponible dans: {output_dir}/speed_summary.json")
+    print("Extract ended")
+    print(f"{len(df_stats)} traj analysed")
+    print(f"Data available in : {output_dir}/speed_summary.json")
 
 if __name__ == "__main__":
     analyze_all_trajectories()

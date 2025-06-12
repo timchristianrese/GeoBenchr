@@ -4,6 +4,12 @@ from shapely.geometry import LineString
 from scipy.spatial import KDTree
 import networkx as nx
 
+
+"""
+This script processes raw GPS bike trips by simplifying them, matching points to a street graph,  
+and generating clean node sequences using shortest paths. The output is used for model training.
+"""
+
 # Simplify a GPS trajectory (remove useless point)
 def simplify_gps_traj(points, tolerance=5):
     line = LineString(points)

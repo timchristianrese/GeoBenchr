@@ -21,7 +21,6 @@ model_path = os.path.join(base_dir, "models", "trained_lstm_model.pt")
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-
 # ====================
 # Data Preparation
 # ====================

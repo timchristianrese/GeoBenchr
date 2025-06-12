@@ -4,6 +4,10 @@ import folium
 import random
 from datetime import datetime, timedelta
 
+"""
+This script reads bike trajectory files and displays them on an interactive map.
+"""
+
 def read_trajectory(file_path):
     coords = []
     timestamps = []
@@ -75,8 +79,8 @@ def plot_trajectories_on_map(traj_folder, output_file, max_traj_to_display=None)
         folium.PolyLine(coords, color=color, weight=3, opacity=0.7,
                         tooltip=f"{os.path.basename(file_path)} - start {start_date.strftime('%Y-%m-%d %H:%M:%S')}").add_to(m)
 
-        folium.Marker(coords[0], tooltip=f"Start - {os.path.basename(file_path)}", icon=folium.Icon(color="green")).add_to(m)
-        folium.Marker(coords[-1], tooltip=f"End - {os.path.basename(file_path)}", icon=folium.Icon(color="red")).add_to(m)
+        #folium.Marker(coords[0], tooltip=f"Start - {os.path.basename(file_path)}", icon=folium.Icon(color="green")).add_to(m)
+        #folium.Marker(coords[-1], tooltip=f"End - {os.path.basename(file_path)}", icon=folium.Icon(color="red")).add_to(m)
 
         for p in points:
             p.add_to(m)
@@ -90,6 +94,6 @@ if __name__ == "__main__":
     os.makedirs(os.path.dirname(output_map_file), exist_ok=True)
 
     # Change this value to control how many trajectories to display
-    max_traj = 200
+    max_traj = 300
 
     plot_trajectories_on_map(traj_folder, output_map_file, max_traj_to_display=max_traj)

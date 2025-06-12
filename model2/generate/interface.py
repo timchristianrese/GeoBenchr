@@ -1,7 +1,6 @@
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 import json
 import torch
 import random
@@ -9,6 +8,11 @@ import numpy as np
 import networkx as nx
 from torch.nn.functional import softmax
 from models.lstm_traj_model import LSTMTripPredictor
+
+"""
+This file defines a class to generate realistic bike trip trajectories using a trained LSTM model and a city graph.  
+It predicts the next location step-by-step based on previous nodes and graph features.
+"""
 
 class TrajectoryGenerator:
     def __init__(self, seq_len=10, embedding_dim=64, hidden_dim=128, max_len=50):
@@ -38,7 +42,6 @@ class TrajectoryGenerator:
         self.vocab_size = len(self.node_to_index)
 
         # Load trained model
-
         self.model = LSTMTripPredictor(self.vocab_size, self.embedding_dim, self.hidden_dim).to(self.device)
         self.model.load_state_dict(torch.load(self.model_path, map_location=self.device))
         self.model.eval()
@@ -75,7 +78,7 @@ class TrajectoryGenerator:
                 node_idx = self.node_to_index[nid]
                 features_seq.append([node_idx] + feat)
 
-            # Padding si nécessaire
+            # Padding if necessary
             while len(features_seq) < self.seq_len:
                 features_seq.insert(0, [0.0, 0.0, 0.0, 0.0])
 

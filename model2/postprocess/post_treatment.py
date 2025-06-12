@@ -1,5 +1,10 @@
 import numpy as np
 
+"""
+This file defines utility functions to modify GPS trajectories.  
+It adds directional noise to simulate GPS drift and smooths paths to create more realistic movement.
+"""
+
 def add_directional_noise(coords, noise_magnitude=0.00015, segment_length=5):
     noisy_coords = coords.copy()
     if len(coords) < segment_length + 2:

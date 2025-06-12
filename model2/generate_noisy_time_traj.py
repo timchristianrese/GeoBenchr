@@ -7,6 +7,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from generate.interface import TrajectoryGenerator
 from postprocess.post_treatment import add_directional_noise, smooth_trajectory
 
+"""
+This script generates synthetic bike trip data with timestamps and directional noise, simulating realistic rider behavior.  
+It creates thousands of trajectories in parallel and saves them as text files for later use or training.
+"""
+
 # Parameters
 NUM_TRAJ = 2000
 START_TRIP_ID = 2000

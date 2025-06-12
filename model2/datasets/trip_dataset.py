@@ -4,6 +4,10 @@ import os
 import networkx as nx
 from torch.utils.data import Dataset
 
+"""
+This file defines a PyTorch Dataset to train models that predict the next location in a bike trip.  
+It uses node sequences from real trips and a city graph to build input/output samples with node features.
+"""
 
 class TripSequenceDataset(Dataset):
     def __init__(self, path, seq_len=10, graph_path=None):
@@ -21,12 +25,12 @@ class TripSequenceDataset(Dataset):
         for k, v in vocab["index_to_node"].items():
             self.index_to_node[int(k)] = v
 
-        # Charger le graphe
+        # load graph
         if graph_path is None:
             graph_path = os.path.join(base_dir, "..", "berlin_bike.graphml")
         self.G = nx.read_graphml(graph_path)
 
-        # Charger les trajectoires
+        # load trajectories
         with open(path) as f:
             for line in f:
                 seq = json.loads(line.strip())
