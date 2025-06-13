@@ -37,12 +37,12 @@ def return_param_values(sql, params, rnd) -> List[Any]:
 
     for param in params:
         replacement = {
-            "period_short": lambda: generate_random_time_span(rnd, 2023, mode=1),
-            "period_medium": lambda: generate_random_time_span(rnd, 2023, mode=2),
-            "period_long": lambda: generate_random_time_span(rnd, 2023, mode=3),
+            "period_short": lambda: generate_random_time_span(rnd, 2023, 2024, mode=1),
+            "period_medium": lambda: generate_random_time_span(rnd, 2023, 2024, mode=2),
+            "period_long": lambda: generate_random_time_span(rnd, 2023, 2024, mode=3),
             "period": lambda: generate_random_time_span(rnd, 2023),
             "instant": lambda: generate_random_timestamp(rnd),
-            "day": lambda: get_random_day(rnd, 2023),
+            "day": lambda: get_random_day(rnd, 2023, 2024),
             "university": lambda: get_random_place("universities", rnd),
             "district": lambda: get_random_place("berlin-districts", rnd),
             "point": lambda: get_random_point(rnd, [[6.212909, 52.241256], [8.752841, 50.53438]]),
@@ -82,10 +82,10 @@ def get_random_point(rnd: random.Random, rectangle: List[List[float]]) -> List[f
 
     return [random_lon, random_lat]
 
-def get_random_day(rnd: random.Random, year: int) -> str:
+def get_random_day(rnd: random.Random, start_year: int, end_year: int) -> str:
     formatter = "%Y-%m-%d %H:%M:%S"
-    start_date = datetime(year, 1, 1)
-    end_date = datetime(year, 12, 31)
+    start_date = datetime(start_year, 3, 1)
+    end_date = datetime(end_year, 3, 31)
     delta = end_date - start_date
     random_day = start_date + timedelta(days=rnd.randint(0, delta.days))
     return random_day.strftime("%Y-%m-%d")
@@ -98,9 +98,9 @@ def generate_random_timestamp(rnd: random.Random) -> str:
     timestamp = start + timedelta(seconds=random_seconds)
     return timestamp.strftime(formatter)
 
-def generate_random_time_span(rnd: random.Random, year: int, mode: int = 0) -> List[str]:
+def generate_random_time_span(rnd: random.Random, start_year: int, end_year: int, mode: int = 0) -> List[str]:
     formatter = "%Y-%m-%d %H:%M:%S"
-    start = datetime(year, 1, 1)
+    start = datetime(start_year, 3, 1)
     start_seconds = rnd.randint(0, 365 * 24 * 60 * 60)
     timestamp1 = start + timedelta(seconds=start_seconds)
 
@@ -119,8 +119,8 @@ def generate_random_time_span(rnd: random.Random, year: int, mode: int = 0) -> L
     tentative_end = timestamp1 + timedelta(seconds=shift_direction * seconds_to_shift)
 
     # Clamp to same year
-    if tentative_end.year != year:
-        tentative_end = datetime(year, 12, 31, 23, 59, 59) if tentative_end.year > year else datetime(year, 1, 1, 0, 0, 1)
+    if tentative_end.year > end_year:
+        tentative_end = datetime(end_year, 3, 31, 23, 59, 59) if tentative_end.year > end_year else datetime(start_year, 3, 1, 0, 0, 1)
 
     start_ts, end_ts = sorted([timestamp1, tentative_end])
     return [start_ts.strftime(formatter), end_ts.strftime(formatter)]
