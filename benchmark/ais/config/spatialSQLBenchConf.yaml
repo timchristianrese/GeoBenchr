@@ -1,0 +1,133 @@
+benchmark:
+  sut: "MobilityDB"
+  mixed: False
+  nodes:
+    - ""
+  threads: 16
+  test: False
+  random_seed: 1500
+
+queryConfigs:
+
+  # Temporal queries
+  # use
+  - name: countActiveCrossingsInPeriod
+    use: True
+    type: temporal
+    sql: >
+      SELECT COUNT(DISTINCT c.crossing_id)
+      FROM crossing_points c
+      WHERE c.timestamp BETWEEN :period_medium;
+    repetition: 10
+    parameters:
+      - period_medium
+    
+  - name: crossingsStartedAtSpecificTimeOnDay
+    use: True
+    type: temporal
+    sql: >
+      SELECT DISTINCT c.
+      FROM crossing_points c
+      WHERE EXTRACT(HOUR FROM c.timestamp) = :hour AND EXTRACT(DAY FROM c.timestamp) = :day;
+    repetition: 10
+    parameters:
+      - day
+      - hour
+
+  # Spatial queries
+  # use
+  - name: countActiveCrossingsNearIsland
+    use: True
+    type: spatial
+    sql: >
+      SELECT COUNT(DISTINCT crossing_id)
+      FROM crossing_points c
+      JOIN islands i
+      ON ST_DWithin(c.geom, i.geom, 2500)
+      WHERE i.name = :island;
+    repetition: 10
+    parameters:
+      - island
+
+  - name: crossingsConnectTwoGivenHarbours
+    use: True
+    type: spatial
+    sql: >
+      WITH start_points AS (
+      SELECT c.crossing_id, geom
+      FROM crossing_points c
+      WHERE c.timestamp = (
+      SELECT MIN(c2.timestamp) 
+      FROM crossing_points c2 
+      WHERE c2.crossing_id = c.crossing_id)
+      ),
+      end_points AS (
+      SELECT c.crossing_id, geom
+      FROM crossing_points c
+      WHERE c.timestamp = (
+      SELECT MAX(c2.timestamp) 
+      FROM crossing_points c2 
+      WHERE c2.crossing_id = c.crossing_id)
+      )
+      SELECT c.crossing_id
+      FROM crossing_points c
+      JOIN start_points sp ON c.crossing_id = sp.crossing_id
+      JOIN end_points ep ON c.crossing_id = ep.crossing_id
+      JOIN harbours h1 ON ST_DWithin(sp.geom, h1.geom, 500)
+      JOIN harbours h2 ON ST_DWithin(ep.geom, h2.geom, 500)
+      WHERE h1.name = :harbour AND h2.name = :harbour2
+    repetition: 10
+    parameters:
+      - harbour
+      - harbour2
+
+  # Spatiotemporal queries
+  # use
+  - name: averageDurationCrossingNearToIslandInPeriod
+    use: True
+    type: spatiotemporal
+    sql: >
+      WITH crossing_data AS (
+      SELECT c.crossing_id, MIN(c.timestamp) AS start_time, MAX(c.timestamp) AS end_time
+      FROM crossing_points c
+      JOIN islands i
+      ON ST_DWithin(c.geom, i.geom, 2500)
+      WHERE c.timestamp BETWEEN :period_medium
+      AND i.name = :island
+      GROUP BY c.crossing_id
+      )
+      SELECT AVG(end_time - start_time) AS avg_duration
+      FROM crossing_data;
+    repetition: 10
+    parameters:
+      - island
+      - period_medium
+
+  # use
+  - name: mostFrequentHarbourInPeriod
+    use: True
+    type: spatiotemporal
+    sql: >
+      WITH crossings_in_period AS (
+      SELECT DISTINCT c.crossing_id
+      FROM crossing_points c
+      WHERE c.timestamp BETWEEN :period_medium
+      ),
+      crossing_end_points AS (
+      SELECT c.crossing_id, c.geom, MAX(c.timestamp) AS end_point
+      FROM crossing_point c
+      JOIN crossings_in_period cp
+      ON co.crossing_id = c.crossing_id
+      WHERE c.timestamp = end_point
+      GROUP BY c.crossing_id
+      )
+      SELECT h.name, COUNT(*) AS crossing_count
+      FROM harbours h
+      JOIN crossing_end_points cep
+      ON ST_DWithin(cep.geom, h.geom, 500)
+      GROUP BY h.name
+      ORDER BY crossing_count DESC;
+      LIMIT 1;
+    repetition: 10
+    parameters:
+      - period_medium

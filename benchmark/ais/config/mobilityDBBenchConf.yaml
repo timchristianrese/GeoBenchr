@@ -43,7 +43,7 @@ queryConfigs:
       SELECT COUNT(*)
       FROM crossings c
       JOIN islands i
-      ON ST_DWithin(c.traj, i.geom, 1000)
+      ON ST_DWithin(trajectory(c.traj), i.geom, 2500)
       WHERE i.name = :island;
     repetition: 10
     parameters:
@@ -55,8 +55,8 @@ queryConfigs:
     sql: >
       SELECT c.*
       FROM crossings c
-      JOIN harbours h1 ON ST_DWithin(first(c.traj), h1.geom, 500)
-      JOIN harbours h2 ON ST_DWithin(last(c.traj), h2.geom, 500)
+      JOIN harbours h1 ON ST_DWithin(startValue(c.traj), h1.geom, 500)
+      JOIN harbours h2 ON ST_DWithin(endValue(c.traj), h2.geom, 500)
       WHERE h1.name = :harbour
       AND h2.name = :harbour2;
     repetition: 10
@@ -66,14 +66,14 @@ queryConfigs:
 
   # Spatiotemporal queries
   # use
-  - name: averageDurationCrossingToGoAtHarbourInPeriod
+  - name: averageDurationCrossingNearToIslandInPeriod
     use: True
     type: spatiotemporal
     sql: >
       SELECT AVG(duration(c.traj)) as avg_duration
       FROM crossings c
       JOIN islands i
-      ON ST_DWithin(c.traj, i.geom, 1000)
+      ON ST_DWithin(trajectory(c.traj), i.geom, 2500)
       WHERE c.traj && :period_medium
       AND i.name = :island;
     repetition: 10
@@ -82,18 +82,18 @@ queryConfigs:
       - period_medium
 
   # use
-  - name: mostFrequentHarboursInPeriod
+  - name: mostFrequentHarbourInPeriod
     use: True
     type: spatiotemporal
     sql: >
       SELECT h.name, COUNT(*) as crossing_count
       FROM harbours h
       JOIN crossings c
-      ON ST_DWithin(last(c.traj), h.geom, 100)
-      WHERE c.traj && :period_medium AND h.name = :harbour
+      ON ST_DWithin(endValue(c.traj), h.geom, 500)
+      WHERE c.traj && :period_medium
       GROUP BY h.name
-      ORDER BY crossing_count DESC;
+      ORDER BY crossing_count DESC
+      LIMIT 1;
     repetition: 10
     parameters:
-      - harbour
       - period_medium
