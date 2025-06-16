@@ -1,9 +1,9 @@
 aviation_client/BenchmarkClient.class
+aviation_client/Main.class
+aviation_client/MockExecutor.class
+aviation_client/SedonaExecutor.class
 aviation_client/QueryExecutor.class
 aviation_client/QueryDispatcher.class
 aviation_client/PostgreSQLExecutor.class
-aviation_client/BenchmarkRunner.class
-aviation_client/Main.class
-aviation_client/MockExecutor.class
-aviation_client/MobilityDBExecutor.class
 aviation_client/QueryConfig.class
+aviation_client/BenchmarkRunner.class

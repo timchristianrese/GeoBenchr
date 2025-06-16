@@ -19,22 +19,21 @@ public class BenchmarkRunner {
     public void run() throws InterruptedException {
         ExecutorService pool = Executors.newFixedThreadPool(numThreads);
         System.out.println("Running benchmark with " + numThreads + " threads, loaded " + queries.size() + " queries.");
-        int chunkSize = (int) Math.ceil((double) queries.size() / numThreads);
-        for (int i = 0; i < numThreads; i++) {
-            System.out.println("Processing chunk " + (i + 1) + " of size " + chunkSize);
-            int start = i * chunkSize;
-            int end = Math.min(start + chunkSize, queries.size());
-            List<QueryConfig> subset = queries.subList(start, end);
-            // Print the first query in the subset for debugging
+
+        for (QueryConfig query : queries) {
             pool.submit(() -> {
-                for (QueryConfig query : subset) {
-                    // System.out.printf("Thread %s executing query: %s%n", Thread.currentThread().getName(), query.getName());
+                try{
                     executor.execute(query.getSql(), query.getName());
+                } 
+                catch (Exception e) {
+                    System.err.println("Error executing query " + query.getName() + ": " + e.getMessage()+ "in thread " + Thread.currentThread().getName());
                 }
             });
         }
-
+        System.out.println("All queries submitted to the executor.");
         pool.shutdown();
         pool.awaitTermination(1, TimeUnit.HOURS);
+        System.out.println("Benchmark completed. All threads finished execution.");
+        System.out.println("Exiting BenchmarkRunner.");
     }
 }
