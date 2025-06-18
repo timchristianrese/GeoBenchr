@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 class FlightLSTM(nn.Module):
-    def __init__(self, feat_dim: int = 6,
+    def __init__(self, feat_dim: int = 7,
                  hidden: int = 256,
                  layers: int = 3,
                  dropout: float = 0.3):
