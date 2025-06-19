@@ -45,7 +45,7 @@ def return_param_values(sql, params, rnd) -> List[Any]:
             "day": lambda: get_random_day(rnd, 2019),
             "hour": lambda: get_random_hour(rnd),
             "harbour": lambda: get_random_place("harbours", rnd),
-            "harbour2": lambda: get_random_place("harbours", rnd),
+            "port": lambda: get_random_place("harbours", rnd),
             "island": lambda: get_random_place("islands-wkt", rnd),
             "region": lambda: get_random_place("regions-wkt", rnd),
             "point": lambda: get_random_point(rnd, [[6.212909, 52.241256], [8.752841, 50.53438]]),
@@ -97,7 +97,7 @@ def get_random_hour(rnd: random.Random) -> str:
     return rnd.randint(0,23)
 
 def generate_random_timestamp(rnd: random.Random) -> str:
-    year = 2023
+    year = 2019
     formatter = "%Y-%m-%d %H:%M:%S"
     start = datetime(year, 1, 1)
     random_seconds = rnd.randint(0, 365 * 24 * 60 * 60 - 1)
@@ -163,7 +163,7 @@ def convert_between_format(match):
     """
     timestamp1 = match.group(1).strip()
     timestamp2 = match.group(2).strip()
-    
+
     # Validate timestamps (optional)
     try:
         datetime.strptime(timestamp1, '%Y-%m-%d %H:%M:%S')
@@ -174,6 +174,21 @@ def convert_between_format(match):
     
     return f"BETWEEN '{timestamp1}' AND '{timestamp2}'"
 
+def convert_start_end_format(match):
+    
+    timestamp1 = match.group(1).strip()
+    timestamp2 = match.group(2).strip()
+    
+    # Validate timestamps (optional)
+    try:
+        datetime.strptime(timestamp1, '%Y-%m-%d %H:%M:%S')
+        datetime.strptime(timestamp2, '%Y-%m-%d %H:%M:%S')
+    except ValueError:
+        # Return original if invalid format
+        return match.group(0)
+    
+    return f"> '{timestamp2}' AND '{timestamp1}' >"
+
 def process_file(input_file, output_file):
     """
     Process a file to convert all BETWEEN clauses to proper SQL format.
@@ -183,15 +198,24 @@ def process_file(input_file, output_file):
         output_file: Path to output file
     """
     # Regex pattern to match BETWEEN [timestamp, timestamp]
-    pattern = re.compile(
+    pattern_between = re.compile(
         r"BETWEEN\s*\[\s*'([^']+)'\s*,\s*'([^']+)'\s*\]",
         re.IGNORECASE
+    )
+
+    pattern_start_end = re.compile(
+        r"\>\s*\[\s*'([^']+)'\s*,\s*'([^']+)'\s*\]\s*\>",
     )
     
     with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
         for line in infile:
             # Replace all occurrences in each line
-            converted_line = pattern.sub(convert_between_format, line)
+            converted_line = pattern_between.sub(convert_between_format, line)
+            outfile.write(converted_line)
+
+    with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+        for line in infile:
+            converted_line = pattern_start_end.sub(convert_start_end_format, line)
             outfile.write(converted_line)
 
 def prepare_query_tasks(config, rnd, platform="mobilityDB") -> List[QueryTask]:
@@ -248,8 +272,8 @@ def prepare_query_tasks(config, rnd, platform="mobilityDB") -> List[QueryTask]:
 #main function
 if __name__ == "__main__":
     mobilityDB_config = load_config("../config/mobilityDBBenchConf.yaml")
-    # spatialSQL_config = load_config("../config/spatialSQLBenchConf.yaml")
-    if not mobilityDB_config: #and not spatialSQL_config:
+    spatialSQL_config = load_config("../config/spatialSQLBenchConf.yaml")
+    if not mobilityDB_config and not spatialSQL_config:
         exit(1)
     print("Loaded config successfully.")
     thread_count = mobilityDB_config['benchmark']['threads']
@@ -283,12 +307,12 @@ if __name__ == "__main__":
         yaml.dump(mobilityDB_data, file, sort_keys=False, allow_unicode=True)
 
 
-    # spatialSQL_queries = prepare_query_tasks(spatialSQL_config, main_random, "spatialSQL")
-    # random.shuffle(spatialSQL_queries)
-    # spatialSQL_data = [query.__dict__ for query in spatialSQL_queries]
-    # with open("../queries/spatialSQL_queries_unprocess.yaml", "w") as file:
-    #     yaml.dump(spatialSQL_data, file, sort_keys=False, allow_unicode=True)
-    # process_file("../queries/spatialSQL_queries_unprocess.yaml", "../queries/spatialSQL_queries.yaml")
+    spatialSQL_queries = prepare_query_tasks(spatialSQL_config, main_random, "spatialSQL")
+    random.shuffle(spatialSQL_queries)
+    spatialSQL_data = [query.__dict__ for query in spatialSQL_queries]
+    with open("../queries/spatialSQL_queries_unprocess.yaml", "w") as file:
+        yaml.dump(spatialSQL_data, file, sort_keys=False, allow_unicode=True)
+    process_file("../queries/spatialSQL_queries_unprocess.yaml", "../queries/spatialSQL_queries.yaml")
         #remove all brackets [] from the file
     # with open("../queries/queries.yaml", "r") as file:
     #     content = file.read()
