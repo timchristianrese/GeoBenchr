@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-Select a subset of trajectories for training:
-"""
-
 import shutil, random, math
 from pathlib import Path
 
@@ -10,11 +5,15 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+"""
+Select a subset of trajectories for training:
+"""
+
 # ────────── SETTINGS ──────────
 SRC_DIR          = Path("flights_txt")
 DST_DIR          = Path("flights_txt_for_training")
-N_STRAIGHT       = 6000     # number of straight flights
-N_TURN           = 8000     # number of turning flights
+N_STRAIGHT       = 8500     # number of straight flights
+N_TURN           = 17000     # number of turning flights
 THRESH_STRAIGHT  = 250.0     # total |Δ heading| under this = straight
 MOVE_FILES       = False     # True = move files, False = copy files
 SEED             = 42
@@ -40,7 +39,7 @@ for f in tqdm(sorted(SRC_DIR.glob("*.txt")), desc="Scoring"):
 print(f"{len(straight)} straight flights, {len(turns)} turning flights (threshold: {THRESH_STRAIGHT})")
 
 if len(straight) < N_STRAIGHT or len(turns) < N_TURN:
-    raise RuntimeError("Not enough files in one category. Change N_STRAIGHT, N_TURN, or THRESH_STRAIGHT")
+    raise RuntimeError("Not enough files in one category, Change N_STRAIGHT, N_TURN, or THRESH_STRAIGHT")
 
 sel_straight = random.sample(straight, N_STRAIGHT)
 sel_turns    = random.sample(turns,    N_TURN)
