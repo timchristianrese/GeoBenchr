@@ -27,7 +27,7 @@ TEACHER_P    = 0.9
 LAMBDA_OFF   = 0.2
 OFF_MARGIN_M = 5000
 
-device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Device", device)
 
 FEAT_WEIGHTS = torch.tensor(
@@ -60,35 +60,41 @@ def meters_per_deg_lon(lat_deg):
     return 111_320.0 * torch.cos(lat_deg * math.pi / 180)
 
 # ── loss function ──
+# def masked_loss(pred, target, mask, lat0, lon0):
+#     """
+#     pred, target : (B, T, 7)
+#     mask         : (B, T)
+#     lat0, lon0   : (B,)
+#     """
+#     # main weighted loss
+#     loss = crit(pred, target) * FEAT_WEIGHTS
+#     loss = (loss * mask.unsqueeze(-1)).sum() / mask.sum()
+
+#     # reconstruct absolute lat lon
+#     dlat_m = pred[..., 0]
+#     dlon_m = pred[..., 1]
+
+#     cum_dlat = torch.cumsum(dlat_m, dim=1)
+#     lat_deg  = lat0.unsqueeze(1).to(device) + cum_dlat / METERS_PER_DEG_LAT
+
+#     cum_dlon = torch.cumsum(dlon_m, dim=1)
+#     meters_per_deg = meters_per_deg_lon(lat_deg)
+#     lon_deg  = lon0.unsqueeze(1).to(device) + cum_dlon / meters_per_deg
+
+#     # off region penalty
+#     dist = signed_distance_torch(lat_deg, lon_deg)
+#     dist = dist.reshape(lat_deg.shape)
+
+#     off_pen = torch.relu(dist - OFF_MARGIN_M)
+#     off_pen = (off_pen * mask).sum() / mask.sum()
+
+#     return loss + LAMBDA_OFF * off_pen
+
 def masked_loss(pred, target, mask, lat0, lon0):
-    """
-    pred, target : (B, T, 7)
-    mask         : (B, T)
-    lat0, lon0   : (B,)
-    """
-    # main weighted loss
     loss = crit(pred, target) * FEAT_WEIGHTS
     loss = (loss * mask.unsqueeze(-1)).sum() / mask.sum()
+    return loss
 
-    # reconstruct absolute lat lon
-    dlat_m = pred[..., 0]
-    dlon_m = pred[..., 1]
-
-    cum_dlat = torch.cumsum(dlat_m, dim=1)
-    lat_deg  = lat0.unsqueeze(1).to(device) + cum_dlat / METERS_PER_DEG_LAT
-
-    cum_dlon = torch.cumsum(dlon_m, dim=1)
-    meters_per_deg = meters_per_deg_lon(lat_deg)
-    lon_deg  = lon0.unsqueeze(1).to(device) + cum_dlon / meters_per_deg
-
-    # off region penalty
-    dist = signed_distance_torch(lat_deg, lon_deg, device)
-    dist = dist.reshape(lat_deg.shape)
-
-    off_pen = torch.relu(dist - OFF_MARGIN_M)
-    off_pen = (off_pen * mask).sum() / mask.sum()
-
-    return loss + LAMBDA_OFF * off_pen
 
 @torch.no_grad()
 def evaluate():

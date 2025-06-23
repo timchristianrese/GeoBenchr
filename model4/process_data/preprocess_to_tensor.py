@@ -26,7 +26,8 @@ features = [
 stats_acc = {k: [] for k in features}
 
 def process_file(path: Path):
-    df = pd.read_csv(path)
+    df = pd.read_csv(path, encoding="ISO-8859-1")
+
 
     df["dlat"]  = df["lat"].diff().fillna(0)
     df["dlon"]  = df["lon"].diff().fillna(0)

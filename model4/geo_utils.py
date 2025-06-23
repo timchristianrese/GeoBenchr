@@ -34,8 +34,9 @@ def signed_distance_torch(lat_t: torch.Tensor, lon_t: torch.Tensor) -> torch.Ten
     return distance in meters (negative inside region, positive outside)
     """
     shape_in = lat_t.shape
-    lat_np = lat_t.reshape(-1).cpu().numpy()
-    lon_np = lon_t.reshape(-1).cpu().numpy()
+    lat_np = lat_t.reshape(-1).detach().cpu().numpy()
+
+    lon_np = lon_t.reshape(-1).detach().cpu().numpy()
 
     # approx distance in degrees, then converted to meters
     dist_deg, _ = KD_TREE.query(np.column_stack((lat_np, lon_np)))

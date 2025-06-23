@@ -10,7 +10,7 @@ import folium
 #TRAJ_FOLDER = Path("flights_txt_for_training")
 TRAJ_FOLDER = Path("generated")
 OUTPUT_HTML = TRAJ_FOLDER / "flights_map.html"
-MAX_TRAJ    = 200 # nb flight displayed
+MAX_TRAJ    = 500 # nb flight displayed
 
 
 def read_trajectory(file_path: Path):

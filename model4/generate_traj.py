@@ -16,7 +16,7 @@ import torch
 from geo_utils import signed_distance_torch
 
 # ── CONFIG ──
-NUM_TRAJ   = 200      # number of files to keep
+NUM_TRAJ   = 500      # number of files to keep
 MAX_LEN    = 300      # max time steps (including the 2 seeded steps)
 MIN_STEPS  = 3        # do not test border before this index (0‑based)
 MARGIN_M   = 100      # tolerated distance outside the region (m)
@@ -60,7 +60,7 @@ AIRPORTS = {
     "EDDK": (50.8659, 7.1427),
     "EDLP": (51.6141, 8.6163),
 }
-AP_RADIUS_KM = 3
+AP_RADIUS_KM = 1.5
 
 # ── helpers ──
 M_PER_DEG_LAT = 111_132.0
