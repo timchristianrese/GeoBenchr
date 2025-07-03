@@ -30,8 +30,10 @@ def load_config(path="../config/mobilityDBBenchConf.yaml"):
         print(f"Failed to load config: {e}")
         return None
 
-def return_param_values(sql, params, rnd) -> List[Any]:
-    parsedSQL = sql
+def return_param_values(sql1,sql2, sql3, params, rnd) -> List[Any]:
+    parsedSQL1 = sql1
+    parsedSQL2 = sql2
+    parsedSQL3 = sql3
     values = []
     formatter = "%Y-%m-%d %H:%M:%S"  # Default formatter for datetime
 
@@ -70,9 +72,11 @@ def return_param_values(sql, params, rnd) -> List[Any]:
                 quoted = str(replacement)
 
             values.append(replacement)
-            parsedSQL = parsedSQL.replace(f":{param}", quoted)
+            parsedSQL1 = parsedSQL1.replace(f":{param}", quoted)
+            parsedSQL2 = parsedSQL2.replace(f":{param}", quoted)
+            parsedSQL3 = parsedSQL3.replace(f":{param}", quoted)
+    return parsedSQL1, parsedSQL2, parsedSQL3, values
 
-    return parsedSQL, values
 
 
 def get_random_point(rnd: random.Random, rectangle: List[List[float]]) -> List[float]:
@@ -170,6 +174,18 @@ def convert_between_format(match):
     
     return f"BETWEEN '{timestamp1}' AND '{timestamp2}'"
 
+def fix_between_clause(sql_fragment: str) -> str:
+    """
+    Converts a SQL BETWEEN clause from the format:
+    "BETWEEN ['2023-07-21 10:08:29', '2023-07-26 23:30:04']"
+    to the format:
+    "BETWEEN TIMESTAMP('2023-07-21 10:08:29') AND TIMESTAMP('2023-07-26 23:30:04')"
+    """
+    pattern = r"BETWEEN\s*\[\s*'([^']+)'\s*,\s*'([^']+)'\s*\]"
+    replacement = r"BETWEEN TIMESTAMP('\1') AND TIMESTAMP('\2')"
+    return re.sub(pattern, replacement, sql_fragment)
+
+
 def process_file(input_file, output_file):
     """
     Process a file to convert all BETWEEN clauses to proper SQL format.
@@ -190,62 +206,59 @@ def process_file(input_file, output_file):
             converted_line = pattern.sub(convert_between_format, line)
             outfile.write(converted_line)
 
-def prepare_query_tasks(config, rnd, platform="mobilityDB") -> List[QueryTask]:
-    if platform == "mobilityDB":
-        all_queries = []
+def prepare_query_tasks(config, rnd) -> List[QueryTask]:
+    mobilitydb_queries = []
+    postgis_queries = []
+    sedona_queries = []
+    for query_config in config['queryConfigs']:
+        if query_config['use']:
+            for _ in range(query_config['repetition']):
+                mobilitydb_sql, postgis_sql, sedona_sql, values = return_param_values(
+                    query_config['mobilitydb'],
+                    query_config['postgis'],
+                    query_config['sedona'],
+                    query_config['parameters'],
+                    rnd,
+                )
+                pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
+                pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
+                mobilitydb_sql = re.sub(pattern, convert_to_tstzspan, mobilitydb_sql)
+                mobilitydb_sql = re.sub(pattern_single, convert_to_timestamptz, mobilitydb_sql)
+                mobilitydb_queries.append(QueryTask(
+                    name=query_config['name'],
+                    type=query_config['type'],
+                    sql=LiteralString(mobilitydb_sql), 
+                    params=values
+                ))
 
-        for query_config in config['queryConfigs']:
-            if query_config['use']:
-                for _ in range(query_config['repetition']):
-                    sql, values = return_param_values(
-                        query_config['sql'],
-                        query_config['parameters'],
-                        rnd,
-                    )
-                    pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
-                    pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
-                    sql = re.sub(pattern, convert_to_tstzspan, sql)
-                    sql = re.sub(pattern_single, convert_to_timestamptz, sql)
-                    all_queries.append(QueryTask(
-                        name=query_config['name'],
-                        type=query_config['type'],
-                        sql=LiteralString(sql),  # 👈 Ensures clean multiline SQL
-                        params=values
-                    ))
+                pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
+                pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
+                postgis_queries.append(QueryTask(
+                    name=query_config['name'],
+                    type=query_config['type'],
+                    sql=LiteralString(postgis_sql),
+                    params=values
+                ))
 
-        if config['benchmark']['mixed']:
-            random.shuffle(all_queries)
+                sedona_sql = fix_between_clause(sedona_sql)
+                pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
+                pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
+                sedona_queries.append(QueryTask(
+                    name=query_config['name'],
+                    type=query_config['type'],
+                    sql=LiteralString(sedona_sql),
+                    params=values
+                ))
 
-        return all_queries
-    elif platform == "spatialSQL":
-        all_queries = []
+    if config['benchmark']['mixed']:
+        random.shuffle(sedona_queries)
 
-        for query_config in config['queryConfigs']:
-            if query_config['use']:
-                for _ in range(query_config['repetition']):
-                    sql, values = return_param_values(
-                        query_config['sql'],
-                        query_config['parameters'],
-                        rnd,
-                    )
-                    pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
-                    pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
-                    all_queries.append(QueryTask(
-                        name=query_config['name'],
-                        type=query_config['type'],
-                        sql=LiteralString(sql),  # 👈 Ensures clean multiline SQL
-                        params=values
-                    ))
-
-        if config['benchmark']['mixed']:
-            random.shuffle(all_queries)
-
-        return all_queries
+    return mobilitydb_queries, postgis_queries, sedona_queries
 #main function
 if __name__ == "__main__":
-    mobilityDB_config = load_config("../config/mobilityDBBenchConf.yaml")
-    spatialSQL_config = load_config("../config/spatialSQLBenchConf.yaml")
-    if not mobilityDB_config and not spatialSQL_config:
+    config = load_config("../config/combinedBenchConf.yaml")
+    if not config:
+        print("Failed to load configuration. Please check the config file path and format.")    
         exit(1)
     print("Loaded config successfully.")
     thread_count = mobilityDB_config['benchmark']['threads']
@@ -272,19 +285,33 @@ if __name__ == "__main__":
     print(f"Mixed queries: {mixed}")
     print(f"Distributed: {distributed}")
 
-    # mobilityDB_queries = prepare_query_tasks(mobilityDB_config, main_random, "mobilityDB")
-    # random.shuffle(mobilityDB_queries)
-    # mobilityDB_data = [query.__dict__ for query in mobilityDB_queries]
-    # with open("../queries/mobilitydb_queries.yaml", "w") as file:
-    #     yaml.dump(mobilityDB_data, file, sort_keys=False, allow_unicode=True)
+
+    mobilityDB_queries,postgisSQL_queries, sedonaSQL_queries = prepare_query_tasks(config, main_random)
+    random.shuffle(mobilityDB_queries)
+    mobilityDB_data = [query.__dict__ for query in mobilityDB_queries]
+    with open("../queries/mobilitydb_queries.yaml", "w") as file:
+        yaml.dump(mobilityDB_data, file, sort_keys=False, allow_unicode=True)
 
 
-    spatialSQL_queries = prepare_query_tasks(spatialSQL_config, main_random, "spatialSQL")
-    random.shuffle(spatialSQL_queries)
-    spatialSQL_data = [query.__dict__ for query in spatialSQL_queries]
-    with open("../queries/spatialSQL_queries_unprocess.yaml", "w") as file:
-        yaml.dump(spatialSQL_data, file, sort_keys=False, allow_unicode=True)
-    process_file("../queries/spatialSQL_queries_unprocess.yaml", "../queries/spatialSQL_queries.yaml")
+    random.shuffle(postgisSQL_queries)
+    postgisSQL_data = [query.__dict__ for query in postgisSQL_queries]
+    with open("../queries/postgisSQL_queries_unprocess.yaml", "w") as file:
+        yaml.dump(postgisSQL_data, file, sort_keys=False, allow_unicode=True)
+    process_file("../queries/postgisSQL_queries_unprocess.yaml", "../queries/postgisSQL_queries.yaml")
+
+    #create tsdb queries from postgisSQL_queries
+    with open("../queries/postgisSQL_queries.yaml", "r") as file:
+        content = file.read()
+        content = content.replace('flight_points', 'tsdb_flight_points')
+        content = content.replace('crossing_points', 'tsdb_crossing_points')
+        with open("../queries/tsdb_queries.yaml", "w") as tsdb_file:
+            tsdb_file.write(content)
+    
+    random.shuffle(sedonaSQL_queries)
+    sedonaSQL_data = [query.__dict__ for query in sedonaSQL_queries]
+    with open("../queries/sedonaSQL_queries.yaml", "w") as file:
+        yaml.dump(sedonaSQL_data, file, sort_keys=False, allow_unicode=True)
+
         #remove all brackets [] from the file
     # with open("../queries/queries.yaml", "r") as file:
     #     content = file.read()

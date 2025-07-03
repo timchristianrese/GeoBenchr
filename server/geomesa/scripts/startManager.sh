@@ -16,13 +16,14 @@ tar -xvf apache-zookeeper-${ZOOKEEPER_VERSION}-bin.tar.gz
 sudo mv apache-zookeeper-${ZOOKEEPER_VERSION}-bin /opt/zookeeper
 cd /opt/zookeeper
 cp conf/zoo_sample.cfg conf/zoo.cfg
+echo "admin.serverPort=8081" | sudo tee -a conf/zoo.cfg
 bin/zkServer.sh start
 
 #Optional, check if it worked
 #bin/zkCli.sh -server 127.0.0.1:2181
 
 #add namenode-manager to /etc/hosts
-machine_name="accumulo-namenode-manager"
+machine_name="server-peter-lan.3s.tu-berlin.de"
 ip_address=$(nslookup $machine_name | awk '/^Address: / { print $2 }')
 if ! grep -q "$ip_address $machine_name" /etc/hosts; then
     echo "$ip_address $machine_name" | sudo tee -a /etc/hosts
@@ -43,7 +44,7 @@ bin/hadoop -version
 echo "<configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://accumulo-namenode-manager:9000</value>
+        <value>hdfs://server-peter-lan.3s.tu-berlin.de:9000</value>
     </property>
 </configuration>" > etc/hadoop/core-site.xml
 echo "<configuration>
@@ -68,7 +69,7 @@ echo "<configuration>
     </property>
     <property>
         <name>yarn.resourcemanager.hostname</name>
-        <value>accumulo-namenode-manager</value>
+        <value>server-peter-lan.3s.tu-berlin.de</value>
     </property>
     <property>
         <name>yarn.resourcemanager.scheduler.class</name>
@@ -107,15 +108,15 @@ HADOOP_HOME=/opt/hadoop' conf/accumulo-env.sh
 
 #replace 8020 in accumulo.properties with 9000
 sed -i 's/8020/9000/g' conf/accumulo.properties
-sed -i 's/localhost/accumulo-namenode-manager/g' conf/accumulo.properties
+sed -i 's/localhost/server-peter-lan.3s.tu-berlin.de/g' conf/accumulo.properties
 #replace instance_name= in accumulo-client.properties with instance_name=test
 sed -i 's/instance.name=/instance.name=test/g' conf/accumulo-client.properties
 sed -i 's/auth.principal=/auth.principal=root/g' conf/accumulo-client.properties
 sed -i 's/auth.token=/auth.token=test/g' conf/accumulo-client.properties
-sed -i 's/instance.zookeepers=localhost/instance.zookeepers=accumulo-namenode-manager/g' conf/accumulo-client.properties
+sed -i 's/instance.zookeepers=localhost/instance.zookeepers=server-peter-lan.3s.tu-berlin.de/g' conf/accumulo-client.properties
 bin/accumulo-cluster create-config
 #make services remotely reachable instead of just from localhost
-sed -i 's/localhost/accumulo-namenode-manager/g' conf/cluster.yaml
+sed -i 's/localhost/server-peter-lan.3s.tu-berlin.de/g' conf/cluster.yaml
 
 
 cd ~

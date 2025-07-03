@@ -31,5 +31,5 @@ def convertCSV(directory_path,has_header,headers, delimiter =","):
 
 #convertCSV("../processed/ais/point", True, "wkt")
 #convertCSV("../processed/cycling/point", False, ["ride_id", "rider_id", "wkt", "timestamp"], ",")
-convertCSV("../processed/aviation/point", False, ["flight_id","aircraft_type","start_airport","destination_airport","wkt","timestamp","altitude"], ";")
+convertCSV("../processed/aviation/point", False, ["flightid","aircraft_type","origin","destination","wkt","timestamp","altitude"], ";")
 
