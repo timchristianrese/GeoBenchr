@@ -1,13 +1,4 @@
 #!/bin/bash
-
-# Exit on error
-SSH_USER="tim"
-#set IP to default value if not provided
-IP="${1:-10.35.0.22}"  # FOO will be assigned 'default' value if VARIABLE not set or null.
-# The value of VARIABLE remains untouched.
-echo $IP
-#setup machine to local ssh to itself and others (todo second part)
-ssh "$SSH_USER@$IP" << 'EOF'
 cd ~/.ssh 
 
 # Generate a public/private rsa key pair; 
@@ -21,19 +12,11 @@ cat id_rsa.pub >> authorized_keys
 sudo chmod 640 authorized_keys
 
 # Restart service with the latest changes (keys)
-sudo service ssh restart
-EOF
 
-
-ssh "$SSH_USER@$IP" << 'EOF'
-#!/bin/bash
-
-set -e
-
-echo "🔧 Updating package lists..."
+echo "deb http://deb.debian.org/debian unstable main non-free contrib"  | sudo tee /etc/apt/sources.list
 sudo apt update
 
-echo "🔧 Installing Java, Maven, Git, and other dependencies..."
+
 sudo apt install -y openjdk-11-jdk maven git wget unzip
 
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
@@ -74,13 +57,10 @@ if [ ! -d "/home/tim/sedona" ]; then
 else 
     echo "Sedona already installed. Skipping download and build."
 fi 
-EOF
 
 echo "Configuring Spark master..."
-ssh "$SSH_USER@$IP" << EOF
-#!/bin/bash
 
-set -e
+IP="141.23.28.216"
 
 # Explicitly define SPARK_HOME
 export SPARK_HOME="/opt/spark"
@@ -101,13 +81,8 @@ echo "✅ spark-env.sh configured for public IP: ${IP}"
 # Restart Spark to apply the new configuration
 ${SPARK_HOME}/sbin/stop-master.sh || true
 ${SPARK_HOME}/sbin/start-master.sh
-EOF
 
-#test run
-ssh "$SSH_USER@$IP" << 'EOF'
-#!/bin/bash
 echo "Running Spark shell with Sedona..."
 set -e
 export SPARK_HOME="/opt/spark"
 $SPARK_HOME/bin/spark-shell --jars ~/sedona/spark-shaded/target/sedona-spark-shaded-3.3_2.12-1.8.0-SNAPSHOT.jar
-EOF

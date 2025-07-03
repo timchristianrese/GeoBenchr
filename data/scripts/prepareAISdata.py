@@ -43,7 +43,6 @@ for filepath in glob.glob(input_pattern):
             if vessel_ids[vessel_id] < min_crossing_id:
                 print(f"Skipping vessel_id {vessel_id} with crossing_id {vessel_ids[vessel_id]} (less than min_crossing_id {min_crossing_id})")
                 exit()
-            print(vessel_ids[vessel_id])
             writer.writerow([vessel_ids[vessel_id], timestamp, vessel_id, wkt, heading, speed, course])
     min_crossing_id = crossing_id
 print("Preprocessing complete.")

@@ -297,6 +297,14 @@ if __name__ == "__main__":
         yaml.dump(postgisSQL_data, file, sort_keys=False, allow_unicode=True)
     process_file("../queries/postgisSQL_queries_unprocess.yaml", "../queries/postgisSQL_queries.yaml")
 
+    #create tsdb queries from postgisSQL_queries
+    with open("../queries/postgisSQL_queries.yaml", "r") as file:
+        content = file.read()
+        content = content.replace('flight_points', 'tsdb_flight_points')
+        content = content.replace('crossing_points', 'tsdb_crossing_points')
+        with open("../queries/tsdb_queries.yaml", "w") as tsdb_file:
+            tsdb_file.write(content)
+    
     random.shuffle(sedonaSQL_queries)
     sedonaSQL_data = [query.__dict__ for query in sedonaSQL_queries]
     with open("../queries/sedonaSQL_queries.yaml", "w") as file:
