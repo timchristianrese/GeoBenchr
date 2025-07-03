@@ -20,6 +20,7 @@ mkdir MobilityDB/build && \
 cd MobilityDB/build && \
 cmake .. && \
 make && \
+
 sudo make install
 curl https://install.citusdata.com/community/deb.sh | sudo bash
 # install the server and initialize db

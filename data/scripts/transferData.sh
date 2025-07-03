@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 USER="tim"  # Change this if needed
+
 IP="${1:-141.23.28.216}"  # Default IP if not provided
 echo $IP
 #aviation

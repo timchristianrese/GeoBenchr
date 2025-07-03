@@ -78,6 +78,7 @@ def return_param_values(sql1,sql2, sql3, params, rnd) -> List[Any]:
     return parsedSQL1, parsedSQL2, parsedSQL3, values
 
 
+
 def get_random_point(rnd: random.Random, rectangle: List[List[float]]) -> List[float]:
     upper_left_lon, upper_left_lat = rectangle[0]
     bottom_right_lon, bottom_right_lat = rectangle[1]
@@ -260,13 +261,13 @@ if __name__ == "__main__":
         print("Failed to load configuration. Please check the config file path and format.")    
         exit(1)
     print("Loaded config successfully.")
-    thread_count = config['benchmark']['threads']
-    nodes = config['benchmark']['nodes']
-    sut = config['benchmark']['sut']
-    main_seed = config['benchmark']['random_seed']
-    mixed = config['benchmark']['mixed']
+    thread_count = mobilityDB_config['benchmark']['threads']
+    nodes = mobilityDB_config['benchmark']['nodes']
+    sut = mobilityDB_config['benchmark']['sut']
+    main_seed = mobilityDB_config['benchmark']['random_seed']
+    mixed = mobilityDB_config['benchmark']['mixed']
     distributed = len(nodes) > 1
-    log_responses = config['benchmark']['test']
+    log_responses = mobilityDB_config['benchmark']['test']
     #print these values
     print(f"Using SUT: {sut}")
     print(f"Using nodes: {nodes}")
@@ -283,6 +284,7 @@ if __name__ == "__main__":
     print(f"Using {thread_count} threads.")
     print(f"Mixed queries: {mixed}")
     print(f"Distributed: {distributed}")
+
 
     mobilityDB_queries,postgisSQL_queries, sedonaSQL_queries = prepare_query_tasks(config, main_random)
     random.shuffle(mobilityDB_queries)

@@ -175,6 +175,7 @@ EOF
         );
 EOF
         psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
+
         \copy cities FROM '/home/tim/data/aviation/resources/cities.csv' WITH (FORMAT csv, HEADER true, DELIMITER ';');
 EOF
         

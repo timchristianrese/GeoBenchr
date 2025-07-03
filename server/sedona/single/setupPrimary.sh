@@ -13,6 +13,7 @@ sudo chmod 640 authorized_keys
 
 # Restart service with the latest changes (keys)
 
+
 echo "deb http://deb.debian.org/debian unstable main non-free contrib"  | sudo tee /etc/apt/sources.list
 sudo apt update
 
@@ -57,6 +58,7 @@ if [ ! -d "/home/tim/sedona" ]; then
 else 
     echo "Sedona already installed. Skipping download and build."
 fi 
+
 
 echo "Configuring Spark master..."
 

@@ -6,3 +6,4 @@ sudo apt update
 sudo apt install timescaledb-2-postgresql-17
 sudo timescaledb-tune
 sudo systemctl restart postgresql
+

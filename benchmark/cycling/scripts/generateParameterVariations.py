@@ -5,6 +5,15 @@ import csv
 import os
 import yaml
 from dataclasses import dataclass
+import yaml
+from yaml.representer import SafeRepresenter
+import re
+class LiteralString(str): pass
+
+def literal_str_representer(dumper, data):
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+
+yaml.add_representer(LiteralString, literal_str_representer)
 
 @dataclass
 class QueryTask:
@@ -13,7 +22,7 @@ class QueryTask:
     sql: str
     params: list
 
-def load_config(path="../config/benchConf.yaml"):
+def load_config(path="../config/mobilityDBBenchConf.yaml"):
     try:
         with open(path) as f:
             return yaml.safe_load(f)
@@ -25,18 +34,17 @@ def return_param_values(sql, params, rnd) -> List[Any]:
     parsedSQL = sql
     values = []
     formatter = "%Y-%m-%d %H:%M:%S"  # Default formatter for datetime
+
     for param in params:
         replacement = {
-            "period_short": lambda: generate_random_time_span(rnd, 2023, mode=1),
-            "period_medium": lambda: generate_random_time_span(rnd, 2023, mode=2),
-            "period_long": lambda: generate_random_time_span(rnd, 2023, mode=3),
+            "period_short": lambda: generate_random_time_span(rnd, 2023, 2024, mode=1),
+            "period_medium": lambda: generate_random_time_span(rnd, 2023, 2024, mode=2),
+            "period_long": lambda: generate_random_time_span(rnd, 2023, 2024, mode=3),
             "period": lambda: generate_random_time_span(rnd, 2023),
             "instant": lambda: generate_random_timestamp(rnd),
-            "day": lambda: get_random_day(rnd, 2023),
-            "city": lambda: get_random_place("cities", rnd),
-            "municipality": lambda: get_random_place("municipalities", rnd),
-            "county": lambda: get_random_place("counties", rnd),
-            "district": lambda: get_random_place("districts", rnd),
+            "day": lambda: get_random_day(rnd, 2023, 2024),
+            "university": lambda: get_random_place("universities", rnd),
+            "district": lambda: get_random_place("berlin-districts", rnd),
             "point": lambda: get_random_point(rnd, [[6.212909, 52.241256], [8.752841, 50.53438]]),
             "radius": lambda: (rnd.uniform(2.0, 10.0) * 10) / (1000 * 6378),
             "low_altitude": lambda: rnd.randint(50, 150) * 10,
@@ -44,10 +52,26 @@ def return_param_values(sql, params, rnd) -> List[Any]:
         }.get(param, lambda: "")()
 
         if replacement is not None:
+            # Quote strings and timestamps
+            if isinstance(replacement, str):
+                quoted = f"'{replacement}'"
+            elif isinstance(replacement, list):
+                # Handle time periods (start, end timestamps)
+                quoted = ", ".join([f"'{ts}'" for ts in replacement])
+                quoted = f"[{quoted}]"  # For array-style SQL functions like attime()
+            elif isinstance(replacement, (int, float)):
+                quoted = str(replacement)
+            elif isinstance(replacement, list) and all(isinstance(x, (int, float)) for x in replacement):
+                # coordinates or similar
+                quoted = f"ARRAY{replacement}"
+            else:
+                quoted = str(replacement)
+
             values.append(replacement)
-            parsedSQL = parsedSQL.replace(f":{param}", f"{replacement}")
+            parsedSQL = parsedSQL.replace(f":{param}", quoted)
 
     return parsedSQL, values
+
 
 def get_random_point(rnd: random.Random, rectangle: List[List[float]]) -> List[float]:
     upper_left_lon, upper_left_lat = rectangle[0]
@@ -58,10 +82,10 @@ def get_random_point(rnd: random.Random, rectangle: List[List[float]]) -> List[f
 
     return [random_lon, random_lat]
 
-def get_random_day(rnd: random.Random, year: int) -> str:
+def get_random_day(rnd: random.Random, start_year: int, end_year: int) -> str:
     formatter = "%Y-%m-%d %H:%M:%S"
-    start_date = datetime(year, 1, 1)
-    end_date = datetime(year, 12, 31)
+    start_date = datetime(start_year, 3, 1)
+    end_date = datetime(end_year, 3, 31)
     delta = end_date - start_date
     random_day = start_date + timedelta(days=rnd.randint(0, delta.days))
     return random_day.strftime("%Y-%m-%d")
@@ -74,9 +98,9 @@ def generate_random_timestamp(rnd: random.Random) -> str:
     timestamp = start + timedelta(seconds=random_seconds)
     return timestamp.strftime(formatter)
 
-def generate_random_time_span(rnd: random.Random, year: int, mode: int = 0) -> List[str]:
+def generate_random_time_span(rnd: random.Random, start_year: int, end_year: int, mode: int = 0) -> List[str]:
     formatter = "%Y-%m-%d %H:%M:%S"
-    start = datetime(year, 1, 1)
+    start = datetime(start_year, 3, 1)
     start_seconds = rnd.randint(0, 365 * 24 * 60 * 60)
     timestamp1 = start + timedelta(seconds=start_seconds)
 
@@ -95,8 +119,8 @@ def generate_random_time_span(rnd: random.Random, year: int, mode: int = 0) -> L
     tentative_end = timestamp1 + timedelta(seconds=shift_direction * seconds_to_shift)
 
     # Clamp to same year
-    if tentative_end.year != year:
-        tentative_end = datetime(year, 12, 31, 23, 59, 59) if tentative_end.year > year else datetime(year, 1, 1, 0, 0, 1)
+    if tentative_end.year > end_year:
+        tentative_end = datetime(end_year, 3, 31, 23, 59, 59) if tentative_end.year > end_year else datetime(start_year, 3, 1, 0, 0, 1)
 
     start_ts, end_ts = sorted([timestamp1, tentative_end])
     return [start_ts.strftime(formatter), end_ts.strftime(formatter)]
@@ -110,51 +134,125 @@ def get_random_place(filename: str, rnd: random.Random) -> Optional[str]:
             if len(reader) <= 1:
                 return None  # No data or only header
             chosen_row = rnd.choice(reader[1:])  # Skip header
+            if filepath.__contains__("cities"):
+                return chosen_row[4]
             return chosen_row[0]  # Return value from column 0 (name)
     except (FileNotFoundError, IndexError) as e:
         print(f"Error reading {filepath}: {e}")
         return None
 
 
-def prepare_query_tasks(config, rnd):
-    all_queries = []
+def convert_to_tstzspan(match):
+    ts1 = match.group(1)
+    ts2 = match.group(2)
+    return f"tstzspan '[{ts1}, {ts2}]'"
+
+def convert_to_timestamptz(match):
+    ts = match.group(1)
+    return f"timestamptz '[{ts}]'"
+
+def convert_between_format(match):
+    """
+    Regex replacement function to convert BETWEEN format.
+    """
+    timestamp1 = match.group(1).strip()
+    timestamp2 = match.group(2).strip()
     
-    for query_config in config['queryConfigs']:
-        if query_config['use']:
-            for _ in range(query_config['repetition']):
-                print(f"Generating query {query_config['name']} of type {query_config['type']}")
-                print(f"Using SQL: {query_config['sql']}")
-                sql, values = return_param_values(
-                    query_config['sql'],
-                    query_config['parameters'],
-                    rnd, 
-                )
-                all_queries.append(QueryTask(
-                    name=query_config['name'],
-                    type=query_config['type'],
-                    sql=sql,
-                    params=values
-                ))
+    # Validate timestamps (optional)
+    try:
+        datetime.strptime(timestamp1, '%Y-%m-%d %H:%M:%S')
+        datetime.strptime(timestamp2, '%Y-%m-%d %H:%M:%S')
+    except ValueError:
+        # Return original if invalid format
+        return match.group(0)
+    
+    return f"BETWEEN '{timestamp1}' AND '{timestamp2}'"
 
-    if config['benchmark']['mixed']:
-        random.shuffle(all_queries)
+def process_file(input_file, output_file):
+    """
+    Process a file to convert all BETWEEN clauses to proper SQL format.
+    
+    Args:
+        input_file: Path to input file
+        output_file: Path to output file
+    """
+    # Regex pattern to match BETWEEN [timestamp, timestamp]
+    pattern = re.compile(
+        r"BETWEEN\s*\[\s*'([^']+)'\s*,\s*'([^']+)'\s*\]",
+        re.IGNORECASE
+    )
+    
+    with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+        for line in infile:
+            # Replace all occurrences in each line
+            converted_line = pattern.sub(convert_between_format, line)
+            outfile.write(converted_line)
 
-    return all_queries
+def prepare_query_tasks(config, rnd, platform="mobilityDB") -> List[QueryTask]:
+    if platform == "mobilityDB":
+        all_queries = []
 
+        for query_config in config['queryConfigs']:
+            if query_config['use']:
+                for _ in range(query_config['repetition']):
+                    sql, values = return_param_values(
+                        query_config['sql'],
+                        query_config['parameters'],
+                        rnd,
+                    )
+                    pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
+                    pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
+                    sql = re.sub(pattern, convert_to_tstzspan, sql)
+                    sql = re.sub(pattern_single, convert_to_timestamptz, sql)
+                    all_queries.append(QueryTask(
+                        name=query_config['name'],
+                        type=query_config['type'],
+                        sql=LiteralString(sql),  # 👈 Ensures clean multiline SQL
+                        params=values
+                    ))
 
+        if config['benchmark']['mixed']:
+            random.shuffle(all_queries)
+
+        return all_queries
+    elif platform == "spatialSQL":
+        all_queries = []
+
+        for query_config in config['queryConfigs']:
+            if query_config['use']:
+                for _ in range(query_config['repetition']):
+                    sql, values = return_param_values(
+                        query_config['sql'],
+                        query_config['parameters'],
+                        rnd,
+                    )
+                    pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
+                    pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
+                    all_queries.append(QueryTask(
+                        name=query_config['name'],
+                        type=query_config['type'],
+                        sql=LiteralString(sql),  # 👈 Ensures clean multiline SQL
+                        params=values
+                    ))
+
+        if config['benchmark']['mixed']:
+            random.shuffle(all_queries)
+
+        return all_queries
 #main function
 if __name__ == "__main__":
-    config = load_config()
-    if not config:
+    mobilityDB_config = load_config("../config/mobilityDBBenchConf.yaml")
+    spatialSQL_config = load_config("../config/spatialSQLBenchConf.yaml")
+    if not mobilityDB_config and not spatialSQL_config:
         exit(1)
     print("Loaded config successfully.")
-    thread_count = config['benchmark']['threads']
-    nodes = config['benchmark']['nodes']
-    sut = config['benchmark']['sut']
-    main_seed = config['benchmark']['random_seed']
-    mixed = config['benchmark']['mixed']
+    thread_count = mobilityDB_config['benchmark']['threads']
+    nodes = mobilityDB_config['benchmark']['nodes']
+    sut = mobilityDB_config['benchmark']['sut']
+    main_seed = mobilityDB_config['benchmark']['random_seed']
+    mixed = mobilityDB_config['benchmark']['mixed']
     distributed = len(nodes) > 1
-    log_responses = config['benchmark']['test']
+    log_responses = mobilityDB_config['benchmark']['test']
     #print these values
     print(f"Using SUT: {sut}")
     print(f"Using nodes: {nodes}")
@@ -172,13 +270,25 @@ if __name__ == "__main__":
     print(f"Mixed queries: {mixed}")
     print(f"Distributed: {distributed}")
 
-    all_queries = prepare_query_tasks(config, main_random)
-    #print the first query
-    print("First query:")
-    print(all_queries[0])
-    data = [query.__dict__ for query in all_queries]
+    mobilityDB_queries = prepare_query_tasks(mobilityDB_config, main_random, "mobilityDB")
+    random.shuffle(mobilityDB_queries)
+    mobilityDB_data = [query.__dict__ for query in mobilityDB_queries]
+    with open("../queries/mobilitydb_queries.yaml", "w") as file:
+        yaml.dump(mobilityDB_data, file, sort_keys=False, allow_unicode=True)
 
-# Write to YAML file
-    with open("../queries/queries.yaml", "w") as file:
-        yaml.dump(data, file, sort_keys=False, allow_unicode=True)
-    #return all_queries
+
+    spatialSQL_queries = prepare_query_tasks(spatialSQL_config, main_random, "spatialSQL")
+    random.shuffle(spatialSQL_queries)
+    spatialSQL_data = [query.__dict__ for query in spatialSQL_queries]
+    with open("../queries/spatialSQL_queries_unprocess.yaml", "w") as file:
+        yaml.dump(spatialSQL_data, file, sort_keys=False, allow_unicode=True)
+    process_file("../queries/spatialSQL_queries_unprocess.yaml", "../queries/spatialSQL_queries.yaml")
+        #remove all brackets [] from the file
+    # with open("../queries/queries.yaml", "r") as file:
+    #     content = file.read()
+    #     content = content.replace('[', '').replace(']', '')
+    # with open("../queries/queries.yaml", "w") as file:
+    #     file.write(content)
+    # print("Queries written to ../queries/queries.yaml")
+    # #return all_queries
+    #rep
