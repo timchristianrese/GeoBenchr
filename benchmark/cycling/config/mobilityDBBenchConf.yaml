@@ -18,7 +18,7 @@ queryConfigs:
       SELECT COUNT(*), :period_medium
       FROM rides r
       WHERE r.traj && :period_medium;
-    repetition: 10
+    repetition: 100
     parameters:
       - period_medium
   #use
@@ -29,24 +29,11 @@ queryConfigs:
       SELECT AVG(duration(r.traj)) AS avg_duration
       FROM rides r
       WHERE r.traj && span(DATE :day::timestamp, DATE :day + INTERVAL '1 day' - INTERVAL '1 second');
-    repetition: 10
+    repetition: 100
     parameters:
       - day
   #use
-  - name: timeIntervalWithMostIncidentsDuringDay
-    use: False
-    type: temporal
-    sql: >
-      SELECT STRFTIME('%H:00', datetime(i.ts / 1000, 'unixepoch')) AS hour_interval,
-      COUNT(*) AS incident_count
-      FROM incidents i
-      WHERE i.incident != 0 AND DATE(datetime(i.ts / 1000, 'unixepoh')) = :day
-      GROUP BY hour_interval
-      ORDER BY incident_count DESC
-      LIMIT 1;
-    repetition: 10
-    parameters:
-      - day
+
 
 
   # Spatial queries
@@ -61,7 +48,7 @@ queryConfigs:
       ON ST_Intersects(trajectory(r.traj), d.geom)
       WHERE d.name = :district
       GROUP BY d.name;
-    repetition: 10
+    repetition: 100
     parameters:
       - district
 
@@ -75,40 +62,9 @@ queryConfigs:
       JOIN berlin_districts d
       ON ST_Intersects(startValue(r.traj), d.geom)
       WHERE d.name = :district;
-    repetition: 10
+    repetition: 100
     parameters:
       - district
-
-  #use
-  - name: ridesCrossingPlaceWithMostIncidentsInDistrict # In a radius of 500m
-    use: True
-    type: spatial
-    sql: >
-      WITH incident_points AS (
-      SELECT i.incident_id, i.geom
-      FROM incidents i
-      JOIN berlin_districts d
-      ON ST_Within(i.geom, d.geom)
-      WHERE d.name = :district),
-      clusters AS (
-      SELECT incident_id, geom,
-      ST_ClusterWithin(geom, :distance) OVER () AS cluster
-      FROM incident_points),
-      hotspot AS (
-      SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center
-      FROM clusters
-      GROUP BY cluster
-      ORDER BY COUNT(*) DESC
-      LIMIT 1)
-      SELECT r.ride_id, r.rider_id
-      FROM rides r
-      CROSS JOIN hotspot h
-      WHERE ST_DWithin(trajectory(r.traj), h.cluster_center::geography, 500);
-
-    repetition: 10
-    parameters:
-      - district
-      - distance
 
 
   # Spatiotemporal queries
@@ -123,7 +79,7 @@ queryConfigs:
       ON ST_DWithin(endValue(r.traj), u.geom::geography, 2500)
       WHERE r.traj && :period_medium
       AND u.name = :university;
-    repetition: 10
+    repetition: 100
     parameters:
       - period_medium
       - university
@@ -150,7 +106,7 @@ queryConfigs:
       FROM ride_districts
       GROUP BY ride_id
       HAVING COUNT(*) > 1;
-    repetition: 10
+    repetition: 100
     parameters:
       - period_medium
 
@@ -164,7 +120,52 @@ queryConfigs:
       ON ST_DWithin(ST_MakePoint(i.lon, i.lat), u.geom, 0.001)
       WHERE DATE(datetime(i.ts / 1000, 'unixepoh')) && :period_medium
       AND u.name = :university;
-    repetition: 10
+    repetition: 100
     parameters:
       - period_medium
       - university
+  - name: timeIntervalWithMostIncidentsDuringDay
+    use: False
+    type: temporal
+    sql: >
+      SELECT STRFTIME('%H:00', datetime(i.ts / 1000, 'unixepoch')) AS hour_interval,
+      COUNT(*) AS incident_count
+      FROM incidents i
+      WHERE i.incident != 0 AND DATE(datetime(i.ts / 1000, 'unixepoh')) = :day
+      GROUP BY hour_interval
+      ORDER BY incident_count DESC
+      LIMIT 1;
+    repetition: 100
+    parameters:
+      - day
+  #use
+  - name: ridesCrossingPlaceWithMostIncidentsInDistrict # In a radius of 500m
+    use: False
+    type: spatial
+    sql: >
+      WITH incident_points AS (
+      SELECT i.incident_id, i.geom
+      FROM incidents i
+      JOIN berlin_districts d
+      ON ST_Within(i.geom, d.geom)
+      WHERE d.name = :district),
+      clusters AS (
+      SELECT incident_id, geom,
+      ST_ClusterWithin(geom, :distance) OVER () AS cluster
+      FROM incident_points),
+      hotspot AS (
+      SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center
+      FROM clusters
+      GROUP BY cluster
+      ORDER BY COUNT(*) DESC
+      LIMIT 1)
+      SELECT r.ride_id, r.rider_id
+      FROM rides r
+      CROSS JOIN hotspot h
+      WHERE ST_DWithin(trajectory(r.traj), h.cluster_center::geography, 500);
+
+    repetition: 100
+    parameters:
+      - district
+      - distance
+

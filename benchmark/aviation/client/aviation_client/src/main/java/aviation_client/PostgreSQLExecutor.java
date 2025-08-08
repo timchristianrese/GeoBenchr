@@ -28,20 +28,36 @@ public class PostgreSQLExecutor implements QueryExecutor {
     //     }
     // }
 
-    @Override
     public void execute(String sql, String queryName) {
-        String threadName = Thread.currentThread().getName();
-        System.out.println(threadName + ": Executing SQL query: " + sql);
+        QueryLogger.logStart("PostgreSQL", queryName);
         try (Connection conn = DriverManager.getConnection(url, user, password);
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()) {
+
+            long start = System.currentTimeMillis();
+            
+            //print the first row and last row
+            
+            int count = 0;
             while (rs.next()) {
-                //print the count of rows returned
-            }
-            //print the number of rows returned
-            System.out.println(threadName + ": Query " + queryName + " executed successfully, returned " + rs.getFetchSize() + " rows.");
+                count++;
+                //print the entire row, all columns, all rows
+                System.out.println("Row " + count + ": ");
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+                    System.out.print(rs.getMetaData().getColumnName(i) + ": " + rs.getObject(i) + ", ");
+                }
+                System.out.println();
+            }  
+
+            // Optional: Print row count and last row
+            System.out.println("Rows returned: " + count);
+            long duration = System.currentTimeMillis() - start;
+            // Optional: Print row count
+            // System.out.println("Rows returned: " + count);
+            QueryLogger.logSuccess("PostgreSQL", queryName, duration);
+
         } catch (Exception e) {
-            System.err.printf("Error executing query %s: %s%n", queryName, e.getMessage());
+            QueryLogger.logError("PostgreSQL", queryName, e);
         }
     }
 }

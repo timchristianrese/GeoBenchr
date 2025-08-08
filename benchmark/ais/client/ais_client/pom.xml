@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ais_client</groupId>
+    <artifactId>ais_client</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+      <dependencies>
+    <!-- PostgreSQL JDBC -->
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.7.1</version>
+    </dependency>
+
+    <!-- SnakeYAML -->
+    <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>2.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.36</version>
+    </dependency>
+    <!-- Spark 3.3.1 (match Sedona build target) -->
+    <dependency>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-core_2.12</artifactId>
+        <version>3.5.6</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-sql_2.12</artifactId>
+        <version>3.5.6</version>
+    </dependency>
+
+    <!-- Apache Sedona -->
+    <dependency>
+        <groupId>org.apache.sedona</groupId>
+        <artifactId>sedona-spark-shaded-3.5_2.12</artifactId>
+        <version>1.7.2</version>
+    </dependency>
+
+    <!-- GeoTools Wrapper -->
+    <dependency>
+        <groupId>org.datasyslab</groupId>
+        <artifactId>geotools-wrapper</artifactId>
+        <version>1.7.2-28.5</version>
+    </dependency>
+</dependencies>
+    <build>
+    <plugins>
+      <!-- Plugin to allow running the main class -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <mainClass>ais_client.BenchmarkClient</mainClass>
+          <arguments></arguments>
+          <jvmArgs>
+            <jvmArg>--add-exports=java.base/sun.nio.ch=ALL-UNNAMED</jvmArg>
+          </jvmArgs>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

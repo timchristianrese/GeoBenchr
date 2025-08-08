@@ -18,7 +18,7 @@ queryConfigs:
       SELECT COUNT(DISTINCT c.crossing_id)
       FROM crossing_points c
       WHERE c.timestamp BETWEEN :period_medium;
-    repetition: 10
+    repetition: 100
     parameters:
       - period_medium
     
@@ -35,7 +35,7 @@ queryConfigs:
       FROM crossing_points c
       JOIN start_timestamps st ON c.crossing_id = st.crossing_id
       WHERE EXTRACT(HOUR FROM st.start_ts) = :hour AND DATE(st.start_ts) = DATE :day;
-    repetition: 10
+    repetition: 100
     parameters:
       - day
       - hour
@@ -52,7 +52,7 @@ queryConfigs:
       ON ST_DWithin(c.geom, i.geom, 5000)
       WHERE i.name = :island
       GROUP BY i.name;
-    repetition: 10
+    repetition: 100
     parameters:
       - island
 
@@ -77,7 +77,7 @@ queryConfigs:
       JOIN harbours h_end ON ST_DWithin(ep.geom, h_end.geom, 1000)
       WHERE h_start.name = :harbour
       AND h_end.name = :port;
-    repetition: 10
+    repetition: 100
     parameters:
       - harbour
       - port
@@ -105,7 +105,7 @@ queryConfigs:
       JOIN harbours h
       ON ST_DWithin(sp.start_geom, h.geom::geography, 500)
       WHERE h.name = :harbour AND cd.end_time > :period_medium > cd.start_time;
-    repetition: 10
+    repetition: 100
     parameters:
       - harbour
       - period_medium
@@ -134,6 +134,6 @@ queryConfigs:
       GROUP BY h.name
       ORDER BY crossing_count DESC
       LIMIT 1;
-    repetition: 10
+    repetition: 100
     parameters:
       - period_medium

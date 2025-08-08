@@ -18,7 +18,7 @@ queryConfigs:
       SELECT COUNT(DISTINCT r.ride_id)
       FROM ride_points r
       WHERE r.timestamp BETWEEN :period_medium;
-    repetition: 10
+    repetition: 100
     parameters:
       - period_medium
   #use
@@ -31,7 +31,7 @@ queryConfigs:
       FROM ride_points r
       WHERE timestamp >= :day:timestamp
       AND timestamp < (:day::timestamp + INTERVAL '1 day') GROUP BY ride_id);
-    repetition: 10
+    repetition: 100
     parameters:
       - day
   #use
@@ -40,13 +40,12 @@ queryConfigs:
     type: temporal
     sql: >
       SELECT STRFTIME('%H:00', datetime(i.ts / 1000, 'unixepoch')) AS hour_interval,
-      COUNT(*) AS incident_count
-      FROM incidents i
-      WHERE i.incident != 0 AND DATE(datetime(i.ts / 1000, 'unixepoh')) = :day
+      COUNT(*) AS ride_counts
+      FROM ride_points r
+      WHERE datetime(r.timestamp / 1000, 'unixepoh')) = :day
       GROUP BY hour_interval
-      ORDER BY incident_count DESC
-      LIMIT 1;
-    repetition: 10
+      ORDER BY ride_counts DESC
+    repetition: 100
     parameters:
       - day
 
@@ -63,7 +62,7 @@ queryConfigs:
       ON ST_Intersects(r.geom, d.geom)
       WHERE d.name = :district
       GROUP BY d.name;
-    repetition: 10
+    repetition: 100
     parameters:
       - district
 
@@ -87,13 +86,13 @@ queryConfigs:
       JOIN berlin_districts d
       ON ST_Intersects(s.geom, d.geom)
       WHERE d.name = :district;
-    repetition: 10
+    repetition: 100
     parameters:
       - district
 
   #use
   - name: ridesCrossingPlaceWithMostIncidentsInDistrict # In a radius of 500m
-    use: True
+    use: False
     type: spatial
     sql: >
       WITH incident_points AS (
@@ -117,7 +116,7 @@ queryConfigs:
       CROSS JOIN hotspot h
       WHERE ST_DWithin(r.geom, h.cluster_center::geography, 500);
 
-    repetition: 10
+    repetition: 100
     parameters:
       - district
       - distance
@@ -147,13 +146,13 @@ queryConfigs:
       JOIN universities u
       ON ST_DWithin(rend.geom, u.geom, 2500)
       WHERE u.name = :university;
-    repetition: 10
+    repetition: 100
     parameters:
       - period_medium
       - university
 
   - name: ridesCrossSeveralDistrictsOnEveningInPeriod
-    use: False
+    use: True
     type: spatiotemporal
     sql: >
       WITH evening_rides AS (
@@ -175,7 +174,7 @@ queryConfigs:
       FROM ride_districts rd
       GROUP BY rd.ride_id
       HAVING COUNT(*) > 1;
-    repetition: 10
+    repetition: 100
     parameters:
       - period_medium
 
@@ -189,7 +188,7 @@ queryConfigs:
       ON ST_DWithin(ST_MakePoint(i.lon, i.lat), u.geom, 0.001)
       WHERE DATE(datetime(i.ts / 1000, 'unixepoh')) && :period_medium
       AND u.name = :university;
-    repetition: 10
+    repetition: 100
     parameters:
       - period_medium
       - university

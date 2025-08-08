@@ -215,7 +215,7 @@ def prepare_query_tasks(config, rnd, platform="mobilityDB") -> List[QueryTask]:
             random.shuffle(all_queries)
 
         return all_queries
-    elif platform == "spatialSQL":
+    elif platform == "postgisSQL":
         all_queries = []
 
         for query_config in config['queryConfigs']:
@@ -242,8 +242,8 @@ def prepare_query_tasks(config, rnd, platform="mobilityDB") -> List[QueryTask]:
 #main function
 if __name__ == "__main__":
     mobilityDB_config = load_config("../config/mobilityDBBenchConf.yaml")
-    spatialSQL_config = load_config("../config/spatialSQLBenchConf.yaml")
-    if not mobilityDB_config and not spatialSQL_config:
+    postgisSQL_config = load_config("../config/postgisSQLBenchConf.yaml")
+    if not mobilityDB_config and not postgisSQL_config:
         exit(1)
     print("Loaded config successfully.")
     thread_count = mobilityDB_config['benchmark']['threads']
@@ -277,12 +277,18 @@ if __name__ == "__main__":
         yaml.dump(mobilityDB_data, file, sort_keys=False, allow_unicode=True)
 
 
-    spatialSQL_queries = prepare_query_tasks(spatialSQL_config, main_random, "spatialSQL")
-    random.shuffle(spatialSQL_queries)
-    spatialSQL_data = [query.__dict__ for query in spatialSQL_queries]
-    with open("../queries/spatialSQL_queries_unprocess.yaml", "w") as file:
-        yaml.dump(spatialSQL_data, file, sort_keys=False, allow_unicode=True)
-    process_file("../queries/spatialSQL_queries_unprocess.yaml", "../queries/spatialSQL_queries.yaml")
+    postgisSQL_queries = prepare_query_tasks(postgisSQL_config, main_random, "postgisSQL")
+    random.shuffle(postgisSQL_queries)
+    postgisSQL_data = [query.__dict__ for query in postgisSQL_queries]
+    with open("../queries/postgisSQL_queries_unprocess.yaml", "w") as file:
+        yaml.dump(postgisSQL_data, file, sort_keys=False, allow_unicode=True)
+    process_file("../queries/postgisSQL_queries_unprocess.yaml", "../queries/postgisSQL_queries.yaml")
+
+    with open("../queries/postgisSQL_queries.yaml", "r") as file:
+        with open("../queries/tsdb_queries.yaml", "w") as outfile:
+            content = file.read()
+            content = content.replace("ride_points", "tsdb_ride_points")
+            outfile.write(content)
         #remove all brackets [] from the file
     # with open("../queries/queries.yaml", "r") as file:
     #     content = file.read()

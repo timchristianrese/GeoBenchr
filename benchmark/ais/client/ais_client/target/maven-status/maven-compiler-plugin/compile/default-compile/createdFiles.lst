@@ -1,0 +1,10 @@
+ais_client/BenchmarkClient.class
+ais_client/SedonaExecutor.class
+ais_client/QueryExecutor.class
+ais_client/QueryDispatcher.class
+ais_client/SpaceTimeExecutor.class
+ais_client/PostgreSQLExecutor.class
+ais_client/BenchmarkRunner.class
+ais_client/Main.class
+ais_client/MockExecutor.class
+ais_client/QueryConfig.class

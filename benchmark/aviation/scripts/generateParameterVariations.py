@@ -261,13 +261,13 @@ if __name__ == "__main__":
         print("Failed to load configuration. Please check the config file path and format.")    
         exit(1)
     print("Loaded config successfully.")
-    thread_count = mobilityDB_config['benchmark']['threads']
-    nodes = mobilityDB_config['benchmark']['nodes']
-    sut = mobilityDB_config['benchmark']['sut']
-    main_seed = mobilityDB_config['benchmark']['random_seed']
-    mixed = mobilityDB_config['benchmark']['mixed']
+    thread_count = config['benchmark']['threads']
+    nodes = config['benchmark']['nodes']
+    sut = config['benchmark']['sut']
+    main_seed = config['benchmark']['random_seed']
+    mixed = config['benchmark']['mixed']
     distributed = len(nodes) > 1
-    log_responses = mobilityDB_config['benchmark']['test']
+    log_responses = config['benchmark']['test']
     #print these values
     print(f"Using SUT: {sut}")
     print(f"Using nodes: {nodes}")

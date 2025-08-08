@@ -101,25 +101,25 @@ public class SedonaExecutor implements QueryExecutor {
 
 
     @Override
-    public void execute (String sql, String queryName) {
-        String threadName = Thread.currentThread().getName();
-        Dataset<Row> result = null;
+    public void execute(String sql, String queryName) {
         if (sedona == null) {
-            System.err.println("Sedona context is not initialized. Cannot execute query: " + queryName);
+            System.err.println("Sedona context not initialized.");
             return;
         }
-        try {
-            System.out.println(threadName + ": Executing Sedona SQL query: " + queryName);
-            long startTime = System.currentTimeMillis();
-            result = sedona.sql(sql);
-            System.out.println(result.count());
-            //result.show(5);
-            long duration = System.currentTimeMillis() - startTime;
 
-            System.out.printf("%s: Query '%s' returned in %d ms.%n",
-                    threadName, queryName, duration);
+        QueryLogger.logStart("Sedona", queryName);
+        try {
+            long start = System.currentTimeMillis();
+            Dataset<Row> result = sedona.sql(sql);
+            long duration = System.currentTimeMillis() - start;
+
+            // Optional: Uncomment if you want row count
+            // long count = result.count();
+            // System.out.println("Rows returned: " + count);
+
+            QueryLogger.logSuccess("Sedona", queryName, duration);
         } catch (Exception e) {
-            System.out.printf("Error executing Sedona query %s: %s%n", queryName, e.getMessage());
+            QueryLogger.logError("Sedona", queryName, e);
         }
     }
 }

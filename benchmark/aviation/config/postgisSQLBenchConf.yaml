@@ -116,7 +116,6 @@ queryConfigs:
     sql: 'SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS
       c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, :radius) WHERE c.name = :city
       AND f.timestamp BETWEEN :period_medium;
-
       '
     repetition: 100
     parameters:

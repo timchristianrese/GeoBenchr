@@ -47,7 +47,7 @@ def return_param_values(sql, params, rnd) -> List[Any]:
             "harbour": lambda: get_random_place("harbours", rnd),
             "port": lambda: get_random_place("harbours", rnd),
             "island": lambda: get_random_place("islands-wkt", rnd),
-            "region": lambda: get_random_place("regions-wkt", rnd),
+            "region": lambda: get_random_place("regions-wkt", rnd, ";"),
             "point": lambda: get_random_point(rnd, [[6.212909, 52.241256], [8.752841, 50.53438]]),
             "radius": lambda: (rnd.uniform(2.0, 10.0) * 10) / (1000 * 6378),
             "low_altitude": lambda: rnd.randint(50, 150) * 10,
@@ -131,12 +131,12 @@ def generate_random_time_span(rnd: random.Random, year: int, mode: int = 0) -> L
     start_ts, end_ts = sorted([timestamp1, tentative_end])
     return [start_ts.strftime(formatter), end_ts.strftime(formatter)]
 
-def get_random_place(filename: str, rnd: random.Random) -> Optional[str]:
+def get_random_place(filename: str, rnd: random.Random, delim=',') -> Optional[str]:
     filepath = os.path.join("..", "data", f"{filename}.csv")
     
     try:
         with open(filepath, newline='', encoding='utf-8') as csvfile:
-            reader = list(csv.reader(csvfile))
+            reader = list(csv.reader(csvfile, delimiter=delim))
             if len(reader) <= 1:
                 return None  # No data or only header
             chosen_row = rnd.choice(reader[1:])  # Skip header
@@ -148,10 +148,36 @@ def get_random_place(filename: str, rnd: random.Random) -> Optional[str]:
         return None
 
 
+def convert_timestamps_in_yaml(yaml_file_path):
+    def is_timestamp(s):
+        # Simple ISO-like timestamp check: YYYY-MM-DD HH:MM:SS
+        return isinstance(s, str) and re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$', s)
+
+    def convert(obj):
+        if isinstance(obj, list):
+            if len(obj) == 2 and all(is_timestamp(item) for item in obj):
+                return f"'{obj[0]}' AND '{obj[1]}'"
+            else:
+                return [convert(item) for item in obj]
+        elif isinstance(obj, dict):
+            return {key: convert(value) for key, value in obj.items()}
+        else:
+            return obj
+
+    with open(yaml_file_path, 'r') as file:
+        content = yaml.safe_load(file)
+
+    converted_content = convert(content)
+
+    with open(yaml_file_path, 'w') as file:
+        yaml.dump(converted_content, file, default_flow_style=False, sort_keys=False)
+
+
 def convert_to_tstzspan(match):
     ts1 = match.group(1)
     ts2 = match.group(2)
     return f"tstzspan '[{ts1}, {ts2}]'"
+
 
 def convert_to_timestamptz(match):
     ts = match.group(1)
@@ -245,7 +271,7 @@ def prepare_query_tasks(config, rnd, platform="mobilityDB") -> List[QueryTask]:
             random.shuffle(all_queries)
 
         return all_queries
-    elif platform == "spatialSQL":
+    elif platform == "postgisSQL":
         all_queries = []
 
         for query_config in config['queryConfigs']:
@@ -272,8 +298,8 @@ def prepare_query_tasks(config, rnd, platform="mobilityDB") -> List[QueryTask]:
 #main function
 if __name__ == "__main__":
     mobilityDB_config = load_config("../config/mobilityDBBenchConf.yaml")
-    spatialSQL_config = load_config("../config/spatialSQLBenchConf.yaml")
-    if not mobilityDB_config and not spatialSQL_config:
+    postgisSQL_config = load_config("../config/postgisSQLBenchConf.yaml")
+    if not mobilityDB_config and not postgisSQL_config:
         exit(1)
     print("Loaded config successfully.")
     thread_count = mobilityDB_config['benchmark']['threads']
@@ -307,12 +333,18 @@ if __name__ == "__main__":
         yaml.dump(mobilityDB_data, file, sort_keys=False, allow_unicode=True)
 
 
-    spatialSQL_queries = prepare_query_tasks(spatialSQL_config, main_random, "spatialSQL")
-    random.shuffle(spatialSQL_queries)
-    spatialSQL_data = [query.__dict__ for query in spatialSQL_queries]
-    with open("../queries/spatialSQL_queries_unprocess.yaml", "w") as file:
-        yaml.dump(spatialSQL_data, file, sort_keys=False, allow_unicode=True)
-    process_file("../queries/spatialSQL_queries_unprocess.yaml", "../queries/spatialSQL_queries.yaml")
+    postgisSQL_queries = prepare_query_tasks(postgisSQL_config, main_random, "postgisSQL")
+    random.shuffle(postgisSQL_queries)
+    postgisSQL_data = [query.__dict__ for query in postgisSQL_queries]
+    with open("../queries/postgisSQL_queries_unprocess.yaml", "w") as file:
+        yaml.dump(postgisSQL_data, file, sort_keys=False, allow_unicode=True)
+    process_file("../queries/postgisSQL_queries_unprocess.yaml", "../queries/postgisSQL_queries.yaml")
+    convert_timestamps_in_yaml("../queries/postgisSQL_queries.yaml")
+    with open("../queries/postgisSQL_queries.yaml", "r") as file:
+        with open("../queries/tsdb_queries.yaml", "w") as outfile:
+            content = file.read()
+            content = content.replace("crossing_points", "tsdb_crossing_points")
+            outfile.write(content)
         #remove all brackets [] from the file
     # with open("../queries/queries.yaml", "r") as file:
     #     content = file.read()
