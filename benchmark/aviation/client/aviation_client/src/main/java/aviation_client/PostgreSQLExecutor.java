@@ -28,13 +28,13 @@ public class PostgreSQLExecutor implements QueryExecutor {
     //     }
     // }
 
-    public void execute(String sql, String queryName) {
-        QueryLogger.logStart("PostgreSQL", queryName);
+    public void execute(String sql, String queryName, String dbType) {
+        QueryLogger.logStart(dbType, queryName);
+        long start = System.currentTimeMillis();
         try (Connection conn = DriverManager.getConnection(url, user, password);
             PreparedStatement stmt = conn.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery()) {
 
-            long start = System.currentTimeMillis();
             
             //print the first row and last row
             
@@ -42,11 +42,6 @@ public class PostgreSQLExecutor implements QueryExecutor {
             while (rs.next()) {
                 count++;
                 //print the entire row, all columns, all rows
-                System.out.println("Row " + count + ": ");
-                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-                    System.out.print(rs.getMetaData().getColumnName(i) + ": " + rs.getObject(i) + ", ");
-                }
-                System.out.println();
             }  
 
             // Optional: Print row count and last row
@@ -54,10 +49,10 @@ public class PostgreSQLExecutor implements QueryExecutor {
             long duration = System.currentTimeMillis() - start;
             // Optional: Print row count
             // System.out.println("Rows returned: " + count);
-            QueryLogger.logSuccess("PostgreSQL", queryName, duration);
+            QueryLogger.logSuccess(dbType, queryName, duration);
 
         } catch (Exception e) {
-            QueryLogger.logError("PostgreSQL", queryName, e);
+            QueryLogger.logError(dbType, queryName, e);
         }
     }
 }

@@ -37,6 +37,7 @@ sedona_map = {q['name']: q for q in sedona_queries}
 combined_queries = []
 
 for entry in mobility_queries:
+    print(entry['name'])
     name = entry['name']
     combined_entry = {
         'name': name,

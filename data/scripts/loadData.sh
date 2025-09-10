@@ -22,6 +22,7 @@ if [ "$system" == "mobilitydb" ]; then
         DROP TABLE IF EXISTS harbours;
         DROP TABLE IF EXISTS islands;
         DROP TABLE IF EXISTS regions;
+        DROP TABLE IF EXISTS crossing_trips;
         CREATE TABLE crossings (
             crossing_id integer, 
             traj tgeogpoint
@@ -129,6 +130,27 @@ GROUP BY crossing_id;
 INSERT INTO tsdb_crossing_points (crossing_id, timestamp, vessel_id, geom, heading, speed, course)
 SELECT crossing_id, timestamp, vessel_id, geom, heading, speed, course FROM crossing_points;
 SELECT create_hypertable('tsdb_crossing_points', 'timestamp', chunk_time_interval => interval '1 day', if_not_exists => true);
+CREATE TABLE crossing_trips (
+    crossing_id INTEGER PRIMARY KEY,
+    vessel_id   TEXT,
+    start_time  TIMESTAMP,
+    end_time    TIMESTAMP,
+    start_geom  GEOGRAPHY(Point, 4326),
+    end_geom    GEOGRAPHY(Point, 4326)
+);
+
+INSERT INTO crossing_trips (crossing_id, vessel_id, start_time, end_time, start_geom, end_geom)
+SELECT
+    crossing_id,
+    MIN(vessel_id) AS vessel_id,
+    MIN(timestamp) AS start_time,
+    MAX(timestamp) AS end_time,
+    (ARRAY_AGG(geom ORDER BY timestamp ASC))[1] AS start_geom,
+    (ARRAY_AGG(geom ORDER BY timestamp DESC))[1] AS end_geom
+FROM crossing_points
+GROUP BY crossing_id;
+
+
 EOF
 
     psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
@@ -154,6 +176,7 @@ EOF
         DROP TABLE IF EXISTS counties;
         DROP TABLE IF EXISTS districts;
         DROP TABLE IF EXISTS municipalities;
+        DROP TABLE IF EXISTS flight_trips;
         CREATE TABLE flight_points (
             flightid       BIGINT,
             airplanetype  TEXT,
@@ -309,6 +332,30 @@ EOF
         Select create_hypertable('tsdb_flight_points', by_range('timestamp'));
         INSERT INTO tsdb_flight_points (flightid, airplanetype, origin, destination, geom, timestamp, altitude)
         SELECT flightid, airplanetype, origin, destination, geom, timestamp, altitude FROM flight_points;
+
+        CREATE TABLE flight_trips (
+            flightid    BIGINT PRIMARY KEY,
+            airplanetype TEXT,
+            origin       TEXT,
+            destination  TEXT,
+            start_time   TIMESTAMP,
+            end_time     TIMESTAMP,
+            start_geom   GEOGRAPHY(Point, 4326),
+            end_geom     GEOGRAPHY(Point, 4326)
+        );
+
+        INSERT INTO flight_trips (flightid, airplanetype, origin, destination, start_time, end_time, start_geom, end_geom)
+        SELECT
+            flightid,
+            MIN(airplanetype) AS airplanetype,
+            MIN(origin) AS origin,
+            MIN(destination) AS destination,
+            MIN(timestamp) AS start_time,
+            MAX(timestamp) AS end_time,
+            (ARRAY_AGG(geom ORDER BY timestamp ASC))[1] AS start_geom,
+            (ARRAY_AGG(geom ORDER BY timestamp DESC))[1] AS end_geom
+        FROM flight_points
+        GROUP BY flightid;
 EOF
         psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
         CREATE INDEX IF NOT EXISTS idx_flight_points_geom ON flight_points USING gist (geom);
@@ -328,6 +375,9 @@ EOF
         DROP TABLE IF EXISTS ride_points;
         DROP TABLE IF EXISTS rides;
         DROP TABLE IF EXISTS tsdb_ride_points;
+        DROP TABLE IF EXISTS ride_trips;
+        DROP TABLE IF EXISTS berlin_districts;
+        DROP TABLE IF EXISTS universities;
         CREATE TABLE ride_points (
             ride_id integer, 
             rider_id integer, 
@@ -353,6 +403,7 @@ EOF
             name TEXT,
             geom GEOGRAPHY(Point, 4326)
         );
+    
 
         -- load districts and universities from /home/tim/data/cycling/resources, files named berlin-districts-wkt.csv and universities-wkt.csv
         CREATE TABLE IF NOT EXISTS temp_districts_raw (
@@ -437,6 +488,25 @@ EOF
         Select create_hypertable('tsdb_ride_points', by_range('timestamp'));
         INSERT INTO tsdb_ride_points (ride_id, rider_id, geom, timestamp)
         SELECT ride_id, rider_id, geom, timestamp FROM ride_points;
+        CREATE TABLE ride_trips (
+            ride_id     INTEGER PRIMARY KEY,
+            rider_id    INTEGER,
+            start_time  TIMESTAMP,
+            end_time    TIMESTAMP,
+            start_geom  GEOGRAPHY(Point, 4326),
+            end_geom    GEOGRAPHY(Point, 4326)
+        );
+
+        INSERT INTO ride_trips (ride_id, rider_id, start_time, end_time, start_geom, end_geom)
+        SELECT 
+            ride_id,
+            MIN(rider_id) AS rider_id, -- all points for a ride_id should have the same rider
+            MIN(timestamp) AS start_time,
+            MAX(timestamp) AS end_time,
+            (ARRAY_AGG(geom ORDER BY timestamp ASC))[1] AS start_geom,
+            (ARRAY_AGG(geom ORDER BY timestamp DESC))[1] AS end_geom
+        FROM ride_points
+        GROUP BY ride_id;
 EOF
         psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
         CREATE INDEX IF NOT EXISTS idx_ride_points_geom ON ride_points USING gist (geom);

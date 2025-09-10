@@ -11,11 +11,16 @@ public class BenchmarkClient {
         int numThreads = Integer.parseInt(System.getenv().getOrDefault("NUM_THREADS", "4"));
         
         List<QueryConfig> queries = QueryDispatcher.loadQueries(yamlPath);
-        PostgreSQLExecutor executor = new PostgreSQLExecutor(
-           "jdbc:postgresql://server-peter-lan.3s.tu-berlin.de:5432/", "postgres", "test"
+        // PostgreSQLExecutor executor = new PostgreSQLExecutor(
+        //     "jdbc:postgresql://server-peter-lan.3s.tu-berlin.de:5432/", "postgres", "test"
+        // );
+        //SpaceTime Executor
+        SpaceTimeExecutor executor = new SpaceTimeExecutor(
+                "141.23.28.216:31339",
+        "mireo","root","@2e9R]3]=O"
         );
-        // String sparkMasterUrl = "spark://server-peter-lan.3s.tu-berlin.de:7077";
-        // SedonaExecutor executor = new SedonaExecutor(sparkMasterUrl);
+        //String sparkMasterUrl = "spark://server-peter-lan.3s.tu-berlin.de:7077";
+        ///SedonaExecutor executor = new SedonaExecutor(sparkMasterUrl);
         
         //QueryExecutor executor = new MockExecutor();
 

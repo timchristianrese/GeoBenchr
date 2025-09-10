@@ -1,0 +1,216 @@
+benchmark:
+  sut: MobilityDB
+  mixed: false
+  nodes:
+  - ''
+  threads: 16
+  test: false
+  random_seed: 1500
+queryConfigs:
+  - name: countActiveFlightsInPeriod
+    use: false
+    type: temporalbench
+    sql: 'SELECT COUNT(*) FROM (SELECT DISTINCT f.flightid FROM fsegment f WHERE f.t && EPOCHRANGE :period_medium);'
+    repetition: 100
+    parameters:
+    - period_medium
+  - name: locationOfAirplaneAtInstant
+    use: false
+    type: temporal
+    sql: 'SELECT flightid, t, altitude[0] + @altitude * ((EPOCH :instant - t[0]) / @t), ST_AsText(ST_Point( x[0] + @x * ((EPOCH :instant - x[0]) / @t), y[0] + @y * ((EPOCH :instant - y[0]) / @t), ))FROM fsegment f WHERE t @> EPOCH :instant;'
+    repetition: 100
+    parameters:
+    - instant
+  - name: airportUtilizationInPeriod
+    use: false
+    type: temporal
+    sql: > 
+      WITH departures AS (
+      SELECT airport, COUNT(departure) AS departure_count
+      FROM (
+      SELECT DISTINCT f.origin AS airport, f.flightid AS departure
+      FROM flight f WHERE f.t && EPOCHRANGE :period_short
+      )
+      GROUP BY airport
+      ), arrivals AS (
+      SELECT airport, COUNT(arrival) AS arrival_count
+      FROM (
+      SELECT DISTINCT f.destination AS airport, f.flightid AS arrival
+      FROM flight f WHERE f.t && EPOCHRANGE :period_short
+      )
+      GROUP BY airport
+      )
+      SELECT
+      COALESCE(d.airport, a.airport) AS airport,
+      COALESCE(d.departure_count, 0) AS departures,
+      COALESCE(a.arrival_count, 0) AS arrivals,
+      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS tr
+      FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+    repetition: 100
+    parameters:
+    - period_short
+  - name: countFlightsInCounties
+    use: false
+    type: spatial
+    sql: > 
+      SELECT name, COUNT(flightid) AS flight_count FROM (
+      SELECT DISTINCT k.name, f.flightid
+      FROM counties k
+      JOIN fsegment f ON ST_Intersects(ST_Line(f.x[0], f.y[0], f.x[1], f.y[1]),
+      ST_ToGeom(k.geom::gmpolygon))
+      WHERE k.name = :county
+      ) GROUP BY name;
+    repetition: 100
+    parameters:
+    - county
+  - name: flightsCloseToMainCitiesLowAltitude
+    use: false
+    type: spatial
+    sql: >
+      SELECT f.flightid, f.altitude[0], at.code, f.t[0]
+      FROM fsegment f
+      JOIN cities c ON ST_DWithin(ST_Line(f.x[0], f.y[0], f.x[1], f.y[1]),
+      ST_ToGeom(c.geom::gpoint), :radius)
+      STRAIGHT JOIN flight fl ON fl.flightid = f.flightid -- STRAIGHT forces the join order, improves
+      query time by around 20%
+      JOIN airplane_types at ON at.id = fl.airplanetype
+      WHERE LBOUND(f.altitude) <= :low_altitude AND c.population >= 200000;
+    repetition: 100
+    parameters:
+    - low_altitude
+    - radius
+  - name: flightClosestToPoint
+    use: false
+    type: spatial
+    sql: >
+      WITH closest AS (
+      SELECT
+      flightid, ST_Distance(ST_Point(x[0], y[0]), ST_ToGeom(':point'::gpoint)) AS min_distance
+      FROM fsegment
+      WHERE ST_DWithin(ST_Point(x[0], y[0]), ST_ToGeom(':point'::gpoint)), 5000)
+      ORDER BY min_distance
+      )
+      SELECT f.flightid, f.airplanetype, f.origin, f.destination, min_distance
+      FROM closest c JOIN flight f ON c.flightid = f.flightid
+      ORDER BY min_distance;
+    repetition: 100
+    parameters:
+    - point
+    - distance
+  - name: flightsInCountyInPeriod
+    use: true
+    type: spatiotemporal
+    sql: >
+      SELECT DISTINCT f.flightid
+      FROM fsegment f
+      JOIN counties k ON ST_Point(f.x[0], f.y[0]) <@ k.geom::mpolygon
+      WHERE k.name = :county AND t && EPOCHRANGE :period_medium
+    repetition: 100
+    parameters:
+    - period_medium
+    - county
+  - name: countFlightsAtInstantInDistricts
+    use: true
+    type: spatiotemporal
+    sql: >
+      SELECT name, COUNT(flightid) FROM (
+      SELECT DISTINCT b.name AS name, f.flightid AS flightid
+      FROM fsegment f JOIN districts b ON ST_Point(f.x[0], f.y[0]) <@ ST_ToGeom(b.geom::gmpolygon)
+      WHERE f.t[0] <= EPOCH :instant && EPOCH :instant < f.t[1]
+      ) GROUP BY name;
+    repetition: 100
+    parameters:
+    - instant
+  - name: inCityRadiusInPeriod
+    use: true
+    type: spatiotemporal
+    sql: >
+      SELECT f.flightid, fl.airplanetype, fl.origin, fl.destination
+      FROM cities AS c
+      JOIN fsegment AS f ON ST_DWithin(ST_Line(f.x[0], f.y[0], f.x[1], f.y[1]),
+      ST_ToGeom(c.geom::gpoint), :radius)
+      JOIN flight AS fl ON fl.flightid = f.flightid
+      WHERE
+      c.name = :city
+      AND f.t && EPOCHRANGE :period_medium
+      AND fl.t && EPOCHRANGE :period_medium
+      ;
+    repetition: 100
+    parameters:
+    - period_medium
+    - city
+    - radius
+  - name: flightDurationInMunicipalityLowAltitudeInPeriod
+    use: true
+    type: spatiotemporal
+    sql: >
+      SELECT g.name,
+      f.flightid,
+      MIN(f.t) AS entry_time,
+      MAX(f.t) AS exit_time,
+      SUM(t[1] - t[0]) AS total_time_below_altitude
+      FROM municipalities g
+      JOIN fsegment f ON ST_Intersects(ST_Line(f.x[0], f.y[0], f.x[1], f.y[1]), g.geom::gmpolygon)
+      WHERE
+      g.name = :municipality
+      AND f.t && EPOCHRANGE :period_medium
+      AND LBOUND(f.altitude) < :low_altitude -- using LBOUND() to get lowest value in a range
+      GROUP BY g.name, f.flightid;
+    repetition: 100
+    parameters:
+    - period_medium
+    - municipality
+    - low_altitude
+  - name: averageHourlyFlightsDuringDayInMunicipality
+    use: true
+    type: spatiotemporal
+    sql: >
+      WITH hours AS (SELECT num FROM CONST.SEQUENCE(24))
+      SELECT start_time, COUNT(flightid) AS active_flights FROM (
+      SELECT DISTINCT h.num AS start_time, fp.flightid
+      FROM hours h JOIN municipalities g ON g.name = :municipality
+      LEFT JOIN fsegment fp ON
+      fp.t && RANGE(:day::timestamp + HOURS(h.num), :day::timestamp + HOURS(h.num + 1))
+      AND ST_Intersects(ST_Line(fp.x[0], fp.y[0], fp.x[1], fp.y[1]), ST_ToGeom(g.geom::gmpolygon))
+      )
+      GROUP BY start_time
+      ORDER BY start_time;
+    repetition: 100
+    parameters:
+    - day
+    - municipality
+  - name: flightsWithLocalOriginDestinationInPeriodInCounty
+    use: true
+    type: spatiotemporal
+    sql: >
+        WITH relevant_airports AS (
+        SELECT a.icao, a.city, a.id
+        FROM airports a
+        JOIN cities c ON a.city = c.name
+        ),
+        passthrough_flights AS (
+        SELECT DISTINCT f.flightid
+        FROM fsegment f
+        JOIN counties k ON ST_Intersects(ST_Line(f.x[0], f.y[0], f.x[1], f.y[1]),
+        ST_ToGeom(k.geom::gmpolygon))
+        WHERE f.t && EPOCHRANGE :period_short
+        AND k.name = :county
+        ),
+        flight_orig_dests AS (
+        SELECT
+        f.flightid,
+        f.airplanetype,
+        a1.icao AS origin_airport,
+        a1.city AS origin_city,
+        a2.icao AS destination_airport,
+        a2.city AS destination_city
+        FROM passthrough_flights qf
+        JOIN flight f ON f.flightid = qf.flightid
+        LEFT JOIN relevant_airports a1 ON f.origin = a1.id
+        LEFT JOIN relevant_airports a2 ON f.destination = a2.id
+        )
+        SELECT * FROM flight_orig_dests WHERE origin_airport IS NOT NULL OR destination_airport IS NOT NULL
+    repetition: 100
+    parameters:
+    - period_short
+    - county

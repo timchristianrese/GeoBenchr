@@ -101,7 +101,7 @@ public class SedonaExecutor implements QueryExecutor {
 
 
     @Override
-    public void execute(String sql, String queryName) {
+    public void execute(String sql, String queryName, String dbType) {
         if (sedona == null) {
             System.err.println("Sedona context not initialized.");
             return;

@@ -1,0 +1,132 @@
+benchmark:
+  sut: MobilityDB
+  mixed: false
+  nodes:
+  - ''
+  threads: 16
+  test: false
+  random_seed: 1500
+queryConfigs:
+- name: countActiveRidesInPeriod
+  use: true
+  type: temporal
+  mobilitydb: |
+    SELECT COUNT(*), :period_medium FROM rides r WHERE r.traj && :period_medium;
+  postgis: |
+    SELECT COUNT(DISTINCT r.ride_id) FROM ride_points r WHERE r.timestamp BETWEEN :period_medium;
+  sedona: |
+    SELECT COUNT(DISTINCT r.ride_id) FROM ride_points r WHERE r.timestamp BETWEEN :period_medium;
+  spacetime: |
+    SELECT COUNT(*) FROM (
+    SELECT DISTINCT r.trip_id FROM ride_points r
+    WHERE r.t <@ EPOCHRANGE :period_medium
+    );
+  repetition: 100
+  parameters:
+  - period_medium
+- name: averageRideDurationDuringDay
+  use: true
+  type: temporal
+  mobilitydb: |
+    SELECT AVG(duration(r.traj)) AS avg_duration FROM rides r WHERE r.traj && span(DATE :day::timestamp, DATE :day + INTERVAL '1 day' - INTERVAL '1 second');
+  postgis: |
+    SELECT AVG(max_ts - min_ts) AS avg_duration FROM (SELECT r.ride_id, MAX(timestamp) AS max_ts, MIN(timestamp) AS min_ts FROM ride_points r WHERE timestamp >= :day:timestamp AND timestamp < (:day::timestamp + INTERVAL '1 day') GROUP BY ride_id);
+  sedona: |
+    SELECT AVG(max_ts - min_ts) AS avg_duration FROM (SELECT r.ride_id, MAX(timestamp) AS max_ts, MIN(timestamp) AS min_ts FROM ride_points r WHERE timestamp >= :day:timestamp AND timestamp < (:day::timestamp + INTERVAL '1 day') GROUP BY ride_id);
+  spacetime: |
+    SELECT AVG(t_max - t_min) AS avg_duration
+    FROM (
+    SELECT r.trip_id, MAX(t) AS t_max, MIN(t) AS t_min
+    FROM ride_points r
+    WHERE t <@ RANGE(EPOCH :day, (EPOCH :day) + tp '1d')
+    GROUP BY trip_id
+    );
+  repetition: 100
+  parameters:
+  - day
+- name: countActiveRidesInDistrict
+  use: true
+  type: spatial
+  mobilitydb: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides r ON ST_Intersects(trajectory(r.traj), d.geom) WHERE d.name = :district GROUP BY d.name;
+  postgis: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = :district GROUP BY d.name;
+  sedona: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = :district GROUP BY d.name;
+  spacetime: |
+    SELECT COUNT(*) FROM (
+    SELECT DISTINCT trip_id
+    FROM berlin_districts d
+    JOIN ride_points p ON ST_Contains(ST_Point(p.x, p.y), ST_ToGeom(d.geom::gpolygon))
+    WHERE d.name = :district
+    );
+  repetition: 100
+  parameters:
+  - district
+- name: ridesStartedInDistrict
+  use: true
+  type: spatial
+  mobilitydb: |
+    SELECT r.ride_id FROM rides r JOIN berlin_districts d ON ST_Intersects(startValue(r.traj), d.geom) WHERE d.name = :district;
+  postgis: |
+    WITH ride_start AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts FROM ride_points r GROUP BY ride_id), start_points AS ( SELECT r.ride_id, r.geom FROM ride_points r JOIN ride_start s ON r.ride_id = s.ride_id AND r.timestamp = s.start_ts) SELECT s.ride_id FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, d.geom) WHERE d.name = :district;
+  sedona: |
+    WITH ride_start AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts FROM ride_points r GROUP BY ride_id), start_points AS ( SELECT r.ride_id, r.geom FROM ride_points r JOIN ride_start s ON r.ride_id = s.ride_id AND r.timestamp = s.start_ts) SELECT s.ride_id FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, d.geom) WHERE d.name = :district;
+  spacetime: |
+    WITH ride_starts AS (
+    SELECT r.trip_id, MIN(r.t) AS start_t
+    FROM ride_points r
+    GROUP BY trip_id
+    ),
+    start_points AS (
+    SELECT r.trip_id, ST_Point(x, y) geom
+    FROM ride_points r
+    JOIN ride_start s ON r.trip_id = s.trip_id AND r.t = s.start_t
+    ),
+    SELECT s.trip_id
+    FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, ST_ToGeom(d.geom::gpolygon))
+    WHERE d.name = :district;
+  repetition: 100
+  parameters:
+  - district
+- name: averageRideDurationToGoAtUniversityInPeriod
+  use: true
+  type: spatiotemporal
+  mobilitydb: |
+    SELECT AVG(duration(r.traj)) AS avg_duration FROM rides r JOIN universities u ON ST_DWithin(endValue(r.traj), u.geom::geography, 2500) WHERE r.traj && :period_medium AND u.name = :university;
+  postgis: |
+    WITH rides_in_period AS ( SELECT DISTINCT r.ride_id FROM ride_points r WHERE r.timestamp BETWEEN :period_medium), ride_stats AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts, MAX(r.timestamp) AS end_ts FROM ride_points r JOIN rides_in_period rp ON r.ride_id = rp.ride_id GROUP BY r.ride_id) SELECT AVG(rs.end_ts - rs.start_ts) AS avg_duration FROM ride_stats rs JOIN ride_points rend ON rend.ride_id = rs.ride_id AND rend.timestamp = rs.end_ts JOIN universities u ON ST_DWithin(rend.geom, u.geom, 2500) WHERE u.name = :university;
+  sedona: |
+    WITH rides_in_period AS ( SELECT DISTINCT r.ride_id FROM ride_points r WHERE r.timestamp BETWEEN :period_medium), ride_stats AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts, MAX(r.timestamp) AS end_ts FROM ride_points r JOIN rides_in_period rp ON r.ride_id = rp.ride_id GROUP BY r.ride_id) SELECT AVG(rs.end_ts - rs.start_ts) AS avg_duration FROM ride_stats rs JOIN ride_points rend ON rend.ride_id = rs.ride_id AND rend.timestamp = rs.end_ts JOIN universities u ON ST_DWithin(rend.geom, u.geom, 2500) WHERE u.name = :university;
+  spacetime: |
+    SELECT AVG(t_max - t_min) AS avg_duration
+    FROM (
+    SELECT r.trip_id, MAX(t) AS t_max, MIN(t) AS t_min
+    FROM ride_points r
+    WHERE t <@ RANGE(EPOCH :day, (EPOCH :day) + tp '1d')
+    GROUP BY trip_id
+    );
+  repetition: 100
+  parameters:
+  - period_medium
+  - university
+- name: ridesCrossSeveralDistrictsOnEveningInPeriod
+  use: true
+  type: spatiotemporal
+  mobilitydb: |
+    WITH evening_rides AS ( SELECT * FROM rides r WHERE r.traj && :period_medium AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.traj)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_rides r JOIN berlin_districts d ON ST_Intersects(trajectory(r.traj), d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  postgis: |
+    WITH evening_rides AS ( SELECT DISTINCT r.ride_id FROM ride_points r WHERE r.timestamp BETWEEN :period_medium AND EXTRACT(HOUR FROM r.timestamp) BETWEEN 18 AND 23 ), ride_districts AS ( SELECT er.ride_id, d.name FROM evening_rides er JOIN ride_points r ON r.ride_id = er.ride_id JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom) GROUP BY er.ride_id, d.name ) SELECT rd.ride_id FROM ride_districts rd GROUP BY rd.ride_id HAVING COUNT(*) > 1;
+  sedona: |
+    WITH evening_rides AS ( SELECT DISTINCT r.ride_id FROM ride_points r WHERE r.timestamp BETWEEN :period_medium AND EXTRACT(HOUR FROM r.timestamp) BETWEEN 18 AND 23 ), ride_districts AS ( SELECT er.ride_id, d.name FROM evening_rides er JOIN ride_points r ON r.ride_id = er.ride_id JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom) GROUP BY er.ride_id, d.name ) SELECT rd.ride_id FROM ride_districts rd GROUP BY rd.ride_id HAVING COUNT(*) > 1;
+  spacetime: |
+    SELECT r.trip_id
+    FROM ride_points r
+    JOIN berlin_districts d ON ST_Intersects(ST_Point(r.x, r.y), ST_ToGeom(d.geom::gpolygon))
+    WHERE r.t <@ EPOCHRANGE :period_medium AND HOUR(r.t) BETWEEN 18 AND 23
+    GROUP BY r.trip_id
+    HAVING COUNT(*) > 1;
+  repetition: 100
+  parameters:
+  - period_medium
+

@@ -2,7 +2,7 @@ package aviation_client;
 
 public class MockExecutor implements QueryExecutor {
     @Override
-    public void execute(String sql, String queryName) {
+    public void execute(String sql, String queryName, String dbType) {
         
         String threadName = Thread.currentThread().getName();
         System.out.println(threadName+": Executing mock query of type " +queryName+": "+ sql);

@@ -11,7 +11,6 @@ queryConfigs:
     use: false
     type: temporalbench
     sql: 'SELECT DISTINCT COUNT(f.flightid) from flight_points f WHERE f.timestamp BETWEEN :period_medium;
-
       '
     repetition: 100
     parameters:

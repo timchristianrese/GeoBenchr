@@ -10,7 +10,7 @@ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 chmod 0600 ~/.ssh/authorized_keys
 
 #install zookeeper
-export ZOOKEEPER_VERSION="3.9.3"
+export ZOOKEEPER_VERSION="3.9.4"
 wget https://downloads.apache.org/zookeeper/zookeeper-${ZOOKEEPER_VERSION}/apache-zookeeper-${ZOOKEEPER_VERSION}-bin.tar.gz
 tar -xvf apache-zookeeper-${ZOOKEEPER_VERSION}-bin.tar.gz
 sudo mv apache-zookeeper-${ZOOKEEPER_VERSION}-bin /opt/zookeeper

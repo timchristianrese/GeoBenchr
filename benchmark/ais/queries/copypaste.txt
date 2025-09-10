@@ -1,0 +1,1 @@
+/opt/msql-server/msql-client -H 141.23.28.216:31339 -o mireo -u root -p @2e9R]3]=O -v -q "SELECT DISTINCT crossing_id FROM (SELECT crossing_id, MIN(t) AS t_start FROM crossing_points WHERE t BETWEEN epoch '2019-02-22' - tp '3d' AND epoch '2019-02-22' + tp '3d' GROUP BY crossing_id HAVING ts_daystart(t_start) = epoch '2019-02-22' AND hour(t_start) = 1);"

@@ -30,10 +30,11 @@ def load_config(path="../config/mobilityDBBenchConf.yaml"):
         print(f"Failed to load config: {e}")
         return None
 
-def return_param_values(sql1,sql2, sql3, params, rnd) -> List[Any]:
+def return_param_values(sql1,sql2, sql3, sql4, params, rnd) -> List[Any]:
     parsedSQL1 = sql1
     parsedSQL2 = sql2
     parsedSQL3 = sql3
+    parsedSQL4 = sql4
     values = []
     formatter = "%Y-%m-%d %H:%M:%S"  # Default formatter for datetime
 
@@ -49,7 +50,7 @@ def return_param_values(sql1,sql2, sql3, params, rnd) -> List[Any]:
             "municipality": lambda: get_random_place("municipalities", rnd),
             "county": lambda: get_random_place("counties", rnd),
             "district": lambda: get_random_place("districts", rnd),
-            "point": lambda: get_random_point(rnd, [[6.212909, 52.241256], [8.752841, 50.53438]]),
+            "point": lambda: (lambda coords: f"SRID=4326;POINT({coords[0]} {coords[1]})")(get_random_point(rnd, [[6.212909, 52.241256], [8.752841, 50.53438]])),
             "radius": lambda: (rnd.uniform(2.0, 10.0) * 10) / (1000 * 6378),
             "low_altitude": lambda: rnd.randint(50, 150) * 10,
             "distance": lambda: rnd.randint(1, 10)
@@ -57,25 +58,25 @@ def return_param_values(sql1,sql2, sql3, params, rnd) -> List[Any]:
 
         if replacement is not None:
             # Quote strings and timestamps
-            if isinstance(replacement, str):
-                quoted = f"'{replacement}'"
-            elif isinstance(replacement, list):
-                # Handle time periods (start, end timestamps)
-                quoted = ", ".join([f"'{ts}'" for ts in replacement])
-                quoted = f"[{quoted}]"  # For array-style SQL functions like attime()
+            if param == "point" and isinstance(replacement, list) and len(replacement) == 2:
+                formatted = f"'SRID=4326;POINT({replacement[0]} {replacement[1]})'"
+            elif isinstance(replacement, str):
+                formatted = f"'{replacement}'"
             elif isinstance(replacement, (int, float)):
-                quoted = str(replacement)
-            elif isinstance(replacement, list) and all(isinstance(x, (int, float)) for x in replacement):
-                # coordinates or similar
-                quoted = f"ARRAY{replacement}"
+                formatted = str(replacement)
+            elif isinstance(replacement, list) and all(isinstance(x, str) for x in replacement):
+                formatted = f"[{', '.join([f'\'{x}\'' for x in replacement])}]"
             else:
-                quoted = str(replacement)
+                formatted = str(replacement)
+
+            
 
             values.append(replacement)
-            parsedSQL1 = parsedSQL1.replace(f":{param}", quoted)
-            parsedSQL2 = parsedSQL2.replace(f":{param}", quoted)
-            parsedSQL3 = parsedSQL3.replace(f":{param}", quoted)
-    return parsedSQL1, parsedSQL2, parsedSQL3, values
+            parsedSQL1 = parsedSQL1.replace(f":{param}", formatted)
+            parsedSQL2 = parsedSQL2.replace(f":{param}", formatted)
+            parsedSQL3 = parsedSQL3.replace(f":{param}", formatted)
+            parsedSQL4 = parsedSQL4.replace(f":{param}", formatted)
+    return parsedSQL1, parsedSQL2, parsedSQL3, parsedSQL4, values
 
 
 
@@ -103,6 +104,14 @@ def generate_random_timestamp(rnd: random.Random) -> str:
     random_seconds = rnd.randint(0, 365 * 24 * 60 * 60 - 1)
     timestamp = start + timedelta(seconds=random_seconds)
     return timestamp.strftime(formatter)
+
+def adjust_timestamp_format(ts: str) -> str:
+    """
+    Adjust all timestamps in the file from ['2023-07-21 10:08:29', '2023-07-26 23:30:04'] to '[2023-07-21 10:08:29, 2023-07-26 23:30:04]'
+    """
+    pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
+    replacement = r"'[\1, \2]'"
+    return re.sub(pattern, replacement, ts)
 
 def generate_random_time_span(rnd: random.Random, year: int, mode: int = 0) -> List[str]:
     formatter = "%Y-%m-%d %H:%M:%S"
@@ -210,13 +219,15 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
     mobilitydb_queries = []
     postgis_queries = []
     sedona_queries = []
+    spacetime_queries = []
     for query_config in config['queryConfigs']:
         if query_config['use']:
             for _ in range(query_config['repetition']):
-                mobilitydb_sql, postgis_sql, sedona_sql, values = return_param_values(
+                mobilitydb_sql, postgis_sql, sedona_sql, spacetime_sql, values = return_param_values(
                     query_config['mobilitydb'],
                     query_config['postgis'],
                     query_config['sedona'],
+                    query_config['spacetime'],
                     query_config['parameters'],
                     rnd,
                 )
@@ -240,6 +251,15 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
                     params=values
                 ))
 
+                pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
+                pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
+                spacetime_queries.append(QueryTask(
+                    name=query_config['name'],
+                    type=query_config['type'],
+                    sql=LiteralString(spacetime_sql),
+                    params=values
+                ))
+
                 sedona_sql = fix_between_clause(sedona_sql)
                 pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
                 pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
@@ -253,7 +273,7 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
     if config['benchmark']['mixed']:
         random.shuffle(sedona_queries)
 
-    return mobilitydb_queries, postgis_queries, sedona_queries
+    return mobilitydb_queries, postgis_queries, sedona_queries, spacetime_queries
 #main function
 if __name__ == "__main__":
     config = load_config("../config/combinedBenchConf.yaml")
@@ -286,14 +306,23 @@ if __name__ == "__main__":
     print(f"Distributed: {distributed}")
 
 
-    mobilityDB_queries,postgisSQL_queries, sedonaSQL_queries = prepare_query_tasks(config, main_random)
-    random.shuffle(mobilityDB_queries)
+    mobilityDB_queries,postgisSQL_queries, sedonaSQL_queries, spaceTimeSQL_queries = prepare_query_tasks(config, main_random)
+
+    num_queries = len(mobilityDB_queries)
+    indices = list(range(num_queries))
+    main_random.shuffle(indices)  # use the same seeded RNG
+
+    # Apply the same permutation to all databases
+    mobilityDB_queries   = [mobilityDB_queries[i] for i in indices]
+    postgisSQL_queries   = [postgisSQL_queries[i] for i in indices]
+    sedonaSQL_queries    = [sedonaSQL_queries[i] for i in indices]
+    spaceTimeSQL_queries = [spaceTimeSQL_queries[i] for i in indices]
+
     mobilityDB_data = [query.__dict__ for query in mobilityDB_queries]
     with open("../queries/mobilitydb_queries.yaml", "w") as file:
         yaml.dump(mobilityDB_data, file, sort_keys=False, allow_unicode=True)
 
 
-    random.shuffle(postgisSQL_queries)
     postgisSQL_data = [query.__dict__ for query in postgisSQL_queries]
     with open("../queries/postgisSQL_queries_unprocess.yaml", "w") as file:
         yaml.dump(postgisSQL_data, file, sort_keys=False, allow_unicode=True)
@@ -307,10 +336,22 @@ if __name__ == "__main__":
         with open("../queries/tsdb_queries.yaml", "w") as tsdb_file:
             tsdb_file.write(content)
     
-    random.shuffle(sedonaSQL_queries)
     sedonaSQL_data = [query.__dict__ for query in sedonaSQL_queries]
     with open("../queries/sedonaSQL_queries.yaml", "w") as file:
         yaml.dump(sedonaSQL_data, file, sort_keys=False, allow_unicode=True)
+
+
+    spaceTimeSQL_data = [query.__dict__ for query in spaceTimeSQL_queries]
+    with open("../queries/spaceTimeSQL_queries.yaml", "w") as file: 
+        yaml.dump(spaceTimeSQL_data, file, sort_keys=False, allow_unicode=True)
+    #adjust the file, i.e change timestamps from ['2023-10-11 05:15:27', '2023-10-19 01:32:06'] to '[2023-10-11 05:15:27, 2023-10-19 01:32:06]'
+    with open("../queries/spaceTimeSQL_queries.yaml", "r") as file:
+        content = file.read()
+        content = adjust_timestamp_format(content)
+        with open("../queries/spaceTimeSQL_queries.yaml", "w") as file:
+            file.write(content)
+    
+
 
         #remove all brackets [] from the file
     # with open("../queries/queries.yaml", "r") as file:

@@ -12,11 +12,20 @@ public class BenchmarkRunner {
     private final QueryExecutor executor;
     private final List<QueryConfig> queries;
     private final int numThreads;
+    private final String dbType;
 
     public BenchmarkRunner(QueryExecutor executor, List<QueryConfig> queries, int numThreads) {
         this.executor = executor;
         this.queries = queries;
         this.numThreads = numThreads;
+        this.dbType = "PostgreSQL"; // Default database type
+    }
+
+    public BenchmarkRunner(QueryExecutor executor, List<QueryConfig> queries, int numThreads, String dbType) {
+        this.executor = executor;
+        this.queries = queries;
+        this.numThreads = numThreads;
+        this.dbType = dbType; // Custom database type
     }
 
     public void run() throws InterruptedException {
@@ -28,7 +37,7 @@ public class BenchmarkRunner {
     for (QueryConfig query : queries) {
         Future<?> future = pool.submit(() -> {
             try {
-                executor.execute(query.getSql(), query.getName());
+                executor.execute(query.getSql(), query.getName(), dbType);
             } catch (Exception e) {
                 System.err.println("Error executing query " + query.getName() + ": " + e.getMessage() +
                                    " in thread " + Thread.currentThread().getName());
