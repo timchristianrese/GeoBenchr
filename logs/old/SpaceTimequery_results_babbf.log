@@ -1,0 +1,300 @@
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 109ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 96ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 727ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 97ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 840ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 116ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 95ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1368ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1393ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 105ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 832ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 1730ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2132ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 692ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2266ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 93ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 806ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 554ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 1620ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 96ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1215ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1238ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 99ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 2551ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 100ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 3441ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1819ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 3865ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 3627ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 92ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 5331ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 4588ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 94ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 26277ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 20369ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 17500ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 17653ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 20530ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2419ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 2725ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 2854ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 92ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 92ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 3025ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 25209ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 3905ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 91ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 5005ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 4936ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 45702ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 20149ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 91ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 19893ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 14364ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 16987ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 3011ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 2480ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1266ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1135ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 90ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1409ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1708ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 5524ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 5440ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 91ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 58007ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 8162ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 11543ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 29634ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 2262ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1915ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1336ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 6061ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 3562ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1549ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 94ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1576ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 5331ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 5367ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 40522ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 91ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1674ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 2746ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2676ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2684ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 2849ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 2125ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1100ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 971ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1690ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1384ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 1372ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 95ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 5220ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 6937ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 34614ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 16830ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 9781ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 10050ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 22250ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 8179ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 7560ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 935ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 15233ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 9010ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 47744ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1381ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 102ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2278ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 2661ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 93ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 2530ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 92ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 2273ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 50619ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 5580ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 5676ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 17975ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 10997ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 10688ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 13182ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 581ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 10707ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 1289ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 711ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 1396ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 1412ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 825ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 103ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 1990ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 91ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 1905ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1207ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 45732ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1605ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 2947ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1425ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 975ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 2844ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 4375ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 37384ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 15164ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 11708ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 14287ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 2063ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 1656ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38264ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 21489ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 2110ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 108ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 3809ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 95ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1543ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 94ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 92ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 822ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 778ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1615ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 2904ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 26717ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 92ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 35073ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 9422ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 11537ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 5563ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 91ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 868ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 10461ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 859ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1590ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1657ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 3521ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 90ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 5437ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 5425ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 94ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 21066ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 5127ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1693ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1420ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1107ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 95ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2905ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2804ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 3171ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 93ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1084ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 92ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 3670ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 6137ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 5799ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 36377ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 11455ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 5278ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 99ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 17970ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 3671ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 37609ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 9140ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 5705ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 2144ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 4949ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 36212ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 21398ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 2966ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 15059ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 12168ms
+[pool-1-thread-2] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-5] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-6] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-1] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-3] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-7] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-8] [SpaceTime] [ais] ERROR: 'mostFrequentHarbourInPeriod': Non-zero exit code: 1
+[pool-1-thread-4] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-6] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-2] [SpaceTime] [ais] ERROR: 'countActiveCrossingsInPeriod': Non-zero exit code: 1
+[pool-1-thread-1] [SpaceTime] [ais] ERROR: 'crossingsStartedAtSpecificTimeOnDay': Non-zero exit code: 1
+[pool-1-thread-3] [SpaceTime] [ais] ERROR: 'crossingsStartedAtSpecificTimeOnDay': Non-zero exit code: 1
+[pool-1-thread-5] [SpaceTime] [ais] ERROR: 'mostFrequentHarbourInPeriod': Non-zero exit code: 1
+[pool-1-thread-7] [SpaceTime] [ais] ERROR: 'countActiveCrossingsInPeriod': Non-zero exit code: 1
+[pool-1-thread-8] [SpaceTime] [ais] ERROR: 'countActiveCrossingsNearIsland': Non-zero exit code: 1
+[pool-1-thread-4] [SpaceTime] [ais] ERROR: 'countActiveCrossingsNearIsland': Non-zero exit code: 1
+[pool-1-thread-6] [SpaceTime] [ais] ERROR: 'countActiveCrossingsNearIsland': Non-zero exit code: 1
+[pool-1-thread-5] [SpaceTime] [ais] ERROR: 'mostFrequentHarbourInPeriod': Non-zero exit code: 1
+[pool-1-thread-3] [SpaceTime] [ais] ERROR: 'countActiveCrossingsInPeriod': Non-zero exit code: 1
+[pool-1-thread-2] [SpaceTime] [ais] ERROR: 'countActiveCrossingsInPeriod': Non-zero exit code: 1
+[pool-1-thread-1] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-4] [SpaceTime] [ais] ERROR: 'countActiveCrossingsInPeriod': Non-zero exit code: 1
+[pool-1-thread-7] [SpaceTime] [ais] ERROR: 'mostFrequentHarbourInPeriod': Non-zero exit code: 1
+[pool-1-thread-8] [SpaceTime] [ais] ERROR: 'crossingsStartedAtSpecificTimeOnDay': Non-zero exit code: 1
+[pool-1-thread-6] [SpaceTime] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': Non-zero exit code: 1
+[pool-1-thread-3] [SpaceTime] [ais] ERROR: 'countActiveCrossingsInPeriod': Non-zero exit code: 1
+[pool-1-thread-2] [SpaceTime] [ais] ERROR: 'crossingsStartedAtSpecificTimeOnDay': Non-zero exit code: 1
+[pool-1-thread-1] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-5] [SpaceTime] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': Non-zero exit code: 1
+[pool-1-thread-7] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-4] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-8] [SpaceTime] [ais] ERROR: 'crossingsConnectTwoGivenHarbours': Non-zero exit code: 1
+[pool-1-thread-3] [SpaceTime] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': Non-zero exit code: 1
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 8593ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 9006ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 9144ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 9463ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 9210ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 8158ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 2257ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 119ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2213ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2581ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2694ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1559ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 112ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1780ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 2117ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 3118ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 125ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 2410ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 5752ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 94ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 124ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 27583ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 13588ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 136ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 15505ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 4349ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 4623ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 31322ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 12097ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 93ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 15064ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 37829ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 15111ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 47930ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1383ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1386ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1615ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1416ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 94ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1231ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 44642ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 9401ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 91ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 9028ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 18816ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 45623ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 6557ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 6741ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 1678ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 6127ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2920ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 1270ms
+[pool-1-thread-3] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 2993ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 2706ms
+[pool-1-thread-6] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 3191ms
+[pool-1-thread-7] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 24909ms
+[pool-1-thread-5] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 7873ms
+[pool-1-thread-2] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 34058ms
+[pool-1-thread-4] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 37239ms
+[pool-1-thread-8] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 29556ms

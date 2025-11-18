@@ -1,0 +1,800 @@
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 888ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 1937ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 332ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 14613ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15616ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 43257ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38504ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 29834ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 17421ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 2632ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 2483ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 214ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 333ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 101790ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 133ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 17114ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 17389ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16565ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 45866ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 36999ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 149ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16988ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 136ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 128ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 126ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 222ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 115ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 146ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 36605ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16362ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 80083ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 50708ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 83120ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 392ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 1545ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 3553ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 201ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 17205ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15886ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16853ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 15073ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 77338ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16569ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 662ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 253ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16514ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 2849ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 72943ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15718ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38091ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16743ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 135ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16255ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38817ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 115ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38332ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 109ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15798ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 44342ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 122ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38296ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 44220ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38618ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16177ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 14805ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15379ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 45832ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16053ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15087ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15589ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 36978ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 198ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16026ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 365ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 111ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 80197ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 45481ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15316ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 71249ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16096ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15274ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15188ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 123ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 122ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16369ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 121ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 37860ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39559ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39131ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 4167ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 80872ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 90147ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 48430ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16569ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15731ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 272ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 15301ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 390ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 78042ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16065ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 680ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39489ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39023ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16847ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 78427ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 134ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15934ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15489ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 235ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15681ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39435ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 183ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 145ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 77326ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 73838ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 77941ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16735ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16640ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 143ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 313ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16489ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 604ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38729ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 117ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16511ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39099ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 15445ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 14898ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16511ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 855ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 76996ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 43336ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16561ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16697ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 162ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 297ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39179ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16698ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15762ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16461ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 164ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 881ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15540ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15682ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15387ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 315ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38285ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16565ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15864ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 140ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16624ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 321ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 123ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 382ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 15394ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 123ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 15177ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38876ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 136ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38863ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16528ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 75350ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16099ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 133ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38731ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 78006ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 139ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16752ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39057ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38019ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 137ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 287ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15823ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15972ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16794ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 15313ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 41025ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 77290ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 76655ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39094ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 75475ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 408ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 75685ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 1838ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38808ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16459ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 150ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16662ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 77315ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16613ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 74163ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 165ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 129ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 958ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 234ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15712ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 75039ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 47285ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 988ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39145ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 1091ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39105ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16759ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 42675ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16516ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16394ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 69995ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16787ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39372ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38588ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16774ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15841ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38130ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39209ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16667ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 77151ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 167ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 154ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 77526ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15826ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 122ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 46641ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 77159ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16635ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 78280ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 15067ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15761ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16468ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 76021ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16703ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15972ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 120ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 126ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16533ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 172ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 51996ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15714ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 138ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 74925ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 150ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 137ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 46449ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 55262ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15822ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 76950ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16594ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16525ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 75239ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16765ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 750ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38079ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16649ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38016ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 74740ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 138ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16745ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16450ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 125ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16499ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 74989ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15677ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 77658ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 76945ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16594ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38484ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38447ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16720ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16455ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 276ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 374ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 846ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 74892ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 51025ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16310ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38374ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16471ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38436ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15719ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 137ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 119ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16547ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 47047ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 77882ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15967ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 609ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 74347ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 148ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 75258ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 124ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 76502ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 347ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 46372ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16715ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38573ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 38697ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16093ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 1534ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 77331ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16678ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 74737ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 46773ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 42392ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16820ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39195ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 70334ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 143ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 16507ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 119ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 322ms
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 39472ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'mostFrequentHarbourInPeriod': ERROR: syntax error at or near "["
+  Position: 115
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'averageDurationCrossingStartAtHarbourInPeriod': ERROR: Only lon/lat coordinate systems are supported in geography.
+[pool-4-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsStartedAtSpecificTimeOnDay': 15800ms
+[pool-4-thread-1] [TimescaleDB] [ais] ERROR: 'countActiveCrossingsInPeriod': ERROR: syntax error at or near "["
+  Position: 92

@@ -1,0 +1,175 @@
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 78ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 62ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 2137ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 869ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 73ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 68ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 474ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 2004ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 135ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 69ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 68ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 62ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 65ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 427ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 75ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 65ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 845ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 416ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 58ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 409ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 61ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 58ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 82ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 431ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 64ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 73ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 73ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 65ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 520ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 63ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 425ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 65ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 263ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 99ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 429ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 2135ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 425ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 281ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 427ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 842ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 72ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 71ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 426ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 163ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 2011ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 73ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 844ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 424ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 67ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 61ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 441ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 2136ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 1809ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 62ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 426ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 62ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 75ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 114ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 65ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 424ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 72ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 425ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 424ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 71ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 82ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 68ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 962ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 69ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 65ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 648ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 123ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 202ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 2625ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 61ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 62ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 67ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 61ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 64ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 67ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 65ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 1710ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 253ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 1861ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 410ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 614ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 392ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 78ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 62ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 310ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 402ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 2386ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 71ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 78ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 79ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 602ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 58ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 1955ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 61ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 412ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 68ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 65ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 75ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 418ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 67ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 60ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 423ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 127ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 58ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 420ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 80ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 630ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 1714ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 388ms
+[pool-2-thread-1] [MobilityDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: relation "ride" does not exist
+  Position: 51
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 415ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 68ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 66ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 529ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 64ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 69ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'rideStartedInDistrict': 423ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 69ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 62ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInPeriod': 67ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 65ms
+[pool-2-thread-1] [MobilityDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 428ms

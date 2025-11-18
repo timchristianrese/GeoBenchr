@@ -1,0 +1,100 @@
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'airportUtilizationInPeriod': 2444ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightClosestToPoint': ERROR: syntax error at or near "{"
+  Position: 204
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightsInCountyInPeriod': ERROR: operator does not exist: tgeompoint && geometry
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 111
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 417ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightsInCountyInPeriod': ERROR: operator does not exist: tgeompoint && geometry
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 109
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 246ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'inCityRadiusInPeriod': 5855ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 417ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'airportUtilizationInPeriod': 2988ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightClosestToPoint': ERROR: syntax error at or near "{"
+  Position: 204
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 294ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 305ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightClosestToPoint': ERROR: syntax error at or near "{"
+  Position: 204
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightsInCountyInPeriod': ERROR: operator does not exist: tgeompoint && geometry
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 119
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightsInCountyInPeriod': ERROR: operator does not exist: tgeompoint && geometry
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 112
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'airportUtilizationInPeriod': 3211ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'countFlightsInCounties': ERROR: missing FROM-clause entry for table "c"
+  Position: 119
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'countFlightsInCounties': ERROR: missing FROM-clause entry for table "c"
+  Position: 119
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightClosestToPoint': ERROR: syntax error at or near "{"
+  Position: 204
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'inCityRadiusInPeriod': 452ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'airportUtilizationInPeriod': 2461ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'countFlightsInCounties': ERROR: missing FROM-clause entry for table "c"
+  Position: 119
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'inCityRadiusInPeriod': 1098ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightsInCountyInPeriod': ERROR: operator does not exist: tgeompoint && geometry
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 122
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'airportUtilizationInPeriod': 2471ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'inCityRadiusInPeriod': 9756ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'airportUtilizationInPeriod': 2539ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'countFlightsInCounties': ERROR: missing FROM-clause entry for table "c"
+  Position: 119
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 332ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightClosestToPoint': ERROR: syntax error at or near "{"
+  Position: 203
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'countFlightsInCounties': ERROR: missing FROM-clause entry for table "c"
+  Position: 119
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightClosestToPoint': ERROR: syntax error at or near "{"
+  Position: 204
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'inCityRadiusInPeriod': 5913ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightsInCountyInPeriod': ERROR: operator does not exist: tgeompoint && geometry
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 107
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'inCityRadiusInPeriod': 2202ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'inCityRadiusInPeriod': 10567ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightClosestToPoint': ERROR: syntax error at or near "{"
+  Position: 204
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'inCityRadiusInPeriod': 7492ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightsInCountyInPeriod': ERROR: operator does not exist: tgeompoint && geometry
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 106
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'inCityRadiusInPeriod': 5035ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightClosestToPoint': ERROR: syntax error at or near "{"
+  Position: 204
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'airportUtilizationInPeriod': 2464ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightClosestToPoint': ERROR: syntax error at or near "{"
+  Position: 204
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'airportUtilizationInPeriod': 2940ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'countFlightsInCounties': ERROR: missing FROM-clause entry for table "c"
+  Position: 119
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'airportUtilizationInPeriod': 2455ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightsInCountyInPeriod': ERROR: operator does not exist: tgeompoint && geometry
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 128
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 287ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightClosestToPoint': ERROR: syntax error at or near "{"
+  Position: 202
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 273ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 208ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'inCityRadiusInPeriod': 4270ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'inCityRadiusInPeriod': 5046ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'countFlightsInCounties': ERROR: missing FROM-clause entry for table "c"
+  Position: 119
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'airportUtilizationInPeriod': 2485ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 258ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightsInCountyInPeriod': ERROR: operator does not exist: tgeompoint && geometry
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 110
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 532ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightClosestToPoint': ERROR: syntax error at or near "{"
+  Position: 203
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 293ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] SUCCESS: 'FlightUpdatesInPeriod': 166ms
+[pool-4-thread-1] [MobilityDB_Time_Partitioned] [aviation] ERROR: 'flightsInCountyInPeriod': ERROR: operator does not exist: tgeompoint && geometry
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 106

@@ -1,0 +1,6 @@
+[pool-3-thread-1] [MobilityDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 523ms
+[pool-3-thread-1] [MobilityDB] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 471ms
+[pool-3-thread-1] [MobilityDB] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 22411ms
+[pool-3-thread-1] [MobilityDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 2914ms
+[pool-3-thread-1] [MobilityDB] [ais] SUCCESS: 'CrossingsActiveAtGivenHourOfDay': 12172ms
+[pool-3-thread-1] [MobilityDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 1568981ms

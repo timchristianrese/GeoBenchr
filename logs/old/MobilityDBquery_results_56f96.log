@@ -1,0 +1,7 @@
+[pool-2-thread-1] [MobilityDB] [aviation] SUCCESS: 'inCityRadiusInPeriod': 261ms
+[pool-2-thread-1] [MobilityDB] [aviation] SUCCESS: 'countActiveFlightsInPeriod': 328ms
+[pool-2-thread-1] [MobilityDB] [aviation] SUCCESS: 'airportUtilizationInPeriod': 253ms
+[pool-2-thread-1] [MobilityDB] [aviation] SUCCESS: 'countFlightsInCounties': 2965500ms
+[pool-2-thread-1] [MobilityDB] [aviation] SUCCESS: 'airportUtilizationInPeriod': 102ms
+[pool-2-thread-1] [MobilityDB] [aviation] SUCCESS: 'airportUtilizationInPeriod': 110ms
+[pool-2-thread-1] [MobilityDB] [aviation] SUCCESS: 'inCityRadiusInPeriod': 189ms

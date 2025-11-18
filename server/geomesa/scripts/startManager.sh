@@ -23,7 +23,7 @@ bin/zkServer.sh start
 #bin/zkCli.sh -server 127.0.0.1:2181
 
 #add namenode-manager to /etc/hosts
-machine_name="server-peter-lan.3s.tu-berlin.de"
+machine_name="server-peter-lan"
 ip_address=$(nslookup $machine_name | awk '/^Address: / { print $2 }')
 if ! grep -q "$ip_address $machine_name" /etc/hosts; then
     echo "$ip_address $machine_name" | sudo tee -a /etc/hosts
@@ -44,7 +44,7 @@ bin/hadoop -version
 echo "<configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://server-peter-lan.3s.tu-berlin.de:9000</value>
+        <value>hdfs://server-peter-lan:9000</value>
     </property>
 </configuration>" > etc/hadoop/core-site.xml
 echo "<configuration>
@@ -69,7 +69,7 @@ echo "<configuration>
     </property>
     <property>
         <name>yarn.resourcemanager.hostname</name>
-        <value>server-peter-lan.3s.tu-berlin.de</value>
+        <value>server-peter-lan</value>
     </property>
     <property>
         <name>yarn.resourcemanager.scheduler.class</name>
@@ -91,7 +91,7 @@ export PDSH_RCMD_TYPE=ssh
 
 #install accumulo 
 cd ~
-export ACCUMULO_VERSION="2.1.3"
+export ACCUMULO_VERSION="2.1.4"
 wget https://dlcdn.apache.org/accumulo/${ACCUMULO_VERSION}/accumulo-${ACCUMULO_VERSION}-bin.tar.gz
 tar -xvf accumulo-${ACCUMULO_VERSION}-bin.tar.gz
 sudo mv accumulo-${ACCUMULO_VERSION} /opt/accumulo
@@ -106,29 +106,39 @@ ACCUMULO_HOME=/opt/accumulo\
 ZOOKEEPER_HOME=/opt/zookeeper\
 HADOOP_HOME=/opt/hadoop' conf/accumulo-env.sh
 
+sudo mkdir -p /opt/accumulo/run
+sudo mkdir -p /opt/accumulo/logs
+sudo chown -R tim:tim /opt/accumulo/run /opt/accumulo/logs
+
 #replace 8020 in accumulo.properties with 9000
 sed -i 's/8020/9000/g' conf/accumulo.properties
-sed -i 's/localhost/server-peter-lan.3s.tu-berlin.de/g' conf/accumulo.properties
+sed -i 's/localhost/server-peter-lan/g' conf/accumulo.properties
 #replace instance_name= in accumulo-client.properties with instance_name=test
 sed -i 's/instance.name=/instance.name=test/g' conf/accumulo-client.properties
 sed -i 's/auth.principal=/auth.principal=root/g' conf/accumulo-client.properties
 sed -i 's/auth.token=/auth.token=test/g' conf/accumulo-client.properties
-sed -i 's/instance.zookeepers=localhost/instance.zookeepers=server-peter-lan.3s.tu-berlin.de/g' conf/accumulo-client.properties
+sed -i 's/instance.zookeepers=localhost/instance.zookeepers=server-peter-lan/g' conf/accumulo-client.properties
 bin/accumulo-cluster create-config
 #make services remotely reachable instead of just from localhost
-sed -i 's/localhost/server-peter-lan.3s.tu-berlin.de/g' conf/cluster.yaml
+sed -i 's/localhost/server-peter-lan/g' conf/cluster.yaml
 
 
 cd ~
-export TAG="5.0.1"
+export TAG="5.3.0"
 export SCALA_VERSION="2.12"
 export VERSION="2.12-${TAG}" # note: 2.12 is the Scala build version
 # download and unpackage the most recent distribution:
-wget "https://github.com/locationtech/geomesa/releases/download/geomesa-${TAG}/geomesa-accumulo_${VERSION}-bin.tar.gz"
-tar xvf geomesa-accumulo_${VERSION}-bin.tar.gz
+sudo wget "https://github.com/locationtech/geomesa/releases/download/geomesa-${TAG}/geomesa-accumulo_${VERSION}-bin.tar.gz"
+sudo tar xvf geomesa-accumulo_${VERSION}-bin.tar.gz
 sudo mv geomesa-accumulo_${VERSION} /opt/geomesa-accumulo 
-sudo mv /opt/geomesa-accumulo/dist/accumulo/geomesa-accumulo-distributed-runtime_${SCALA_VERSION}-${TAG}.jar /opt/accumulo/lib
+sudo mv /opt/geomesa-accumulo/dist/accumulo/geomesa-accumulo-distributed-runtime_${SCALA_VERSION}-${TAG}.jar /opt/accumulo/lib/geomesa-accumulo-distributed-runtime_${SCALA_VERSION}-${TAG}.jar
+
+sudo chown -R tim:tim /opt/geomesa-accumulo
 
 cd /opt/accumulo
+
+# change file limit in etc/security/limits.conf
+echo "tim hard nofile 32768" | sudo tee -a /etc/security/limits.conf
+echo "tim soft nofile 32768" | sudo tee -a /etc/security/limits.conf
 
 #bin/accumulo-cluster start

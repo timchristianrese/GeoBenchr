@@ -1,0 +1,6 @@
+[pool-5-thread-1] [TimescaleDB] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 71ms
+[pool-5-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 64ms
+[pool-5-thread-1] [TimescaleDB] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 830ms
+[pool-5-thread-1] [TimescaleDB] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 72ms
+[pool-5-thread-1] [TimescaleDB] [ais] SUCCESS: 'CrossingsActiveAtGivenHourOfDay': 9649ms
+[pool-5-thread-1] [TimescaleDB] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 459ms

@@ -62,7 +62,7 @@ fi
 
 echo "Configuring Spark master..."
 
-IP="141.23.28.216"
+IP="server-peter-lan"
 
 # Explicitly define SPARK_HOME
 export SPARK_HOME="/opt/spark"

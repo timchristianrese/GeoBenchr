@@ -1,0 +1,6 @@
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 135ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 96ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 331ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 106ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'CrossingsActiveAtGivenHourOfDay': 1794ms
+[pool-1-thread-1] [SpaceTime] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 117ms

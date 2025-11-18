@@ -1,0 +1,6 @@
+[pool-2-thread-1] [PostGIS] [ais] SUCCESS: 'averageDurationCrossingStartAtHarbourInPeriod': 562ms
+[pool-2-thread-1] [PostGIS] [ais] SUCCESS: 'countActiveCrossingsInPeriod': 96ms
+[pool-2-thread-1] [PostGIS] [ais] SUCCESS: 'mostFrequentHarbourInPeriod': 71370ms
+[pool-2-thread-1] [PostGIS] [ais] SUCCESS: 'crossingsConnectTwoGivenHarbours': 91ms
+[pool-2-thread-1] [PostGIS] [ais] SUCCESS: 'CrossingsActiveAtGivenHourOfDay': 8836ms
+[pool-2-thread-1] [PostGIS] [ais] SUCCESS: 'countActiveCrossingsNearIsland': 307ms

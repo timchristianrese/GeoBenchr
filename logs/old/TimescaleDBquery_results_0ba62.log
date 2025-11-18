@@ -1,0 +1,200 @@
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 24949ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 554ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 281ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 6208ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 19804ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 326ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 5174ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 387ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 577ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 156ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 111ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 55ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 234ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 112ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 88ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 110ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 672ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 113ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 4806ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 678ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 558ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 113ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 5499ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 401ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 1768ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 430ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 2153ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 8147ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 376ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 65ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 55ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 109ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 112ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 89ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 85ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 111ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 52ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 426ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 108ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 5841ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 217ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 153ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 212ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 138ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 2580ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 415ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 248ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 118ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 112ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 110ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 53ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 120ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 362ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 114ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 111ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 114ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 172ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 1323ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 4067ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 112ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 420ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 87ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 334ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 109ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 4086ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 372ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 56ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 104ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 1042ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 172ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 1082ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 5492ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 150ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 194ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 113ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 101ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 4967ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 1287ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 430ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 342ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 252ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 664ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 104ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 783ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 104ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 5328ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 249ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 355ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 396ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 851ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 2467ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 48ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 359ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 10369ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 206ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 122ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 126ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 99ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 271ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 5380ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 2343ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 5147ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 54ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 101ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 103ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 580ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 103ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 283ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 143ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 277ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 113ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 5240ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 401ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 216ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 260ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 228ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 256ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 5551ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 777ms
+[pool-5-thread-1] [TimescaleDB] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 217
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'countActiveRideInDistrict': 5494ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'ridesPastOrToUniversity': 106ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 70ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'averageRideDurationDuringDay': 109ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 160ms
+[pool-5-thread-1] [TimescaleDB] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 195ms

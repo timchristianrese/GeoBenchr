@@ -1,0 +1,1375 @@
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 133) WHERE r.trip && tstzspan '[2023-12-19 00:26:09, 2023-12-26 02:33:32]' AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2023-12-19 00:26:09'
+    - '2023-12-26 02:33:32'
+  - Charité-Campus-Klinik
+  - 133
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+  params:
+  - Tempelhof-Schöneberg
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 125))
+      AND ST_DWithin(r.trajectory, u.geom, 125)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 125
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 497))
+      AND ST_DWithin(r.trajectory, u.geom, 497)
+    WHERE u.name = 'Bard-College';
+  params:
+  - Bard-College
+  - 497
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Steglitz-Zehlendorf' GROUP BY d.name;
+  params:
+  - Steglitz-Zehlendorf
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Pankow' GROUP BY d.name;
+  params:
+  - Pankow
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2022-11-14'::timestamp, DATE '2022-11-14' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2022-11-14'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Pankow' GROUP BY d.name;
+  params:
+  - Pankow
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 315))
+      AND ST_DWithin(r.trajectory, u.geom, 315)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 315
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2023-08-24 00:44:44, 2023-09-06 00:22:18]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2023-08-24 00:44:44'
+    - '2023-09-06 00:22:18'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 819) WHERE r.trip && tstzspan '[2024-05-04 08:33:55, 2024-05-08 16:00:41]' AND u.name = 'Technische-Universität-Berlin';
+  params:
+  - - '2024-05-04 08:33:55'
+    - '2024-05-08 16:00:41'
+  - Technische-Universität-Berlin
+  - 819
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2024-10-16 16:11:33, 2024-10-29 09:51:06]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-10-16 16:11:33'
+    - '2024-10-29 09:51:06'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2021-04-20'::timestamp, DATE '2021-04-20' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2021-04-20'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2020-08-10 08:48:23, 2020-08-18 22:34:26]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2020-08-10 08:48:23'
+    - '2020-08-18 22:34:26'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2021-08-27 08:11:51, 2021-09-08 21:23:05]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-08-27 08:11:51'
+    - '2021-09-08 21:23:05'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2024-10-26'::timestamp, DATE '2024-10-26' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2024-10-26'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2023-10-05 12:11:58, 2023-10-08 22:37:22]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-10-05 12:11:58'
+    - '2023-10-08 22:37:22'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2020-06-03'::timestamp, DATE '2020-06-03' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2020-06-03'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-05-12 23:20:17, 2022-05-16 17:17:25]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2022-05-12 23:20:17'
+    - '2022-05-16 17:17:25'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2022-01-08'::timestamp, DATE '2022-01-08' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2022-01-08'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Marzahn-Hellersdorf' GROUP BY d.name;
+  params:
+  - Marzahn-Hellersdorf
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 838))
+      AND ST_DWithin(r.trajectory, u.geom, 838)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 838
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 553))
+      AND ST_DWithin(r.trajectory, u.geom, 553)
+    WHERE u.name = 'Charité-Campus-Klinik';
+  params:
+  - Charité-Campus-Klinik
+  - 553
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2022-08-01'::timestamp, DATE '2022-08-01' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2022-08-01'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+  params:
+  - Tempelhof-Schöneberg
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-12-28 23:59:02, 2022-01-10 03:24:34]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2021-12-28 23:59:02'
+    - '2022-01-10 03:24:34'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Marzahn-Hellersdorf' GROUP BY d.name;
+  params:
+  - Marzahn-Hellersdorf
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 166))
+      AND ST_DWithin(r.trajectory, u.geom, 166)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 166
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Reinickendorf' GROUP BY d.name;
+  params:
+  - Reinickendorf
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf' GROUP BY d.name;
+  params:
+  - Charlottenburg-Wilmersdorf
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 249))
+      AND ST_DWithin(r.trajectory, u.geom, 249)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 249
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2020-10-20 16:07:20, 2020-11-02 01:49:06]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-10-20 16:07:20'
+    - '2020-11-02 01:49:06'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2020-09-12 13:53:52, 2020-09-19 23:47:38]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2020-09-12 13:53:52'
+    - '2020-09-19 23:47:38'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2023-07-11'::timestamp, DATE '2023-07-11' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2023-07-11'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2023-04-08'::timestamp, DATE '2023-04-08' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2023-04-08'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-11-25 18:37:15, 2022-11-27 23:12:48]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2022-11-25 18:37:15'
+    - '2022-11-27 23:12:48'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2020-12-11 11:52:55, 2020-12-25 19:10:36]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-12-11 11:52:55'
+    - '2020-12-25 19:10:36'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 828) WHERE r.trip && tstzspan '[2022-05-25 18:12:59, 2022-05-30 01:17:40]' AND u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - - '2022-05-25 18:12:59'
+    - '2022-05-30 01:17:40'
+  - Universität-der-Künste-Berlin
+  - 828
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 313) WHERE r.trip && tstzspan '[2023-06-24 11:48:54, 2023-07-01 23:38:35]' AND u.name = 'Technische-Universität-Berlin';
+  params:
+  - - '2023-06-24 11:48:54'
+    - '2023-07-01 23:38:35'
+  - Technische-Universität-Berlin
+  - 313
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2023-03-24'::timestamp, DATE '2023-03-24' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2023-03-24'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2020-03-30 10:40:05, 2020-04-14 08:49:49]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-03-30 10:40:05'
+    - '2020-04-14 08:49:49'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 525) WHERE r.trip && tstzspan '[2023-06-20 00:54:59, 2023-06-27 22:09:17]' AND u.name = 'Freie-Universität-Berlin';
+  params:
+  - - '2023-06-20 00:54:59'
+    - '2023-06-27 22:09:17'
+  - Freie-Universität-Berlin
+  - 525
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 160))
+      AND ST_DWithin(r.trajectory, u.geom, 160)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 160
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 197) WHERE r.trip && tstzspan '[2022-02-13 18:27:58, 2022-02-18 03:50:13]' AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2022-02-13 18:27:58'
+    - '2022-02-18 03:50:13'
+  - Charité-Campus-Klinik
+  - 197
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2024-08-17'::timestamp, DATE '2024-08-17' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2024-08-17'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Neukölln' GROUP BY d.name;
+  params:
+  - Neukölln
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2023-12-06 16:31:17, 2023-12-10 10:51:22]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2023-12-06 16:31:17'
+    - '2023-12-10 10:51:22'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 571) WHERE r.trip && tstzspan '[2021-08-31 12:29:42, 2021-09-12 15:55:01]' AND u.name = 'Bard-College';
+  params:
+  - - '2021-08-31 12:29:42'
+    - '2021-09-12 15:55:01'
+  - Bard-College
+  - 571
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2023-01-05 17:24:21, 2023-01-08 11:44:27]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2023-01-05 17:24:21'
+    - '2023-01-08 11:44:27'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2024-10-07 16:20:39, 2024-10-19 12:33:56]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-10-07 16:20:39'
+    - '2024-10-19 12:33:56'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2023-06-05 16:52:13, 2023-06-11 10:29:31]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-06-05 16:52:13'
+    - '2023-06-11 10:29:31'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Steglitz-Zehlendorf' GROUP BY d.name;
+  params:
+  - Steglitz-Zehlendorf
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2023-07-13 00:14:42, 2023-07-27 12:50:27]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2023-07-13 00:14:42'
+    - '2023-07-27 12:50:27'
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 325))
+      AND ST_DWithin(r.trajectory, u.geom, 325)
+    WHERE u.name = 'Charité-Campus-Klinik';
+  params:
+  - Charité-Campus-Klinik
+  - 325
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 536))
+      AND ST_DWithin(r.trajectory, u.geom, 536)
+    WHERE u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 536
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2022-07-08'::timestamp, DATE '2022-07-08' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2022-07-08'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 283) WHERE r.trip && tstzspan '[2023-12-28 09:57:03, 2024-01-10 22:38:56]' AND u.name = 'Humboldt-Universität-zu-Berlin';
+  params:
+  - - '2023-12-28 09:57:03'
+    - '2024-01-10 22:38:56'
+  - Humboldt-Universität-zu-Berlin
+  - 283
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2021-07-20'::timestamp, DATE '2021-07-20' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2021-07-20'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2020-02-24 18:27:19, 2020-03-02 09:20:30]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-02-24 18:27:19'
+    - '2020-03-02 09:20:30'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 126) WHERE r.trip && tstzspan '[2020-04-10 18:55:28, 2020-04-18 08:23:22]' AND u.name = 'Freie-Universität-Berlin';
+  params:
+  - - '2020-04-10 18:55:28'
+    - '2020-04-18 08:23:22'
+  - Freie-Universität-Berlin
+  - 126
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 417) WHERE r.trip && tstzspan '[2022-07-03 02:00:31, 2022-07-14 22:18:23]' AND u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - - '2022-07-03 02:00:31'
+    - '2022-07-14 22:18:23'
+  - European-School-of-Management-and-Technology-Berlin
+  - 417
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2023-12-02'::timestamp, DATE '2023-12-02' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2023-12-02'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2022-09-26 12:02:52, 2022-10-06 09:59:30]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2022-09-26 12:02:52'
+    - '2022-10-06 09:59:30'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2022-04-17'::timestamp, DATE '2022-04-17' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2022-04-17'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2024-12-28'::timestamp, DATE '2024-12-28' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2024-12-28'
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 510))
+      AND ST_DWithin(r.trajectory, u.geom, 510)
+    WHERE u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 510
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 962))
+      AND ST_DWithin(r.trajectory, u.geom, 962)
+    WHERE u.name = 'Bard-College';
+  params:
+  - Bard-College
+  - 962
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Reinickendorf' GROUP BY d.name;
+  params:
+  - Reinickendorf
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf' GROUP BY d.name;
+  params:
+  - Charlottenburg-Wilmersdorf
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2023-11-21'::timestamp, DATE '2023-11-21' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2023-11-21'
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 225))
+      AND ST_DWithin(r.trajectory, u.geom, 225)
+    WHERE u.name = 'Humboldt-Universität-zu-Berlin';
+  params:
+  - Humboldt-Universität-zu-Berlin
+  - 225
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2021-12-15 23:26:41, 2021-12-18 04:40:09]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-12-15 23:26:41'
+    - '2021-12-18 04:40:09'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2024-04-06 18:01:14, 2024-04-20 10:16:29]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-04-06 18:01:14'
+    - '2024-04-20 10:16:29'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 328) WHERE r.trip && tstzspan '[2022-09-07 20:00:50, 2022-09-15 23:52:21]' AND u.name = 'Bard-College';
+  params:
+  - - '2022-09-07 20:00:50'
+    - '2022-09-15 23:52:21'
+  - Bard-College
+  - 328
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 185))
+      AND ST_DWithin(r.trajectory, u.geom, 185)
+    WHERE u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 185
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf' GROUP BY d.name;
+  params:
+  - Charlottenburg-Wilmersdorf
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 809) WHERE r.trip && tstzspan '[2023-11-19 10:29:50, 2023-11-25 17:11:47]' AND u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - - '2023-11-19 10:29:50'
+    - '2023-11-25 17:11:47'
+  - Universität-der-Künste-Berlin
+  - 809
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 762) WHERE r.trip && tstzspan '[2020-12-08 07:30:51, 2020-12-19 14:45:26]' AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2020-12-08 07:30:51'
+    - '2020-12-19 14:45:26'
+  - Charité-Campus-Klinik
+  - 762
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 494))
+      AND ST_DWithin(r.trajectory, u.geom, 494)
+    WHERE u.name = 'Charité-Campus-Klinik';
+  params:
+  - Charité-Campus-Klinik
+  - 494
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2020-07-15 15:08:46, 2020-07-22 09:49:05]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-07-15 15:08:46'
+    - '2020-07-22 09:49:05'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 307) WHERE r.trip && tstzspan '[2020-03-11 00:32:25, 2020-03-20 06:57:01]' AND u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - - '2020-03-11 00:32:25'
+    - '2020-03-20 06:57:01'
+  - European-School-of-Management-and-Technology-Berlin
+  - 307
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2021-03-24'::timestamp, DATE '2021-03-24' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2021-03-24'
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 506))
+      AND ST_DWithin(r.trajectory, u.geom, 506)
+    WHERE u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - European-School-of-Management-and-Technology-Berlin
+  - 506
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-04-09 22:03:41, 2021-04-13 16:39:32]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2021-04-09 22:03:41'
+    - '2021-04-13 16:39:32'
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 725))
+      AND ST_DWithin(r.trajectory, u.geom, 725)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 725
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+  params:
+  - Tempelhof-Schöneberg
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2023-11-29 08:04:03, 2023-12-12 20:38:25]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-11-29 08:04:03'
+    - '2023-12-12 20:38:25'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2021-04-22 12:12:33, 2021-05-04 04:04:45]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-04-22 12:12:33'
+    - '2021-05-04 04:04:45'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2022-05-29'::timestamp, DATE '2022-05-29' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2022-05-29'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 521) WHERE r.trip && tstzspan '[2020-09-16 11:33:54, 2020-09-25 22:29:30]' AND u.name = 'Technische-Universität-Berlin';
+  params:
+  - - '2020-09-16 11:33:54'
+    - '2020-09-25 22:29:30'
+  - Technische-Universität-Berlin
+  - 521
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 594) WHERE r.trip && tstzspan '[2022-08-03 12:55:47, 2022-08-08 15:57:02]' AND u.name = 'Humboldt-Universität-zu-Berlin';
+  params:
+  - - '2022-08-03 12:55:47'
+    - '2022-08-08 15:57:02'
+  - Humboldt-Universität-zu-Berlin
+  - 594
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2024-09-09 14:44:35, 2024-09-13 05:33:00]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-09-09 14:44:35'
+    - '2024-09-13 05:33:00'
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 764))
+      AND ST_DWithin(r.trajectory, u.geom, 764)
+    WHERE u.name = 'Technische-Universität-Berlin';
+  params:
+  - Technische-Universität-Berlin
+  - 764
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 961) WHERE r.trip && tstzspan '[2024-11-25 17:42:19, 2024-12-10 05:54:57]' AND u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - - '2024-11-25 17:42:19'
+    - '2024-12-10 05:54:57'
+  - Universität-der-Künste-Berlin
+  - 961
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 439) WHERE r.trip && tstzspan '[2020-03-29 01:18:42, 2020-04-03 11:03:37]' AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2020-03-29 01:18:42'
+    - '2020-04-03 11:03:37'
+  - Charité-Campus-Klinik
+  - 439
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Reinickendorf' GROUP BY d.name;
+  params:
+  - Reinickendorf
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-06-16 17:42:26, 2021-07-01 17:00:35]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2021-06-16 17:42:26'
+    - '2021-07-01 17:00:35'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2024-08-08 15:43:16, 2024-08-23 01:17:43]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2024-08-08 15:43:16'
+    - '2024-08-23 01:17:43'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2024-11-19 23:00:03, 2024-11-28 15:15:34]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2024-11-19 23:00:03'
+    - '2024-11-28 15:15:34'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-07-29 00:38:46, 2022-08-11 17:57:30]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2022-07-29 00:38:46'
+    - '2022-08-11 17:57:30'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2021-03-16 19:58:55, 2021-03-22 13:46:55]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-03-16 19:58:55'
+    - '2021-03-22 13:46:55'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-01-17 10:41:29, 2021-01-29 13:01:18]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2021-01-17 10:41:29'
+    - '2021-01-29 13:01:18'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2021-11-18'::timestamp, DATE '2021-11-18' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2021-11-18'
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 918))
+      AND ST_DWithin(r.trajectory, u.geom, 918)
+    WHERE u.name = 'Technische-Universität-Berlin';
+  params:
+  - Technische-Universität-Berlin
+  - 918
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-08-11 16:05:46, 2021-08-23 19:32:07]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2021-08-11 16:05:46'
+    - '2021-08-23 19:32:07'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-03-30 18:55:18, 2021-04-06 06:11:12]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2021-03-30 18:55:18'
+    - '2021-04-06 06:11:12'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 912) WHERE r.trip && tstzspan '[2021-08-02 11:36:44, 2021-08-07 22:29:36]' AND u.name = 'Freie-Universität-Berlin';
+  params:
+  - - '2021-08-02 11:36:44'
+    - '2021-08-07 22:29:36'
+  - Freie-Universität-Berlin
+  - 912
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-08-03 04:10:29, 2021-08-12 22:12:12]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2021-08-03 04:10:29'
+    - '2021-08-12 22:12:12'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Spandau' GROUP BY d.name;
+  params:
+  - Spandau
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Steglitz-Zehlendorf' GROUP BY d.name;
+  params:
+  - Steglitz-Zehlendorf
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 442) WHERE r.trip && tstzspan '[2021-04-28 03:15:47, 2021-05-02 04:51:24]' AND u.name = 'Freie-Universität-Berlin';
+  params:
+  - - '2021-04-28 03:15:47'
+    - '2021-05-02 04:51:24'
+  - Freie-Universität-Berlin
+  - 442
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2020-06-28 09:03:38, 2020-07-06 18:32:38]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-06-28 09:03:38'
+    - '2020-07-06 18:32:38'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 957) WHERE r.trip && tstzspan '[2022-05-03 00:18:12, 2022-05-16 11:27:55]' AND u.name = 'Technische-Universität-Berlin';
+  params:
+  - - '2022-05-03 00:18:12'
+    - '2022-05-16 11:27:55'
+  - Technische-Universität-Berlin
+  - 957
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 478))
+      AND ST_DWithin(r.trajectory, u.geom, 478)
+    WHERE u.name = 'Charité-Campus-Klinik';
+  params:
+  - Charité-Campus-Klinik
+  - 478
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 442) WHERE r.trip && tstzspan '[2020-12-06 21:39:28, 2020-12-19 17:48:05]' AND u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - - '2020-12-06 21:39:28'
+    - '2020-12-19 17:48:05'
+  - European-School-of-Management-and-Technology-Berlin
+  - 442
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Friedrichshain-Kreuzberg' GROUP BY d.name;
+  params:
+  - Friedrichshain-Kreuzberg
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2022-07-03 00:05:52, 2022-07-09 10:01:01]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2022-07-03 00:05:52'
+    - '2022-07-09 10:01:01'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2023-12-13 14:08:05, 2023-12-27 17:09:46]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-12-13 14:08:05'
+    - '2023-12-27 17:09:46'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2023-02-18 20:23:14, 2023-02-25 19:44:55]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-02-18 20:23:14'
+    - '2023-02-25 19:44:55'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2022-05-01'::timestamp, DATE '2022-05-01' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2022-05-01'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-11-17 06:54:35, 2021-11-20 03:17:17]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2021-11-17 06:54:35'
+    - '2021-11-20 03:17:17'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+  params:
+  - Tempelhof-Schöneberg
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Lichtenberg' GROUP BY d.name;
+  params:
+  - Lichtenberg
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Pankow' GROUP BY d.name;
+  params:
+  - Pankow
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2020-05-25 08:02:34, 2020-05-30 09:56:06]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-05-25 08:02:34'
+    - '2020-05-30 09:56:06'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2024-10-13'::timestamp, DATE '2024-10-13' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2024-10-13'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2022-02-05'::timestamp, DATE '2022-02-05' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2022-02-05'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 294) WHERE r.trip && tstzspan '[2021-04-01 22:26:16, 2021-04-05 01:21:28]' AND u.name = 'Humboldt-Universität-zu-Berlin';
+  params:
+  - - '2021-04-01 22:26:16'
+    - '2021-04-05 01:21:28'
+  - Humboldt-Universität-zu-Berlin
+  - 294
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 862))
+      AND ST_DWithin(r.trajectory, u.geom, 862)
+    WHERE u.name = 'Charité-Campus-Klinik';
+  params:
+  - Charité-Campus-Klinik
+  - 862
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2020-06-29'::timestamp, DATE '2020-06-29' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2020-06-29'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2022-05-02 00:29:50, 2022-05-08 04:04:10]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2022-05-02 00:29:50'
+    - '2022-05-08 04:04:10'
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 624))
+      AND ST_DWithin(r.trajectory, u.geom, 624)
+    WHERE u.name = 'Bard-College';
+  params:
+  - Bard-College
+  - 624
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-12-28 01:01:47, 2022-12-31 03:15:32]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2022-12-28 01:01:47'
+    - '2022-12-31 03:15:32'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2024-06-01'::timestamp, DATE '2024-06-01' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2024-06-01'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Pankow' GROUP BY d.name;
+  params:
+  - Pankow
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 700))
+      AND ST_DWithin(r.trajectory, u.geom, 700)
+    WHERE u.name = 'Humboldt-Universität-zu-Berlin';
+  params:
+  - Humboldt-Universität-zu-Berlin
+  - 700
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 221) WHERE r.trip && tstzspan '[2022-06-21 07:14:15, 2022-07-02 15:22:22]' AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2022-06-21 07:14:15'
+    - '2022-07-02 15:22:22'
+  - Charité-Campus-Klinik
+  - 221
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-05-26 10:10:08, 2021-05-28 21:27:10]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2021-05-26 10:10:08'
+    - '2021-05-28 21:27:10'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-11-15 17:43:32, 2021-11-19 16:21:27]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2021-11-15 17:43:32'
+    - '2021-11-19 16:21:27'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2021-10-09 03:11:37, 2021-10-23 22:44:03]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-10-09 03:11:37'
+    - '2021-10-23 22:44:03'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    WITH hour_table AS (
+    SELECT EXTRACT(HOUR FROM unnest(timestamps(r.trip))) AS hour_of_day
+    FROM rides_adaptgrid r
+    WHERE r.trip && tstzspan '[2024-08-26 11:36:26, 2024-09-06 23:46:12]'
+    )
+    SELECT hour_of_day, COUNT(*) AS num_points
+    FROM hour_table
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-08-26 11:36:26'
+    - '2024-09-06 23:46:12'
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 996))
+      AND ST_DWithin(r.trajectory, u.geom, 996)
+    WHERE u.name = 'Technische-Universität-Berlin';
+  params:
+  - Technische-Universität-Berlin
+  - 996
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Spandau' GROUP BY d.name;
+  params:
+  - Spandau
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, 723) WHERE r.trip && tstzspan '[2024-09-24 16:46:11, 2024-10-05 01:37:29]' AND u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - - '2024-09-24 16:46:11'
+    - '2024-10-05 01:37:29'
+  - European-School-of-Management-and-Technology-Berlin
+  - 723
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides_adaptgrid r ON ST_Intersects(r.trajectory, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+  params:
+  - Tempelhof-Schöneberg
+- name: rides_adaptgridPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from rides_adaptgrid r
+    JOIN universities u
+      ON r.trajectory && st_expand(u.geom, 119))
+      AND ST_DWithin(r.trajectory, u.geom, 119)
+    WHERE u.name = 'Bard-College';
+  params:
+  - Bard-College
+  - 119
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2020-06-18 18:40:58, 2020-06-28 03:09:49]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2020-06-18 18:40:58'
+    - '2020-06-28 03:09:49'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT AVG(duration(r.trip)) AS avg_duration FROM rides_adaptgrid r WHERE r.trip && span(DATE '2023-06-16'::timestamp, DATE '2023-06-16' + INTERVAL '1 day' - INTERVAL '1 second');
+  params:
+  - '2023-06-16'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-03-31 14:00:13, 2022-04-06 19:17:25]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2022-03-31 14:00:13'
+    - '2022-04-06 19:17:25'
+- name: rideCrossSeveralDistrictsOnEveningInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2024-11-24 12:56:39, 2024-11-30 06:57:10]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+  params:
+  - - '2024-11-24 12:56:39'
+    - '2024-11-30 06:57:10'

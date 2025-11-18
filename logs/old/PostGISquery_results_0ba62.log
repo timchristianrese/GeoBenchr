@@ -1,0 +1,200 @@
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 6619ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 397ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 112ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 2732ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 6196ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 63ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 6154ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 377ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 154ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 159ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 67ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 4398ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 215ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 66ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 97ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 61ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 163ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 52ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 1929ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 684ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 416ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 62ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 6537ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 134ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 1825ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 429ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 1462ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 4674ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 347ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 68ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 4421ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 57ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 49ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 4325ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 89ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 57ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 55ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 437ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 53ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 3121ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 4440ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 4378ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 179ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 139ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 2731ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 226ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 204ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 59ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 55ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 56ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 55ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 57ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 279ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 59ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 59ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 60ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 132ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 1511ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 4765ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 53ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 138ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 87ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 260ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 55ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 4763ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 371ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 53ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 56ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 394ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 114ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 1230ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 6742ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 148ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 196ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 63ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 96ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 5405ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 1503ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 203ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 126ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 97ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 226ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 111ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 202ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 44ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 5781ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 138ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 151ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 145ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 864ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 2817ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 50ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 363ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 8866ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 200ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 112ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 134ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 55ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 98ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 6772ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 2425ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 6415ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 50ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 51ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 52ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 667ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 54ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 262ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 102ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 4458ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 50ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 6406ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 396ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 4432ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 98ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 201ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'SortRidesByHourInPeriod': 237ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 6177ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 838ms
+[pool-2-thread-1] [PostGIS] [cycling] ERROR: 'averageRideDurationToGoAtUniversityInPeriod': ERROR: operator does not exist: tsrange @> timestamp with time zone
+  Hint: No operator matches the given name and argument types. You might need to add explicit type casts.
+  Position: 212
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'countActiveRideInDistrict': 6541ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'ridesPastOrToUniversity': 67ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 4342ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'averageRideDurationDuringDay': 53ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 97ms
+[pool-2-thread-1] [PostGIS] [cycling] SUCCESS: 'rideCrossSeveralDistrictsOnEveningInPeriod': 84ms
