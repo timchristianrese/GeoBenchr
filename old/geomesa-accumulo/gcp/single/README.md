@@ -110,11 +110,7 @@ Running this benchmark requires JDK 11 and Maven to be installed on your machine
 export GCP_IP=$(terraform output -raw external_ip_sut_manager)
 cd ../../../benchmark/geomesa/geotools/geotools
 mvn clean install
-java -jar target/geobenchr-1.0.jar test root test example $GCP_IP <queryType> <threadCount> <limit> <queryTable>
-```
-An example would be the following (will not work for you, as the public IP will be a different one)
-```
-java -jar target/geobenchr-1.0.jar test root test example $GCP_IP insert 3 20000 ride_data
+java -jar target/geobenchr-1.0.jar test root test example $GCP_IP
 ```
 #### Shell 
 Running this benchmark requires Python to be installed. Open a second terminal in the current folder

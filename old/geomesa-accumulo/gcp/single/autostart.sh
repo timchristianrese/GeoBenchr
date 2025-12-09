@@ -6,7 +6,7 @@ ssh $SSH_USER@$GCP_IP 'chmod +x ~/startManager.sh; ~/startManager.sh'
 ssh $SSH_USER@$GCP_IP "/opt/hadoop/bin/hdfs namenode -format"
 ssh $SSH_USER@$GCP_IP "/opt/hadoop/sbin/start-dfs.sh"
 ssh $SSH_USER@$GCP_IP "/opt/accumulo/bin/accumulo init --instance-name test -u root --password test"
-ssh $SSH_USER@$GCP_IP "ulimit -n 32768;/opt/accumulo/bin/accumulo-cluster start"
+ssh $SSH_USER@$GCP_IP "/opt/accumulo/bin/accumulo-cluster start"
 ssh $SSH_USER@$GCP_IP 'cd /opt/geomesa-accumulo;yes | bin/install-dependencies.sh;yes | bin/install-shapefile-support.sh'
 ssh $SSH_USER@$GCP_IP 'cd /opt/geomesa-accumulo; bin/geomesa-accumulo create-schema -i test -z localhost -u root  -p test -c example -s "ride_id:Integer:index=full,rider_id:Integer:index=full,latitude:Double,longitude:Double,geom:Point:srid=4326,x:Double,y:Double,z:Double,timestamp:Date" -f ride_data'
 ssh $SSH_USER@$GCP_IP 'cd /opt/geomesa-accumulo; bin/geomesa-accumulo create-schema -i test -z localhost -u root  -p test -c example -s "ride_id:Integer:index=full,rider_id:Integer:index=full,trip:MultiLineString:srid=4326,timestamp:List[Date]" -f trip_data'

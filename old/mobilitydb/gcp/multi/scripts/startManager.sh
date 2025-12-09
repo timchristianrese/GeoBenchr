@@ -6,7 +6,7 @@ sudo apt install -y postgresql-common </dev/null
 sudo yes '' | /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
 sudo apt install -y build-essential cmake libproj-dev libjson-c-dev libprotobuf-c-dev postgresql-16 git postgresql-server-dev-16 libgsl-dev </dev/null
 sudo service postgresql start  
-sudo apt install -y libgeos++-dev libgeos3.12.1t64 libgeos-c1v5 libgeos-dev libgeos-doc postgresql-16-postgis-3 </dev/null
+sudo apt install -y libgeos++-dev libgeos3.10.2 libgeos-c1v5 libgeos-dev libgeos-doc postgresql-16-postgis-3 </dev/null
 git clone https://github.com/MobilityDB/MobilityDB && \
 mkdir MobilityDB/build && \
 cd MobilityDB/build && \
