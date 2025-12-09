@@ -10,7 +10,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2020-11-03 19:52:25', '2020-11-16 08:47:03'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2020-11-03 19:52:25' AND TIMESTAMP '2020-11-16 08:47:03'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -98,7 +98,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2024-07-02 14:13:43', '2024-07-11 00:19:00'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2024-07-02 14:13:43' AND TIMESTAMP '2024-07-11 00:19:00'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -179,7 +179,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2022-12-27 21:13:40', '2023-01-06 00:29:12'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2022-12-27 21:13:40' AND TIMESTAMP '2023-01-06 00:29:12'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -247,7 +247,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2024-09-29 20:24:26', '2024-10-12 05:02:04'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2024-09-29 20:24:26' AND TIMESTAMP '2024-10-12 05:02:04'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -283,7 +283,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2023-12-15 21:46:34', '2023-12-27 20:20:07'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2023-12-15 21:46:34' AND TIMESTAMP '2023-12-27 20:20:07'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -295,7 +295,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2022-12-03 06:14:36', '2022-12-13 22:49:19'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2022-12-03 06:14:36' AND TIMESTAMP '2022-12-13 22:49:19'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -307,7 +307,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2024-01-18 04:34:36', '2024-01-23 06:03:01'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2024-01-18 04:34:36' AND TIMESTAMP '2024-01-23 06:03:01'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -453,7 +453,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2024-04-17 15:59:58', '2024-04-28 05:08:48'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2024-04-17 15:59:58' AND TIMESTAMP '2024-04-28 05:08:48'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -516,7 +516,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2020-11-22 23:23:25', '2020-12-06 17:07:39'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2020-11-22 23:23:25' AND TIMESTAMP '2020-12-06 17:07:39'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -617,7 +617,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2024-10-20 23:21:00', '2024-11-02 07:33:15'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2024-10-20 23:21:00' AND TIMESTAMP '2024-11-02 07:33:15'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -701,7 +701,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-01-31 22:36:42', '2021-02-09 21:20:41'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-01-31 22:36:42' AND TIMESTAMP '2021-02-09 21:20:41'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -779,7 +779,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-01-11 13:01:53', '2021-01-24 22:24:07'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-01-11 13:01:53' AND TIMESTAMP '2021-01-24 22:24:07'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -921,7 +921,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-06-01 18:21:46', '2021-06-09 14:59:41'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-06-01 18:21:46' AND TIMESTAMP '2021-06-09 14:59:41'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -967,7 +967,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2023-10-07 20:56:13', '2023-10-14 23:38:40'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2023-10-07 20:56:13' AND TIMESTAMP '2023-10-14 23:38:40'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -990,7 +990,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2024-09-10 18:52:04', '2024-09-16 17:04:58'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2024-09-10 18:52:04' AND TIMESTAMP '2024-09-16 17:04:58'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1188,7 +1188,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2022-08-26 23:15:05', '2022-09-07 01:25:16'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2022-08-26 23:15:05' AND TIMESTAMP '2022-09-07 01:25:16'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1200,7 +1200,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2023-11-04 10:15:13', '2023-11-18 05:59:28'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2023-11-04 10:15:13' AND TIMESTAMP '2023-11-18 05:59:28'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1228,7 +1228,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2020-12-09 08:33:49', '2020-12-20 19:43:37'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2020-12-09 08:33:49' AND TIMESTAMP '2020-12-20 19:43:37'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1326,7 +1326,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2023-05-26 01:33:00', '2023-06-08 15:04:48'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2023-05-26 01:33:00' AND TIMESTAMP '2023-06-08 15:04:48'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1461,7 +1461,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-12-19 09:25:18', '2021-12-21 11:28:58'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-12-19 09:25:18' AND TIMESTAMP '2021-12-21 11:28:58'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1495,7 +1495,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-07-05 04:45:10', '2021-07-19 11:25:13'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-07-05 04:45:10' AND TIMESTAMP '2021-07-19 11:25:13'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1598,7 +1598,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-10-16 03:33:14', '2021-10-19 11:07:26'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-10-16 03:33:14' AND TIMESTAMP '2021-10-19 11:07:26'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1710,7 +1710,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2023-02-26 01:11:45', '2023-03-06 02:00:07'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2023-02-26 01:11:45' AND TIMESTAMP '2023-03-06 02:00:07'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1756,7 +1756,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2024-02-20 14:26:14', '2024-03-02 12:44:52'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2024-02-20 14:26:14' AND TIMESTAMP '2024-03-02 12:44:52'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1806,7 +1806,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2020-08-13 08:25:29', '2020-08-24 18:06:20'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2020-08-13 08:25:29' AND TIMESTAMP '2020-08-24 18:06:20'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1840,7 +1840,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2024-05-29 04:05:01', '2024-05-31 16:18:36'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2024-05-29 04:05:01' AND TIMESTAMP '2024-05-31 16:18:36'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1959,7 +1959,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-02-20 23:40:57', '2021-02-28 20:51:18'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-02-20 23:40:57' AND TIMESTAMP '2021-02-28 20:51:18'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -1982,7 +1982,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2024-09-03 09:05:05', '2024-09-07 20:00:22'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2024-09-03 09:05:05' AND TIMESTAMP '2024-09-07 20:00:22'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2006,7 +2006,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2023-08-13 19:54:14', '2023-08-18 07:59:41'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2023-08-13 19:54:14' AND TIMESTAMP '2023-08-18 07:59:41'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2115,7 +2115,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-02-21 20:54:01', '2021-03-06 22:18:25'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-02-21 20:54:01' AND TIMESTAMP '2021-03-06 22:18:25'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2151,7 +2151,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-08-30 06:21:19', '2021-09-02 16:30:49'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-08-30 06:21:19' AND TIMESTAMP '2021-09-02 16:30:49'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2175,7 +2175,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-07-19 18:01:58', '2021-07-28 05:06:40'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-07-19 18:01:58' AND TIMESTAMP '2021-07-28 05:06:40'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2219,7 +2219,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-04-22 20:13:38', '2021-04-26 02:34:05'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-04-22 20:13:38' AND TIMESTAMP '2021-04-26 02:34:05'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2247,7 +2247,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2022-07-11 06:51:02', '2022-07-15 13:54:39'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2022-07-11 06:51:02' AND TIMESTAMP '2022-07-15 13:54:39'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2277,7 +2277,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2023-07-02 07:24:00', '2023-07-09 12:51:48'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2023-07-02 07:24:00' AND TIMESTAMP '2023-07-09 12:51:48'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2359,7 +2359,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2023-10-11 07:30:23', '2023-10-21 19:00:34'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2023-10-11 07:30:23' AND TIMESTAMP '2023-10-21 19:00:34'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2371,7 +2371,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2022-08-25 22:25:57', '2022-08-30 21:27:33'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2022-08-25 22:25:57' AND TIMESTAMP '2022-08-30 21:27:33'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2394,7 +2394,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-07-21 04:07:54', '2021-08-01 08:03:18'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-07-21 04:07:54' AND TIMESTAMP '2021-08-01 08:03:18'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2424,7 +2424,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2023-04-10 06:16:40', '2023-04-22 01:33:55'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2023-04-10 06:16:40' AND TIMESTAMP '2023-04-22 01:33:55'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2464,7 +2464,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2020-02-13 00:11:57', '2020-02-21 13:33:48'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2020-02-13 00:11:57' AND TIMESTAMP '2020-02-21 13:33:48'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2537,7 +2537,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-04-27 11:07:32', '2021-05-12 01:55:48'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-04-27 11:07:32' AND TIMESTAMP '2021-05-12 01:55:48'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2577,7 +2577,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2023-01-21 20:37:16', '2023-01-29 19:16:31'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2023-01-21 20:37:16' AND TIMESTAMP '2023-01-29 19:16:31'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2633,7 +2633,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2021-08-27 15:11:42', '2021-09-10 18:12:10'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2021-08-27 15:11:42' AND TIMESTAMP '2021-09-10 18:12:10'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2719,7 +2719,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2020-12-04 11:24:50', '2020-12-06 16:57:15'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2020-12-04 11:24:50' AND TIMESTAMP '2020-12-06 16:57:15'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2834,7 +2834,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2023-06-06 17:07:46', '2023-06-12 23:53:18'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2023-06-06 17:07:46' AND TIMESTAMP '2023-06-12 23:53:18'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2870,7 +2870,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2022-07-17 12:54:09', '2022-07-29 09:53:36'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2022-07-17 12:54:09' AND TIMESTAMP '2022-07-29 09:53:36'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2882,7 +2882,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2020-08-06 05:04:55', '2020-08-16 10:39:58'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2020-08-06 05:04:55' AND TIMESTAMP '2020-08-16 10:39:58'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -2947,7 +2947,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2022-07-28 07:50:35', '2022-08-11 12:06:53'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2022-07-28 07:50:35' AND TIMESTAMP '2022-08-11 12:06:53'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -3050,7 +3050,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2020-06-15 08:50:03', '2020-06-24 08:46:40'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2020-06-15 08:50:03' AND TIMESTAMP '2020-06-24 08:46:40'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -3147,7 +3147,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2024-08-28 10:32:08', '2024-09-02 17:56:34'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2024-08-28 10:32:08' AND TIMESTAMP '2024-09-02 17:56:34'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -3159,7 +3159,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2024-09-11 10:47:33', '2024-09-17 09:02:28'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2024-09-11 10:47:33' AND TIMESTAMP '2024-09-17 09:02:28'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:
@@ -3257,7 +3257,7 @@
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE ['2022-11-14 18:36:40', '2022-11-21 00:45:21'] @> r.timestamp
+    WHERE r.timestamp BETWEEN TIMESTAMP '2022-11-14 18:36:40' AND TIMESTAMP '2022-11-21 00:45:21'
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   params:

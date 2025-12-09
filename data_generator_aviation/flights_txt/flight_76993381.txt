@@ -1,0 +1,2 @@
+time_iso,lat,lon,delta_t_s,alt_ft,gs_kt,heading_deg
+2023-12-06 13:10:32,51.647043,9.442397,0,6025.9,,

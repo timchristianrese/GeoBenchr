@@ -160,7 +160,7 @@ queryConfigs:
     SELECT DISTINCT r.ride_id
     FROM ride_points r
     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE :period_medium @> r.timestamp
+    WHERE r.timestamp BETWEEN :period_medium
     GROUP BY r.ride_id
     HAVING COUNT(DISTINCT d.name) > 1;
   spacetime: |
