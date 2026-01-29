@@ -1,6 +1,7 @@
 #!/bin/bash
+size=$1
 # Load all data required for benchmarks
-nohup ./loadData.sh mobilitydb ais 100M
-nohup ./loadData.sh mobilitydb aviation 100M
-nohup ./loadData.sh mobilitydb cycling 100M
+nohup ./loadData.sh all ais $1 
+nohup ./loadData.sh all aviation $1
+nohup ./loadData.sh all cycling $1
 

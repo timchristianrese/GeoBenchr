@@ -1,4 +1,11 @@
 #ignore everything in processed, raw and Simra
 processed/*
-raw/*
+raw/ais/*2019.csv
+raw/aviation/*23.csv
+raw/cycling/*merged*
 SimRa/*
+files/*
+raw/ais/*.csv
+raw/aviation/*.csv
+raw/cycling/*.csv
+raw/aviation/exp/*

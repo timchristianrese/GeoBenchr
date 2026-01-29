@@ -1,0 +1,2 @@
+# Ship data generation
+As of now, the ship data generator still has issues with routing trips through solid land, which is obviously impossible in real life. Due to this downside, we recommend that more raw data is simply collected from the [website](https://www.bisec.gr/dataset/the-piraeus-ais-dataset-for-large-scale-maritime-data-analytics)

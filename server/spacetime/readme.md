@@ -1,0 +1,2 @@
+# Installation 
+As SpaceTime is proprietary software, we do not provide installation instructions for the database system here. Please contact the developing company [Mireo](https://www.mireo.com/spacetime) in this regard. 

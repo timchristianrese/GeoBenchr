@@ -28,7 +28,7 @@ case "$size" in
 esac
 echo "Selected dataset size: $size ($TARGET_POINTS points)"
 
-if [ "$system" == "mobilitydb" ]; then
+if [ "$system" == "all" ]; then
     echo "Loading data into mobilitydb"
 # Set PostgreSQL connection parameters
     DB_NAME="postgres"
