@@ -1,7 +1,7 @@
 # Loading Data
 This step assumes that you have already set up the database systems and they are currently running on the machine. 
 - First, we need to load the required resources onto the server. For this, several steps need to be completed. 
-- For each scenario, we provide a small subset of raw data in this repository. The actual used amount of data is higher, but impractical to store in a repository (due to the significant repository size increase). 
+- For each scenario, we provide a small subset of raw data in this repository. The actual used amount of data is higher, but impractical to store in a repository (due to the significant repository size increase and file size limits)
 - For the aviation data, please contact the Deutsche Flugsicherung in order to obtain data available for research. 
 - All SimRa data was taken from the [Simra Project](https://github.com/simra-project/dataset)
 - All AIS data was taken from [The Piraeus AIS Dataset for Large-scale Maritime Data Analytics] (https://www.bisec.gr/dataset/the-piraeus-ais-dataset-for-large-scale-maritime-data-analytics)
