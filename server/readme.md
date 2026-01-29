@@ -1,0 +1,2 @@
+# Installation 
+For each database system, installation instructions can be found in the corresponding subfolder (For SpaceTime, you will need to contact the developer in this regard as its proprietary software.).

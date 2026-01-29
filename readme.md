@@ -13,6 +13,6 @@ As of now, GeoBenchr supports the following database systems:
 ## Setup 
 The benchmark deployment is split into separate categories for clarity, those being `server`, `data`, and `client`.  All steps are necessary in order to run a benchmark experiment with GeoBenchr, in the above mentioned order. Detailed setup instructions for each category can be found in the subdirectories (in nearly all cases, in the `single` subfolder)
 ## Results
-Some of the results are included in the paper. All generated graphs are hosted here in the repository, found [here] (./analysis/results)
+Key results are included in the paper. All generated graphs are hosted here in the repository, found [here] (./analysis/results)
 
 
