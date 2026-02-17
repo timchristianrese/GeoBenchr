@@ -1,373 +1,81 @@
 - name: flightClosestToPoint
   type: spatial
   sql: |
-    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_GeomFromText('SRID=4326;POINT(6.493143573741311 51.308446179913005)')) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_GeomFromText('SRID=4326;POINT(6.493143573741311 51.308446179913005)'), 5) ORDER BY min_distance ASC;
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(775092.5900883757, 6862446.781402792), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(775092.5900883757, 6862446.781402792), 3857), 1120) ORDER BY min_distance ASC LIMIT 1;
   params:
-  - SRID=4326;POINT(6.493143573741311 51.308446179913005)
-  - 5
-- name: countActiveFlightsInPeriod
-  type: temporalbench
-  sql: |
-    SELECT COUNT(DISTINCT f.flightid) from flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-11-10 07:57:42') AND TIMESTAMP('2023-11-21 05:56:14');
-  params:
-  - - '2023-11-10 07:57:42'
-    - '2023-11-21 05:56:14'
+  - ST_SetSRID(ST_Point(775092.5900883757, 6862446.781402792), 3857)
+  - 1120
 - name: flightClosestToPoint
   type: spatial
   sql: |
-    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_GeomFromText('SRID=4326;POINT(8.51848774381303 50.90336622647214)')) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_GeomFromText('SRID=4326;POINT(8.51848774381303 50.90336622647214)'), 9) ORDER BY min_distance ASC;
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(978759.6009686731, 6684180.13150864), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(978759.6009686731, 6684180.13150864), 3857), 3158) ORDER BY min_distance ASC LIMIT 1;
   params:
-  - SRID=4326;POINT(8.51848774381303 50.90336622647214)
-  - 9
-- name: countFlightsInCounties
-  type: spatial
-  sql: |
-    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Euskirchen' GROUP BY k.name;
-  params:
-  - Krs Euskirchen
+  - ST_SetSRID(ST_Point(978759.6009686731, 6684180.13150864), 3857)
+  - 3158
 - name: flightsInCountyInPeriod
   type: spatiotemporal
   sql: |
-    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Oberbergischer Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP('2023-06-25 07:23:56') AND TIMESTAMP('2023-07-02 05:52:25');
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Steinfurt' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-10-10 12:40:46' AND TIMESTAMP '2023-10-22 20:55:32';
   params:
-  - - '2023-06-25 07:23:56'
-    - '2023-07-02 05:52:25'
-  - Krs Oberbergischer Kreis
+  - - '2023-10-10 12:40:46'
+    - '2023-10-22 20:55:32'
+  - Krs Steinfurt
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Siegen-Wittgenstein' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-01-29 21:10:50' AND TIMESTAMP '2023-02-12 09:55:52';
+  params:
+  - - '2023-01-29 21:10:50'
+    - '2023-02-12 09:55:52'
+  - Krs Siegen-Wittgenstein
 - name: flightClosestToPoint
   type: spatial
   sql: |
-    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_GeomFromText('SRID=4326;POINT(7.11561592823072 51.3751924053712)')) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_GeomFromText('SRID=4326;POINT(7.11561592823072 51.3751924053712)'), 7) ORDER BY min_distance ASC;
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(750403.310388766, 6641184.264465992), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(750403.310388766, 6641184.264465992), 3857), 1825) ORDER BY min_distance ASC LIMIT 1;
   params:
-  - SRID=4326;POINT(7.11561592823072 51.3751924053712)
-  - 7
+  - ST_SetSRID(ST_Point(750403.310388766, 6641184.264465992), 3857)
+  - 1825
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-05-15 03:08:25' AND TIMESTAMP '2023-05-15 20:58:13' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-05-15 03:08:25' AND TIMESTAMP '2023-05-15 20:58:13' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-05-15 03:08:25'
+    - '2023-05-15 20:58:13'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Bochum') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1687) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-11-29 03:59:18' AND fe.end_time >= TIMESTAMP '2023-11-26 07:24:51') AND f.timestamp BETWEEN TIMESTAMP '2023-11-26 07:24:51' AND TIMESTAMP '2023-11-29 03:59:18';
+  params:
+  - - '2023-11-26 07:24:51'
+    - '2023-11-29 03:59:18'
+  - Bochum
+  - 1687
 - name: countFlightsInCounties
   type: spatial
   sql: |
-    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Rheinisch-Bergischer Kreis' GROUP BY k.name;
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Staedteregion Aachen' GROUP BY k.name;
   params:
-  - Krs Rheinisch-Bergischer Kreis
+  - Krs Staedteregion Aachen
 - name: airportUtilizationInPeriod
   type: temporal
   sql: |
-    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-01-24 12:34:38') AND TIMESTAMP('2023-01-25 18:35:13') GROUP BY f.origin ), arrivals AS (
-      SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count
-      FROM flight_points f
-      WHERE f.timestamp BETWEEN TIMESTAMP('2023-01-24 12:34:38') AND TIMESTAMP('2023-01-25 18:35:13')
-      GROUP BY f.destination
-    ) SELECT
-      COALESCE(d.airport, a.airport) AS airport,
-      COALESCE(d.departure_count, 0) AS departures,
-      COALESCE(a.arrival_count, 0) AS arrivals,
-      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count
-    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-03-27 17:59:51' AND TIMESTAMP '2023-03-28 00:33:03' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-03-27 17:59:51' AND TIMESTAMP '2023-03-28 00:33:03' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
   params:
-  - - '2023-01-24 12:34:38'
-    - '2023-01-25 18:35:13'
-- name: countActiveFlightsInPeriod
-  type: temporalbench
-  sql: |
-    SELECT COUNT(DISTINCT f.flightid) from flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-05-08 11:44:34') AND TIMESTAMP('2023-05-12 13:50:33');
-  params:
-  - - '2023-05-08 11:44:34'
-    - '2023-05-12 13:50:33'
-- name: inCityRadiusInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 7.290648985537254e-06) WHERE c.name = 'Niederkassel' AND f.timestamp BETWEEN TIMESTAMP('2023-06-28 19:00:00') AND TIMESTAMP('2023-07-07 03:38:06');
-  params:
-  - - '2023-06-28 19:00:00'
-    - '2023-07-07 03:38:06'
-  - Niederkassel
-  - 7.290648985537254e-06
-- name: airportUtilizationInPeriod
-  type: temporal
-  sql: |
-    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-05-10 15:56:32') AND TIMESTAMP('2023-05-11 11:06:54') GROUP BY f.origin ), arrivals AS (
-      SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count
-      FROM flight_points f
-      WHERE f.timestamp BETWEEN TIMESTAMP('2023-05-10 15:56:32') AND TIMESTAMP('2023-05-11 11:06:54')
-      GROUP BY f.destination
-    ) SELECT
-      COALESCE(d.airport, a.airport) AS airport,
-      COALESCE(d.departure_count, 0) AS departures,
-      COALESCE(a.arrival_count, 0) AS arrivals,
-      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count
-    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport
-  params:
-  - - '2023-05-10 15:56:32'
-    - '2023-05-11 11:06:54'
-- name: airportUtilizationInPeriod
-  type: temporal
-  sql: |
-    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-12-27 09:37:01') AND TIMESTAMP('2023-12-28 13:30:10') GROUP BY f.origin ), arrivals AS (
-      SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count
-      FROM flight_points f
-      WHERE f.timestamp BETWEEN TIMESTAMP('2023-12-27 09:37:01') AND TIMESTAMP('2023-12-28 13:30:10')
-      GROUP BY f.destination
-    ) SELECT
-      COALESCE(d.airport, a.airport) AS airport,
-      COALESCE(d.departure_count, 0) AS departures,
-      COALESCE(a.arrival_count, 0) AS arrivals,
-      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count
-    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport
-  params:
-  - - '2023-12-27 09:37:01'
-    - '2023-12-28 13:30:10'
-- name: inCityRadiusInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1.3651869083553872e-05) WHERE c.name = 'Willich' AND f.timestamp BETWEEN TIMESTAMP('2023-05-09 04:49:52') AND TIMESTAMP('2023-05-16 13:07:32');
-  params:
-  - - '2023-05-09 04:49:52'
-    - '2023-05-16 13:07:32'
-  - Willich
-  - 1.3651869083553872e-05
-- name: airportUtilizationInPeriod
-  type: temporal
-  sql: |
-    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-09-18 21:32:09') AND TIMESTAMP('2023-09-19 13:21:34') GROUP BY f.origin ), arrivals AS (
-      SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count
-      FROM flight_points f
-      WHERE f.timestamp BETWEEN TIMESTAMP('2023-09-18 21:32:09') AND TIMESTAMP('2023-09-19 13:21:34')
-      GROUP BY f.destination
-    ) SELECT
-      COALESCE(d.airport, a.airport) AS airport,
-      COALESCE(d.departure_count, 0) AS departures,
-      COALESCE(a.arrival_count, 0) AS arrivals,
-      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count
-    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport
-  params:
-  - - '2023-09-18 21:32:09'
-    - '2023-09-19 13:21:34'
-- name: countActiveFlightsInPeriod
-  type: temporalbench
-  sql: |
-    SELECT COUNT(DISTINCT f.flightid) from flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-05-23 17:42:03') AND TIMESTAMP('2023-06-02 09:46:26');
-  params:
-  - - '2023-05-23 17:42:03'
-    - '2023-06-02 09:46:26'
-- name: flightsInCountyInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Unna' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP('2023-09-13 19:51:52') AND TIMESTAMP('2023-09-21 19:06:47');
-  params:
-  - - '2023-09-13 19:51:52'
-    - '2023-09-21 19:06:47'
-  - Krs Unna
-- name: inCityRadiusInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 5.257433392467601e-06) WHERE c.name = 'Rheinbach' AND f.timestamp BETWEEN TIMESTAMP('2023-05-19 04:14:32') AND TIMESTAMP('2023-05-24 10:00:14');
-  params:
-  - - '2023-05-19 04:14:32'
-    - '2023-05-24 10:00:14'
-  - Rheinbach
-  - 5.257433392467601e-06
-- name: flightClosestToPoint
-  type: spatial
-  sql: |
-    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_GeomFromText('SRID=4326;POINT(6.890140091803668 50.795947278511115)')) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_GeomFromText('SRID=4326;POINT(6.890140091803668 50.795947278511115)'), 7) ORDER BY min_distance ASC;
-  params:
-  - SRID=4326;POINT(6.890140091803668 50.795947278511115)
-  - 7
+  - - '2023-03-27 17:59:51'
+    - '2023-03-28 00:33:03'
 - name: countFlightsInCounties
   type: spatial
   sql: |
-    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Rheinisch-Bergischer Kreis' GROUP BY k.name;
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Dortmund' GROUP BY k.name;
   params:
-  - Krs Rheinisch-Bergischer Kreis
-- name: countActiveFlightsInPeriod
-  type: temporalbench
+  - Krs Dortmund
+- name: countFlightsInCounties
+  type: spatial
   sql: |
-    SELECT COUNT(DISTINCT f.flightid) from flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-10-24 05:01:02') AND TIMESTAMP('2023-11-07 03:35:22');
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Dueren' GROUP BY k.name;
   params:
-  - - '2023-10-24 05:01:02'
-    - '2023-11-07 03:35:22'
-- name: flightsInCountyInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Minden-Luebbecke' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP('2023-01-08 09:46:04') AND TIMESTAMP('2023-01-17 05:51:30');
-  params:
-  - - '2023-01-08 09:46:04'
-    - '2023-01-17 05:51:30'
-  - Krs Minden-Luebbecke
-- name: countActiveFlightsInPeriod
-  type: temporalbench
-  sql: |
-    SELECT COUNT(DISTINCT f.flightid) from flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-06-23 10:41:03') AND TIMESTAMP('2023-07-03 04:35:50');
-  params:
-  - - '2023-06-23 10:41:03'
-    - '2023-07-03 04:35:50'
-- name: flightsInCountyInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Coesfeld' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP('2023-06-20 11:48:48') AND TIMESTAMP('2023-06-27 21:15:05');
-  params:
-  - - '2023-06-20 11:48:48'
-    - '2023-06-27 21:15:05'
-  - Krs Coesfeld
-- name: airportUtilizationInPeriod
-  type: temporal
-  sql: |
-    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-07-07 01:44:53') AND TIMESTAMP('2023-07-08 01:26:54') GROUP BY f.origin ), arrivals AS (
-      SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count
-      FROM flight_points f
-      WHERE f.timestamp BETWEEN TIMESTAMP('2023-07-07 01:44:53') AND TIMESTAMP('2023-07-08 01:26:54')
-      GROUP BY f.destination
-    ) SELECT
-      COALESCE(d.airport, a.airport) AS airport,
-      COALESCE(d.departure_count, 0) AS departures,
-      COALESCE(a.arrival_count, 0) AS arrivals,
-      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count
-    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport
-  params:
-  - - '2023-07-07 01:44:53'
-    - '2023-07-08 01:26:54'
-- name: flightsInCountyInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Dueren' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP('2023-01-26 07:23:10') AND TIMESTAMP('2023-02-09 15:11:39');
-  params:
-  - - '2023-01-26 07:23:10'
-    - '2023-02-09 15:11:39'
   - Krs Dueren
-- name: flightsInCountyInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Koeln' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP('2023-12-16 07:07:40') AND TIMESTAMP('2023-12-20 08:29:58');
-  params:
-  - - '2023-12-16 07:07:40'
-    - '2023-12-20 08:29:58'
-  - Krs Koeln
-- name: inCityRadiusInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 4.618928778080096e-06) WHERE c.name = 'Porta Westfalica' AND f.timestamp BETWEEN TIMESTAMP('2023-05-14 17:54:59') AND TIMESTAMP('2023-05-21 18:51:37');
-  params:
-  - - '2023-05-14 17:54:59'
-    - '2023-05-21 18:51:37'
-  - Porta Westfalica
-  - 4.618928778080096e-06
-- name: flightsInCountyInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Mettmann' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP('2023-03-12 23:07:00') AND TIMESTAMP('2023-03-25 07:32:25');
-  params:
-  - - '2023-03-12 23:07:00'
-    - '2023-03-25 07:32:25'
-  - Krs Mettmann
-- name: countActiveFlightsInPeriod
-  type: temporalbench
-  sql: |
-    SELECT COUNT(DISTINCT f.flightid) from flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-04-28 03:35:08') AND TIMESTAMP('2023-05-01 12:29:28');
-  params:
-  - - '2023-04-28 03:35:08'
-    - '2023-05-01 12:29:28'
-- name: countFlightsInCounties
-  type: spatial
-  sql: |
-    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Soest' GROUP BY k.name;
-  params:
-  - Krs Soest
-- name: inCityRadiusInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 8.916845184139539e-06) WHERE c.name = 'Werther (Westf.)' AND f.timestamp BETWEEN TIMESTAMP('2023-10-30 23:58:20') AND TIMESTAMP('2023-11-14 05:16:52');
-  params:
-  - - '2023-10-30 23:58:20'
-    - '2023-11-14 05:16:52'
-  - Werther (Westf.)
-  - 8.916845184139539e-06
-- name: countFlightsInCounties
-  type: spatial
-  sql: |
-    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Hochsauerlandkreis' GROUP BY k.name;
-  params:
-  - Krs Hochsauerlandkreis
-- name: flightClosestToPoint
-  type: spatial
-  sql: |
-    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_GeomFromText('SRID=4326;POINT(7.1846062518596465 50.85206064537443)')) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_GeomFromText('SRID=4326;POINT(7.1846062518596465 50.85206064537443)'), 10) ORDER BY min_distance ASC;
-  params:
-  - SRID=4326;POINT(7.1846062518596465 50.85206064537443)
-  - 10
-- name: airportUtilizationInPeriod
-  type: temporal
-  sql: |
-    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-01-08 08:27:39') AND TIMESTAMP('2023-01-09 23:04:12') GROUP BY f.origin ), arrivals AS (
-      SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count
-      FROM flight_points f
-      WHERE f.timestamp BETWEEN TIMESTAMP('2023-01-08 08:27:39') AND TIMESTAMP('2023-01-09 23:04:12')
-      GROUP BY f.destination
-    ) SELECT
-      COALESCE(d.airport, a.airport) AS airport,
-      COALESCE(d.departure_count, 0) AS departures,
-      COALESCE(a.arrival_count, 0) AS arrivals,
-      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count
-    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport
-  params:
-  - - '2023-01-08 08:27:39'
-    - '2023-01-09 23:04:12'
-- name: countActiveFlightsInPeriod
-  type: temporalbench
-  sql: |
-    SELECT COUNT(DISTINCT f.flightid) from flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-05-24 02:52:20') AND TIMESTAMP('2023-05-29 13:02:57');
-  params:
-  - - '2023-05-24 02:52:20'
-    - '2023-05-29 13:02:57'
-- name: countFlightsInCounties
-  type: spatial
-  sql: |
-    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Remscheid' GROUP BY k.name;
-  params:
-  - Krs Remscheid
-- name: countActiveFlightsInPeriod
-  type: temporalbench
-  sql: |
-    SELECT COUNT(DISTINCT f.flightid) from flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-10-24 14:14:57') AND TIMESTAMP('2023-10-30 04:43:15');
-  params:
-  - - '2023-10-24 14:14:57'
-    - '2023-10-30 04:43:15'
-- name: countActiveFlightsInPeriod
-  type: temporalbench
-  sql: |
-    SELECT COUNT(DISTINCT f.flightid) from flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-04-18 14:23:50') AND TIMESTAMP('2023-04-20 23:39:18');
-  params:
-  - - '2023-04-18 14:23:50'
-    - '2023-04-20 23:39:18'
-- name: flightClosestToPoint
-  type: spatial
-  sql: |
-    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_GeomFromText('SRID=4326;POINT(8.164328137972555 51.07431283163588)')) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_GeomFromText('SRID=4326;POINT(8.164328137972555 51.07431283163588)'), 8) ORDER BY min_distance ASC;
-  params:
-  - SRID=4326;POINT(8.164328137972555 51.07431283163588)
-  - 8
-- name: airportUtilizationInPeriod
-  type: temporal
-  sql: |
-    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-04-21 21:45:05') AND TIMESTAMP('2023-04-22 04:27:42') GROUP BY f.origin ), arrivals AS (
-      SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count
-      FROM flight_points f
-      WHERE f.timestamp BETWEEN TIMESTAMP('2023-04-21 21:45:05') AND TIMESTAMP('2023-04-22 04:27:42')
-      GROUP BY f.destination
-    ) SELECT
-      COALESCE(d.airport, a.airport) AS airport,
-      COALESCE(d.departure_count, 0) AS departures,
-      COALESCE(a.arrival_count, 0) AS arrivals,
-      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count
-    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport
-  params:
-  - - '2023-04-21 21:45:05'
-    - '2023-04-22 04:27:42'
-- name: inCityRadiusInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1.1095004169108851e-05) WHERE c.name = 'Voerde' AND f.timestamp BETWEEN TIMESTAMP('2023-04-14 20:47:57') AND TIMESTAMP('2023-04-27 20:30:31');
-  params:
-  - - '2023-04-14 20:47:57'
-    - '2023-04-27 20:30:31'
-  - Voerde
-  - 1.1095004169108851e-05
 - name: countFlightsInCounties
   type: spatial
   sql: |
@@ -377,57 +85,2076 @@
 - name: flightsInCountyInPeriod
   type: spatiotemporal
   sql: |
-    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Rhein-Kreis Neuss' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP('2023-06-03 19:41:00') AND TIMESTAMP('2023-06-15 18:23:48');
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Oberbergischer Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-06-01 23:36:24' AND TIMESTAMP '2023-06-08 20:26:36';
   params:
-  - - '2023-06-03 19:41:00'
-    - '2023-06-15 18:23:48'
-  - Krs Rhein-Kreis Neuss
-- name: flightsInCountyInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Rhein-Kreis Neuss' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP('2023-05-08 19:20:14') AND TIMESTAMP('2023-05-11 19:06:18');
-  params:
-  - - '2023-05-08 19:20:14'
-    - '2023-05-11 19:06:18'
-  - Krs Rhein-Kreis Neuss
+  - - '2023-06-01 23:36:24'
+    - '2023-06-08 20:26:36'
+  - Krs Oberbergischer Kreis
 - name: inCityRadiusInPeriod
   type: spatiotemporal
   sql: |
-    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3.4459360321055206e-06) WHERE c.name = 'Lemgo' AND f.timestamp BETWEEN TIMESTAMP('2023-06-12 09:55:51') AND TIMESTAMP('2023-06-22 03:14:35');
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Wiehl') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3427) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-01-22 23:01:23' AND fe.end_time >= TIMESTAMP '2023-01-13 11:42:04') AND f.timestamp BETWEEN TIMESTAMP '2023-01-13 11:42:04' AND TIMESTAMP '2023-01-22 23:01:23';
   params:
-  - - '2023-06-12 09:55:51'
-    - '2023-06-22 03:14:35'
-  - Lemgo
-  - 3.4459360321055206e-06
-- name: flightClosestToPoint
-  type: spatial
+  - - '2023-01-13 11:42:04'
+    - '2023-01-22 23:01:23'
+  - Wiehl
+  - 3427
+- name: FlightUpdatesInPeriod
+  type: temporal
   sql: |
-    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_GeomFromText('SRID=4326;POINT(6.354667912543742 51.11680116065118)')) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_GeomFromText('SRID=4326;POINT(6.354667912543742 51.11680116065118)'), 4) ORDER BY min_distance ASC;
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-03-03 06:45:10' AND TIMESTAMP '2023-03-17 14:02:51' GROUP BY f.flightid;
   params:
-  - SRID=4326;POINT(6.354667912543742 51.11680116065118)
-  - 4
+  - - '2023-03-03 06:45:10'
+    - '2023-03-17 14:02:51'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-06-13 00:07:09' AND TIMESTAMP '2023-06-19 03:41:29' GROUP BY f.flightid;
+  params:
+  - - '2023-06-13 00:07:09'
+    - '2023-06-19 03:41:29'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Kamp-Lintfort') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 4209) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-01-14 06:00:09' AND fe.end_time >= TIMESTAMP '2023-01-05 17:03:50') AND f.timestamp BETWEEN TIMESTAMP '2023-01-05 17:03:50' AND TIMESTAMP '2023-01-14 06:00:09';
+  params:
+  - - '2023-01-05 17:03:50'
+    - '2023-01-14 06:00:09'
+  - Kamp-Lintfort
+  - 4209
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Hoexter') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3063) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-03-08 17:06:07' AND fe.end_time >= TIMESTAMP '2023-03-06 02:44:41') AND f.timestamp BETWEEN TIMESTAMP '2023-03-06 02:44:41' AND TIMESTAMP '2023-03-08 17:06:07';
+  params:
+  - - '2023-03-06 02:44:41'
+    - '2023-03-08 17:06:07'
+  - Hoexter
+  - 3063
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Grevenbroich') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3617) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-10-15 19:33:51' AND fe.end_time >= TIMESTAMP '2023-10-05 09:59:22') AND f.timestamp BETWEEN TIMESTAMP '2023-10-05 09:59:22' AND TIMESTAMP '2023-10-15 19:33:51';
+  params:
+  - - '2023-10-05 09:59:22'
+    - '2023-10-15 19:33:51'
+  - Grevenbroich
+  - 3617
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Enger') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1529) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-01-13 11:51:20' AND fe.end_time >= TIMESTAMP '2023-01-06 08:59:13') AND f.timestamp BETWEEN TIMESTAMP '2023-01-06 08:59:13' AND TIMESTAMP '2023-01-13 11:51:20';
+  params:
+  - - '2023-01-06 08:59:13'
+    - '2023-01-13 11:51:20'
+  - Enger
+  - 1529
 - name: countFlightsInCounties
   type: spatial
   sql: |
-    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Viersen' GROUP BY k.name;
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Maerkischer Kreis' GROUP BY k.name;
   params:
-  - Krs Viersen
+  - Krs Maerkischer Kreis
 - name: flightClosestToPoint
   type: spatial
   sql: |
-    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_GeomFromText('SRID=4326;POINT(8.58211345714495 51.28521014046845)')) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_GeomFromText('SRID=4326;POINT(8.58211345714495 51.28521014046845)'), 5) ORDER BY min_distance ASC;
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(909223.7656330178, 6825801.770711311), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(909223.7656330178, 6825801.770711311), 3857), 3004) ORDER BY min_distance ASC LIMIT 1;
   params:
-  - SRID=4326;POINT(8.58211345714495 51.28521014046845)
-  - 5
+  - ST_SetSRID(ST_Point(909223.7656330178, 6825801.770711311), 3857)
+  - 3004
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Rhein-Sieg-Kreis' GROUP BY k.name;
+  params:
+  - Krs Rhein-Sieg-Kreis
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Mettmann' GROUP BY k.name;
+  params:
+  - Krs Mettmann
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Soest' GROUP BY k.name;
+  params:
+  - Krs Soest
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-11-17 04:47:40' AND TIMESTAMP '2023-11-24 02:37:31' GROUP BY f.flightid;
+  params:
+  - - '2023-11-17 04:47:40'
+    - '2023-11-24 02:37:31'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Hochsauerlandkreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-08-18 03:04:30' AND TIMESTAMP '2023-08-31 10:34:26';
+  params:
+  - - '2023-08-18 03:04:30'
+    - '2023-08-31 10:34:26'
+  - Krs Hochsauerlandkreis
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Recklinghausen' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-06-06 13:23:55' AND TIMESTAMP '2023-06-10 09:38:59';
+  params:
+  - - '2023-06-06 13:23:55'
+    - '2023-06-10 09:38:59'
+  - Krs Recklinghausen
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-11-10 09:27:45' AND TIMESTAMP '2023-11-11 09:58:01' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-11-10 09:27:45' AND TIMESTAMP '2023-11-11 09:58:01' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-11-10 09:27:45'
+    - '2023-11-11 09:58:01'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Bochum' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-07-27 21:53:31' AND TIMESTAMP '2023-08-09 02:24:55';
+  params:
+  - - '2023-07-27 21:53:31'
+    - '2023-08-09 02:24:55'
+  - Krs Bochum
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-02-01 09:15:13' AND TIMESTAMP '2023-02-08 03:55:32' GROUP BY f.flightid;
+  params:
+  - - '2023-02-01 09:15:13'
+    - '2023-02-08 03:55:32'
 - name: inCityRadiusInPeriod
   type: spatiotemporal
   sql: |
-    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 7.140935096701523e-06) WHERE c.name = 'Emsdetten' AND f.timestamp BETWEEN TIMESTAMP('2023-04-26 06:14:30') AND TIMESTAMP('2023-04-29 16:39:26');
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Nideggen') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 4592) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-04-21 00:56:31' AND fe.end_time >= TIMESTAMP '2023-04-09 08:54:20') AND f.timestamp BETWEEN TIMESTAMP '2023-04-09 08:54:20' AND TIMESTAMP '2023-04-21 00:56:31';
   params:
-  - - '2023-04-26 06:14:30'
-    - '2023-04-29 16:39:26'
-  - Emsdetten
-  - 7.140935096701523e-06
+  - - '2023-04-09 08:54:20'
+    - '2023-04-21 00:56:31'
+  - Nideggen
+  - 4592
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Krefeld' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-11-05 02:33:13' AND TIMESTAMP '2023-11-07 06:41:56';
+  params:
+  - - '2023-11-05 02:33:13'
+    - '2023-11-07 06:41:56'
+  - Krs Krefeld
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-08-02 22:05:18' AND TIMESTAMP '2023-08-15 07:24:33' GROUP BY f.flightid;
+  params:
+  - - '2023-08-02 22:05:18'
+    - '2023-08-15 07:24:33'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Muenster' GROUP BY k.name;
+  params:
+  - Krs Muenster
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Coesfeld' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-01-12 05:56:33' AND TIMESTAMP '2023-01-16 19:09:43';
+  params:
+  - - '2023-01-12 05:56:33'
+    - '2023-01-16 19:09:43'
+  - Krs Coesfeld
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Bad Berleburg') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 4071) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-12-25 22:32:42' AND fe.end_time >= TIMESTAMP '2023-12-22 19:59:16') AND f.timestamp BETWEEN TIMESTAMP '2023-12-22 19:59:16' AND TIMESTAMP '2023-12-25 22:32:42';
+  params:
+  - - '2023-12-22 19:59:16'
+    - '2023-12-25 22:32:42'
+  - Bad Berleburg
+  - 4071
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Bueren') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1216) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-01-08 01:32:49' AND fe.end_time >= TIMESTAMP '2023-01-05 00:01:42') AND f.timestamp BETWEEN TIMESTAMP '2023-01-05 00:01:42' AND TIMESTAMP '2023-01-08 01:32:49';
+  params:
+  - - '2023-01-05 00:01:42'
+    - '2023-01-08 01:32:49'
+  - Bueren
+  - 1216
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(1015244.0354688759, 6883369.656213962), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(1015244.0354688759, 6883369.656213962), 3857), 3827) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(1015244.0354688759, 6883369.656213962), 3857)
+  - 3827
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(758721.2578949428, 6883753.244732298), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(758721.2578949428, 6883753.244732298), 3857), 1659) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(758721.2578949428, 6883753.244732298), 3857)
+  - 1659
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Straelen') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 2411) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-09-18 09:17:57' AND fe.end_time >= TIMESTAMP '2023-09-13 02:01:36') AND f.timestamp BETWEEN TIMESTAMP '2023-09-13 02:01:36' AND TIMESTAMP '2023-09-18 09:17:57';
+  params:
+  - - '2023-09-13 02:01:36'
+    - '2023-09-18 09:17:57'
+  - Straelen
+  - 2411
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Bonn' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-01-26 20:59:16' AND TIMESTAMP '2023-02-05 11:45:20';
+  params:
+  - - '2023-01-26 20:59:16'
+    - '2023-02-05 11:45:20'
+  - Krs Bonn
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Moenchengladbach') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1001) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-07-13 03:56:37' AND fe.end_time >= TIMESTAMP '2023-07-09 16:09:24') AND f.timestamp BETWEEN TIMESTAMP '2023-07-09 16:09:24' AND TIMESTAMP '2023-07-13 03:56:37';
+  params:
+  - - '2023-07-09 16:09:24'
+    - '2023-07-13 03:56:37'
+  - Moenchengladbach
+  - 1001
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(728720.8742253623, 6576927.9469039915), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(728720.8742253623, 6576927.9469039915), 3857), 1765) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(728720.8742253623, 6576927.9469039915), 3857)
+  - 1765
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Soest' GROUP BY k.name;
+  params:
+  - Krs Soest
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-01-27 17:45:34' AND TIMESTAMP '2023-01-28 20:54:37' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-01-27 17:45:34' AND TIMESTAMP '2023-01-28 20:54:37' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-01-27 17:45:34'
+    - '2023-01-28 20:54:37'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Grevenbroich') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3051) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-11-13 16:15:28' AND fe.end_time >= TIMESTAMP '2023-11-06 05:04:45') AND f.timestamp BETWEEN TIMESTAMP '2023-11-06 05:04:45' AND TIMESTAMP '2023-11-13 16:15:28';
+  params:
+  - - '2023-11-06 05:04:45'
+    - '2023-11-13 16:15:28'
+  - Grevenbroich
+  - 3051
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-06-13 20:51:46' AND TIMESTAMP '2023-06-15 09:25:30' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-06-13 20:51:46' AND TIMESTAMP '2023-06-15 09:25:30' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-06-13 20:51:46'
+    - '2023-06-15 09:25:30'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Wuppertal') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 4005) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-10-19 03:10:08' AND fe.end_time >= TIMESTAMP '2023-10-06 11:55:34') AND f.timestamp BETWEEN TIMESTAMP '2023-10-06 11:55:34' AND TIMESTAMP '2023-10-19 03:10:08';
+  params:
+  - - '2023-10-06 11:55:34'
+    - '2023-10-19 03:10:08'
+  - Wuppertal
+  - 4005
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Voerde') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3561) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-05-27 20:38:22' AND fe.end_time >= TIMESTAMP '2023-05-22 20:24:44') AND f.timestamp BETWEEN TIMESTAMP '2023-05-22 20:24:44' AND TIMESTAMP '2023-05-27 20:38:22';
+  params:
+  - - '2023-05-22 20:24:44'
+    - '2023-05-27 20:38:22'
+  - Voerde
+  - 3561
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Kleve' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-04-28 23:15:37' AND TIMESTAMP '2023-05-03 06:47:50';
+  params:
+  - - '2023-04-28 23:15:37'
+    - '2023-05-03 06:47:50'
+  - Krs Kleve
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Steinfurt' GROUP BY k.name;
+  params:
+  - Krs Steinfurt
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-04-05 14:30:00' AND TIMESTAMP '2023-04-05 16:14:10' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-04-05 14:30:00' AND TIMESTAMP '2023-04-05 16:14:10' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-04-05 14:30:00'
+    - '2023-04-05 16:14:10'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Oberbergischer Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-02-26 06:50:09' AND TIMESTAMP '2023-03-09 12:16:29';
+  params:
+  - - '2023-02-26 06:50:09'
+    - '2023-03-09 12:16:29'
+  - Krs Oberbergischer Kreis
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(737999.2618301187, 6813312.813794865), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(737999.2618301187, 6813312.813794865), 3857), 2951) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(737999.2618301187, 6813312.813794865), 3857)
+  - 2951
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Rhein-Sieg-Kreis' GROUP BY k.name;
+  params:
+  - Krs Rhein-Sieg-Kreis
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Ochtrup') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3983) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-03-19 03:54:01' AND fe.end_time >= TIMESTAMP '2023-03-06 21:22:42') AND f.timestamp BETWEEN TIMESTAMP '2023-03-06 21:22:42' AND TIMESTAMP '2023-03-19 03:54:01';
+  params:
+  - - '2023-03-06 21:22:42'
+    - '2023-03-19 03:54:01'
+  - Ochtrup
+  - 3983
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-02-09 23:10:18' AND TIMESTAMP '2023-02-10 04:57:35' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-02-09 23:10:18' AND TIMESTAMP '2023-02-10 04:57:35' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-02-09 23:10:18'
+    - '2023-02-10 04:57:35'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-07-23 04:22:54' AND TIMESTAMP '2023-07-24 00:43:02' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-07-23 04:22:54' AND TIMESTAMP '2023-07-24 00:43:02' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-07-23 04:22:54'
+    - '2023-07-24 00:43:02'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Borken' GROUP BY k.name;
+  params:
+  - Krs Borken
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Rhein-Sieg-Kreis' GROUP BY k.name;
+  params:
+  - Krs Rhein-Sieg-Kreis
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Spenge') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 2872) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-10-04 12:25:32' AND fe.end_time >= TIMESTAMP '2023-09-20 16:41:17') AND f.timestamp BETWEEN TIMESTAMP '2023-09-20 16:41:17' AND TIMESTAMP '2023-10-04 12:25:32';
+  params:
+  - - '2023-09-20 16:41:17'
+    - '2023-10-04 12:25:32'
+  - Spenge
+  - 2872
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Oelde') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1221) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-10-03 21:38:31' AND fe.end_time >= TIMESTAMP '2023-09-30 03:47:51') AND f.timestamp BETWEEN TIMESTAMP '2023-09-30 03:47:51' AND TIMESTAMP '2023-10-03 21:38:31';
+  params:
+  - - '2023-09-30 03:47:51'
+    - '2023-10-03 21:38:31'
+  - Oelde
+  - 1221
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Rheinisch-Bergischer Kreis' GROUP BY k.name;
+  params:
+  - Krs Rheinisch-Bergischer Kreis
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Schwerte') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 4892) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-11-28 01:38:44' AND fe.end_time >= TIMESTAMP '2023-11-15 18:48:40') AND f.timestamp BETWEEN TIMESTAMP '2023-11-15 18:48:40' AND TIMESTAMP '2023-11-28 01:38:44';
+  params:
+  - - '2023-11-15 18:48:40'
+    - '2023-11-28 01:38:44'
+  - Schwerte
+  - 4892
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Nieheim') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3057) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-02-25 07:27:14' AND fe.end_time >= TIMESTAMP '2023-02-13 17:32:00') AND f.timestamp BETWEEN TIMESTAMP '2023-02-13 17:32:00' AND TIMESTAMP '2023-02-25 07:27:14';
+  params:
+  - - '2023-02-13 17:32:00'
+    - '2023-02-25 07:27:14'
+  - Nieheim
+  - 3057
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-09-17 12:07:27' AND TIMESTAMP '2023-09-18 20:15:05' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-09-17 12:07:27' AND TIMESTAMP '2023-09-18 20:15:05' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-09-17 12:07:27'
+    - '2023-09-18 20:15:05'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(820673.0451904122, 6587978.3985099895), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(820673.0451904122, 6587978.3985099895), 3857), 2151) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(820673.0451904122, 6587978.3985099895), 3857)
+  - 2151
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Marl') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3443) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-04-12 10:59:59' AND fe.end_time >= TIMESTAMP '2023-03-30 10:31:20') AND f.timestamp BETWEEN TIMESTAMP '2023-03-30 10:31:20' AND TIMESTAMP '2023-04-12 10:59:59';
+  params:
+  - - '2023-03-30 10:31:20'
+    - '2023-04-12 10:59:59'
+  - Marl
+  - 3443
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(1005230.9942345049, 6739603.293850348), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(1005230.9942345049, 6739603.293850348), 3857), 2248) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(1005230.9942345049, 6739603.293850348), 3857)
+  - 2248
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Oberhausen' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-02-19 18:54:26' AND TIMESTAMP '2023-02-28 17:04:34';
+  params:
+  - - '2023-02-19 18:54:26'
+    - '2023-02-28 17:04:34'
+  - Krs Oberhausen
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Oberbergischer Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-08-14 05:39:08' AND TIMESTAMP '2023-08-21 02:03:16';
+  params:
+  - - '2023-08-14 05:39:08'
+    - '2023-08-21 02:03:16'
+  - Krs Oberbergischer Kreis
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(900405.7161461269, 6759935.014259388), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(900405.7161461269, 6759935.014259388), 3857), 1401) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(900405.7161461269, 6759935.014259388), 3857)
+  - 1401
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Mettmann' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-01-18 01:32:55' AND TIMESTAMP '2023-01-20 23:11:10';
+  params:
+  - - '2023-01-18 01:32:55'
+    - '2023-01-20 23:11:10'
+  - Krs Mettmann
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Mettmann' GROUP BY k.name;
+  params:
+  - Krs Mettmann
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Rhein-Sieg-Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-06-07 11:24:48' AND TIMESTAMP '2023-06-17 22:16:34';
+  params:
+  - - '2023-06-07 11:24:48'
+    - '2023-06-17 22:16:34'
+  - Krs Rhein-Sieg-Kreis
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-08-11 07:04:57' AND TIMESTAMP '2023-08-26 02:46:30' GROUP BY f.flightid;
+  params:
+  - - '2023-08-11 07:04:57'
+    - '2023-08-26 02:46:30'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-04-07 05:58:38' AND TIMESTAMP '2023-04-07 15:59:54' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-04-07 05:58:38' AND TIMESTAMP '2023-04-07 15:59:54' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-04-07 05:58:38'
+    - '2023-04-07 15:59:54'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-10-12 14:00:50' AND TIMESTAMP '2023-10-14 08:34:58' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-10-12 14:00:50' AND TIMESTAMP '2023-10-14 08:34:58' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-10-12 14:00:50'
+    - '2023-10-14 08:34:58'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-06-24 15:19:23' AND TIMESTAMP '2023-07-02 21:14:34' GROUP BY f.flightid;
+  params:
+  - - '2023-06-24 15:19:23'
+    - '2023-07-02 21:14:34'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Dortmund' GROUP BY k.name;
+  params:
+  - Krs Dortmund
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Buende') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 2708) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-05-08 10:10:22' AND fe.end_time >= TIMESTAMP '2023-04-27 06:20:17') AND f.timestamp BETWEEN TIMESTAMP '2023-04-27 06:20:17' AND TIMESTAMP '2023-05-08 10:10:22';
+  params:
+  - - '2023-04-27 06:20:17'
+    - '2023-05-08 10:10:22'
+  - Buende
+  - 2708
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Maerkischer Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-06-14 12:20:50' AND TIMESTAMP '2023-06-19 19:57:28';
+  params:
+  - - '2023-06-14 12:20:50'
+    - '2023-06-19 19:57:28'
+  - Krs Maerkischer Kreis
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Moenchengladbach' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-07-18 00:01:05' AND TIMESTAMP '2023-07-20 16:12:48';
+  params:
+  - - '2023-07-18 00:01:05'
+    - '2023-07-20 16:12:48'
+  - Krs Moenchengladbach
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-03-11 13:52:17' AND TIMESTAMP '2023-03-13 03:09:11' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-03-11 13:52:17' AND TIMESTAMP '2023-03-13 03:09:11' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-03-11 13:52:17'
+    - '2023-03-13 03:09:11'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-09-09 18:05:43' AND TIMESTAMP '2023-09-11 16:20:27' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-09-09 18:05:43' AND TIMESTAMP '2023-09-11 16:20:27' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-09-09 18:05:43'
+    - '2023-09-11 16:20:27'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(982964.2257259171, 6784674.255168188), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(982964.2257259171, 6784674.255168188), 3857), 2461) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(982964.2257259171, 6784674.255168188), 3857)
+  - 2461
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-02-04 14:01:31' AND TIMESTAMP '2023-02-05 09:03:56' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-02-04 14:01:31' AND TIMESTAMP '2023-02-05 09:03:56' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-02-04 14:01:31'
+    - '2023-02-05 09:03:56'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-07-24 17:27:48' AND TIMESTAMP '2023-07-24 18:10:12' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-07-24 17:27:48' AND TIMESTAMP '2023-07-24 18:10:12' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-07-24 17:27:48'
+    - '2023-07-24 18:10:12'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(722800.2444061218, 6660324.958445645), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(722800.2444061218, 6660324.958445645), 3857), 1917) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(722800.2444061218, 6660324.958445645), 3857)
+  - 1917
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Sendenhorst') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3916) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-08-08 07:12:31' AND fe.end_time >= TIMESTAMP '2023-07-26 16:10:49') AND f.timestamp BETWEEN TIMESTAMP '2023-07-26 16:10:49' AND TIMESTAMP '2023-08-08 07:12:31';
+  params:
+  - - '2023-07-26 16:10:49'
+    - '2023-08-08 07:12:31'
+  - Sendenhorst
+  - 3916
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Overath') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3491) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-04-20 14:22:28' AND fe.end_time >= TIMESTAMP '2023-04-11 16:35:34') AND f.timestamp BETWEEN TIMESTAMP '2023-04-11 16:35:34' AND TIMESTAMP '2023-04-20 14:22:28';
+  params:
+  - - '2023-04-11 16:35:34'
+    - '2023-04-20 14:22:28'
+  - Overath
+  - 3491
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-05-14 17:03:21' AND TIMESTAMP '2023-05-16 22:16:49' GROUP BY f.flightid;
+  params:
+  - - '2023-05-14 17:03:21'
+    - '2023-05-16 22:16:49'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(735921.2139455895, 6836828.171573319), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(735921.2139455895, 6836828.171573319), 3857), 2128) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(735921.2139455895, 6836828.171573319), 3857)
+  - 2128
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-12-25 02:52:51' AND TIMESTAMP '2023-12-29 14:38:52' GROUP BY f.flightid;
+  params:
+  - - '2023-12-25 02:52:51'
+    - '2023-12-29 14:38:52'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Heinsberg' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-04-19 01:23:28' AND TIMESTAMP '2023-05-01 20:52:03';
+  params:
+  - - '2023-04-19 01:23:28'
+    - '2023-05-01 20:52:03'
+  - Krs Heinsberg
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-03-20 11:22:15' AND TIMESTAMP '2023-04-01 03:14:27' GROUP BY f.flightid;
+  params:
+  - - '2023-03-20 11:22:15'
+    - '2023-04-01 03:14:27'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-09-04 10:01:58' AND TIMESTAMP '2023-09-05 01:51:39' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-09-04 10:01:58' AND TIMESTAMP '2023-09-05 01:51:39' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-09-04 10:01:58'
+    - '2023-09-05 01:51:39'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Lichtenau') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1542) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-08-26 18:35:39' AND fe.end_time >= TIMESTAMP '2023-08-23 05:43:27') AND f.timestamp BETWEEN TIMESTAMP '2023-08-23 05:43:27' AND TIMESTAMP '2023-08-26 18:35:39';
+  params:
+  - - '2023-08-23 05:43:27'
+    - '2023-08-26 18:35:39'
+  - Lichtenau
+  - 1542
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Paderborn' GROUP BY k.name;
+  params:
+  - Krs Paderborn
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-10-16 00:43:53' AND TIMESTAMP '2023-10-17 12:35:35' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-10-16 00:43:53' AND TIMESTAMP '2023-10-17 12:35:35' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-10-16 00:43:53'
+    - '2023-10-17 12:35:35'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Hallenberg') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 4167) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-10-11 00:16:50' AND fe.end_time >= TIMESTAMP '2023-10-04 10:59:04') AND f.timestamp BETWEEN TIMESTAMP '2023-10-04 10:59:04' AND TIMESTAMP '2023-10-11 00:16:50';
+  params:
+  - - '2023-10-04 10:59:04'
+    - '2023-10-11 00:16:50'
+  - Hallenberg
+  - 4167
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(1043981.7129427933, 6670910.809627717), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(1043981.7129427933, 6670910.809627717), 3857), 1663) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(1043981.7129427933, 6670910.809627717), 3857)
+  - 1663
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-08-24 23:49:48' AND TIMESTAMP '2023-08-25 14:27:12' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-08-24 23:49:48' AND TIMESTAMP '2023-08-25 14:27:12' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-08-24 23:49:48'
+    - '2023-08-25 14:27:12'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Minden-Luebbecke' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-01-28 21:26:04' AND TIMESTAMP '2023-02-10 04:29:36';
+  params:
+  - - '2023-01-28 21:26:04'
+    - '2023-02-10 04:29:36'
+  - Krs Minden-Luebbecke
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Ennepe-Ruhr-Kreis' GROUP BY k.name;
+  params:
+  - Krs Ennepe-Ruhr-Kreis
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Pulheim') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3033) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-06-24 15:02:07' AND fe.end_time >= TIMESTAMP '2023-06-12 06:09:09') AND f.timestamp BETWEEN TIMESTAMP '2023-06-12 06:09:09' AND TIMESTAMP '2023-06-24 15:02:07';
+  params:
+  - - '2023-06-12 06:09:09'
+    - '2023-06-24 15:02:07'
+  - Pulheim
+  - 3033
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Euskirchen' GROUP BY k.name;
+  params:
+  - Krs Euskirchen
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-07-04 16:47:43' AND TIMESTAMP '2023-07-14 14:44:21' GROUP BY f.flightid;
+  params:
+  - - '2023-07-04 16:47:43'
+    - '2023-07-14 14:44:21'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-06-30 16:17:38' AND TIMESTAMP '2023-07-02 11:34:22' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-06-30 16:17:38' AND TIMESTAMP '2023-07-02 11:34:22' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-06-30 16:17:38'
+    - '2023-07-02 11:34:22'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Langenfeld') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1494) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-03-06 20:20:47' AND fe.end_time >= TIMESTAMP '2023-02-20 21:03:44') AND f.timestamp BETWEEN TIMESTAMP '2023-02-20 21:03:44' AND TIMESTAMP '2023-03-06 20:20:47';
+  params:
+  - - '2023-02-20 21:03:44'
+    - '2023-03-06 20:20:47'
+  - Langenfeld
+  - 1494
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Olpe' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-05-31 19:44:15' AND TIMESTAMP '2023-06-14 13:44:21';
+  params:
+  - - '2023-05-31 19:44:15'
+    - '2023-06-14 13:44:21'
+  - Krs Olpe
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Recklinghausen' GROUP BY k.name;
+  params:
+  - Krs Recklinghausen
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-06-20 07:51:36' AND TIMESTAMP '2023-06-26 17:46:46' GROUP BY f.flightid;
+  params:
+  - - '2023-06-20 07:51:36'
+    - '2023-06-26 17:46:46'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Rhein-Kreis Neuss' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-07-31 04:13:17' AND TIMESTAMP '2023-08-09 07:28:49';
+  params:
+  - - '2023-07-31 04:13:17'
+    - '2023-08-09 07:28:49'
+  - Krs Rhein-Kreis Neuss
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-08-22 02:48:17' AND TIMESTAMP '2023-09-03 22:54:41' GROUP BY f.flightid;
+  params:
+  - - '2023-08-22 02:48:17'
+    - '2023-09-03 22:54:41'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Duisburg') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 4724) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-03-05 06:31:57' AND fe.end_time >= TIMESTAMP '2023-02-25 12:30:19') AND f.timestamp BETWEEN TIMESTAMP '2023-02-25 12:30:19' AND TIMESTAMP '2023-03-05 06:31:57';
+  params:
+  - - '2023-02-25 12:30:19'
+    - '2023-03-05 06:31:57'
+  - Duisburg
+  - 4724
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Borken' GROUP BY k.name;
+  params:
+  - Krs Borken
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Minden-Luebbecke' GROUP BY k.name;
+  params:
+  - Krs Minden-Luebbecke
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-03-10 06:49:02' AND TIMESTAMP '2023-03-10 14:45:20' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-03-10 06:49:02' AND TIMESTAMP '2023-03-10 14:45:20' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-03-10 06:49:02'
+    - '2023-03-10 14:45:20'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Hoexter' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-01-28 02:15:48' AND TIMESTAMP '2023-01-30 14:43:20';
+  params:
+  - - '2023-01-28 02:15:48'
+    - '2023-01-30 14:43:20'
+  - Krs Hoexter
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(814708.2277534761, 6785002.660723852), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(814708.2277534761, 6785002.660723852), 3857), 2389) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(814708.2277534761, 6785002.660723852), 3857)
+  - 2389
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-05-08 04:40:30' AND TIMESTAMP '2023-05-16 02:29:54' GROUP BY f.flightid;
+  params:
+  - - '2023-05-08 04:40:30'
+    - '2023-05-16 02:29:54'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-03-29 18:12:43' AND TIMESTAMP '2023-03-29 19:18:44' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-03-29 18:12:43' AND TIMESTAMP '2023-03-29 19:18:44' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-03-29 18:12:43'
+    - '2023-03-29 19:18:44'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-08-02 02:30:38' AND TIMESTAMP '2023-08-04 05:08:13' GROUP BY f.flightid;
+  params:
+  - - '2023-08-02 02:30:38'
+    - '2023-08-04 05:08:13'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Bottrop' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-08-04 10:34:45' AND TIMESTAMP '2023-08-14 10:48:18';
+  params:
+  - - '2023-08-04 10:34:45'
+    - '2023-08-14 10:48:18'
+  - Krs Bottrop
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Bielefeld' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-09-16 21:54:07' AND TIMESTAMP '2023-09-28 02:14:11';
+  params:
+  - - '2023-09-16 21:54:07'
+    - '2023-09-28 02:14:11'
+  - Krs Bielefeld
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Maerkischer Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-08-28 07:12:40' AND TIMESTAMP '2023-09-11 22:49:43';
+  params:
+  - - '2023-08-28 07:12:40'
+    - '2023-09-11 22:49:43'
+  - Krs Maerkischer Kreis
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-03-25 11:51:06' AND TIMESTAMP '2023-03-29 00:44:38' GROUP BY f.flightid;
+  params:
+  - - '2023-03-25 11:51:06'
+    - '2023-03-29 00:44:38'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Ennepe-Ruhr-Kreis' GROUP BY k.name;
+  params:
+  - Krs Ennepe-Ruhr-Kreis
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Duisburg' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-11-19 05:19:33' AND TIMESTAMP '2023-12-01 02:54:30';
+  params:
+  - - '2023-11-19 05:19:33'
+    - '2023-12-01 02:54:30'
+  - Krs Duisburg
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Hochsauerlandkreis' GROUP BY k.name;
+  params:
+  - Krs Hochsauerlandkreis
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-12-29 13:02:51' AND TIMESTAMP '2023-12-29 14:18:22' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-12-29 13:02:51' AND TIMESTAMP '2023-12-29 14:18:22' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-12-29 13:02:51'
+    - '2023-12-29 14:18:22'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Ennepe-Ruhr-Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-08-28 23:42:46' AND TIMESTAMP '2023-09-04 07:27:53';
+  params:
+  - - '2023-08-28 23:42:46'
+    - '2023-09-04 07:27:53'
+  - Krs Ennepe-Ruhr-Kreis
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-04-28 13:33:37' AND TIMESTAMP '2023-04-28 16:45:26' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-04-28 13:33:37' AND TIMESTAMP '2023-04-28 16:45:26' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-04-28 13:33:37'
+    - '2023-04-28 16:45:26'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-10-31 16:09:25' AND TIMESTAMP '2023-10-31 22:09:51' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-10-31 16:09:25' AND TIMESTAMP '2023-10-31 22:09:51' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-10-31 16:09:25'
+    - '2023-10-31 22:09:51'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-08-18 17:17:57' AND TIMESTAMP '2023-08-20 14:28:03' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-08-18 17:17:57' AND TIMESTAMP '2023-08-20 14:28:03' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-08-18 17:17:57'
+    - '2023-08-20 14:28:03'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Lippe' GROUP BY k.name;
+  params:
+  - Krs Lippe
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(969326.1689051096, 6737596.693007001), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(969326.1689051096, 6737596.693007001), 3857), 1889) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(969326.1689051096, 6737596.693007001), 3857)
+  - 1889
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Mettmann' GROUP BY k.name;
+  params:
+  - Krs Mettmann
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-04-25 18:33:22' AND TIMESTAMP '2023-04-26 09:10:18' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-04-25 18:33:22' AND TIMESTAMP '2023-04-26 09:10:18' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-04-25 18:33:22'
+    - '2023-04-26 09:10:18'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-08-27 16:32:07' AND TIMESTAMP '2023-09-02 10:09:25' GROUP BY f.flightid;
+  params:
+  - - '2023-08-27 16:32:07'
+    - '2023-09-02 10:09:25'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Mettmann' GROUP BY k.name;
+  params:
+  - Krs Mettmann
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Minden-Luebbecke' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-08-09 18:31:05' AND TIMESTAMP '2023-08-20 03:22:20';
+  params:
+  - - '2023-08-09 18:31:05'
+    - '2023-08-20 03:22:20'
+  - Krs Minden-Luebbecke
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-11-01 17:37:02' AND TIMESTAMP '2023-11-15 09:52:18' GROUP BY f.flightid;
+  params:
+  - - '2023-11-01 17:37:02'
+    - '2023-11-15 09:52:18'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(823086.7180594008, 6546647.598295331), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(823086.7180594008, 6546647.598295331), 3857), 1353) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(823086.7180594008, 6546647.598295331), 3857)
+  - 1353
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(942516.8326449178, 6887005.895574475), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(942516.8326449178, 6887005.895574475), 3857), 2351) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(942516.8326449178, 6887005.895574475), 3857)
+  - 2351
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Siegen-Wittgenstein' GROUP BY k.name;
+  params:
+  - Krs Siegen-Wittgenstein
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Duesseldorf' GROUP BY k.name;
+  params:
+  - Krs Duesseldorf
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-03-14 07:24:44' AND TIMESTAMP '2023-03-28 10:08:16' GROUP BY f.flightid;
+  params:
+  - - '2023-03-14 07:24:44'
+    - '2023-03-28 10:08:16'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(915127.6427609344, 6772490.051449487), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(915127.6427609344, 6772490.051449487), 3857), 4983) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(915127.6427609344, 6772490.051449487), 3857)
+  - 4983
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(682442.154740547, 6823976.646675083), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(682442.154740547, 6823976.646675083), 3857), 3383) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(682442.154740547, 6823976.646675083), 3857)
+  - 3383
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Luedinghausen') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1993) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-06-22 08:23:50' AND fe.end_time >= TIMESTAMP '2023-06-17 09:06:05') AND f.timestamp BETWEEN TIMESTAMP '2023-06-17 09:06:05' AND TIMESTAMP '2023-06-22 08:23:50';
+  params:
+  - - '2023-06-17 09:06:05'
+    - '2023-06-22 08:23:50'
+  - Luedinghausen
+  - 1993
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(926151.0307685388, 6590703.300841711), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(926151.0307685388, 6590703.300841711), 3857), 4439) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(926151.0307685388, 6590703.300841711), 3857)
+  - 4439
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Maerkischer Kreis' GROUP BY k.name;
+  params:
+  - Krs Maerkischer Kreis
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-12-15 20:35:20' AND TIMESTAMP '2023-12-16 17:46:47' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-12-15 20:35:20' AND TIMESTAMP '2023-12-16 17:46:47' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-12-15 20:35:20'
+    - '2023-12-16 17:46:47'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Petershagen') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3447) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-03-05 22:06:41' AND fe.end_time >= TIMESTAMP '2023-02-19 00:38:58') AND f.timestamp BETWEEN TIMESTAMP '2023-02-19 00:38:58' AND TIMESTAMP '2023-03-05 22:06:41';
+  params:
+  - - '2023-02-19 00:38:58'
+    - '2023-03-05 22:06:41'
+  - Petershagen
+  - 3447
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(653479.5931358684, 6744422.486254577), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(653479.5931358684, 6744422.486254577), 3857), 4668) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(653479.5931358684, 6744422.486254577), 3857)
+  - 4668
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Oberbergischer Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-02-09 09:34:19' AND TIMESTAMP '2023-02-19 08:04:15';
+  params:
+  - - '2023-02-09 09:34:19'
+    - '2023-02-19 08:04:15'
+  - Krs Oberbergischer Kreis
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-05-10 09:50:53' AND TIMESTAMP '2023-05-10 17:01:20' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-05-10 09:50:53' AND TIMESTAMP '2023-05-10 17:01:20' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-05-10 09:50:53'
+    - '2023-05-10 17:01:20'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-03-17 20:08:13' AND TIMESTAMP '2023-03-23 13:56:13' GROUP BY f.flightid;
+  params:
+  - - '2023-03-17 20:08:13'
+    - '2023-03-23 13:56:13'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(1050142.2588680433, 6710008.982860441), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(1050142.2588680433, 6710008.982860441), 3857), 3694) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(1050142.2588680433, 6710008.982860441), 3857)
+  - 3694
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(978775.3882979389, 6660005.9780955855), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(978775.3882979389, 6660005.9780955855), 3857), 3142) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(978775.3882979389, 6660005.9780955855), 3857)
+  - 3142
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-12-27 03:52:40' AND TIMESTAMP '2023-12-31 04:26:16' GROUP BY f.flightid;
+  params:
+  - - '2023-12-27 03:52:40'
+    - '2023-12-31 04:26:16'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Oberbergischer Kreis' GROUP BY k.name;
+  params:
+  - Krs Oberbergischer Kreis
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-01-28 22:05:40' AND TIMESTAMP '2023-02-06 07:34:41' GROUP BY f.flightid;
+  params:
+  - - '2023-01-28 22:05:40'
+    - '2023-02-06 07:34:41'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-01-13 03:18:32' AND TIMESTAMP '2023-01-13 23:50:31' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-01-13 03:18:32' AND TIMESTAMP '2023-01-13 23:50:31' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-01-13 03:18:32'
+    - '2023-01-13 23:50:31'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Heinsberg' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-06-01 23:28:50' AND TIMESTAMP '2023-06-15 03:31:28';
+  params:
+  - - '2023-06-01 23:28:50'
+    - '2023-06-15 03:31:28'
+  - Krs Heinsberg
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Maerkischer Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-11-18 09:35:23' AND TIMESTAMP '2023-11-20 23:11:26';
+  params:
+  - - '2023-11-18 09:35:23'
+    - '2023-11-20 23:11:26'
+  - Krs Maerkischer Kreis
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-04-06 15:06:49' AND TIMESTAMP '2023-04-20 10:37:49' GROUP BY f.flightid;
+  params:
+  - - '2023-04-06 15:06:49'
+    - '2023-04-20 10:37:49'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-07-31 04:59:06' AND TIMESTAMP '2023-07-31 09:01:13' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-07-31 04:59:06' AND TIMESTAMP '2023-07-31 09:01:13' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-07-31 04:59:06'
+    - '2023-07-31 09:01:13'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Rheinisch-Bergischer Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-12-09 09:32:53' AND TIMESTAMP '2023-12-22 15:02:21';
+  params:
+  - - '2023-12-09 09:32:53'
+    - '2023-12-22 15:02:21'
+  - Krs Rheinisch-Bergischer Kreis
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-01-10 20:37:58' AND TIMESTAMP '2023-01-25 18:47:42' GROUP BY f.flightid;
+  params:
+  - - '2023-01-10 20:37:58'
+    - '2023-01-25 18:47:42'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Warendorf' GROUP BY k.name;
+  params:
+  - Krs Warendorf
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-09-28 19:26:29' AND TIMESTAMP '2023-09-29 04:01:55' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-09-28 19:26:29' AND TIMESTAMP '2023-09-29 04:01:55' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-09-28 19:26:29'
+    - '2023-09-29 04:01:55'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-05-02 20:35:45' AND TIMESTAMP '2023-05-17 16:08:12' GROUP BY f.flightid;
+  params:
+  - - '2023-05-02 20:35:45'
+    - '2023-05-17 16:08:12'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Duesseldorf' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-10-24 02:49:39' AND TIMESTAMP '2023-11-01 15:38:00';
+  params:
+  - - '2023-10-24 02:49:39'
+    - '2023-11-01 15:38:00'
+  - Krs Duesseldorf
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Wassenberg') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1175) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-03-08 18:47:31' AND fe.end_time >= TIMESTAMP '2023-02-24 07:11:04') AND f.timestamp BETWEEN TIMESTAMP '2023-02-24 07:11:04' AND TIMESTAMP '2023-03-08 18:47:31';
+  params:
+  - - '2023-02-24 07:11:04'
+    - '2023-03-08 18:47:31'
+  - Wassenberg
+  - 1175
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Luebbecke') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 4676) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-04-14 11:01:31' AND fe.end_time >= TIMESTAMP '2023-04-05 10:30:21') AND f.timestamp BETWEEN TIMESTAMP '2023-04-05 10:30:21' AND TIMESTAMP '2023-04-14 11:01:31';
+  params:
+  - - '2023-04-05 10:30:21'
+    - '2023-04-14 11:01:31'
+  - Luebbecke
+  - 4676
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Warendorf' GROUP BY k.name;
+  params:
+  - Krs Warendorf
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Dortmund' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-03-13 17:16:17' AND TIMESTAMP '2023-03-18 21:05:08';
+  params:
+  - - '2023-03-13 17:16:17'
+    - '2023-03-18 21:05:08'
+  - Krs Dortmund
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-11-30 03:28:43' AND TIMESTAMP '2023-12-03 18:17:08' GROUP BY f.flightid;
+  params:
+  - - '2023-11-30 03:28:43'
+    - '2023-12-03 18:17:08'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-01-03 05:16:35' AND TIMESTAMP '2023-01-10 00:29:38' GROUP BY f.flightid;
+  params:
+  - - '2023-01-03 05:16:35'
+    - '2023-01-10 00:29:38'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(1039996.2451679879, 6638334.073353911), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(1039996.2451679879, 6638334.073353911), 3857), 1970) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(1039996.2451679879, 6638334.073353911), 3857)
+  - 1970
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Bielefeld' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-04-16 04:27:28' AND TIMESTAMP '2023-04-21 18:29:05';
+  params:
+  - - '2023-04-16 04:27:28'
+    - '2023-04-21 18:29:05'
+  - Krs Bielefeld
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Bottrop' GROUP BY k.name;
+  params:
+  - Krs Bottrop
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-09-05 01:04:49' AND TIMESTAMP '2023-09-05 21:21:42' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-09-05 01:04:49' AND TIMESTAMP '2023-09-05 21:21:42' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-09-05 01:04:49'
+    - '2023-09-05 21:21:42'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Rhein-Sieg-Kreis' GROUP BY k.name;
+  params:
+  - Krs Rhein-Sieg-Kreis
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Medebach') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1012) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-05-29 21:54:23' AND fe.end_time >= TIMESTAMP '2023-05-15 18:20:27') AND f.timestamp BETWEEN TIMESTAMP '2023-05-15 18:20:27' AND TIMESTAMP '2023-05-29 21:54:23';
+  params:
+  - - '2023-05-15 18:20:27'
+    - '2023-05-29 21:54:23'
+  - Medebach
+  - 1012
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(1025258.9746379368, 6519548.01304523), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(1025258.9746379368, 6519548.01304523), 3857), 2487) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(1025258.9746379368, 6519548.01304523), 3857)
+  - 2487
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Rheinisch-Bergischer Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-08-09 11:42:27' AND TIMESTAMP '2023-08-22 15:19:55';
+  params:
+  - - '2023-08-09 11:42:27'
+    - '2023-08-22 15:19:55'
+  - Krs Rheinisch-Bergischer Kreis
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Borgholzhausen') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1327) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-09-13 19:18:21' AND fe.end_time >= TIMESTAMP '2023-09-11 09:09:09') AND f.timestamp BETWEEN TIMESTAMP '2023-09-11 09:09:09' AND TIMESTAMP '2023-09-13 19:18:21';
+  params:
+  - - '2023-09-11 09:09:09'
+    - '2023-09-13 19:18:21'
+  - Borgholzhausen
+  - 1327
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Olpe' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-03-15 04:33:06' AND TIMESTAMP '2023-03-17 06:23:06';
+  params:
+  - - '2023-03-15 04:33:06'
+    - '2023-03-17 06:23:06'
+  - Krs Olpe
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Moenchengladbach' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-08-13 04:49:29' AND TIMESTAMP '2023-08-17 00:46:41';
+  params:
+  - - '2023-08-13 04:49:29'
+    - '2023-08-17 00:46:41'
+  - Krs Moenchengladbach
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-03-16 00:04:32' AND TIMESTAMP '2023-03-28 21:27:40' GROUP BY f.flightid;
+  params:
+  - - '2023-03-16 00:04:32'
+    - '2023-03-28 21:27:40'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Warendorf') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3392) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-09-26 12:05:36' AND fe.end_time >= TIMESTAMP '2023-09-13 08:30:58') AND f.timestamp BETWEEN TIMESTAMP '2023-09-13 08:30:58' AND TIMESTAMP '2023-09-26 12:05:36';
+  params:
+  - - '2023-09-13 08:30:58'
+    - '2023-09-26 12:05:36'
+  - Warendorf
+  - 3392
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Troisdorf') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3003) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-01-23 17:56:22' AND fe.end_time >= TIMESTAMP '2023-01-14 00:51:43') AND f.timestamp BETWEEN TIMESTAMP '2023-01-14 00:51:43' AND TIMESTAMP '2023-01-23 17:56:22';
+  params:
+  - - '2023-01-14 00:51:43'
+    - '2023-01-23 17:56:22'
+  - Troisdorf
+  - 3003
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Hoexter' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-02-16 19:19:46' AND TIMESTAMP '2023-02-22 06:29:17';
+  params:
+  - - '2023-02-16 19:19:46'
+    - '2023-02-22 06:29:17'
+  - Krs Hoexter
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-05-11 03:54:45' AND TIMESTAMP '2023-05-11 07:02:52' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-05-11 03:54:45' AND TIMESTAMP '2023-05-11 07:02:52' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-05-11 03:54:45'
+    - '2023-05-11 07:02:52'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(847674.4016229459, 6618039.985082039), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(847674.4016229459, 6618039.985082039), 3857), 4703) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(847674.4016229459, 6618039.985082039), 3857)
+  - 4703
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(724954.4962762994, 6643119.138001017), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(724954.4962762994, 6643119.138001017), 3857), 1423) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(724954.4962762994, 6643119.138001017), 3857)
+  - 1423
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Barntrup') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3276) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-09-24 00:24:12' AND fe.end_time >= TIMESTAMP '2023-09-21 16:24:52') AND f.timestamp BETWEEN TIMESTAMP '2023-09-21 16:24:52' AND TIMESTAMP '2023-09-24 00:24:12';
+  params:
+  - - '2023-09-21 16:24:52'
+    - '2023-09-24 00:24:12'
+  - Barntrup
+  - 3276
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Soest' GROUP BY k.name;
+  params:
+  - Krs Soest
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Nideggen') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1857) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-02-16 10:46:12' AND fe.end_time >= TIMESTAMP '2023-02-05 17:19:21') AND f.timestamp BETWEEN TIMESTAMP '2023-02-05 17:19:21' AND TIMESTAMP '2023-02-16 10:46:12';
+  params:
+  - - '2023-02-05 17:19:21'
+    - '2023-02-16 10:46:12'
+  - Nideggen
+  - 1857
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Recklinghausen' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-01-21 17:21:05' AND TIMESTAMP '2023-01-28 15:09:58';
+  params:
+  - - '2023-01-21 17:21:05'
+    - '2023-01-28 15:09:58'
+  - Krs Recklinghausen
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Lippe' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-02-24 10:19:53' AND TIMESTAMP '2023-02-27 13:45:40';
+  params:
+  - - '2023-02-24 10:19:53'
+    - '2023-02-27 13:45:40'
+  - Krs Lippe
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-10-08 05:17:50' AND TIMESTAMP '2023-10-08 11:48:37' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-10-08 05:17:50' AND TIMESTAMP '2023-10-08 11:48:37' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-10-08 05:17:50'
+    - '2023-10-08 11:48:37'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(724210.803813808, 6663416.770485685), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(724210.803813808, 6663416.770485685), 3857), 3930) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(724210.803813808, 6663416.770485685), 3857)
+  - 3930
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-10-06 17:51:38' AND TIMESTAMP '2023-10-20 06:26:01' GROUP BY f.flightid;
+  params:
+  - - '2023-10-06 17:51:38'
+    - '2023-10-20 06:26:01'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-08-16 08:08:54' AND TIMESTAMP '2023-08-17 19:28:30' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-08-16 08:08:54' AND TIMESTAMP '2023-08-17 19:28:30' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-08-16 08:08:54'
+    - '2023-08-17 19:28:30'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Kevelaer') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 2379) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-10-29 18:34:32' AND fe.end_time >= TIMESTAMP '2023-10-15 23:13:30') AND f.timestamp BETWEEN TIMESTAMP '2023-10-15 23:13:30' AND TIMESTAMP '2023-10-29 18:34:32';
+  params:
+  - - '2023-10-15 23:13:30'
+    - '2023-10-29 18:34:32'
+  - Kevelaer
+  - 2379
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(695578.4719762905, 6644841.308528552), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(695578.4719762905, 6644841.308528552), 3857), 4375) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(695578.4719762905, 6644841.308528552), 3857)
+  - 4375
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Lippe' GROUP BY k.name;
+  params:
+  - Krs Lippe
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Hoexter' GROUP BY k.name;
+  params:
+  - Krs Hoexter
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Staedteregion Aachen' GROUP BY k.name;
+  params:
+  - Krs Staedteregion Aachen
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-11-29 04:59:13' AND TIMESTAMP '2023-12-11 01:12:29' GROUP BY f.flightid;
+  params:
+  - - '2023-11-29 04:59:13'
+    - '2023-12-11 01:12:29'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-03-23 02:17:30' AND TIMESTAMP '2023-04-03 15:57:52' GROUP BY f.flightid;
+  params:
+  - - '2023-03-23 02:17:30'
+    - '2023-04-03 15:57:52'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-09-25 17:36:00' AND TIMESTAMP '2023-09-29 04:01:24' GROUP BY f.flightid;
+  params:
+  - - '2023-09-25 17:36:00'
+    - '2023-09-29 04:01:24'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-12-17 08:43:07' AND TIMESTAMP '2023-12-18 09:22:25' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-12-17 08:43:07' AND TIMESTAMP '2023-12-18 09:22:25' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-12-17 08:43:07'
+    - '2023-12-18 09:22:25'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-04-24 06:20:54' AND TIMESTAMP '2023-05-06 19:32:07' GROUP BY f.flightid;
+  params:
+  - - '2023-04-24 06:20:54'
+    - '2023-05-06 19:32:07'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Steinfurt' GROUP BY k.name;
+  params:
+  - Krs Steinfurt
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(785682.7719453084, 6874900.443789937), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(785682.7719453084, 6874900.443789937), 3857), 2273) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(785682.7719453084, 6874900.443789937), 3857)
+  - 2273
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-08-19 13:08:21' AND TIMESTAMP '2023-08-20 19:42:21' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-08-19 13:08:21' AND TIMESTAMP '2023-08-20 19:42:21' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-08-19 13:08:21'
+    - '2023-08-20 19:42:21'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(915369.6825041495, 6664989.848787199), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(915369.6825041495, 6664989.848787199), 3857), 4403) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(915369.6825041495, 6664989.848787199), 3857)
+  - 4403
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-04-26 10:53:07' AND TIMESTAMP '2023-05-04 04:33:04' GROUP BY f.flightid;
+  params:
+  - - '2023-04-26 10:53:07'
+    - '2023-05-04 04:33:04'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Guetersloh' GROUP BY k.name;
+  params:
+  - Krs Guetersloh
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(1025481.3295778036, 6788721.722220239), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(1025481.3295778036, 6788721.722220239), 3857), 2162) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(1025481.3295778036, 6788721.722220239), 3857)
+  - 2162
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Lippe' GROUP BY k.name;
+  params:
+  - Krs Lippe
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-11-08 20:27:14' AND TIMESTAMP '2023-11-16 09:35:03' GROUP BY f.flightid;
+  params:
+  - - '2023-11-08 20:27:14'
+    - '2023-11-16 09:35:03'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-11-14 18:42:43' AND TIMESTAMP '2023-11-22 08:37:45' GROUP BY f.flightid;
+  params:
+  - - '2023-11-14 18:42:43'
+    - '2023-11-22 08:37:45'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-01-03 21:30:10' AND TIMESTAMP '2023-01-10 12:23:22' GROUP BY f.flightid;
+  params:
+  - - '2023-01-03 21:30:10'
+    - '2023-01-10 12:23:22'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-07-08 19:32:14' AND TIMESTAMP '2023-07-09 20:08:41' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-07-08 19:32:14' AND TIMESTAMP '2023-07-09 20:08:41' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-07-08 19:32:14'
+    - '2023-07-09 20:08:41'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(822157.2070021835, 6682497.868419012), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(822157.2070021835, 6682497.868419012), 3857), 4484) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(822157.2070021835, 6682497.868419012), 3857)
+  - 4484
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Maerkischer Kreis' GROUP BY k.name;
+  params:
+  - Krs Maerkischer Kreis
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-06-01 15:27:56' AND TIMESTAMP '2023-06-01 20:56:42' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-06-01 15:27:56' AND TIMESTAMP '2023-06-01 20:56:42' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-06-01 15:27:56'
+    - '2023-06-01 20:56:42'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Straelen') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 4199) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-11-23 17:38:44' AND fe.end_time >= TIMESTAMP '2023-11-12 21:48:25') AND f.timestamp BETWEEN TIMESTAMP '2023-11-12 21:48:25' AND TIMESTAMP '2023-11-23 17:38:44';
+  params:
+  - - '2023-11-12 21:48:25'
+    - '2023-11-23 17:38:44'
+  - Straelen
+  - 4199
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-12-18 06:47:53' AND TIMESTAMP '2023-12-18 20:38:44' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-12-18 06:47:53' AND TIMESTAMP '2023-12-18 20:38:44' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-12-18 06:47:53'
+    - '2023-12-18 20:38:44'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(977312.7272105308, 6826417.1756089665), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(977312.7272105308, 6826417.1756089665), 3857), 3062) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(977312.7272105308, 6826417.1756089665), 3857)
+  - 3062
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-06-15 05:22:42' AND TIMESTAMP '2023-06-16 21:42:26' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-06-15 05:22:42' AND TIMESTAMP '2023-06-16 21:42:26' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-06-15 05:22:42'
+    - '2023-06-16 21:42:26'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(963589.880696589, 6551855.465826161), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(963589.880696589, 6551855.465826161), 3857), 1682) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(963589.880696589, 6551855.465826161), 3857)
+  - 1682
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(697270.0076724107, 6732638.856707723), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(697270.0076724107, 6732638.856707723), 3857), 3679) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(697270.0076724107, 6732638.856707723), 3857)
+  - 3679
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-10-09 14:33:24' AND TIMESTAMP '2023-10-23 17:35:06' GROUP BY f.flightid;
+  params:
+  - - '2023-10-09 14:33:24'
+    - '2023-10-23 17:35:06'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-01-18 23:01:28' AND TIMESTAMP '2023-01-22 13:24:18' GROUP BY f.flightid;
+  params:
+  - - '2023-01-18 23:01:28'
+    - '2023-01-22 13:24:18'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-04-07 06:14:00' AND TIMESTAMP '2023-04-07 22:53:53' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-04-07 06:14:00' AND TIMESTAMP '2023-04-07 22:53:53' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-04-07 06:14:00'
+    - '2023-04-07 22:53:53'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(1052135.887260529, 6545386.658807392), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(1052135.887260529, 6545386.658807392), 3857), 3154) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(1052135.887260529, 6545386.658807392), 3857)
+  - 3154
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Guetersloh') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3911) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-05-25 01:25:31' AND fe.end_time >= TIMESTAMP '2023-05-16 18:30:30') AND f.timestamp BETWEEN TIMESTAMP '2023-05-16 18:30:30' AND TIMESTAMP '2023-05-25 01:25:31';
+  params:
+  - - '2023-05-16 18:30:30'
+    - '2023-05-25 01:25:31'
+  - Guetersloh
+  - 3911
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Hoexter' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-09-22 00:13:26' AND TIMESTAMP '2023-09-27 05:08:30';
+  params:
+  - - '2023-09-22 00:13:26'
+    - '2023-09-27 05:08:30'
+  - Krs Hoexter
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(664723.8457331003, 6800450.6605492), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(664723.8457331003, 6800450.6605492), 3857), 3500) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(664723.8457331003, 6800450.6605492), 3857)
+  - 3500
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Herford' GROUP BY k.name;
+  params:
+  - Krs Herford
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(701370.4833230792, 6808798.347870567), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(701370.4833230792, 6808798.347870567), 3857), 1439) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(701370.4833230792, 6808798.347870567), 3857)
+  - 1439
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-08-21 23:12:21' AND TIMESTAMP '2023-08-22 05:14:08' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-08-21 23:12:21' AND TIMESTAMP '2023-08-22 05:14:08' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-08-21 23:12:21'
+    - '2023-08-22 05:14:08'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(941577.9773103575, 6828009.983886289), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(941577.9773103575, 6828009.983886289), 3857), 1707) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(941577.9773103575, 6828009.983886289), 3857)
+  - 1707
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Wuppertal' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-10-02 03:15:32' AND TIMESTAMP '2023-10-14 17:33:05';
+  params:
+  - - '2023-10-02 03:15:32'
+    - '2023-10-14 17:33:05'
+  - Krs Wuppertal
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-09-22 21:54:39' AND TIMESTAMP '2023-09-26 08:12:19' GROUP BY f.flightid;
+  params:
+  - - '2023-09-22 21:54:39'
+    - '2023-09-26 08:12:19'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Hoexter' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-11-24 04:28:37' AND TIMESTAMP '2023-12-06 03:40:09';
+  params:
+  - - '2023-11-24 04:28:37'
+    - '2023-12-06 03:40:09'
+  - Krs Hoexter
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-03-22 09:05:46' AND TIMESTAMP '2023-03-31 00:45:33' GROUP BY f.flightid;
+  params:
+  - - '2023-03-22 09:05:46'
+    - '2023-03-31 00:45:33'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Monheim am Rhein') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1729) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-08-05 17:30:49' AND fe.end_time >= TIMESTAMP '2023-07-27 05:09:16') AND f.timestamp BETWEEN TIMESTAMP '2023-07-27 05:09:16' AND TIMESTAMP '2023-08-05 17:30:49';
+  params:
+  - - '2023-07-27 05:09:16'
+    - '2023-08-05 17:30:49'
+  - Monheim am Rhein
+  - 1729
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-05-25 19:11:53' AND TIMESTAMP '2023-05-30 13:30:13' GROUP BY f.flightid;
+  params:
+  - - '2023-05-25 19:11:53'
+    - '2023-05-30 13:30:13'
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-04-19 09:51:52' AND TIMESTAMP '2023-04-20 14:29:03' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-04-19 09:51:52' AND TIMESTAMP '2023-04-20 14:29:03' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-04-19 09:51:52'
+    - '2023-04-20 14:29:03'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(934255.4250887944, 6829889.571106504), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(934255.4250887944, 6829889.571106504), 3857), 3950) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(934255.4250887944, 6829889.571106504), 3857)
+  - 3950
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-11-30 04:44:42' AND TIMESTAMP '2023-12-11 16:54:28' GROUP BY f.flightid;
+  params:
+  - - '2023-11-30 04:44:42'
+    - '2023-12-11 16:54:28'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-12-15 19:51:26' AND TIMESTAMP '2023-12-23 00:46:57' GROUP BY f.flightid;
+  params:
+  - - '2023-12-15 19:51:26'
+    - '2023-12-23 00:46:57'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(787088.8540685633, 6852963.103049245), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(787088.8540685633, 6852963.103049245), 3857), 4233) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(787088.8540685633, 6852963.103049245), 3857)
+  - 4233
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Ennepe-Ruhr-Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-05-30 02:18:36' AND TIMESTAMP '2023-06-11 09:04:14';
+  params:
+  - - '2023-05-30 02:18:36'
+    - '2023-06-11 09:04:14'
+  - Krs Ennepe-Ruhr-Kreis
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Guetersloh' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-07-26 23:53:50' AND TIMESTAMP '2023-08-07 14:09:17';
+  params:
+  - - '2023-07-26 23:53:50'
+    - '2023-08-07 14:09:17'
+  - Krs Guetersloh
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-04-10 21:29:42' AND TIMESTAMP '2023-04-12 21:23:16' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-04-10 21:29:42' AND TIMESTAMP '2023-04-12 21:23:16' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-04-10 21:29:42'
+    - '2023-04-12 21:23:16'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Muelheim a.d. Ruhr' GROUP BY k.name;
+  params:
+  - Krs Muelheim a.d. Ruhr
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Warendorf' GROUP BY k.name;
+  params:
+  - Krs Warendorf
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(953145.7532314749, 6774049.288678676), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(953145.7532314749, 6774049.288678676), 3857), 4140) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(953145.7532314749, 6774049.288678676), 3857)
+  - 4140
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Olfen') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1033) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-12-31 23:46:35' AND fe.end_time >= TIMESTAMP '2023-12-29 18:08:27') AND f.timestamp BETWEEN TIMESTAMP '2023-12-29 18:08:27' AND TIMESTAMP '2023-12-31 23:46:35';
+  params:
+  - - '2023-12-29 18:08:27'
+    - '2023-12-31 23:46:35'
+  - Olfen
+  - 1033
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-06-07 06:59:43' AND TIMESTAMP '2023-06-07 22:34:40' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-06-07 06:59:43' AND TIMESTAMP '2023-06-07 22:34:40' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-06-07 06:59:43'
+    - '2023-06-07 22:34:40'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Minden-Luebbecke' GROUP BY k.name;
+  params:
+  - Krs Minden-Luebbecke
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Olsberg') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1969) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-01-14 18:43:49' AND fe.end_time >= TIMESTAMP '2023-01-10 13:21:00') AND f.timestamp BETWEEN TIMESTAMP '2023-01-10 13:21:00' AND TIMESTAMP '2023-01-14 18:43:49';
+  params:
+  - - '2023-01-10 13:21:00'
+    - '2023-01-14 18:43:49'
+  - Olsberg
+  - 1969
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Staedteregion Aachen' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-09-29 23:30:36' AND TIMESTAMP '2023-10-14 19:30:48';
+  params:
+  - - '2023-09-29 23:30:36'
+    - '2023-10-14 19:30:48'
+  - Krs Staedteregion Aachen
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-02-22 08:27:56' AND TIMESTAMP '2023-02-23 06:38:35' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-02-22 08:27:56' AND TIMESTAMP '2023-02-23 06:38:35' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-02-22 08:27:56'
+    - '2023-02-23 06:38:35'
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Wiehl') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1828) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-08-18 13:59:32' AND fe.end_time >= TIMESTAMP '2023-08-07 06:48:00') AND f.timestamp BETWEEN TIMESTAMP '2023-08-07 06:48:00' AND TIMESTAMP '2023-08-18 13:59:32';
+  params:
+  - - '2023-08-07 06:48:00'
+    - '2023-08-18 13:59:32'
+  - Wiehl
+  - 1828
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-03-18 15:12:08' AND TIMESTAMP '2023-03-19 13:49:17' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-03-18 15:12:08' AND TIMESTAMP '2023-03-19 13:49:17' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-03-18 15:12:08'
+    - '2023-03-19 13:49:17'
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Hamm' GROUP BY k.name;
+  params:
+  - Krs Hamm
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-04-03 20:46:45' AND TIMESTAMP '2023-04-13 19:22:31' GROUP BY f.flightid;
+  params:
+  - - '2023-04-03 20:46:45'
+    - '2023-04-13 19:22:31'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(790254.9584488743, 6524258.55575489), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(790254.9584488743, 6524258.55575489), 3857), 4645) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(790254.9584488743, 6524258.55575489), 3857)
+  - 4645
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Wesel' GROUP BY k.name;
+  params:
+  - Krs Wesel
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(768238.3231816946, 6649202.945324264), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(768238.3231816946, 6649202.945324264), 3857), 2379) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(768238.3231816946, 6649202.945324264), 3857)
+  - 2379
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Freudenberg') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1955) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-11-02 11:44:37' AND fe.end_time >= TIMESTAMP '2023-10-22 15:09:15') AND f.timestamp BETWEEN TIMESTAMP '2023-10-22 15:09:15' AND TIMESTAMP '2023-11-02 11:44:37';
+  params:
+  - - '2023-10-22 15:09:15'
+    - '2023-11-02 11:44:37'
+  - Freudenberg
+  - 1955
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Hagen' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-09-02 08:06:03' AND TIMESTAMP '2023-09-15 06:34:53';
+  params:
+  - - '2023-09-02 08:06:03'
+    - '2023-09-15 06:34:53'
+  - Krs Hagen
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Rees') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 3681) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-01-25 04:52:55' AND fe.end_time >= TIMESTAMP '2023-01-16 05:42:54') AND f.timestamp BETWEEN TIMESTAMP '2023-01-16 05:42:54' AND TIMESTAMP '2023-01-25 04:52:55';
+  params:
+  - - '2023-01-16 05:42:54'
+    - '2023-01-25 04:52:55'
+  - Rees
+  - 3681
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Schloß Holte-Stukenbrock') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 4819) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-06-21 10:52:28' AND fe.end_time >= TIMESTAMP '2023-06-10 12:18:03') AND f.timestamp BETWEEN TIMESTAMP '2023-06-10 12:18:03' AND TIMESTAMP '2023-06-21 10:52:28';
+  params:
+  - - '2023-06-10 12:18:03'
+    - '2023-06-21 10:52:28'
+  - Schloß Holte-Stukenbrock
+  - 4819
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(1015499.795917527, 6802217.554148121), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(1015499.795917527, 6802217.554148121), 3857), 3715) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(1015499.795917527, 6802217.554148121), 3857)
+  - 3715
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Baesweiler') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 2798) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-07-30 02:32:12' AND fe.end_time >= TIMESTAMP '2023-07-19 01:35:47') AND f.timestamp BETWEEN TIMESTAMP '2023-07-19 01:35:47' AND TIMESTAMP '2023-07-30 02:32:12';
+  params:
+  - - '2023-07-19 01:35:47'
+    - '2023-07-30 02:32:12'
+  - Baesweiler
+  - 2798
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Unna' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-08-17 02:06:59' AND TIMESTAMP '2023-08-31 16:04:00';
+  params:
+  - - '2023-08-17 02:06:59'
+    - '2023-08-31 16:04:00'
+  - Krs Unna
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Kamp-Lintfort') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 4801) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-11-23 14:01:26' AND fe.end_time >= TIMESTAMP '2023-11-13 01:08:13') AND f.timestamp BETWEEN TIMESTAMP '2023-11-13 01:08:13' AND TIMESTAMP '2023-11-23 14:01:26';
+  params:
+  - - '2023-11-13 01:08:13'
+    - '2023-11-23 14:01:26'
+  - Kamp-Lintfort
+  - 4801
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(840987.9069190681, 6508653.764604156), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(840987.9069190681, 6508653.764604156), 3857), 3404) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(840987.9069190681, 6508653.764604156), 3857)
+  - 3404
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-08-01 22:49:56' AND TIMESTAMP '2023-08-02 01:39:11' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-08-01 22:49:56' AND TIMESTAMP '2023-08-02 01:39:11' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-08-01 22:49:56'
+    - '2023-08-02 01:39:11'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(716936.8194444906, 6526146.518489952), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(716936.8194444906, 6526146.518489952), 3857), 1202) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(716936.8194444906, 6526146.518489952), 3857)
+  - 1202
+- name: airportUtilizationInPeriod
+  type: temporal
+  sql: |
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-04-03 03:03:15' AND TIMESTAMP '2023-04-04 23:55:07' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-04-03 03:03:15' AND TIMESTAMP '2023-04-04 23:55:07' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
+  params:
+  - - '2023-04-03 03:03:15'
+    - '2023-04-04 23:55:07'
 - name: countFlightsInCounties
   type: spatial
   sql: |
@@ -437,104 +2164,125 @@
 - name: airportUtilizationInPeriod
   type: temporal
   sql: |
-    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-11-05 23:55:01') AND TIMESTAMP('2023-11-06 16:01:02') GROUP BY f.origin ), arrivals AS (
-      SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count
-      FROM flight_points f
-      WHERE f.timestamp BETWEEN TIMESTAMP('2023-11-05 23:55:01') AND TIMESTAMP('2023-11-06 16:01:02')
-      GROUP BY f.destination
-    ) SELECT
-      COALESCE(d.airport, a.airport) AS airport,
-      COALESCE(d.departure_count, 0) AS departures,
-      COALESCE(a.arrival_count, 0) AS arrivals,
-      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count
-    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-05-02 01:20:54' AND TIMESTAMP '2023-05-03 05:46:33' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-05-02 01:20:54' AND TIMESTAMP '2023-05-03 05:46:33' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
   params:
-  - - '2023-11-05 23:55:01'
-    - '2023-11-06 16:01:02'
-- name: flightClosestToPoint
-  type: spatial
-  sql: |
-    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_GeomFromText('SRID=4326;POINT(8.135940739099471 52.16551411111646)')) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_GeomFromText('SRID=4326;POINT(8.135940739099471 52.16551411111646)'), 7) ORDER BY min_distance ASC;
-  params:
-  - SRID=4326;POINT(8.135940739099471 52.16551411111646)
-  - 7
-- name: flightClosestToPoint
-  type: spatial
-  sql: |
-    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_GeomFromText('SRID=4326;POINT(7.728654529691154 51.68459215649008)')) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_GeomFromText('SRID=4326;POINT(7.728654529691154 51.68459215649008)'), 5) ORDER BY min_distance ASC;
-  params:
-  - SRID=4326;POINT(7.728654529691154 51.68459215649008)
-  - 5
+  - - '2023-05-02 01:20:54'
+    - '2023-05-03 05:46:33'
 - name: flightsInCountyInPeriod
   type: spatiotemporal
   sql: |
-    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Wuppertal' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP('2023-02-21 06:37:15') AND TIMESTAMP('2023-03-03 06:41:50');
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Rheinisch-Bergischer Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-03-04 03:47:48' AND TIMESTAMP '2023-03-06 09:47:32';
   params:
-  - - '2023-02-21 06:37:15'
-    - '2023-03-03 06:41:50'
-  - Krs Wuppertal
+  - - '2023-03-04 03:47:48'
+    - '2023-03-06 09:47:32'
+  - Krs Rheinisch-Bergischer Kreis
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-02-10 23:03:44' AND TIMESTAMP '2023-02-23 08:45:30' GROUP BY f.flightid;
+  params:
+  - - '2023-02-10 23:03:44'
+    - '2023-02-23 08:45:30'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(819649.92022183, 6512142.788535226), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(819649.92022183, 6512142.788535226), 3857), 1828) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(819649.92022183, 6512142.788535226), 3857)
+  - 1828
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-08-05 05:45:10' AND TIMESTAMP '2023-08-12 05:06:51' GROUP BY f.flightid;
+  params:
+  - - '2023-08-05 05:45:10'
+    - '2023-08-12 05:06:51'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-01-18 00:36:11' AND TIMESTAMP '2023-01-23 02:29:42' GROUP BY f.flightid;
+  params:
+  - - '2023-01-18 00:36:11'
+    - '2023-01-23 02:29:42'
 - name: inCityRadiusInPeriod
   type: spatiotemporal
   sql: |
-    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1.3644075654823828e-05) WHERE c.name = 'Burscheid' AND f.timestamp BETWEEN TIMESTAMP('2023-11-06 12:46:29') AND TIMESTAMP('2023-11-17 05:47:17');
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Bergkamen') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 2110) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-12-04 18:54:40' AND fe.end_time >= TIMESTAMP '2023-11-22 22:46:58') AND f.timestamp BETWEEN TIMESTAMP '2023-11-22 22:46:58' AND TIMESTAMP '2023-12-04 18:54:40';
   params:
-  - - '2023-11-06 12:46:29'
-    - '2023-11-17 05:47:17'
-  - Burscheid
-  - 1.3644075654823828e-05
-- name: countActiveFlightsInPeriod
-  type: temporalbench
+  - - '2023-11-22 22:46:58'
+    - '2023-12-04 18:54:40'
+  - Bergkamen
+  - 2110
+- name: inCityRadiusInPeriod
+  type: spatiotemporal
   sql: |
-    SELECT COUNT(DISTINCT f.flightid) from flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-04-06 21:50:50') AND TIMESTAMP('2023-04-19 21:11:35');
+    SELECT DISTINCT f.flightid FROM (SELECT name, geom FROM cities WHERE name = 'Nieheim') AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 1475) JOIN flight_trajectories_start ft ON ft.flightid = f.flightid JOIN flight_trajectories_end fe ON fe.flightid = f.flightid  WHERE (ft.start_time <= TIMESTAMP '2023-12-02 11:47:03' AND fe.end_time >= TIMESTAMP '2023-11-20 15:53:29') AND f.timestamp BETWEEN TIMESTAMP '2023-11-20 15:53:29' AND TIMESTAMP '2023-12-02 11:47:03';
   params:
-  - - '2023-04-06 21:50:50'
-    - '2023-04-19 21:11:35'
-- name: airportUtilizationInPeriod
-  type: temporal
-  sql: |
-    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-02-20 13:22:20') AND TIMESTAMP('2023-02-22 06:23:47') GROUP BY f.origin ), arrivals AS (
-      SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count
-      FROM flight_points f
-      WHERE f.timestamp BETWEEN TIMESTAMP('2023-02-20 13:22:20') AND TIMESTAMP('2023-02-22 06:23:47')
-      GROUP BY f.destination
-    ) SELECT
-      COALESCE(d.airport, a.airport) AS airport,
-      COALESCE(d.departure_count, 0) AS departures,
-      COALESCE(a.arrival_count, 0) AS arrivals,
-      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count
-    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport
-  params:
-  - - '2023-02-20 13:22:20'
-    - '2023-02-22 06:23:47'
+  - - '2023-11-20 15:53:29'
+    - '2023-12-02 11:47:03'
+  - Nieheim
+  - 1475
 - name: countFlightsInCounties
   type: spatial
   sql: |
-    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Olpe' GROUP BY k.name;
+    SELECT k.name, COUNT(DISTINCT f.flightid) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Staedteregion Aachen' GROUP BY k.name;
   params:
-  - Krs Olpe
+  - Krs Staedteregion Aachen
 - name: airportUtilizationInPeriod
   type: temporal
   sql: |
-    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP('2023-05-22 05:42:28') AND TIMESTAMP('2023-05-23 08:49:36') GROUP BY f.origin ), arrivals AS (
-      SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count
-      FROM flight_points f
-      WHERE f.timestamp BETWEEN TIMESTAMP('2023-05-22 05:42:28') AND TIMESTAMP('2023-05-23 08:49:36')
-      GROUP BY f.destination
-    ) SELECT
-      COALESCE(d.airport, a.airport) AS airport,
-      COALESCE(d.departure_count, 0) AS departures,
-      COALESCE(a.arrival_count, 0) AS arrivals,
-      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count
-    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport
+    WITH departures AS ( SELECT f.origin AS airport, COUNT(DISTINCT f.flightid) AS departure_count FROM flight_trajectories_start f WHERE f.start_time::timestamp BETWEEN TIMESTAMP '2023-09-17 15:20:01' AND TIMESTAMP '2023-09-19 09:20:02' GROUP BY f.origin ), arrivals AS (SELECT f.destination AS airport, COUNT(DISTINCT f.flightid) AS arrival_count FROM flight_trajectories_end f WHERE f.end_time::timestamp BETWEEN TIMESTAMP '2023-09-17 15:20:01' AND TIMESTAMP '2023-09-19 09:20:02' GROUP BY f.destination) SELECT COALESCE(d.airport, a.airport) AS airport, COALESCE(d.departure_count, 0) AS departures, COALESCE(a.arrival_count, 0) AS arrivals,      COALESCE(d.departure_count, 0) + COALESCE(a.arrival_count, 0) AS traffic_count    FROM departures d FULL JOIN arrivals a ON d.airport = a.airport;
   params:
-  - - '2023-05-22 05:42:28'
-    - '2023-05-23 08:49:36'
-- name: inCityRadiusInPeriod
+  - - '2023-09-17 15:20:01'
+    - '2023-09-19 09:20:02'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-06-11 18:34:12' AND TIMESTAMP '2023-06-17 21:49:12' GROUP BY f.flightid;
+  params:
+  - - '2023-06-11 18:34:12'
+    - '2023-06-17 21:49:12'
+- name: flightsInCountyInPeriod
   type: spatiotemporal
   sql: |
-    SELECT f.flightId, f.airplanetype, f.origin, f.destination FROM cities AS c JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, 8.001694381173785e-06) WHERE c.name = 'Wuppertal' AND f.timestamp BETWEEN TIMESTAMP('2023-03-23 14:04:13') AND TIMESTAMP('2023-03-30 05:39:44');
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Coesfeld' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-06-23 01:09:42' AND TIMESTAMP '2023-06-29 12:56:26';
   params:
-  - - '2023-03-23 14:04:13'
-    - '2023-03-30 05:39:44'
-  - Wuppertal
-  - 8.001694381173785e-06
+  - - '2023-06-23 01:09:42'
+    - '2023-06-29 12:56:26'
+  - Krs Coesfeld
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-09-06 17:35:39' AND TIMESTAMP '2023-09-14 00:37:34' GROUP BY f.flightid;
+  params:
+  - - '2023-09-06 17:35:39'
+    - '2023-09-14 00:37:34'
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flightid, f.airplaneType, f.origin, f.destination, ST_Distance(f.geom, ST_SetSRID(ST_Point(886795.716785722, 6562662.703588015), 3857)) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(886795.716785722, 6562662.703588015), 3857), 2581) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(886795.716785722, 6562662.703588015), 3857)
+  - 2581
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-11-30 07:12:08' AND TIMESTAMP '2023-12-13 00:51:41' GROUP BY f.flightid;
+  params:
+  - - '2023-11-30 07:12:08'
+    - '2023-12-13 00:51:41'
+- name: FlightUpdatesInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flightid, COUNT(*) FROM flight_points f WHERE f.timestamp BETWEEN TIMESTAMP '2023-12-08 19:48:17' AND TIMESTAMP '2023-12-17 14:08:57' GROUP BY f.flightid;
+  params:
+  - - '2023-12-08 19:48:17'
+    - '2023-12-17 14:08:57'
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flightid FROM flight_points f, counties k WHERE k.name = 'Krs Bonn' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN TIMESTAMP '2023-10-14 08:23:45' AND TIMESTAMP '2023-10-27 19:47:46';
+  params:
+  - - '2023-10-14 08:23:45'
+    - '2023-10-27 19:47:46'
+  - Krs Bonn

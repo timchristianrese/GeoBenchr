@@ -9,7 +9,8 @@ public class BenchmarkClient {
         int numThreads = Integer.parseInt(System.getenv().getOrDefault("NUM_THREADS", "1"));
         //generate random 5 letter ID for benchmark run
         String runID = java.util.UUID.randomUUID().toString().substring(0, 5);
-
+        
+        BenchmarkMarkerLogger benchLogger = new BenchmarkMarkerLogger(runID);
         //Select application
         String application = args.length > 0 ? args[0] : "aviation";
         System.out.println("Starting benchmark for application: " + application + " with " + numThreads + " threads.");
@@ -29,8 +30,9 @@ public class BenchmarkClient {
         queries = QueryDispatcher.loadQueries(yamlPath);
         System.out.println("Setup complete. Starting benchmark...");
         runner = new BenchmarkRunner(spaceTimeExecutor, queries, numThreads, "SpaceTime", application, runID);
+        benchLogger.logText("SpaceTime Start");
         runner.run();
-
+        benchLogger.logText("SpaceTime End");
     
 
 
@@ -41,13 +43,17 @@ public class BenchmarkClient {
         yamlPath = application + "/" + "postgisSQL_queries.yaml";
         queries = QueryDispatcher.loadQueries(yamlPath);
         runner = new BenchmarkRunner(postgresqlExecutor, queries, numThreads, "PostGIS", application, runID);
+        benchLogger.logText("PostGIS Start");
         runner.run();
+        benchLogger.logText("PostGIS End");
 
         //MobilityDB
         yamlPath = application + "/" + "mobilitydb_queries.yaml";
         queries = QueryDispatcher.loadQueries(yamlPath);
         runner = new BenchmarkRunner(postgresqlExecutor, queries, numThreads, "MobilityDB", application, runID);
+        benchLogger.logText("MobilityDB Start");
         runner.run();
+        benchLogger.logText("MobilityDB End");
 
         // //MobilityDB Time Partitioned
         // yamlPath = application + "/" + "mobilitydb_queries_time_partitioned.yaml";
@@ -65,7 +71,9 @@ public class BenchmarkClient {
         yamlPath = application + "/" + "tsdb_queries.yaml";
         queries = QueryDispatcher.loadQueries(yamlPath);
         runner = new BenchmarkRunner(postgresqlExecutor, queries, numThreads, "TimescaleDB", application, runID);
+        benchLogger.logText("TimescaleDB Start");
         runner.run();
+        benchLogger.logText("TimescaleDB End");
 
 
         
@@ -88,6 +96,8 @@ public class BenchmarkClient {
         
         //QueryExecutor executor = new MockExecutor();
 
+        benchLogger.moveLogFile();
+        System.out.println("Benchmark run " + runID + " completed.");
         
     }
 }

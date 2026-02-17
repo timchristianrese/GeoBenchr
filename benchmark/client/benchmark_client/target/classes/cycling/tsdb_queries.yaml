@@ -1,111 +1,2592 @@
-- name: ridesCrossingPlaceWithMostIncidentsInDistrict
-  type: spatial
-  sql: |
-    WITH incident_points AS ( SELECT i.incident_id, i.geom FROM incidents i JOIN berlin_districts d ON ST_Within(i.geom, d.geom) WHERE d.name = 'Treptow-Köpenick'), clusters AS ( SELECT incident_id, geom, ST_ClusterWithin(geom, 10) OVER () AS cluster FROM incident_points), hotspot AS ( SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center FROM clusters GROUP BY cluster ORDER BY COUNT(*) DESC LIMIT 1) SELECT DISTINCT ON (r.ride_id) r.ride_id, r.rider_id FROM tsdb_ride_points r CROSS JOIN hotspot h WHERE ST_DWithin(r.geom, h.cluster_center::geography, 500);
-  params:
-  - Treptow-Köpenick
-  - 10
 - name: averageRideDurationDuringDay
   type: temporal
   sql: |
-    SELECT AVG(max_ts - min_ts) AS avg_duration FROM (SELECT r.ride_id, MAX(timestamp) AS max_ts, MIN(timestamp) AS min_ts FROM tsdb_ride_points r WHERE timestamp >= '2023-09-09':timestamp AND timestamp < ('2023-09-09'::timestamp + INTERVAL '1 day') GROUP BY ride_id);
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-09-23'::timestamp, '2022-09-23'::timestamp + INTERVAL '1 day');
   params:
-  - '2023-09-09'
-- name: ridesStartedInDistrict
+  - '2022-09-23'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2020-11-03 19:52:25, 2020-11-16 08:47:03]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2020-11-03 19:52:25'
+    - '2020-11-16 08:47:03'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-04-22 12:12:33, 2021-05-04 04:04:45]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-04-22 12:12:33'
+    - '2021-05-04 04:04:45'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-03-16 14:10:18, 2021-03-25 05:50:05]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-03-16 14:10:18'
+    - '2021-03-25 05:50:05'
+- name: countActiveRideInDistrict
   type: spatial
   sql: |
-    WITH ride_start AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts FROM tsdb_ride_points r GROUP BY ride_id), start_points AS ( SELECT r.ride_id, r.geom FROM tsdb_ride_points r JOIN ride_start s ON r.ride_id = s.ride_id AND r.timestamp = s.start_ts) SELECT s.ride_id FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, d.geom) WHERE d.name = 'Pankow';
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Reinickendorf' GROUP BY d.name;
   params:
-  - Pankow
-- name: countActiveRidesInPeriod
+  - Reinickendorf
+- name: SortRidesByHourInPeriod
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT r.ride_id) FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-08-02 04:26:35' AND '2023-08-08 06:58:45';
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2024-09-09 14:44:35, 2024-09-13 05:33:00]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
   params:
-  - - '2023-08-02 04:26:35'
-    - '2023-08-08 06:58:45'
-- name: countActiveRidesInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT r.ride_id) FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-06-12 23:01:04' AND '2023-06-15 13:25:20';
-  params:
-  - - '2023-06-12 23:01:04'
-    - '2023-06-15 13:25:20'
-- name: countActiveRidesInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT r.ride_id) FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-09-05 21:11:13' AND '2023-09-15 17:46:08';
-  params:
-  - - '2023-09-05 21:11:13'
-    - '2023-09-15 17:46:08'
-- name: countActiveRidesInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT r.ride_id) FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-07-17 04:14:32' AND '2023-07-22 10:00:14';
-  params:
-  - - '2023-07-17 04:14:32'
-    - '2023-07-22 10:00:14'
+  - - '2024-09-09 14:44:35'
+    - '2024-09-13 05:33:00'
 - name: averageRideDurationDuringDay
   type: temporal
   sql: |
-    SELECT AVG(max_ts - min_ts) AS avg_duration FROM (SELECT r.ride_id, MAX(timestamp) AS max_ts, MIN(timestamp) AS min_ts FROM tsdb_ride_points r WHERE timestamp >= '2023-08-24':timestamp AND timestamp < ('2023-08-24'::timestamp + INTERVAL '1 day') GROUP BY ride_id);
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2023-08-08'::timestamp, '2023-08-08'::timestamp + INTERVAL '1 day');
   params:
-  - '2023-08-24'
+  - '2023-08-08'
 - name: averageRideDurationDuringDay
   type: temporal
   sql: |
-    SELECT AVG(max_ts - min_ts) AS avg_duration FROM (SELECT r.ride_id, MAX(timestamp) AS max_ts, MIN(timestamp) AS min_ts FROM tsdb_ride_points r WHERE timestamp >= '2024-03-02':timestamp AND timestamp < ('2024-03-02'::timestamp + INTERVAL '1 day') GROUP BY ride_id);
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-01-18'::timestamp, '2021-01-18'::timestamp + INTERVAL '1 day');
   params:
-  - '2024-03-02'
-- name: ridesCrossingPlaceWithMostIncidentsInDistrict
-  type: spatial
-  sql: |
-    WITH incident_points AS ( SELECT i.incident_id, i.geom FROM incidents i JOIN berlin_districts d ON ST_Within(i.geom, d.geom) WHERE d.name = 'Lichtenberg'), clusters AS ( SELECT incident_id, geom, ST_ClusterWithin(geom, 3) OVER () AS cluster FROM incident_points), hotspot AS ( SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center FROM clusters GROUP BY cluster ORDER BY COUNT(*) DESC LIMIT 1) SELECT DISTINCT ON (r.ride_id) r.ride_id, r.rider_id FROM tsdb_ride_points r CROSS JOIN hotspot h WHERE ST_DWithin(r.geom, h.cluster_center::geography, 500);
-  params:
-  - Lichtenberg
-  - 3
-- name: ridesCrossingPlaceWithMostIncidentsInDistrict
-  type: spatial
-  sql: |
-    WITH incident_points AS ( SELECT i.incident_id, i.geom FROM incidents i JOIN berlin_districts d ON ST_Within(i.geom, d.geom) WHERE d.name = 'Mitte'), clusters AS ( SELECT incident_id, geom, ST_ClusterWithin(geom, 8) OVER () AS cluster FROM incident_points), hotspot AS ( SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center FROM clusters GROUP BY cluster ORDER BY COUNT(*) DESC LIMIT 1) SELECT DISTINCT ON (r.ride_id) r.ride_id, r.rider_id FROM tsdb_ride_points r CROSS JOIN hotspot h WHERE ST_DWithin(r.geom, h.cluster_center::geography, 500);
-  params:
-  - Mitte
-  - 8
-- name: ridesStartedInDistrict
-  type: spatial
-  sql: |
-    WITH ride_start AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts FROM tsdb_ride_points r GROUP BY ride_id), start_points AS ( SELECT r.ride_id, r.geom FROM tsdb_ride_points r JOIN ride_start s ON r.ride_id = s.ride_id AND r.timestamp = s.start_ts) SELECT s.ride_id FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, d.geom) WHERE d.name = 'Mitte';
-  params:
-  - Mitte
-- name: countActiveRidesInPeriod
+  - '2021-01-18'
+- name: averageRideDurationDuringDay
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT r.ride_id) FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-07-07 04:49:52' AND '2023-07-14 13:07:32';
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-06-16'::timestamp, '2021-06-16'::timestamp + INTERVAL '1 day');
   params:
-  - - '2023-07-07 04:49:52'
-    - '2023-07-14 13:07:32'
+  - '2021-06-16'
 - name: averageRideDurationToGoAtUniversityInPeriod
   type: spatiotemporal
   sql: |
-    WITH rides_in_period AS ( SELECT DISTINCT r.ride_id FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-08-20 18:45:46' AND '2023-08-30 08:00:01'), ride_stats AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts, MAX(r.timestamp) AS end_ts FROM tsdb_ride_points r JOIN rides_in_period rp ON r.ride_id = rp.ride_id GROUP BY r.ride_id) SELECT AVG(rs.end_ts - rs.start_ts) AS avg_duration FROM ride_stats rs JOIN tsdb_ride_points rend ON rend.ride_id = rs.ride_id AND rend.timestamp = rs.end_ts JOIN universities u ON ST_DWithin(rend.geom, u.geom, 2500) WHERE u.name = 'Freie-Universität-Berlin';
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 615)
+    WHERE
+      tsrange '[2020-12-24 23:26:50, 2021-01-01 05:57:10]' @> r.start_time::timestamp
+      AND u.name = 'Bard-College';
   params:
-  - - '2023-08-20 18:45:46'
-    - '2023-08-30 08:00:01'
-  - Freie-Universität-Berlin
+  - - '2020-12-24 23:26:50'
+    - '2021-01-01 05:57:10'
+  - Bard-College
+  - 615
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2024-07-02 14:13:43, 2024-07-11 00:19:00]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2024-07-02 14:13:43'
+    - '2024-07-11 00:19:00'
 - name: averageRideDurationDuringDay
   type: temporal
   sql: |
-    SELECT AVG(max_ts - min_ts) AS avg_duration FROM (SELECT r.ride_id, MAX(timestamp) AS max_ts, MIN(timestamp) AS min_ts FROM tsdb_ride_points r WHERE timestamp >= '2023-10-22':timestamp AND timestamp < ('2023-10-22'::timestamp + INTERVAL '1 day') GROUP BY ride_id);
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2025-01-17'::timestamp, '2025-01-17'::timestamp + INTERVAL '1 day');
   params:
-  - '2023-10-22'
-- name: ridesCrossingPlaceWithMostIncidentsInDistrict
+  - '2025-01-17'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2020-06-28 09:03:38, 2020-07-06 18:32:38]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-06-28 09:03:38'
+    - '2020-07-06 18:32:38'
+- name: RidesPastOrToUniversity
   type: spatial
   sql: |
-    WITH incident_points AS ( SELECT i.incident_id, i.geom FROM incidents i JOIN berlin_districts d ON ST_Within(i.geom, d.geom) WHERE d.name = 'Tempelhof-Schöneberg'), clusters AS ( SELECT incident_id, geom, ST_ClusterWithin(geom, 7) OVER () AS cluster FROM incident_points), hotspot AS ( SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center FROM clusters GROUP BY cluster ORDER BY COUNT(*) DESC LIMIT 1) SELECT DISTINCT ON (r.ride_id) r.ride_id, r.rider_id FROM tsdb_ride_points r CROSS JOIN hotspot h WHERE ST_DWithin(r.geom, h.cluster_center::geography, 500);
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 229)
+    WHERE u.name = 'Technische-Universität-Berlin';
+  params:
+  - Technische-Universität-Berlin
+  - 229
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 159)
+    WHERE
+      tsrange '[2023-07-18 23:17:03, 2023-07-23 17:34:55]' @> r.start_time::timestamp
+      AND u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - - '2023-07-18 23:17:03'
+    - '2023-07-23 17:34:55'
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 159
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-12-17'::timestamp, '2021-12-17'::timestamp + INTERVAL '1 day');
+  params:
+  - '2021-12-17'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Reinickendorf' GROUP BY d.name;
+  params:
+  - Reinickendorf
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2020-12-04'::timestamp, '2020-12-04'::timestamp + INTERVAL '1 day');
+  params:
+  - '2020-12-04'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Pankow' GROUP BY d.name;
+  params:
+  - Pankow
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2022-12-27 21:13:40, 2023-01-06 00:29:12]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2022-12-27 21:13:40'
+    - '2023-01-06 00:29:12'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 347)
+    WHERE
+      tsrange '[2022-06-26 01:04:11, 2022-07-08 16:07:09]' @> r.start_time::timestamp
+      AND u.name = 'Bard-College';
+  params:
+  - - '2022-06-26 01:04:11'
+    - '2022-07-08 16:07:09'
+  - Bard-College
+  - 347
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 762)
+    WHERE u.name = 'Charité-Campus-Klinik';
+  params:
+  - Charité-Campus-Klinik
+  - 762
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-05-24'::timestamp, '2021-05-24'::timestamp + INTERVAL '1 day');
+  params:
+  - '2021-05-24'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 178)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 178
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2020-12-31'::timestamp, '2020-12-31'::timestamp + INTERVAL '1 day');
+  params:
+  - '2020-12-31'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-05-10'::timestamp, '2022-05-10'::timestamp + INTERVAL '1 day');
+  params:
+  - '2022-05-10'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2024-09-29 20:24:26, 2024-10-12 05:02:04]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2024-09-29 20:24:26'
+    - '2024-10-12 05:02:04'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2020-02-24 18:27:19, 2020-03-02 09:20:30]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-02-24 18:27:19'
+    - '2020-03-02 09:20:30'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2023-06-05 16:52:13, 2023-06-11 10:29:31]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-06-05 16:52:13'
+    - '2023-06-11 10:29:31'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2023-12-15 21:46:34, 2023-12-27 20:20:07]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2023-12-15 21:46:34'
+    - '2023-12-27 20:20:07'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2022-12-03 06:14:36, 2022-12-13 22:49:19]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2022-12-03 06:14:36'
+    - '2022-12-13 22:49:19'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2024-01-18 04:34:36, 2024-01-23 06:03:01]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2024-01-18 04:34:36'
+    - '2024-01-23 06:03:01'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2023-01-14 21:11:09, 2023-01-16 23:48:44]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-01-14 21:11:09'
+    - '2023-01-16 23:48:44'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2022-02-19 07:44:59, 2022-02-24 02:03:19]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2022-02-19 07:44:59'
+    - '2022-02-24 02:03:19'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2023-11-27'::timestamp, '2023-11-27'::timestamp + INTERVAL '1 day');
+  params:
+  - '2023-11-27'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-09-07 05:48:09, 2021-09-14 23:28:05]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-09-07 05:48:09'
+    - '2021-09-14 23:28:05'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 160)
+    WHERE u.name = 'Bard-College';
+  params:
+  - Bard-College
+  - 160
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Friedrichshain-Kreuzberg' GROUP BY d.name;
+  params:
+  - Friedrichshain-Kreuzberg
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-01-13'::timestamp, '2021-01-13'::timestamp + INTERVAL '1 day');
+  params:
+  - '2021-01-13'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2024-06-11 05:29:05, 2024-06-18 18:36:53]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-06-11 05:29:05'
+    - '2024-06-18 18:36:53'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 908)
+    WHERE
+      tsrange '[2022-01-26 03:09:21, 2022-01-29 02:39:05]' @> r.start_time::timestamp
+      AND u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - - '2022-01-26 03:09:21'
+    - '2022-01-29 02:39:05'
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 908
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
   params:
   - Tempelhof-Schöneberg
-  - 7
-- name: countActiveRidesInDistrict
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 886)
+    WHERE u.name = 'Bard-College';
+  params:
+  - Bard-College
+  - 886
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Marzahn-Hellersdorf' GROUP BY d.name;
+  params:
+  - Marzahn-Hellersdorf
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2023-08-26'::timestamp, '2023-08-26'::timestamp + INTERVAL '1 day');
+  params:
+  - '2023-08-26'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+  params:
+  - Tempelhof-Schöneberg
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Mitte' GROUP BY d.name;
+  params:
+  - Mitte
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2024-04-17 15:59:58, 2024-04-28 05:08:48]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2024-04-17 15:59:58'
+    - '2024-04-28 05:08:48'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-08-25'::timestamp, '2022-08-25'::timestamp + INTERVAL '1 day');
+  params:
+  - '2022-08-25'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-12-26'::timestamp, '2021-12-26'::timestamp + INTERVAL '1 day');
+  params:
+  - '2021-12-26'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 537)
+    WHERE u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - European-School-of-Management-and-Technology-Berlin
+  - 537
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 411)
+    WHERE u.name = 'Bard-College';
+  params:
+  - Bard-College
+  - 411
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Neukölln' GROUP BY d.name;
+  params:
+  - Neukölln
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 150)
+    WHERE u.name = 'Technische-Universität-Berlin';
+  params:
+  - Technische-Universität-Berlin
+  - 150
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2020-11-22 23:23:25, 2020-12-06 17:07:39]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2020-11-22 23:23:25'
+    - '2020-12-06 17:07:39'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 526)
+    WHERE u.name = 'Bard-College';
+  params:
+  - Bard-College
+  - 526
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 747)
+    WHERE
+      tsrange '[2021-01-06 15:31:16, 2021-01-11 01:50:22]' @> r.start_time::timestamp
+      AND u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - - '2021-01-06 15:31:16'
+    - '2021-01-11 01:50:22'
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 747
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 265)
+    WHERE
+      tsrange '[2025-01-24 12:29:27, 2025-01-27 21:00:47]' @> r.start_time::timestamp
+      AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2025-01-24 12:29:27'
+    - '2025-01-27 21:00:47'
+  - Charité-Campus-Klinik
+  - 265
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 881)
+    WHERE
+      tsrange '[2022-11-15 07:13:17, 2022-11-24 07:25:11]' @> r.start_time::timestamp
+      AND u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - - '2022-11-15 07:13:17'
+    - '2022-11-24 07:25:11'
+  - European-School-of-Management-and-Technology-Berlin
+  - 881
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Pankow' GROUP BY d.name;
+  params:
+  - Pankow
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2020-03-30 10:40:05, 2020-04-14 08:49:49]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-03-30 10:40:05'
+    - '2020-04-14 08:49:49'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-04-01 02:24:44, 2021-04-04 15:18:15]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-04-01 02:24:44'
+    - '2021-04-04 15:18:15'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2024-10-20 23:21:00, 2024-11-02 07:33:15]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2024-10-20 23:21:00'
+    - '2024-11-02 07:33:15'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 879)
+    WHERE
+      tsrange '[2020-06-20 00:02:56, 2020-07-01 02:26:49]' @> r.start_time::timestamp
+      AND u.name = 'Freie-Universität-Berlin';
+  params:
+  - - '2020-06-20 00:02:56'
+    - '2020-07-01 02:26:49'
+  - Freie-Universität-Berlin
+  - 879
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2020-02-19'::timestamp, '2020-02-19'::timestamp + INTERVAL '1 day');
+  params:
+  - '2020-02-19'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Marzahn-Hellersdorf' GROUP BY d.name;
+  params:
+  - Marzahn-Hellersdorf
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 739)
+    WHERE
+      tsrange '[2023-05-16 22:17:33, 2023-05-31 13:54:35]' @> r.start_time::timestamp
+      AND u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - - '2023-05-16 22:17:33'
+    - '2023-05-31 13:54:35'
+  - Universität-der-Künste-Berlin
+  - 739
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 364)
+    WHERE
+      tsrange '[2020-12-18 16:40:47, 2020-12-25 20:43:25]' @> r.start_time::timestamp
+      AND u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - - '2020-12-18 16:40:47'
+    - '2020-12-25 20:43:25'
+  - Universität-der-Künste-Berlin
+  - 364
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf' GROUP BY d.name;
+  params:
+  - Charlottenburg-Wilmersdorf
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Neukölln' GROUP BY d.name;
+  params:
+  - Neukölln
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-01-31 22:36:42, 2021-02-09 21:20:41]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-01-31 22:36:42'
+    - '2021-02-09 21:20:41'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Spandau' GROUP BY d.name;
+  params:
+  - Spandau
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 983)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 983
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 966)
+    WHERE
+      tsrange '[2022-09-22 15:25:15, 2022-09-25 02:41:15]' @> r.start_time::timestamp
+      AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2022-09-22 15:25:15'
+    - '2022-09-25 02:41:15'
+  - Charité-Campus-Klinik
+  - 966
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 466)
+    WHERE
+      tsrange '[2024-04-07 23:32:00, 2024-04-16 00:34:47]' @> r.start_time::timestamp
+      AND u.name = 'Technische-Universität-Berlin';
+  params:
+  - - '2024-04-07 23:32:00'
+    - '2024-04-16 00:34:47'
+  - Technische-Universität-Berlin
+  - 466
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Lichtenberg' GROUP BY d.name;
+  params:
+  - Lichtenberg
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 158)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 158
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-01-11 13:01:53, 2021-01-24 22:24:07]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-01-11 13:01:53'
+    - '2021-01-24 22:24:07'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2020-07-15 15:08:46, 2020-07-22 09:49:05]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-07-15 15:08:46'
+    - '2020-07-22 09:49:05'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf' GROUP BY d.name;
+  params:
+  - Charlottenburg-Wilmersdorf
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 134)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 134
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-10-25'::timestamp, '2022-10-25'::timestamp + INTERVAL '1 day');
+  params:
+  - '2022-10-25'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-12-15 23:26:41, 2021-12-18 04:40:09]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-12-15 23:26:41'
+    - '2021-12-18 04:40:09'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-09-13'::timestamp, '2022-09-13'::timestamp + INTERVAL '1 day');
+  params:
+  - '2022-09-13'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2020-08-21'::timestamp, '2020-08-21'::timestamp + INTERVAL '1 day');
+  params:
+  - '2020-08-21'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 437)
+    WHERE
+      tsrange '[2020-04-28 04:52:50, 2020-05-11 18:33:41]' @> r.start_time::timestamp
+      AND u.name = 'Bard-College';
+  params:
+  - - '2020-04-28 04:52:50'
+    - '2020-05-11 18:33:41'
+  - Bard-College
+  - 437
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 103)
+    WHERE
+      tsrange '[2020-07-23 23:01:15, 2020-07-30 10:01:26]' @> r.start_time::timestamp
+      AND u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - - '2020-07-23 23:01:15'
+    - '2020-07-30 10:01:26'
+  - European-School-of-Management-and-Technology-Berlin
+  - 103
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf' GROUP BY d.name;
+  params:
+  - Charlottenburg-Wilmersdorf
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 419)
+    WHERE u.name = 'Bard-College';
+  params:
+  - Bard-College
+  - 419
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 842)
+    WHERE
+      tsrange '[2021-08-10 12:27:43, 2021-08-22 06:17:49]' @> r.start_time::timestamp
+      AND u.name = 'Humboldt-Universität-zu-Berlin';
+  params:
+  - - '2021-08-10 12:27:43'
+    - '2021-08-22 06:17:49'
+  - Humboldt-Universität-zu-Berlin
+  - 842
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Friedrichshain-Kreuzberg' GROUP BY d.name;
+  params:
+  - Friedrichshain-Kreuzberg
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-06-01 18:21:46, 2021-06-09 14:59:41]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-06-01 18:21:46'
+    - '2021-06-09 14:59:41'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2023-12-13 14:08:05, 2023-12-27 17:09:46]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-12-13 14:08:05'
+    - '2023-12-27 17:09:46'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 619)
+    WHERE
+      tsrange '[2023-05-17 20:22:10, 2023-05-27 23:34:45]' @> r.start_time::timestamp
+      AND u.name = 'Freie-Universität-Berlin';
+  params:
+  - - '2023-05-17 20:22:10'
+    - '2023-05-27 23:34:45'
+  - Freie-Universität-Berlin
+  - 619
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-06-09'::timestamp, '2022-06-09'::timestamp + INTERVAL '1 day');
+  params:
+  - '2022-06-09'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2023-10-07 20:56:13, 2023-10-14 23:38:40]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2023-10-07 20:56:13'
+    - '2023-10-14 23:38:40'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 697)
+    WHERE u.name = 'Technische-Universität-Berlin';
+  params:
+  - Technische-Universität-Berlin
+  - 697
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2024-09-10 18:52:04, 2024-09-16 17:04:58]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2024-09-10 18:52:04'
+    - '2024-09-16 17:04:58'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-12-01'::timestamp, '2022-12-01'::timestamp + INTERVAL '1 day');
+  params:
+  - '2022-12-01'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Mitte' GROUP BY d.name;
+  params:
+  - Mitte
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-10-25'::timestamp, '2022-10-25'::timestamp + INTERVAL '1 day');
+  params:
+  - '2022-10-25'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Friedrichshain-Kreuzberg' GROUP BY d.name;
+  params:
+  - Friedrichshain-Kreuzberg
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-06-24'::timestamp, '2022-06-24'::timestamp + INTERVAL '1 day');
+  params:
+  - '2022-06-24'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-03-16 19:58:55, 2021-03-22 13:46:55]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-03-16 19:58:55'
+    - '2021-03-22 13:46:55'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+  params:
+  - Tempelhof-Schöneberg
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 126)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 126
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 283)
+    WHERE u.name = 'Humboldt-Universität-zu-Berlin';
+  params:
+  - Humboldt-Universität-zu-Berlin
+  - 283
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 370)
+    WHERE u.name = 'Bard-College';
+  params:
+  - Bard-College
+  - 370
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Lichtenberg' GROUP BY d.name;
+  params:
+  - Lichtenberg
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 651)
+    WHERE
+      tsrange '[2023-08-30 09:00:25, 2023-09-12 02:34:22]' @> r.start_time::timestamp
+      AND u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - - '2023-08-30 09:00:25'
+    - '2023-09-12 02:34:22'
+  - European-School-of-Management-and-Technology-Berlin
+  - 651
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 385)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 385
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-05-31 12:43:46, 2021-06-14 08:14:46]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-05-31 12:43:46'
+    - '2021-06-14 08:14:46'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 503)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 503
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 336)
+    WHERE
+      tsrange '[2022-09-04 22:53:08, 2022-09-07 09:06:13]' @> r.start_time::timestamp
+      AND u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - - '2022-09-04 22:53:08'
+    - '2022-09-07 09:06:13'
+  - European-School-of-Management-and-Technology-Berlin
+  - 336
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 463)
+    WHERE
+      tsrange '[2021-09-12 17:00:45, 2021-09-22 08:15:17]' @> r.start_time::timestamp
+      AND u.name = 'Bard-College';
+  params:
+  - - '2021-09-12 17:00:45'
+    - '2021-09-22 08:15:17'
+  - Bard-College
+  - 463
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2023-06-06'::timestamp, '2023-06-06'::timestamp + INTERVAL '1 day');
+  params:
+  - '2023-06-06'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 443)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 443
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2022-08-26 23:15:05, 2022-09-07 01:25:16]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2022-08-26 23:15:05'
+    - '2022-09-07 01:25:16'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2023-11-04 10:15:13, 2023-11-18 05:59:28]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2023-11-04 10:15:13'
+    - '2023-11-18 05:59:28'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 132)
+    WHERE
+      tsrange '[2021-07-14 14:39:41, 2021-07-25 05:54:17]' @> r.start_time::timestamp
+      AND u.name = 'Technische-Universität-Berlin';
+  params:
+  - - '2021-07-14 14:39:41'
+    - '2021-07-25 05:54:17'
+  - Technische-Universität-Berlin
+  - 132
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2020-12-09 08:33:49, 2020-12-20 19:43:37]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2020-12-09 08:33:49'
+    - '2020-12-20 19:43:37'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 951)
+    WHERE
+      tsrange '[2022-12-22 17:47:46, 2022-12-30 07:04:12]' @> r.start_time::timestamp
+      AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2022-12-22 17:47:46'
+    - '2022-12-30 07:04:12'
+  - Charité-Campus-Klinik
+  - 951
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Friedrichshain-Kreuzberg' GROUP BY d.name;
+  params:
+  - Friedrichshain-Kreuzberg
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-03-20 03:47:43, 2021-03-31 17:28:05]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-03-20 03:47:43'
+    - '2021-03-31 17:28:05'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 768)
+    WHERE u.name = 'Technische-Universität-Berlin';
+  params:
+  - Technische-Universität-Berlin
+  - 768
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Neukölln' GROUP BY d.name;
+  params:
+  - Neukölln
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2025-01-07 17:57:37, 2025-01-11 18:31:13]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2025-01-07 17:57:37'
+    - '2025-01-11 18:31:13'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2023-10-05 02:37:52, 2023-10-08 12:55:31]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-10-05 02:37:52'
+    - '2023-10-08 12:55:31'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 568)
+    WHERE u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - European-School-of-Management-and-Technology-Berlin
+  - 568
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2023-05-26 01:33:00, 2023-06-08 15:04:48]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2023-05-26 01:33:00'
+    - '2023-06-08 15:04:48'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 110)
+    WHERE
+      tsrange '[2022-03-21 09:19:41, 2022-03-24 18:51:15]' @> r.start_time::timestamp
+      AND u.name = 'Bard-College';
+  params:
+  - - '2022-03-21 09:19:41'
+    - '2022-03-24 18:51:15'
+  - Bard-College
+  - 110
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-10-10'::timestamp, '2022-10-10'::timestamp + INTERVAL '1 day');
+  params:
+  - '2022-10-10'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 912)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 912
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-06-26 07:53:55, 2021-07-06 06:29:41]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-06-26 07:53:55'
+    - '2021-07-06 06:29:41'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Spandau' GROUP BY d.name;
+  params:
+  - Spandau
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 141)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 141
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 968)
+    WHERE
+      tsrange '[2024-10-27 18:12:31, 2024-10-30 19:45:09]' @> r.start_time::timestamp
+      AND u.name = 'Freie-Universität-Berlin';
+  params:
+  - - '2024-10-27 18:12:31'
+    - '2024-10-30 19:45:09'
+  - Freie-Universität-Berlin
+  - 968
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2022-07-03 00:05:52, 2022-07-09 10:01:01]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2022-07-03 00:05:52'
+    - '2022-07-09 10:01:01'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 270)
+    WHERE
+      tsrange '[2024-10-10 11:26:41, 2024-10-22 13:23:41]' @> r.start_time::timestamp
+      AND u.name = 'Technische-Universität-Berlin';
+  params:
+  - - '2024-10-10 11:26:41'
+    - '2024-10-22 13:23:41'
+  - Technische-Universität-Berlin
+  - 270
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2023-11-27'::timestamp, '2023-11-27'::timestamp + INTERVAL '1 day');
+  params:
+  - '2023-11-27'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 629)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 629
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-12-19 09:25:18, 2021-12-21 11:28:58]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-12-19 09:25:18'
+    - '2021-12-21 11:28:58'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2024-10-13'::timestamp, '2024-10-13'::timestamp + INTERVAL '1 day');
+  params:
+  - '2024-10-13'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 798)
+    WHERE
+      tsrange '[2025-01-06 16:19:02, 2025-01-15 11:55:22]' @> r.start_time::timestamp
+      AND u.name = 'Freie-Universität-Berlin';
+  params:
+  - - '2025-01-06 16:19:02'
+    - '2025-01-15 11:55:22'
+  - Freie-Universität-Berlin
+  - 798
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-07-05 04:45:10, 2021-07-19 11:25:13]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-07-05 04:45:10'
+    - '2021-07-19 11:25:13'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 150)
+    WHERE
+      tsrange '[2023-07-15 13:35:03, 2023-07-19 15:52:57]' @> r.start_time::timestamp
+      AND u.name = 'Humboldt-Universität-zu-Berlin';
+  params:
+  - - '2023-07-15 13:35:03'
+    - '2023-07-19 15:52:57'
+  - Humboldt-Universität-zu-Berlin
+  - 150
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 771)
+    WHERE
+      tsrange '[2023-07-03 05:59:56, 2023-07-09 00:09:32]' @> r.start_time::timestamp
+      AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2023-07-03 05:59:56'
+    - '2023-07-09 00:09:32'
+  - Charité-Campus-Klinik
+  - 771
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2024-10-26'::timestamp, '2024-10-26'::timestamp + INTERVAL '1 day');
+  params:
+  - '2024-10-26'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2023-02-25'::timestamp, '2023-02-25'::timestamp + INTERVAL '1 day');
+  params:
+  - '2023-02-25'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+  params:
+  - Tempelhof-Schöneberg
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Treptow-Köpenick' GROUP BY d.name;
+  params:
+  - Treptow-Köpenick
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 507)
+    WHERE u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 507
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Reinickendorf' GROUP BY d.name;
+  params:
+  - Reinickendorf
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-08-09'::timestamp, '2022-08-09'::timestamp + INTERVAL '1 day');
+  params:
+  - '2022-08-09'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2024-06-10 17:03:12, 2024-06-18 06:58:14]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-06-10 17:03:12'
+    - '2024-06-18 06:58:14'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-10-16 03:33:14, 2021-10-19 11:07:26]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-10-16 03:33:14'
+    - '2021-10-19 11:07:26'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 635)
+    WHERE
+      tsrange '[2023-03-19 14:18:27, 2023-04-01 04:03:25]' @> r.start_time::timestamp
+      AND u.name = 'Bard-College';
+  params:
+  - - '2023-03-19 14:18:27'
+    - '2023-04-01 04:03:25'
+  - Bard-College
+  - 635
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2022-04-25 21:21:29, 2022-05-02 00:36:30]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2022-04-25 21:21:29'
+    - '2022-05-02 00:36:30'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2025-01-15 10:50:03, 2025-01-19 22:36:04]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2025-01-15 10:50:03'
+    - '2025-01-19 22:36:04'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 328)
+    WHERE
+      tsrange '[2024-03-20 10:09:49, 2024-03-26 15:10:57]' @> r.start_time::timestamp
+      AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2024-03-20 10:09:49'
+    - '2024-03-26 15:10:57'
+  - Charité-Campus-Klinik
+  - 328
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 766)
+    WHERE
+      tsrange '[2023-06-29 09:13:19, 2023-07-07 01:20:59]' @> r.start_time::timestamp
+      AND u.name = 'Freie-Universität-Berlin';
+  params:
+  - - '2023-06-29 09:13:19'
+    - '2023-07-07 01:20:59'
+  - Freie-Universität-Berlin
+  - 766
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 491)
+    WHERE u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 491
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Reinickendorf' GROUP BY d.name;
+  params:
+  - Reinickendorf
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 421)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 421
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2023-02-26 01:11:45, 2023-03-06 02:00:07]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2023-02-26 01:11:45'
+    - '2023-03-06 02:00:07'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 115)
+    WHERE u.name = 'Humboldt-Universität-zu-Berlin';
+  params:
+  - Humboldt-Universität-zu-Berlin
+  - 115
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-06-22'::timestamp, '2021-06-22'::timestamp + INTERVAL '1 day');
+  params:
+  - '2021-06-22'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-10-01'::timestamp, '2022-10-01'::timestamp + INTERVAL '1 day');
+  params:
+  - '2022-10-01'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 735)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 735
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2024-02-20 14:26:14, 2024-03-02 12:44:52]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2024-02-20 14:26:14'
+    - '2024-03-02 12:44:52'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Lichtenberg' GROUP BY d.name;
+  params:
+  - Lichtenberg
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 160)
+    WHERE
+      tsrange '[2024-01-23 13:54:18, 2024-02-04 15:57:00]' @> r.start_time::timestamp
+      AND u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - - '2024-01-23 13:54:18'
+    - '2024-02-04 15:57:00'
+  - Universität-der-Künste-Berlin
+  - 160
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 119)
+    WHERE
+      tsrange '[2022-11-02 21:07:41, 2022-11-09 05:56:06]' @> r.start_time::timestamp
+      AND u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - - '2022-11-02 21:07:41'
+    - '2022-11-09 05:56:06'
+  - European-School-of-Management-and-Technology-Berlin
+  - 119
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2020-08-13 08:25:29, 2020-08-24 18:06:20]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2020-08-13 08:25:29'
+    - '2020-08-24 18:06:20'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 819)
+    WHERE
+      tsrange '[2024-11-30 04:04:33, 2024-12-04 06:20:15]' @> r.start_time::timestamp
+      AND u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - - '2024-11-30 04:04:33'
+    - '2024-12-04 06:20:15'
+  - Universität-der-Künste-Berlin
+  - 819
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-04-12'::timestamp, '2021-04-12'::timestamp + INTERVAL '1 day');
+  params:
+  - '2021-04-12'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2024-05-29 04:05:01, 2024-05-31 16:18:36]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2024-05-29 04:05:01'
+    - '2024-05-31 16:18:36'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Neukölln' GROUP BY d.name;
+  params:
+  - Neukölln
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 684)
+    WHERE
+      tsrange '[2021-08-31 14:07:31, 2021-09-08 00:38:42]' @> r.start_time::timestamp
+      AND u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - - '2021-08-31 14:07:31'
+    - '2021-09-08 00:38:42'
+  - European-School-of-Management-and-Technology-Berlin
+  - 684
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2023-01-10 13:12:29, 2023-01-22 22:31:43]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-01-10 13:12:29'
+    - '2023-01-22 22:31:43'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2022-04-07'::timestamp, '2022-04-07'::timestamp + INTERVAL '1 day');
+  params:
+  - '2022-04-07'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2020-05-24 02:22:25, 2020-05-27 16:45:16]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-05-24 02:22:25'
+    - '2020-05-27 16:45:16'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 907)
+    WHERE
+      tsrange '[2023-06-19 07:33:00, 2023-07-03 19:04:39]' @> r.start_time::timestamp
+      AND u.name = 'Humboldt-Universität-zu-Berlin';
+  params:
+  - - '2023-06-19 07:33:00'
+    - '2023-07-03 19:04:39'
+  - Humboldt-Universität-zu-Berlin
+  - 907
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 674)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 674
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 328)
+    WHERE u.name = 'Bard-College';
+  params:
+  - Bard-College
+  - 328
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2024-03-27'::timestamp, '2024-03-27'::timestamp + INTERVAL '1 day');
+  params:
+  - '2024-03-27'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 679)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 679
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-02-20 23:40:57, 2021-02-28 20:51:18]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-02-20 23:40:57'
+    - '2021-02-28 20:51:18'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 460)
+    WHERE u.name = 'Bard-College';
+  params:
+  - Bard-College
+  - 460
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2024-09-03 09:05:05, 2024-09-07 20:00:22]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2024-09-03 09:05:05'
+    - '2024-09-07 20:00:22'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-04-01 13:40:13, 2021-04-15 16:23:45]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-04-01 13:40:13'
+    - '2021-04-15 16:23:45'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2023-08-13 19:54:14, 2023-08-18 07:59:41]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2023-08-13 19:54:14'
+    - '2023-08-18 07:59:41'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2020-03-27'::timestamp, '2020-03-27'::timestamp + INTERVAL '1 day');
+  params:
+  - '2020-03-27'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Friedrichshain-Kreuzberg' GROUP BY d.name;
+  params:
+  - Friedrichshain-Kreuzberg
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 212)
+    WHERE u.name = 'Technische-Universität-Berlin';
+  params:
+  - Technische-Universität-Berlin
+  - 212
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 746)
+    WHERE
+      tsrange '[2021-05-26 10:10:08, 2021-05-28 21:27:10]' @> r.start_time::timestamp
+      AND u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - - '2021-05-26 10:10:08'
+    - '2021-05-28 21:27:10'
+  - Universität-der-Künste-Berlin
+  - 746
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2020-03-19 11:10:14, 2020-03-26 06:23:17]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-03-19 11:10:14'
+    - '2020-03-26 06:23:17'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 214)
+    WHERE
+      tsrange '[2022-01-29 20:09:13, 2022-02-12 21:07:00]' @> r.start_time::timestamp
+      AND u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - - '2022-01-29 20:09:13'
+    - '2022-02-12 21:07:00'
+  - Universität-der-Künste-Berlin
+  - 214
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-11-04 16:57:17, 2021-11-12 14:46:41]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-11-04 16:57:17'
+    - '2021-11-12 14:46:41'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Treptow-Köpenick' GROUP BY d.name;
+  params:
+  - Treptow-Köpenick
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2020-10-20 16:07:20, 2020-11-02 01:49:06]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-10-20 16:07:20'
+    - '2020-11-02 01:49:06'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-02-21 20:54:01, 2021-03-06 22:18:25]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-02-21 20:54:01'
+    - '2021-03-06 22:18:25'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2024-10-08 10:38:48, 2024-10-17 04:59:28]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-10-08 10:38:48'
+    - '2024-10-17 04:59:28'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2020-08-04'::timestamp, '2020-08-04'::timestamp + INTERVAL '1 day');
+  params:
+  - '2020-08-04'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Spandau' GROUP BY d.name;
+  params:
+  - Spandau
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-08-30 06:21:19, 2021-09-02 16:30:49]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-08-30 06:21:19'
+    - '2021-09-02 16:30:49'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Friedrichshain-Kreuzberg' GROUP BY d.name;
+  params:
+  - Friedrichshain-Kreuzberg
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Friedrichshain-Kreuzberg' GROUP BY d.name;
+  params:
+  - Friedrichshain-Kreuzberg
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-07-19 18:01:58, 2021-07-28 05:06:40]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-07-19 18:01:58'
+    - '2021-07-28 05:06:40'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 805)
+    WHERE
+      tsrange '[2020-09-30 09:54:42, 2020-10-05 21:04:14]' @> r.start_time::timestamp
+      AND u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - - '2020-09-30 09:54:42'
+    - '2020-10-05 21:04:14'
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 805
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 417)
+    WHERE
+      tsrange '[2023-10-06 12:18:40, 2023-10-20 06:35:45]' @> r.start_time::timestamp
+      AND u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - - '2023-10-06 12:18:40'
+    - '2023-10-20 06:35:45'
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 417
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-04-22 20:13:38, 2021-04-26 02:34:05]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-04-22 20:13:38'
+    - '2021-04-26 02:34:05'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 883)
+    WHERE
+      tsrange '[2024-10-18 03:50:16, 2024-10-24 04:49:24]' @> r.start_time::timestamp
+      AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2024-10-18 03:50:16'
+    - '2024-10-24 04:49:24'
+  - Charité-Campus-Klinik
+  - 883
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2022-07-11 06:51:02, 2022-07-15 13:54:39]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2022-07-11 06:51:02'
+    - '2022-07-15 13:54:39'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2022-09-26 12:02:52, 2022-10-06 09:59:30]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2022-09-26 12:02:52'
+    - '2022-10-06 09:59:30'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-11-08'::timestamp, '2021-11-08'::timestamp + INTERVAL '1 day');
+  params:
+  - '2021-11-08'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2023-07-02 07:24:00, 2023-07-09 12:51:48]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2023-07-02 07:24:00'
+    - '2023-07-09 12:51:48'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2023-02-18 20:23:14, 2023-02-25 19:44:55]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-02-18 20:23:14'
+    - '2023-02-25 19:44:55'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-10-09 03:11:37, 2021-10-23 22:44:03]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-10-09 03:11:37'
+    - '2021-10-23 22:44:03'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2024-10-16 16:11:33, 2024-10-29 09:51:06]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-10-16 16:11:33'
+    - '2024-10-29 09:51:06'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 832)
+    WHERE
+      tsrange '[2020-04-03 20:39:01, 2020-04-14 01:37:59]' @> r.start_time::timestamp
+      AND u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - - '2020-04-03 20:39:01'
+    - '2020-04-14 01:37:59'
+  - European-School-of-Management-and-Technology-Berlin
+  - 832
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Friedrichshain-Kreuzberg' GROUP BY d.name;
+  params:
+  - Friedrichshain-Kreuzberg
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2023-02-21 06:02:39, 2023-03-08 01:44:11]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-02-21 06:02:39'
+    - '2023-03-08 01:44:11'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2023-10-11 07:30:23, 2023-10-21 19:00:34]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2023-10-11 07:30:23'
+    - '2023-10-21 19:00:34'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2022-08-25 22:25:57, 2022-08-30 21:27:33]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2022-08-25 22:25:57'
+    - '2022-08-30 21:27:33'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 860)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 860
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-07-21 04:07:54, 2021-08-01 08:03:18]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-07-21 04:07:54'
+    - '2021-08-01 08:03:18'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2023-07-02 21:33:02, 2023-07-10 04:34:57]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-07-02 21:33:02'
+    - '2023-07-10 04:34:57'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-12-26'::timestamp, '2021-12-26'::timestamp + INTERVAL '1 day');
+  params:
+  - '2021-12-26'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2023-04-10 06:16:40, 2023-04-22 01:33:55]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2023-04-10 06:16:40'
+    - '2023-04-22 01:33:55'
+- name: countActiveRideInDistrict
   type: spatial
   sql: |
     SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Pankow' GROUP BY d.name;
@@ -114,287 +2595,890 @@
 - name: averageRideDurationDuringDay
   type: temporal
   sql: |
-    SELECT AVG(max_ts - min_ts) AS avg_duration FROM (SELECT r.ride_id, MAX(timestamp) AS max_ts, MIN(timestamp) AS min_ts FROM tsdb_ride_points r WHERE timestamp >= '2023-04-30':timestamp AND timestamp < ('2023-04-30'::timestamp + INTERVAL '1 day') GROUP BY ride_id);
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2023-11-14'::timestamp, '2023-11-14'::timestamp + INTERVAL '1 day');
   params:
-  - '2023-04-30'
-- name: ridesCrossingPlaceWithMostIncidentsInDistrict
+  - '2023-11-14'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 190)
+    WHERE
+      tsrange '[2023-04-18 15:55:52, 2023-05-01 07:44:19]' @> r.start_time::timestamp
+      AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2023-04-18 15:55:52'
+    - '2023-05-01 07:44:19'
+  - Charité-Campus-Klinik
+  - 190
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2020-02-13 00:11:57, 2020-02-21 13:33:48]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2020-02-13 00:11:57'
+    - '2020-02-21 13:33:48'
+- name: countActiveRideInDistrict
   type: spatial
   sql: |
-    WITH incident_points AS ( SELECT i.incident_id, i.geom FROM incidents i JOIN berlin_districts d ON ST_Within(i.geom, d.geom) WHERE d.name = 'Steglitz-Zehlendorf'), clusters AS ( SELECT incident_id, geom, ST_ClusterWithin(geom, 2) OVER () AS cluster FROM incident_points), hotspot AS ( SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center FROM clusters GROUP BY cluster ORDER BY COUNT(*) DESC LIMIT 1) SELECT DISTINCT ON (r.ride_id) r.ride_id, r.rider_id FROM tsdb_ride_points r CROSS JOIN hotspot h WHERE ST_DWithin(r.geom, h.cluster_center::geography, 500);
-  params:
-  - Steglitz-Zehlendorf
-  - 2
-- name: countActiveRidesInDistrict
-  type: spatial
-  sql: |
-    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Lichtenberg' GROUP BY d.name;
-  params:
-  - Lichtenberg
-- name: countActiveRidesInDistrict
-  type: spatial
-  sql: |
-    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Neukölln' GROUP BY d.name;
-  params:
-  - Neukölln
-- name: ridesStartedInDistrict
-  type: spatial
-  sql: |
-    WITH ride_start AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts FROM tsdb_ride_points r GROUP BY ride_id), start_points AS ( SELECT r.ride_id, r.geom FROM tsdb_ride_points r JOIN ride_start s ON r.ride_id = s.ride_id AND r.timestamp = s.start_ts) SELECT s.ride_id FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf';
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf' GROUP BY d.name;
   params:
   - Charlottenburg-Wilmersdorf
-- name: countActiveRidesInDistrict
-  type: spatial
-  sql: |
-    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Spandau' GROUP BY d.name;
-  params:
-  - Spandau
-- name: ridesStartedInDistrict
-  type: spatial
-  sql: |
-    WITH ride_start AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts FROM tsdb_ride_points r GROUP BY ride_id), start_points AS ( SELECT r.ride_id, r.geom FROM tsdb_ride_points r JOIN ride_start s ON r.ride_id = s.ride_id AND r.timestamp = s.start_ts) SELECT s.ride_id FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, d.geom) WHERE d.name = 'Marzahn-Hellersdorf';
-  params:
-  - Marzahn-Hellersdorf
-- name: averageRideDurationDuringDay
+- name: SortRidesByHourInPeriod
   type: temporal
   sql: |
-    SELECT AVG(max_ts - min_ts) AS avg_duration FROM (SELECT r.ride_id, MAX(timestamp) AS max_ts, MIN(timestamp) AS min_ts FROM tsdb_ride_points r WHERE timestamp >= '2023-06-26':timestamp AND timestamp < ('2023-06-26'::timestamp + INTERVAL '1 day') GROUP BY ride_id);
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2022-05-02 00:29:50, 2022-05-08 04:04:10]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
   params:
-  - '2023-06-26'
-- name: ridesStartedInDistrict
+  - - '2022-05-02 00:29:50'
+    - '2022-05-08 04:04:10'
+- name: RidesPastOrToUniversity
   type: spatial
   sql: |
-    WITH ride_start AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts FROM tsdb_ride_points r GROUP BY ride_id), start_points AS ( SELECT r.ride_id, r.geom FROM tsdb_ride_points r JOIN ride_start s ON r.ride_id = s.ride_id AND r.timestamp = s.start_ts) SELECT s.ride_id FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, d.geom) WHERE d.name = 'Friedrichshain-Kreuzberg';
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 528)
+    WHERE u.name = 'Bard-College';
   params:
-  - Friedrichshain-Kreuzberg
-- name: countActiveRidesInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT r.ride_id) FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-05-10 04:49:59' AND '2023-05-14 09:28:24';
-  params:
-  - - '2023-05-10 04:49:59'
-    - '2023-05-14 09:28:24'
-- name: ridesCrossingPlaceWithMostIncidentsInDistrict
-  type: spatial
-  sql: |
-    WITH incident_points AS ( SELECT i.incident_id, i.geom FROM incidents i JOIN berlin_districts d ON ST_Within(i.geom, d.geom) WHERE d.name = 'Pankow'), clusters AS ( SELECT incident_id, geom, ST_ClusterWithin(geom, 2) OVER () AS cluster FROM incident_points), hotspot AS ( SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center FROM clusters GROUP BY cluster ORDER BY COUNT(*) DESC LIMIT 1) SELECT DISTINCT ON (r.ride_id) r.ride_id, r.rider_id FROM tsdb_ride_points r CROSS JOIN hotspot h WHERE ST_DWithin(r.geom, h.cluster_center::geography, 500);
-  params:
-  - Pankow
-  - 2
-- name: countActiveRidesInDistrict
-  type: spatial
-  sql: |
-    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Lichtenberg' GROUP BY d.name;
-  params:
-  - Lichtenberg
+  - Bard-College
+  - 528
 - name: averageRideDurationToGoAtUniversityInPeriod
   type: spatiotemporal
   sql: |
-    WITH rides_in_period AS ( SELECT DISTINCT r.ride_id FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-09-11 12:34:03' AND '2023-09-23 05:55:10'), ride_stats AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts, MAX(r.timestamp) AS end_ts FROM tsdb_ride_points r JOIN rides_in_period rp ON r.ride_id = rp.ride_id GROUP BY r.ride_id) SELECT AVG(rs.end_ts - rs.start_ts) AS avg_duration FROM ride_stats rs JOIN tsdb_ride_points rend ON rend.ride_id = rs.ride_id AND rend.timestamp = rs.end_ts JOIN universities u ON ST_DWithin(rend.geom, u.geom, 2500) WHERE u.name = 'Humboldt-Universität-zu-Berlin';
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 139)
+    WHERE
+      tsrange '[2022-05-02 16:41:43, 2022-05-15 18:07:33]' @> r.start_time::timestamp
+      AND u.name = 'Freie-Universität-Berlin';
   params:
-  - - '2023-09-11 12:34:03'
-    - '2023-09-23 05:55:10'
-  - Humboldt-Universität-zu-Berlin
-- name: ridesStartedInDistrict
-  type: spatial
-  sql: |
-    WITH ride_start AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts FROM tsdb_ride_points r GROUP BY ride_id), start_points AS ( SELECT r.ride_id, r.geom FROM tsdb_ride_points r JOIN ride_start s ON r.ride_id = s.ride_id AND r.timestamp = s.start_ts) SELECT s.ride_id FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, d.geom) WHERE d.name = 'Spandau';
-  params:
-  - Spandau
-- name: averageRideDurationDuringDay
-  type: temporal
-  sql: |
-    SELECT AVG(max_ts - min_ts) AS avg_duration FROM (SELECT r.ride_id, MAX(timestamp) AS max_ts, MIN(timestamp) AS min_ts FROM tsdb_ride_points r WHERE timestamp >= '2023-03-14':timestamp AND timestamp < ('2023-03-14'::timestamp + INTERVAL '1 day') GROUP BY ride_id);
-  params:
-  - '2023-03-14'
-- name: averageRideDurationToGoAtUniversityInPeriod
-  type: spatiotemporal
-  sql: |
-    WITH rides_in_period AS ( SELECT DISTINCT r.ride_id FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-02-17 00:15:41' AND '2023-03-02 17:22:21'), ride_stats AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts, MAX(r.timestamp) AS end_ts FROM tsdb_ride_points r JOIN rides_in_period rp ON r.ride_id = rp.ride_id GROUP BY r.ride_id) SELECT AVG(rs.end_ts - rs.start_ts) AS avg_duration FROM ride_stats rs JOIN tsdb_ride_points rend ON rend.ride_id = rs.ride_id AND rend.timestamp = rs.end_ts JOIN universities u ON ST_DWithin(rend.geom, u.geom, 2500) WHERE u.name = 'European-School-of-Management-and-Technology-Berlin';
-  params:
-  - - '2023-02-17 00:15:41'
-    - '2023-03-02 17:22:21'
-  - European-School-of-Management-and-Technology-Berlin
-- name: countActiveRidesInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT r.ride_id) FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-12-11 08:21:10' AND '2023-12-25 13:39:42';
-  params:
-  - - '2023-12-11 08:21:10'
-    - '2023-12-25 13:39:42'
-- name: ridesStartedInDistrict
-  type: spatial
-  sql: |
-    WITH ride_start AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts FROM tsdb_ride_points r GROUP BY ride_id), start_points AS ( SELECT r.ride_id, r.geom FROM tsdb_ride_points r JOIN ride_start s ON r.ride_id = s.ride_id AND r.timestamp = s.start_ts) SELECT s.ride_id FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, d.geom) WHERE d.name = 'Neukölln';
-  params:
-  - Neukölln
-- name: averageRideDurationToGoAtUniversityInPeriod
-  type: spatiotemporal
-  sql: |
-    WITH rides_in_period AS ( SELECT DISTINCT r.ride_id FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-08-25 14:38:17' AND '2023-09-06 05:42:58'), ride_stats AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts, MAX(r.timestamp) AS end_ts FROM tsdb_ride_points r JOIN rides_in_period rp ON r.ride_id = rp.ride_id GROUP BY r.ride_id) SELECT AVG(rs.end_ts - rs.start_ts) AS avg_duration FROM ride_stats rs JOIN tsdb_ride_points rend ON rend.ride_id = rs.ride_id AND rend.timestamp = rs.end_ts JOIN universities u ON ST_DWithin(rend.geom, u.geom, 2500) WHERE u.name = 'Humboldt-Universität-zu-Berlin';
-  params:
-  - - '2023-08-25 14:38:17'
-    - '2023-09-06 05:42:58'
-  - Humboldt-Universität-zu-Berlin
-- name: ridesStartedInDistrict
-  type: spatial
-  sql: |
-    WITH ride_start AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts FROM tsdb_ride_points r GROUP BY ride_id), start_points AS ( SELECT r.ride_id, r.geom FROM tsdb_ride_points r JOIN ride_start s ON r.ride_id = s.ride_id AND r.timestamp = s.start_ts) SELECT s.ride_id FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf';
-  params:
-  - Charlottenburg-Wilmersdorf
-- name: ridesCrossingPlaceWithMostIncidentsInDistrict
-  type: spatial
-  sql: |
-    WITH incident_points AS ( SELECT i.incident_id, i.geom FROM incidents i JOIN berlin_districts d ON ST_Within(i.geom, d.geom) WHERE d.name = 'Lichtenberg'), clusters AS ( SELECT incident_id, geom, ST_ClusterWithin(geom, 4) OVER () AS cluster FROM incident_points), hotspot AS ( SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center FROM clusters GROUP BY cluster ORDER BY COUNT(*) DESC LIMIT 1) SELECT DISTINCT ON (r.ride_id) r.ride_id, r.rider_id FROM tsdb_ride_points r CROSS JOIN hotspot h WHERE ST_DWithin(r.geom, h.cluster_center::geography, 500);
-  params:
-  - Lichtenberg
-  - 4
-- name: averageRideDurationDuringDay
-  type: temporal
-  sql: |
-    SELECT AVG(max_ts - min_ts) AS avg_duration FROM (SELECT r.ride_id, MAX(timestamp) AS max_ts, MIN(timestamp) AS min_ts FROM tsdb_ride_points r WHERE timestamp >= '2023-11-02':timestamp AND timestamp < ('2023-11-02'::timestamp + INTERVAL '1 day') GROUP BY ride_id);
-  params:
-  - '2023-11-02'
-- name: averageRideDurationToGoAtUniversityInPeriod
-  type: spatiotemporal
-  sql: |
-    WITH rides_in_period AS ( SELECT DISTINCT r.ride_id FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-07-07 01:29:19' AND '2023-07-09 20:40:37'), ride_stats AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts, MAX(r.timestamp) AS end_ts FROM tsdb_ride_points r JOIN rides_in_period rp ON r.ride_id = rp.ride_id GROUP BY r.ride_id) SELECT AVG(rs.end_ts - rs.start_ts) AS avg_duration FROM ride_stats rs JOIN tsdb_ride_points rend ON rend.ride_id = rs.ride_id AND rend.timestamp = rs.end_ts JOIN universities u ON ST_DWithin(rend.geom, u.geom, 2500) WHERE u.name = 'Universität-der-Künste-Berlin';
-  params:
-  - - '2023-07-07 01:29:19'
-    - '2023-07-09 20:40:37'
-  - Universität-der-Künste-Berlin
-- name: countActiveRidesInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT r.ride_id) FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-10-25 11:55:42' AND '2023-11-04 05:14:26';
-  params:
-  - - '2023-10-25 11:55:42'
-    - '2023-11-04 05:14:26'
-- name: averageRideDurationToGoAtUniversityInPeriod
-  type: spatiotemporal
-  sql: |
-    WITH rides_in_period AS ( SELECT DISTINCT r.ride_id FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-04-14 23:34:16' AND '2023-04-18 14:28:18'), ride_stats AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts, MAX(r.timestamp) AS end_ts FROM tsdb_ride_points r JOIN rides_in_period rp ON r.ride_id = rp.ride_id GROUP BY r.ride_id) SELECT AVG(rs.end_ts - rs.start_ts) AS avg_duration FROM ride_stats rs JOIN tsdb_ride_points rend ON rend.ride_id = rs.ride_id AND rend.timestamp = rs.end_ts JOIN universities u ON ST_DWithin(rend.geom, u.geom, 2500) WHERE u.name = 'Technische-Universität-Berlin';
-  params:
-  - - '2023-04-14 23:34:16'
-    - '2023-04-18 14:28:18'
-  - Technische-Universität-Berlin
-- name: countActiveRidesInDistrict
-  type: spatial
-  sql: |
-    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Marzahn-Hellersdorf' GROUP BY d.name;
-  params:
-  - Marzahn-Hellersdorf
-- name: averageRideDurationToGoAtUniversityInPeriod
-  type: spatiotemporal
-  sql: |
-    WITH rides_in_period AS ( SELECT DISTINCT r.ride_id FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-08-09 22:16:22' AND '2023-08-19 10:50:49'), ride_stats AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts, MAX(r.timestamp) AS end_ts FROM tsdb_ride_points r JOIN rides_in_period rp ON r.ride_id = rp.ride_id GROUP BY r.ride_id) SELECT AVG(rs.end_ts - rs.start_ts) AS avg_duration FROM ride_stats rs JOIN tsdb_ride_points rend ON rend.ride_id = rs.ride_id AND rend.timestamp = rs.end_ts JOIN universities u ON ST_DWithin(rend.geom, u.geom, 2500) WHERE u.name = 'Technische-Universität-Berlin';
-  params:
-  - - '2023-08-09 22:16:22'
-    - '2023-08-19 10:50:49'
-  - Technische-Universität-Berlin
-- name: countActiveRidesInDistrict
-  type: spatial
-  sql: |
-    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Marzahn-Hellersdorf' GROUP BY d.name;
-  params:
-  - Marzahn-Hellersdorf
-- name: averageRideDurationDuringDay
-  type: temporal
-  sql: |
-    SELECT AVG(max_ts - min_ts) AS avg_duration FROM (SELECT r.ride_id, MAX(timestamp) AS max_ts, MIN(timestamp) AS min_ts FROM tsdb_ride_points r WHERE timestamp >= '2023-11-12':timestamp AND timestamp < ('2023-11-12'::timestamp + INTERVAL '1 day') GROUP BY ride_id);
-  params:
-  - '2023-11-12'
-- name: averageRideDurationToGoAtUniversityInPeriod
-  type: spatiotemporal
-  sql: |
-    WITH rides_in_period AS ( SELECT DISTINCT r.ride_id FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-03-21 09:58:57' AND '2023-03-31 05:37:36'), ride_stats AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts, MAX(r.timestamp) AS end_ts FROM tsdb_ride_points r JOIN rides_in_period rp ON r.ride_id = rp.ride_id GROUP BY r.ride_id) SELECT AVG(rs.end_ts - rs.start_ts) AS avg_duration FROM ride_stats rs JOIN tsdb_ride_points rend ON rend.ride_id = rs.ride_id AND rend.timestamp = rs.end_ts JOIN universities u ON ST_DWithin(rend.geom, u.geom, 2500) WHERE u.name = 'Freie-Universität-Berlin';
-  params:
-  - - '2023-03-21 09:58:57'
-    - '2023-03-31 05:37:36'
+  - - '2022-05-02 16:41:43'
+    - '2022-05-15 18:07:33'
   - Freie-Universität-Berlin
-- name: ridesStartedInDistrict
+  - 139
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 412)
+    WHERE
+      tsrange '[2021-03-04 15:47:40, 2021-03-16 21:39:27]' @> r.start_time::timestamp
+      AND u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - - '2021-03-04 15:47:40'
+    - '2021-03-16 21:39:27'
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 412
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-04-27 11:07:32, 2021-05-12 01:55:48]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-04-27 11:07:32'
+    - '2021-05-12 01:55:48'
+- name: RidesPastOrToUniversity
   type: spatial
   sql: |
-    WITH ride_start AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts FROM tsdb_ride_points r GROUP BY ride_id), start_points AS ( SELECT r.ride_id, r.geom FROM tsdb_ride_points r JOIN ride_start s ON r.ride_id = s.ride_id AND r.timestamp = s.start_ts) SELECT s.ride_id FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, d.geom) WHERE d.name = 'Friedrichshain-Kreuzberg';
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 563)
+    WHERE u.name = 'European-School-of-Management-and-Technology-Berlin';
   params:
-  - Friedrichshain-Kreuzberg
-- name: countActiveRidesInPeriod
+  - European-School-of-Management-and-Technology-Berlin
+  - 563
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf' GROUP BY d.name;
+  params:
+  - Charlottenburg-Wilmersdorf
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 783)
+    WHERE u.name = 'Technische-Universität-Berlin';
+  params:
+  - Technische-Universität-Berlin
+  - 783
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2023-01-21 20:37:16, 2023-01-29 19:16:31]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2023-01-21 20:37:16'
+    - '2023-01-29 19:16:31'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 689)
+    WHERE
+      tsrange '[2023-01-23 05:02:48, 2023-01-28 23:35:29]' @> r.start_time::timestamp
+      AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2023-01-23 05:02:48'
+    - '2023-01-28 23:35:29'
+  - Charité-Campus-Klinik
+  - 689
+- name: averageRideDurationDuringDay
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT r.ride_id) FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-11-11 16:01:02' AND '2023-11-20 20:54:26';
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-03-04'::timestamp, '2021-03-04'::timestamp + INTERVAL '1 day');
   params:
-  - - '2023-11-11 16:01:02'
-    - '2023-11-20 20:54:26'
-- name: ridesCrossingPlaceWithMostIncidentsInDistrict
+  - '2021-03-04'
+- name: RidesPastOrToUniversity
   type: spatial
   sql: |
-    WITH incident_points AS ( SELECT i.incident_id, i.geom FROM incidents i JOIN berlin_districts d ON ST_Within(i.geom, d.geom) WHERE d.name = 'Treptow-Köpenick'), clusters AS ( SELECT incident_id, geom, ST_ClusterWithin(geom, 7) OVER () AS cluster FROM incident_points), hotspot AS ( SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center FROM clusters GROUP BY cluster ORDER BY COUNT(*) DESC LIMIT 1) SELECT DISTINCT ON (r.ride_id) r.ride_id, r.rider_id FROM tsdb_ride_points r CROSS JOIN hotspot h WHERE ST_DWithin(r.geom, h.cluster_center::geography, 500);
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 186)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 186
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 254)
+    WHERE u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 254
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2021-08-27 15:11:42, 2021-09-10 18:12:10]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2021-08-27 15:11:42'
+    - '2021-09-10 18:12:10'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 190)
+    WHERE
+      tsrange '[2023-03-24 13:13:02, 2023-04-04 14:42:05]' @> r.start_time::timestamp
+      AND u.name = 'Technische-Universität-Berlin';
+  params:
+  - - '2023-03-24 13:13:02'
+    - '2023-04-04 14:42:05'
+  - Technische-Universität-Berlin
+  - 190
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Lichtenberg' GROUP BY d.name;
+  params:
+  - Lichtenberg
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2023-08-18'::timestamp, '2023-08-18'::timestamp + INTERVAL '1 day');
+  params:
+  - '2023-08-18'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 717)
+    WHERE
+      tsrange '[2021-02-17 01:18:24, 2021-02-19 03:08:24]' @> r.start_time::timestamp
+      AND u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - - '2021-02-17 01:18:24'
+    - '2021-02-19 03:08:24'
+  - Universität-der-Künste-Berlin
+  - 717
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-02-12 20:12:59, 2021-02-25 17:36:06]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-02-12 20:12:59'
+    - '2021-02-25 17:36:06'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Treptow-Köpenick' GROUP BY d.name;
   params:
   - Treptow-Köpenick
-  - 7
-- name: countActiveRidesInDistrict
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2023-11-29 08:04:03, 2023-12-12 20:38:25]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-11-29 08:04:03'
+    - '2023-12-12 20:38:25'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2020-12-04 11:24:50, 2020-12-06 16:57:15]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2020-12-04 11:24:50'
+    - '2020-12-06 16:57:15'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-11-30'::timestamp, '2021-11-30'::timestamp + INTERVAL '1 day');
+  params:
+  - '2021-11-30'
+- name: countActiveRideInDistrict
   type: spatial
   sql: |
-    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Spandau' GROUP BY d.name;
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Lichtenberg' GROUP BY d.name;
   params:
-  - Spandau
+  - Lichtenberg
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2022-07-31 18:22:52, 2022-08-09 00:18:03]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2022-07-31 18:22:52'
+    - '2022-08-09 00:18:03'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2024-12-10 23:35:48, 2024-12-18 04:31:19]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-12-10 23:35:48'
+    - '2024-12-18 04:31:19'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2021-08-27 08:11:51, 2021-09-08 21:23:05]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2021-08-27 08:11:51'
+    - '2021-09-08 21:23:05'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 398)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 398
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 233)
+    WHERE u.name = 'Humboldt-Universität-zu-Berlin';
+  params:
+  - Humboldt-Universität-zu-Berlin
+  - 233
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 962)
+    WHERE u.name = 'Charité-Campus-Klinik';
+  params:
+  - Charité-Campus-Klinik
+  - 962
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2023-09-01'::timestamp, '2023-09-01'::timestamp + INTERVAL '1 day');
+  params:
+  - '2023-09-01'
 - name: averageRideDurationToGoAtUniversityInPeriod
   type: spatiotemporal
   sql: |
-    WITH rides_in_period AS ( SELECT DISTINCT r.ride_id FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-04-28 01:31:10' AND '2023-05-07 10:53:44'), ride_stats AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts, MAX(r.timestamp) AS end_ts FROM tsdb_ride_points r JOIN rides_in_period rp ON r.ride_id = rp.ride_id GROUP BY r.ride_id) SELECT AVG(rs.end_ts - rs.start_ts) AS avg_duration FROM ride_stats rs JOIN tsdb_ride_points rend ON rend.ride_id = rs.ride_id AND rend.timestamp = rs.end_ts JOIN universities u ON ST_DWithin(rend.geom, u.geom, 2500) WHERE u.name = 'Freie-Universität-Berlin';
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 202)
+    WHERE
+      tsrange '[2020-02-19 10:30:10, 2020-02-26 20:37:10]' @> r.start_time::timestamp
+      AND u.name = 'Technische-Universität-Berlin';
   params:
-  - - '2023-04-28 01:31:10'
-    - '2023-05-07 10:53:44'
-  - Freie-Universität-Berlin
-- name: countActiveRidesInDistrict
+  - - '2020-02-19 10:30:10'
+    - '2020-02-26 20:37:10'
+  - Technische-Universität-Berlin
+  - 202
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2023-06-06 17:07:46, 2023-06-12 23:53:18]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2023-06-06 17:07:46'
+    - '2023-06-12 23:53:18'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2024-10-07 16:20:39, 2024-10-19 12:33:56]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-10-07 16:20:39'
+    - '2024-10-19 12:33:56'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2020-12-11 11:52:55, 2020-12-25 19:10:36]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-12-11 11:52:55'
+    - '2020-12-25 19:10:36'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2022-07-17 12:54:09, 2022-07-29 09:53:36]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2022-07-17 12:54:09'
+    - '2022-07-29 09:53:36'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2020-08-06 05:04:55, 2020-08-16 10:39:58]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2020-08-06 05:04:55'
+    - '2020-08-16 10:39:58'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2020-05-25 08:02:34, 2020-05-30 09:56:06]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2020-05-25 08:02:34'
+    - '2020-05-30 09:56:06'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2023-06-06 05:24:05, 2023-06-19 01:30:29]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-06-06 05:24:05'
+    - '2023-06-19 01:30:29'
+- name: RidesPastOrToUniversity
   type: spatial
   sql: |
-    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 221)
+    WHERE u.name = 'Technische-Universität-Berlin';
   params:
-  - Tempelhof-Schöneberg
-- name: countActiveRidesInDistrict
+  - Technische-Universität-Berlin
+  - 221
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Treptow-Köpenick' GROUP BY d.name;
+  params:
+  - Treptow-Köpenick
+- name: countActiveRideInDistrict
   type: spatial
   sql: |
     SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Steglitz-Zehlendorf' GROUP BY d.name;
   params:
   - Steglitz-Zehlendorf
-- name: ridesStartedInDistrict
-  type: spatial
-  sql: |
-    WITH ride_start AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts FROM tsdb_ride_points r GROUP BY ride_id), start_points AS ( SELECT r.ride_id, r.geom FROM tsdb_ride_points r JOIN ride_start s ON r.ride_id = s.ride_id AND r.timestamp = s.start_ts) SELECT s.ride_id FROM start_points s JOIN berlin_districts d ON ST_Intersects(s.geom, d.geom) WHERE d.name = 'Friedrichshain-Kreuzberg';
-  params:
-  - Friedrichshain-Kreuzberg
-- name: ridesCrossingPlaceWithMostIncidentsInDistrict
-  type: spatial
-  sql: |
-    WITH incident_points AS ( SELECT i.incident_id, i.geom FROM incidents i JOIN berlin_districts d ON ST_Within(i.geom, d.geom) WHERE d.name = 'Steglitz-Zehlendorf'), clusters AS ( SELECT incident_id, geom, ST_ClusterWithin(geom, 8) OVER () AS cluster FROM incident_points), hotspot AS ( SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center FROM clusters GROUP BY cluster ORDER BY COUNT(*) DESC LIMIT 1) SELECT DISTINCT ON (r.ride_id) r.ride_id, r.rider_id FROM tsdb_ride_points r CROSS JOIN hotspot h WHERE ST_DWithin(r.geom, h.cluster_center::geography, 500);
-  params:
-  - Steglitz-Zehlendorf
-  - 8
-- name: countActiveRidesInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT r.ride_id) FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-03-13 14:10:34' AND '2023-03-18 13:50:15';
-  params:
-  - - '2023-03-13 14:10:34'
-    - '2023-03-18 13:50:15'
 - name: averageRideDurationDuringDay
   type: temporal
   sql: |
-    SELECT AVG(max_ts - min_ts) AS avg_duration FROM (SELECT r.ride_id, MAX(timestamp) AS max_ts, MIN(timestamp) AS min_ts FROM tsdb_ride_points r WHERE timestamp >= '2023-06-15':timestamp AND timestamp < ('2023-06-15'::timestamp + INTERVAL '1 day') GROUP BY ride_id);
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2021-02-27'::timestamp, '2021-02-27'::timestamp + INTERVAL '1 day');
   params:
-  - '2023-06-15'
-- name: ridesCrossingPlaceWithMostIncidentsInDistrict
+  - '2021-02-27'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2022-07-28 07:50:35, 2022-08-11 12:06:53]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2022-07-28 07:50:35'
+    - '2022-08-11 12:06:53'
+- name: RidesPastOrToUniversity
   type: spatial
   sql: |
-    WITH incident_points AS ( SELECT i.incident_id, i.geom FROM incidents i JOIN berlin_districts d ON ST_Within(i.geom, d.geom) WHERE d.name = 'Spandau'), clusters AS ( SELECT incident_id, geom, ST_ClusterWithin(geom, 3) OVER () AS cluster FROM incident_points), hotspot AS ( SELECT ST_SetSRID(ST_Centroid(ST_Collect(geom)), 4326) AS cluster_center FROM clusters GROUP BY cluster ORDER BY COUNT(*) DESC LIMIT 1) SELECT DISTINCT ON (r.ride_id) r.ride_id, r.rider_id FROM tsdb_ride_points r CROSS JOIN hotspot h WHERE ST_DWithin(r.geom, h.cluster_center::geography, 500);
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 750)
+    WHERE u.name = 'European-School-of-Management-and-Technology-Berlin';
   params:
-  - Spandau
-  - 3
+  - European-School-of-Management-and-Technology-Berlin
+  - 750
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2020-06-25'::timestamp, '2020-06-25'::timestamp + INTERVAL '1 day');
+  params:
+  - '2020-06-25'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Neukölln' GROUP BY d.name;
+  params:
+  - Neukölln
 - name: averageRideDurationToGoAtUniversityInPeriod
   type: spatiotemporal
   sql: |
-    WITH rides_in_period AS ( SELECT DISTINCT r.ride_id FROM tsdb_ride_points r WHERE r.timestamp BETWEEN '2023-08-27 10:26:57' AND '2023-09-01 21:29:22'), ride_stats AS ( SELECT r.ride_id, MIN(r.timestamp) AS start_ts, MAX(r.timestamp) AS end_ts FROM tsdb_ride_points r JOIN rides_in_period rp ON r.ride_id = rp.ride_id GROUP BY r.ride_id) SELECT AVG(rs.end_ts - rs.start_ts) AS avg_duration FROM ride_stats rs JOIN tsdb_ride_points rend ON rend.ride_id = rs.ride_id AND rend.timestamp = rs.end_ts JOIN universities u ON ST_DWithin(rend.geom, u.geom, 2500) WHERE u.name = 'Charité-Campus-Klinik';
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 152)
+    WHERE
+      tsrange '[2021-08-17 09:18:30, 2021-08-25 01:47:05]' @> r.start_time::timestamp
+      AND u.name = 'Freie-Universität-Berlin';
   params:
-  - - '2023-08-27 10:26:57'
-    - '2023-09-01 21:29:22'
+  - - '2021-08-17 09:18:30'
+    - '2021-08-25 01:47:05'
+  - Freie-Universität-Berlin
+  - 152
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2024-03-18'::timestamp, '2024-03-18'::timestamp + INTERVAL '1 day');
+  params:
+  - '2024-03-18'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 692)
+    WHERE u.name = 'Technische-Universität-Berlin';
+  params:
+  - Technische-Universität-Berlin
+  - 692
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2024-06-22 18:16:17, 2024-06-29 16:06:08]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-06-22 18:16:17'
+    - '2024-06-29 16:06:08'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Treptow-Köpenick' GROUP BY d.name;
+  params:
+  - Treptow-Köpenick
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 228)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 228
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2020-05-27'::timestamp, '2020-05-27'::timestamp + INTERVAL '1 day');
+  params:
+  - '2020-05-27'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2020-06-15 08:50:03, 2020-06-24 08:46:40]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2020-06-15 08:50:03'
+    - '2020-06-24 08:46:40'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2023-10-05 12:11:58, 2023-10-08 22:37:22]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2023-10-05 12:11:58'
+    - '2023-10-08 22:37:22'
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Mitte' GROUP BY d.name;
+  params:
+  - Mitte
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2024-06-15'::timestamp, '2024-06-15'::timestamp + INTERVAL '1 day');
+  params:
+  - '2024-06-15'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 457)
+    WHERE
+      tsrange '[2021-04-08 21:37:43, 2021-04-15 22:41:05]' @> r.start_time::timestamp
+      AND u.name = 'Humboldt-Universität-zu-Berlin';
+  params:
+  - - '2021-04-08 21:37:43'
+    - '2021-04-15 22:41:05'
+  - Humboldt-Universität-zu-Berlin
+  - 457
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Reinickendorf' GROUP BY d.name;
+  params:
+  - Reinickendorf
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Treptow-Köpenick' GROUP BY d.name;
+  params:
+  - Treptow-Köpenick
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 936)
+    WHERE u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin';
+  params:
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 936
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 914)
+    WHERE
+      tsrange '[2021-10-27 03:59:44, 2021-11-01 22:41:41]' @> r.start_time::timestamp
+      AND u.name = 'Bard-College';
+  params:
+  - - '2021-10-27 03:59:44'
+    - '2021-11-01 22:41:41'
+  - Bard-College
+  - 914
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+  params:
+  - Tempelhof-Schöneberg
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2024-08-28 10:32:08, 2024-09-02 17:56:34]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2024-08-28 10:32:08'
+    - '2024-09-02 17:56:34'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2024-09-11 10:47:33, 2024-09-17 09:02:28]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2024-09-11 10:47:33'
+    - '2024-09-17 09:02:28'
+- name: averageRideDurationToGoAtUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, 205)
+    WHERE
+      tsrange '[2020-10-29 21:21:23, 2020-11-05 21:47:59]' @> r.start_time::timestamp
+      AND u.name = 'Charité-Campus-Klinik';
+  params:
+  - - '2020-10-29 21:21:23'
+    - '2020-11-05 21:47:59'
   - Charité-Campus-Klinik
+  - 205
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2024-10-12'::timestamp, '2024-10-12'::timestamp + INTERVAL '1 day');
+  params:
+  - '2024-10-12'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 237)
+    WHERE u.name = 'Freie-Universität-Berlin';
+  params:
+  - Freie-Universität-Berlin
+  - 237
+- name: countActiveRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Marzahn-Hellersdorf' GROUP BY d.name;
+  params:
+  - Marzahn-Hellersdorf
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2024-08-26 11:36:26, 2024-09-06 23:46:12]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-08-26 11:36:26'
+    - '2024-09-06 23:46:12'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 371)
+    WHERE u.name = 'Universität-der-Künste-Berlin';
+  params:
+  - Universität-der-Künste-Berlin
+  - 371
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2023-07-10'::timestamp, '2023-07-10'::timestamp + INTERVAL '1 day');
+  params:
+  - '2023-07-10'
+- name: averageRideDurationDuringDay
+  type: temporal
+  sql: |
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM tsdb_ride_trajectories r
+    WHERE (r.start_time, r.end_time)
+          OVERLAPS ('2020-09-30'::timestamp, '2020-09-30'::timestamp + INTERVAL '1 day');
+  params:
+  - '2020-09-30'
+- name: SortRidesByHourInPeriod
+  type: temporal
+  sql: |
+    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+       COUNT(*) AS num_points
+    FROM tsdb_ride_points r
+    WHERE tsrange '[2024-04-06 18:01:14, 2024-04-20 10:16:29]' @> r.timestamp
+    GROUP BY hour_of_day
+    ORDER BY hour_of_day;
+  params:
+  - - '2024-04-06 18:01:14'
+    - '2024-04-20 10:16:29'
+- name: rideCrossSeveralDistrictsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.ride_id
+    FROM tsdb_ride_points r
+    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+    WHERE tsrange '[2022-11-14 18:36:40, 2022-11-21 00:45:21]' @> r.timestamp
+    GROUP BY r.ride_id
+    HAVING COUNT(DISTINCT d.name) > 1;
+  params:
+  - - '2022-11-14 18:36:40'
+    - '2022-11-21 00:45:21'
+- name: RidesPastOrToUniversity
+  type: spatial
+  sql: |
+    SELECT DISTINCT r.ride_id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 606)
+    WHERE u.name = 'European-School-of-Management-and-Technology-Berlin';
+  params:
+  - European-School-of-Management-and-Technology-Berlin
+  - 606

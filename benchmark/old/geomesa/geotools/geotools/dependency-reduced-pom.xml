@@ -76,7 +76,7 @@
   </repositories>
   <properties>
     <geotools.version>30.2</geotools.version>
-    <zookeeper.version>3.9.3</zookeeper.version>
+    <zookeeper.version>3.9.4</zookeeper.version>
     <geomesa.version>5.0.1</geomesa.version>
     <scala.abi.version>2.12</scala.abi.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

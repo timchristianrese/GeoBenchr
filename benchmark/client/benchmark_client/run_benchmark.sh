@@ -12,9 +12,12 @@ sudo systemctl restart postgresql
 export MAVEN_OPTS="-Dfile.encoding=UTF-8"
 mvn clean compile
 # Run Maven with the passed argument
+sar -u -r 1 >> benchmark_usage.log &
 mvn exec:java \
   -Dexec.mainClass="benchmark_client.BenchmarkClient" \
   -Dexec.args="$MODE" \
   -Dexec.cleanupDaemonThreads=false \
   -Dexec.systemPropertyVariables="file.encoding=UTF-8"
 
+# Stop sar command
+pkill sar 
