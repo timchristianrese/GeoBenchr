@@ -1,0 +1,5 @@
+SELECT rp.rider_id, rp.trip_id, rp.x, rp.y
+FROM ride_points rp
+WHERE ((rp.x > 9980000) AND (rp.x < 10100000) AND (rp.y > 46150000) AND (rp.y < 46180000))
+ORDER BY rp.rider_id ASC
+LIMIT 10;

@@ -1,0 +1,12 @@
+name: countActiveRidesInPeriod
+source: "ride_points r"
+source_data: { type: table }
+select: []
+aggregations:
+  - function: COUNT
+    field: "DISTINCT r.trip_id"
+filter:
+  time_filter:
+    - field: "r.t"
+      start: "'2022-10-04T18:00:00Z'"
+      end:   "'2022-10-04T19:00:00Z'"

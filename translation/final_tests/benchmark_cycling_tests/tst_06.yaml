@@ -1,0 +1,25 @@
+name: T2b_intersects_wideZone_window_groupByTrip
+source: "ride_points r"
+source_data: { type: table }
+geometries:
+  - name: z_wide
+    type: polygon
+    srid: 4326
+    coordinates:
+      - [13.30,52.45]
+      - [13.50,52.45]
+      - [13.50,52.58]
+      - [13.30,52.58]
+      - [13.30,52.45]
+select:
+  - "r.trip_id"
+aggregations:
+  - { function: COUNT, field: "*", alias: "n" }
+group_by: ["r.trip_id"]
+filter:
+  and:
+    - spatial_filter: [ { type: intersects, args: ["ST_Point(r.x, r.y)", ":geometries.z_wide"] } ]
+    - time_filter:    [ { field: "r.t", start: "'2022-10-04T18:00:00Z'", end: "'2022-10-04T19:00:00Z'"} ]
+order_by:
+  - { field: "r.trip_id", direction: "asc" }
+limit: 10

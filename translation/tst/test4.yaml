@@ -1,0 +1,32 @@
+#two inner joins + equality filter
+- name: test4
+
+  source: commandes c
+
+  select:
+    - v.modele
+    - u.nom
+
+  joins:
+    - type: inner
+      source: utilisateurs u
+      source_data:
+      clause:
+        - field: c.utilisateur_id
+          operator: eq
+          value: u.id
+          type: var
+    - type: inner
+      source: voitures v
+      source_data:
+      clause:
+        - field: c.voiture_id
+          operator: eq
+          value: v.id
+          type: var
+
+  filter:
+    - field: c.statut
+      operator: eq
+      value: annulee
+      type: str

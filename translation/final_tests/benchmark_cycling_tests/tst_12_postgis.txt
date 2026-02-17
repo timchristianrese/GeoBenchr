@@ -1,0 +1,6 @@
+SELECT d.name, COUNT(DISTINCT r.trip_id) AS n_trips
+FROM berlin_districts d
+LEFT JOIN ride_points r ON (ST_Intersects(ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326), ST_SetSRID(ST_Point(r.x, r.y), 4326)) AND r.t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z')
+GROUP BY d.name
+ORDER BY n_trips DESC
+LIMIT 10;

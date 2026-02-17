@@ -1,0 +1,53 @@
+name: countFlightsInCounties
+source: "counties k"
+source_data:
+  type: csv
+  path: "counties-wkt.csv"
+  geometry_column: polygon
+  csv_options:
+    delimiter: ";"
+    header: true
+    infer_schema: false
+  schema:
+    - { name: name }
+    - { name: polygon }
+
+select:
+  - "k.name"
+
+aggregations:
+  - function: COUNT
+    field: "DISTINCT f.flightid"
+    alias: flight_count
+
+joins:
+  - type: inner
+    source: "flight_points f"
+    source_data:
+      type: csv
+      path: "point_NRW_HIGH_0123.csv"
+      geometry_column: wkt
+      csv_options:
+        delimiter: ";"
+        header: false
+        infer_schema: false
+      schema:
+        - { name: flightid }
+        - { name: airplanetype }
+        - { name: origin }
+        - { name: destination }
+        - { name: wkt }
+        - { name: timestamp }
+        - { name: altitude, type: double }
+    clause:
+      spatial_filter:
+        - type: intersects
+          args: ["f.geom", "k.geom"]
+
+group_by:
+  - "k.name"
+
+filter:
+  - field: k.name
+    operator: eq
+    value: "'Krs Hochsauerlandkreis'"

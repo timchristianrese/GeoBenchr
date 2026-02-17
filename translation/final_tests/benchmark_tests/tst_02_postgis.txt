@@ -1,0 +1,3 @@
+SELECT f.flightid, f.altitude, ST_AsText(f.geom) AS location, f.timestamp
+FROM flight_points f
+WHERE (f.timestamp BETWEEN '2023-01-02 18:17:18' AND '2023-01-02 18:17:18');

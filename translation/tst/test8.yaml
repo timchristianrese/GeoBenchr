@@ -1,0 +1,40 @@
+#left-join chain with in in clause
+- name: test8
+
+  source: "utilisateurs u"
+
+  select:
+    - u.nom
+    - u.prenom
+    - v.modele
+    - c.montant
+    - c.statut
+
+  joins:
+    - type: left
+      source: "voitures v"
+      source_data:
+      clause:
+        - field: v.owner_id
+          operator: eq
+          value: u.id
+          type: var
+    - type: left
+      source: "commandes c"
+      source_data:
+      clause:
+        and:
+          - field: c.voiture_id
+            operator: eq
+            value: v.id
+            type: var
+          - field: c.statut
+            operator: in
+            value: ["payee", "expediee"]
+            type: str
+
+  order_by:
+    - field: nom
+      direction: asc
+      field: prenom
+      direction: asc

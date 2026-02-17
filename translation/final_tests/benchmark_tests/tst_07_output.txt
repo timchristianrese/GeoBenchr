@@ -1,0 +1,21 @@
+# ----------- POSTGIS OUTPUT -----------
+
+(venv) 3s@Scalables-MacBook-Pro aviation % psql -d aviation -c "SELECT DISTINCT f.flightid
+FROM flight_points f, counties k
+
+WHERE (k.name = 'Krs Hochsauerlandkreis' AND f.geom && k.geom AND f.timestamp BETWEEN '2023-01-02 18:17:18' AND '2023-01-02 18:18:00');
+"
+ flightid 
+----------
+ 69187756
+ 69187888
+(2 rows)
+
+# ----------- SEDONA OUTPUT -----------
+
++-------------------+                                                           
+|DISTINCT f.flightid|
++-------------------+
+|           69187888|
+|           69187756|
++-------------------+

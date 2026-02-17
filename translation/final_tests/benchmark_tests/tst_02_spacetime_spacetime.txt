@@ -1,0 +1,3 @@
+SELECT s.flightid, s.t, ST_AsText(ST_Line(s.x[0], s.y[0], s.x[1], s.y[1])) AS geom
+FROM fsegment s
+WHERE (s.t <@ EPOCHRANGE '[2023-01-02 18:17:18, 2023-01-02 18:17:18]');

@@ -1,0 +1,14 @@
+name: topPlaneTypes
+source: "flight_points f"
+source_data: { type: table }
+select:
+  - "f.airplanetype"
+aggregations:
+  - { function: "COUNT", field: "*", alias: "cnt" }
+group_by: ["f.airplanetype"]
+having:
+  { field: "cnt", operator: ">=", value: 100, type: "number" }
+order_by:
+  - { field: "cnt", direction: "desc" }
+limit: 10
+offset: 0

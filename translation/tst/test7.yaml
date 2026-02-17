@@ -1,0 +1,31 @@
+#left join with and clause + sort
+- name: test7
+
+  source: "utilisateurs u"
+
+  select:
+    - u.nom
+    - u.prenom
+    - c.montant
+    - c.statut
+
+  joins:
+    - type: left
+      source: "commandes c"
+      source_data:
+      clause:
+        and:
+          - field: c.utilisateur_id
+            operator: eq
+            value: u.id
+            type: var
+          - field: c.statut
+            operator: eq
+            value: "payee"
+            type: str
+
+  order_by:
+    - field: u.nom
+      direction: asc
+    - field: u.prenom
+      direction: asc

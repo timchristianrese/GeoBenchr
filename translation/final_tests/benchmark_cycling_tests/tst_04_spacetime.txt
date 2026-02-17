@@ -1,0 +1,5 @@
+SELECT r.trip_id
+FROM ride_points r
+WHERE (ST_DWithin(ST_Point(r.x, r.y), ST_ToGeom('POINT(13.3946322544946 52.5180609334192)'::gpoint), 223.0))
+ORDER BY r.trip_id ASC
+LIMIT 5;

@@ -1,0 +1,10 @@
+name: segmentAtInstant
+source: "fsegment s"
+source_data: { type: table }
+select:
+  - "s.flightid"
+  - "s.t"
+  - "ST_AsText(ST_Line(s.x[0], s.y[0], s.x[1], s.y[1])) AS geom"
+filter:
+  time_filter:
+    - { field: "s.t", start: "2023-01-02 18:17:18", end: "2023-01-02 18:17:18" }

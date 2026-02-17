@@ -1,0 +1,58 @@
+#with + group by + join on cte + sort after project
+- name: test22
+
+  with:
+    - name: last_per_user
+      source: "commandes c"
+      select:
+        - c.utilisateur_id
+
+      aggregations:
+        - function: max
+          field: c.date_commande
+          alias: t_max
+
+      group_by:
+        - c.utilisateur_id
+
+    - name: last_orders
+      source: "commandes c2"
+      select:
+        - c2.utilisateur_id
+        - c2.montant
+        - e.t_max
+
+      joins:
+        - type: inner
+          source: "last_per_user e"
+          clause:
+            and:
+              - field: c2.utilisateur_id
+                operator: eq
+                value: e.utilisateur_id
+                type: var
+              - field: c2.date_commande
+                operator: eq
+                value: e.t_max
+                var: str
+
+  source: "last_orders lo"
+  select:
+    - u.pays
+  joins:
+    - type: inner
+      source: "utilisateurs u"
+      clause:
+        - field: lo.utilisateur_id
+          operator: eq
+          value: u.id
+          type: var
+  aggregations:
+    - function: AVG
+      field: lo.montant
+      alias: avg_amount
+  group_by:
+    - u.pays
+  order_by:
+    - field: u.pays
+      direction: "asc"

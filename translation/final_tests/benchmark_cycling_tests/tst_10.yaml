@@ -1,0 +1,25 @@
+name: T12_disjoint_window_countDistinct
+source: "ride_points r"
+source_data: { type: table }
+
+geometries:
+  - name: z_wide
+    type: polygon
+    srid: 4326
+    coordinates:
+      - [13.30,52.45]
+      - [13.50,52.45]
+      - [13.50,52.58]
+      - [13.30,52.58]
+      - [13.30,52.45]
+
+select: []
+aggregations:
+  - { function: COUNT, field: "DISTINCT r.trip_id", alias: "n" }
+
+filter:
+  and:
+    - spatial_filter:
+      - { type: disjoint, args: ["ST_Point(r.x, r.y)", ":geometries.z_wide"] }
+    - time_filter:
+      - { field: "r.t", start: "'2022-10-04T00:00:00Z'", end: "'2022-10-04T23:59:59Z'" }

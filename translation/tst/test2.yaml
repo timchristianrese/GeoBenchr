@@ -1,0 +1,37 @@
+#left join + count + group by + sort
+- name: test2
+
+  source: utilisateurs u
+
+  select:
+    - u.id
+    - u.nom
+    - u.prenom
+
+  aggregations:
+    - function: count
+      field: c.utilisateur_id
+      alias: nb_commandes
+
+  joins:
+    - type: left
+      source: commandes c
+      source_data:
+      clause:
+        - field: c.utilisateur_id
+          operator: eq
+          value: u.id
+          type: var
+
+  order_by:
+    - field: nb_commandes
+      direction: desc
+    - field: nom
+      direction: asc
+    - field: prenom
+      direction: asc
+
+  group_by:
+    - u.id
+    - u.nom
+    - u.prenom

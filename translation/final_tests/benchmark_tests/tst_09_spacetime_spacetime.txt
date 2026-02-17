@@ -1,0 +1,3 @@
+SELECT f.flightid, f.origin, f.destination
+FROM flight_points f
+WHERE ((f.origin = 'FRA' OR f.destination = 'FRA') AND NOT (f.airplanetype = 'A320'));

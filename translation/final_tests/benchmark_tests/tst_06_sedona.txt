@@ -1,0 +1,56 @@
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+sedona_version = "1.7.2"                                        # dernière sur PyPI
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark                              # existe déjà si lancé via spark-submit
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .getOrCreate()
+    )
+
+from sedona.register import SedonaRegistrator
+SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+reader = (spark.read
+    .option("delimiter", ";")
+    .option("header", "false")
+    .option("encoding", "UTF-8")
+    .option("quote", "\"")
+    .option("escape", "\\")
+    .option("inferSchema", "false")
+    .csv("point_NRW_HIGH_0123.csv") )
+df_tmp = reader.toDF("flightid", "airplanetype", "origin", "destination", "wkt", "timestamp", "altitude")
+from pyspark.sql import functions as F
+df_tmp = df_tmp.withColumn("altitude", F.col("altitude").cast("double"))
+from pyspark.sql import functions as F
+from sedona.sql.types import GeometryType
+df_tmp = df_tmp.withColumn("geom", F.expr("ST_GeomFromWKT(wkt)").cast(GeometryType()))
+df = df_tmp
+df.createOrReplaceTempView("flight_points")
+df.createOrReplaceTempView("f")
+df = df.filter("(ST_Within(geom, ST_GeomFromText('POLYGON((8.71 51.16, 8.75 51.16, 8.75 51.2, 8.71 51.2, 8.71 51.16))', 4326)) AND (flightid IN ('69187756', '69187812', '69187819')))")
+df = df.selectExpr('flightid', 'airplanetype', 'origin', 'destination', "ST_Distance(geom, ST_GeomFromText('POINT(8.73 51.18)',4326)) AS dist_to_center")
+from pyspark.sql import functions as F
+df = df.orderBy(F.col("dist_to_center").asc())
+result = df
+
+# Final result variable is: result
+result.show()

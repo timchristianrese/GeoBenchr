@@ -1,0 +1,19 @@
+name: nearCityRadius
+source: "flight_points p"
+source_data: { type: table }
+select:
+  - "p.flightid"
+  - "p.altitude"
+  - "p.airplanetype"
+  - "p.timestamp"
+joins:
+  - type: inner
+    source: "cities c"
+    source_data: {}
+    clause:
+      spatial_filter:
+        - { type: "dwithin", args: ["p.geom", "c.geom", 0.01] }
+filter:
+  and:
+    - { field: "p.altitude", operator: "<=", value: 920, type: "number" }
+    - { field: "c.population", operator: ">=", value: 200000, type: "number" }

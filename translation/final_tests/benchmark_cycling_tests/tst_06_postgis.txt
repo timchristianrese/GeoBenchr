@@ -1,0 +1,6 @@
+SELECT r.trip_id, COUNT(*) AS n
+FROM ride_points r
+WHERE (ST_Intersects(ST_SetSRID(ST_Point(r.x, r.y), 4326), ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326)) AND r.t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z')
+GROUP BY r.trip_id
+ORDER BY r.trip_id ASC
+LIMIT 10;

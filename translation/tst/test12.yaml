@@ -1,0 +1,26 @@
+#left join + where on joined alias
+- name: test12
+
+  source: "utilisateurs u"
+
+  select:
+    - u.nom
+    - u.prenom
+    - c.montant
+    - c.statut
+
+  joins:
+    - type: left
+      source: "commandes c"
+      source_data:
+      clause:
+        - field: c.utilisateur_id
+          operator: eq
+          value: u.id
+          type: var
+        
+  filter:
+    - field: c.statut
+      operator: eq
+      value: annulee
+      type: str

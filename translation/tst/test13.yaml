@@ -1,0 +1,42 @@
+#inner join + group by + having + order by
+- name: test13
+
+  source: "utilisateurs u"
+
+  select:
+    - u.id
+    - u.nom
+    - u.prenom
+
+  aggregations:
+    - function: count
+      field: c.utilisateur_id
+      alias: nb
+
+
+  joins:
+    - type: inner
+      source: "commandes c"
+      source_data:
+      clause:
+        - field: c.utilisateur_id
+          operator: eq
+          value: u.id
+          type: var
+        
+  group_by:
+    - u.id
+    - u.nom
+    - u.prenom
+
+  having:
+    - field: nb
+      operator: gte
+      value: 2
+      type: int
+
+  order_by:
+    - field: nb
+      direction: desc
+    - field: nom
+      direction: asc

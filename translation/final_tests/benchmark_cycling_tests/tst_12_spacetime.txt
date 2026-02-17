@@ -1,0 +1,6 @@
+SELECT d.name, COUNT(DISTINCT r.trip_id) AS n_trips
+FROM berlin_districts d
+LEFT JOIN ride_points r ON (ST_Intersects(ST_ToGeom('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))'::gpolygon), ST_Point(r.x, r.y)) AND r.t <@ EPOCHRANGE '[2022-10-04 18:00:00, 2022-10-04 19:00:00]')
+GROUP BY d.name
+ORDER BY n_trips DESC
+LIMIT 10;

@@ -1,0 +1,30 @@
+name: ridesCrossSeveralDistrictsOnEveningInPeriod
+source: "ride_points r"
+source_data: { type: table }
+
+select:
+  - "r.trip_id"
+
+joins:
+  - type: inner
+    source: "berlin_districts d"
+    source_data:
+      type: table
+      schema:
+        - { name: geom, type: string, format: "wkt:gpolygon" }
+    clause:
+      spatial_filter:
+        - { type: intersects, args: ["ST_Point(r.x, r.y)", "d.geom"] }
+
+filter:
+  and:
+    - time_filter:
+        - { field: "r.t", start: "'2022-10-04T18:00:00Z'", end: "'2022-10-04T23:59:59Z'" }
+
+group_by: ["r.trip_id"]
+
+aggregations:
+  - { function: COUNT, field: "*", alias: "n" }
+
+having:
+  - { field: "n", operator: ">", value: 1 }

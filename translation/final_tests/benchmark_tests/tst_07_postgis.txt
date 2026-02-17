@@ -1,0 +1,4 @@
+SELECT DISTINCT f.flightid
+FROM flight_points f
+INNER JOIN counties k ON (f.geom && k.geom)
+WHERE (k.name = 'Krs Hochsauerlandkreis' AND f.timestamp BETWEEN '2023-01-02 18:17:18' AND '2023-01-02 18:18:00');

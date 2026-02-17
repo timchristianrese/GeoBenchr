@@ -1,0 +1,66 @@
+name: my_query
+
+# --- main source ---
+source: "schema.table t"
+source_data:
+  type: table | csv
+  path: "/path/to.csv"           # for csv
+  geometry_column: geom          # name or index for csv
+  csv_options:
+    delimiter: ";"
+    header: false
+    encoding: "UTF-8"
+    quote: '"'
+    escape: "\\"
+    infer_schema: false
+  schema:
+    - { name: "ts", type: "timestamp" }
+    - { name: "geom_wkt", type: "string", format: "wkt:gpolygon" }  # hint SpaceTime
+  geom:                           # for table: metadata
+    column: "geom"
+    kind: "polygon"               # point|polygon|...
+    storage: "wkt"
+    srid: 4326
+
+# --- named geometries ---
+geometries:
+  - { name: city, type: point, srid: 4326, coordinates: [13.405, 52.52] }
+  - { name: area, type: polygon, srid: 4326, coordinates: [[...], ...] }
+
+# --- projection & aggregates ---
+select: ["t.id", "t.attr", "ST_AsText(t.geom) as wkt"]  # free
+aggregations:
+  - { function: COUNT, field: "*", alias: "n" }
+
+group_by: ["t.attr"]
+having:
+  field: "n"        # or an expression
+  operator: ">"
+  value: 10
+  type: "int"
+
+order_by:
+  - { field: "t.attr", direction: "asc" }
+
+limit: 100
+offset: 20
+
+# --- joins ---
+joins:
+  - type: inner | left | right | full | spatial
+    source: "other.table o"
+    source_data: { type: table }
+    clause:
+      and:
+        - { field: "t.id", operator: "=", value: "o.id", type: "int" }
+        - spatial_filter:
+            - { type: "intersects", args: ["t.geom", "o.geom"] }
+
+# --- filters ---
+filter:
+  and:
+    - time_filter:
+        - { field: "t.ts", start: "2023-07-01T00:00:00Z", end: "2023-07-31T23:59:59Z" }
+    - { field: "t.status", operator: "IN", value: ["'OK'","'WARN'"], type: "string" }
+    - spatial_filter:
+        - { type: "dwithin", args: ["t.geom", ":geometries.city", { value: 5000, units: "m" }] }

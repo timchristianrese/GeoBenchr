@@ -1,0 +1,13 @@
+WITH ride_starts AS (
+SELECT r.trip_id, MIN(r.t) AS start_t
+FROM ride_points r
+GROUP BY r.trip_id
+),
+start_points AS (
+SELECT r.trip_id, ST_Point(r.x, r.y) AS geom
+FROM ride_points r
+INNER JOIN ride_starts s ON (r.trip_id = s.trip_id AND r.t = s.start_t)
+)
+SELECT s.trip_id
+FROM start_points s
+INNER JOIN berlin_districts d ON (ST_Intersects(s.geom, d.geom));

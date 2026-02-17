@@ -1,0 +1,33 @@
+#left join + time filter in join clause + sort
+- name: test10
+
+  source: "utilisateurs u"
+
+  select:
+    - u.nom
+    - u.prenom
+    - c.date_commande
+    - c.statut
+
+  joins:
+    - type: left
+      source: "commandes c"
+      source_data:
+      clause:
+        and:
+          - field: c.utilisateur_id
+            operator: eq
+            value: u.id
+            type: var
+          - time_filter:
+              - field: c.date_commande
+                start: "'2024-06-10T00:00:00Z'"
+                end: "'2024-06-30T23:59:59Z'"
+
+  order_by:
+    - field: u.nom
+      direction: asc
+    - field: u.prenom
+      direction: asc
+    - field: c.date_commande
+      direction: desc

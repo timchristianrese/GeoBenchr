@@ -1,0 +1,25 @@
+name: spatialDWithinConstant
+source: "ride_points r"
+source_data: { type: table }
+
+geometries:
+  - name: uni
+    type: point
+    srid: 4326
+    coordinates: [13.3946322544946, 52.5180609334192]
+
+select:
+  - "r.trip_id"
+
+filter:
+  spatial_filter:
+    - type: dwithin
+      args:
+        - "ST_Point(r.x, r.y)"
+        - ":geometries.uni"
+        - { value: 223, units: "m" }
+
+order_by:
+  - field: "r.trip_id"
+    direction: "asc"
+limit: 5

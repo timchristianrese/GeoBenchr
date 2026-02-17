@@ -1,0 +1,14 @@
+name: T2_dwithin_endOnly_countDistinct
+source: "ride_points r"
+source_data: { type: table }
+geometries:
+  - { name: poi, type: point, srid: 4326, coordinates: [13.4050, 52.5208] }
+select: []
+aggregations:
+  - { function: COUNT, field: "DISTINCT r.trip_id", alias: "n" }
+filter:
+  and:
+    - spatial_filter:
+      - { type: dwithin, args: ["ST_Point(r.x, r.y)", ":geometries.poi", 0.01] }
+    - time_filter:
+      - { field: "r.t", end: "'2022-10-04T19:00:00Z'" }

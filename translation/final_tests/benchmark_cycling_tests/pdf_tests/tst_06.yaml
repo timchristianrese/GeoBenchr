@@ -1,0 +1,42 @@
+name: ridesStartedInDistrict
+with:
+  - name: ride_starts
+    source: "ride_points r"
+    source_data: { type: table }
+    select:
+      - "r.trip_id"
+      - "MIN(r.t) AS start_t"
+    group_by: ["r.trip_id"]
+
+  - name: start_points
+    source: "ride_points r"
+    source_data: { type: table }
+    select:
+      - "r.trip_id"
+      - "ST_Point(r.x, r.y) AS geom"
+    joins:
+      - type: inner
+        source: "ride_starts s"
+        source_data: { type: table }
+        clause:
+          and:
+            - { field: "r.trip_id", operator: "=", value: "s.trip_id" }
+            - { field: "r.t",       operator: "=", value: "s.start_t" }
+
+source: "start_points s"
+source_data: { type: table }
+select:
+  - "s.trip_id"
+joins:
+  - type: inner
+    source: "berlin_districts d"
+    source_data:
+      type: table
+      schema:
+        - { name: geom, type: string, format: "wkt:gpolygon" }
+    clause:
+      spatial_filter:
+        - { type: intersects, args: ["s.geom", "d.geom"] }
+filters:
+  and:
+    - { field: "d.name", operator: "=", value: "Mitte", type: str }

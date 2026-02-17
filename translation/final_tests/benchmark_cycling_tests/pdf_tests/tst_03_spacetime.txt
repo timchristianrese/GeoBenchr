@@ -1,0 +1,6 @@
+SELECT r.trip_id, COUNT(*) AS n
+FROM ride_points r
+INNER JOIN berlin_districts d ON (ST_Point(r.x, r.y) <@ ST_ToGeom(d.geom::gpolygon))
+WHERE (r.t <@ EPOCHRANGE '[2022-10-04 18:00:00, 2022-10-04 23:59:59]')
+GROUP BY r.trip_id
+HAVING (n > 1);

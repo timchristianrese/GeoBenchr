@@ -1,0 +1,6 @@
+SELECT COUNT(*) AS n
+FROM (
+SELECT DISTINCT r.trip_id
+FROM ride_points r
+WHERE (ST_Disjoint(ST_Point(r.x, r.y), ST_ToGeom('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))'::gpolygon)) AND r.t <@ EPOCHRANGE '[2022-10-04 00:00:00, 2022-10-04 23:59:59]')
+) _dedup;

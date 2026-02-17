@@ -1,0 +1,13 @@
+WITH a_cnt AS (
+SELECT airport, COUNT(arrival) AS cnt
+FROM {'source': 'arrivals', 'source_data': {'type': 'table'}}
+GROUP BY airport
+),
+d_cnt AS (
+SELECT airport, COUNT(departure) AS cnt
+FROM {'source': 'departures', 'source_data': {'type': 'table'}}
+GROUP BY airport
+)
+SELECT COALESCE(a.airport, d.airport) AS airport, COALESCE(a_cnt.cnt, 0) AS arrival_count, COALESCE(d_cnt.cnt, 0) AS departure_count
+FROM {'source': 'arrivals a', 'source_data': {'type': 'table'}}
+FULL JOIN departures d ON a.airport = d.airport;

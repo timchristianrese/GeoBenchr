@@ -1,0 +1,36 @@
+#inner join + numeric filter on joined field (gt) + 3-field sort
+- name: test3
+
+  source: utilisateurs u
+
+  select:
+    - u.id
+    - u.nom
+    - u.prenom
+    - v.marque
+    - v.modele
+    - v.annee
+
+  joins:
+    - type: inner
+      source: voitures v
+      source_data:
+      clause:
+        - field: u.id
+          operator: eq
+          value: v.owner_id
+          type: var
+
+  filter:
+    - field: v.annee
+      operator: gt
+      value: 2015
+      type: int
+
+  order_by:
+    - field: u.nom
+      direction: asc
+    - field: u.prenom
+      direction: asc
+    - field: v.annee
+      direction: desc

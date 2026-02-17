@@ -1,0 +1,6 @@
+SELECT COUNT(*) AS count
+FROM (
+SELECT DISTINCT f.flightid
+FROM fsegment f
+WHERE (f.t <@ EPOCHRANGE '[2023-01-02 18:17:18, 2023-01-02 18:18:00]')
+) AS sub;

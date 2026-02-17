@@ -1,0 +1,11 @@
+name: where_in_rp
+source: "ride_points rp"
+select: ["rp.rider_id", "rp.trip_id", "rp.x", "rp.y"]
+filter:
+  and:
+    - { field: "rp.rider_id", operator: "IN", value: [8, 9] }
+    - { field: "rp.trip_id",  operator: "IN", value: [39795, 86403] }
+order_by:
+  - { field: "rp.rider_id", direction: "asc" }
+  - { field: "rp.trip_id",  direction: "asc" }
+limit: 10

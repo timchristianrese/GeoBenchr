@@ -1,0 +1,23 @@
+#points within literal polygon
+- name: test16
+
+  source: "points_interet p"
+
+  select:
+    - p.name
+
+  geometries:
+    - name: mitte_poly
+      type: polygon
+      srid: 4326
+      coordinates:
+        - [13.370, 52.505]
+        - [13.430, 52.505]
+        - [13.430, 52.540]
+        - [13.370, 52.540]
+        - [13.370, 52.505]
+
+  filter:
+    - spatial_filter:
+      - type: within
+        args: [p.geom, ":geometries.mitte_poly"]

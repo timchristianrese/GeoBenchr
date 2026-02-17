@@ -1,0 +1,5 @@
+SELECT rp.rider_id, rp.trip_id, rp.x, rp.y
+FROM ride_points rp
+WHERE (rp.x > 12.0 AND rp.x < 14.0 AND rp.y > 52.0 AND rp.y < 53.5)
+ORDER BY rp.rider_id ASC
+LIMIT 10;

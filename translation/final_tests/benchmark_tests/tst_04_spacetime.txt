@@ -1,0 +1,6 @@
+SELECT COUNT(*) AS flight_count
+FROM (
+SELECT DISTINCT f.flightid
+FROM counties k
+WHERE k.name = 'Krs Hochsauerlandkreis'
+) AS sub;

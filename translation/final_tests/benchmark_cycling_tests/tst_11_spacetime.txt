@@ -1,0 +1,6 @@
+SELECT COUNT(*) AS n_trips
+FROM (
+SELECT DISTINCT r.trip_id
+FROM ride_points r
+WHERE (ST_CoveredBy(ST_Point(r.x, r.y), ST_ToGeom('POLYGON((13.38 52.505, 13.42 52.505, 13.42 52.525, 13.38 52.525, 13.38 52.505))'::gpolygon)) AND r.t <@ EPOCHRANGE '[2022-10-01 00:00:00, 2022-10-07 23:59:59]')
+) _dedup;

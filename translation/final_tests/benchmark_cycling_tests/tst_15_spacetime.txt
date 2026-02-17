@@ -1,0 +1,7 @@
+SELECT r.trip_id, COUNT(*) AS n
+FROM ride_points r
+WHERE (ST_Intersects(ST_Point(r.x, r.y), ST_ToGeom('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))'::gpolygon)) AND r.t <@ EPOCHRANGE '[2022-10-04 18:00:00, 2022-10-04 19:00:00]')
+GROUP BY r.trip_id
+HAVING (n >= 5)
+ORDER BY n DESC
+LIMIT 10;

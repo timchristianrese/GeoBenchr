@@ -1,0 +1,30 @@
+#distinct + group_by
+- name: test20
+
+  source: "commandes c"
+
+  select:
+    - u.pays
+
+  joins:
+    - type: left
+      source: "utilisateurs u"
+      source_data:
+      clause:
+        - field: u.id
+          operator: eq
+          value: c.utilisateur_id
+          type: var
+
+  aggregations:
+    - function: COUNT
+      field: "DISTINCT c.utilisateur_id"
+      alias: clients_uniques
+
+  group_by:
+    - u.pays
+
+  order_by:
+    - field: u.pays
+      direction: asc
+

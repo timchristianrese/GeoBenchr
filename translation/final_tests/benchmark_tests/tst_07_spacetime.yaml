@@ -1,0 +1,17 @@
+name: bboxCompatIntersect
+source: "flight_points f"
+source_data: { type: table }
+select:
+  - "DISTINCT f.flightid"
+joins:
+  - type: inner
+    source: "counties k"
+    source_data: {}
+    clause:
+      spatial_filter:
+        - { type: "&&", args: ["f.geom", "k.geom"] }
+filter:
+  and:
+    - { field: "k.name", operator: "=", value: "Krs Hochsauerlandkreis", type: "str" }
+    - time_filter:
+        - { field: "f.timestamp", start: "2023-01-02 18:17:18", end: "2023-01-02 18:18:00" }

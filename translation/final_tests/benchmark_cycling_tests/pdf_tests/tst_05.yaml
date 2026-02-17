@@ -1,0 +1,17 @@
+name: averageRideDurationDuringDay
+with:
+  - name: per_trip_bounds
+    source: "ride_points r"
+    source_data: { type: table }
+    select:
+      - "r.trip_id"
+      - "MIN(r.t) AS t_min"
+      - "MAX(r.t) AS t_max"
+    filters:
+      time_filter:
+        - { field: "r.t", start: "'2022-10-04T00:00:00Z'", end: "'2022-10-04T23:59:59Z'" }
+    group_by: ["r.trip_id"]
+source: "per_trip_bounds e"
+source_data: { type: table }
+select:
+  - "AVG(e.t_max - e.t_min) AS avg_duration"

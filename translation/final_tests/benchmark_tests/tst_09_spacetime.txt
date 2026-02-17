@@ -1,0 +1,4 @@
+SELECT f.flightid, f.airplanetype, f.origin, f.destination
+FROM cities c
+INNER JOIN flight_points f ON (ST_DWithin(f.geom, c.geom, 1))
+WHERE (c.name = 'Aachen' AND f.timestamp <@ EPOCHRANGE '[2023-01-02 18:17:18, 2023-01-02 18:18:00]');

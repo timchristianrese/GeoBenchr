@@ -1,0 +1,26 @@
+#left join + sort
+- name: test6
+
+  source: "utilisateurs u"
+
+  select:
+    - u.nom
+    - u.prenom
+    - v.marque
+    - v.modele
+
+  joins:
+    - type: left
+      source: "voitures v"
+      source_data:
+      clause:
+        - field: v.owner_id
+          operator: eq
+          value: u.id
+          type: var
+
+  order_by:
+    - field: u.nom
+      direction: asc
+    - field: u.prenom
+      direction: asc

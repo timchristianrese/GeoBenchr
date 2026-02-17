@@ -1,0 +1,3 @@
+SELECT COUNT(DISTINCT f.flightid) AS count
+FROM flight_points f
+WHERE (f.timestamp BETWEEN '2023-01-02 18:17:18' AND '2023-01-02 18:18:00');

@@ -1,0 +1,6 @@
+SELECT COUNT(*) AS n
+FROM (
+SELECT DISTINCT r.trip_id
+FROM ride_points r
+WHERE (ST_DWithin(ST_Point(r.x, r.y), ST_ToGeom('POINT(13.405 52.5208)'::gpoint), 1113.2) AND r.t <= EPOCH '2022-10-04 19:00:00')
+) _dedup;

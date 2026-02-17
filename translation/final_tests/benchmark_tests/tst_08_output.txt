@@ -1,0 +1,24 @@
+# ----------- POSTGIS OUTPUT -----------
+
+3s@Scalables-MacBook-Pro DSpatiaL % psql -d aviation -c "SELECT b.name, COUNT(DISTINCT f.flightid) AS count
+FROM flight_points f, districts b
+
+WHERE (f.geom && b.geom AND f.timestamp BETWEEN '2023-01-02 18:17:18' AND '2023-01-02 18:17:18')
+GROUP BY b.name;
+"
+     name     | count 
+--------------+-------
+ Rbz Arnsberg |     2
+ Rbz Detmold  |     1
+ Rbz Koeln    |     1
+(3 rows)
+
+# ----------- SEDONA OUTPUT -----------
+
++------------+-----+                                                            
+|      b.name|count|
++------------+-----+
+| Rbz Detmold|    1|
+|   Rbz Koeln|    1|
+|Rbz Arnsberg|    2|
++------------+-----+

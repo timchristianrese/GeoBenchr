@@ -1,0 +1,6 @@
+SELECT r.trip_id, d.name AS district
+FROM ride_points r
+INNER JOIN berlin_districts d ON (ST_Point(r.x, r.y) <@ ST_ToGeom(d.geom::gpolygon))
+WHERE (r.t <@ EPOCHRANGE '[2022-10-04 18:00:00, 2022-10-04 19:00:00]')
+ORDER BY r.trip_id ASC
+LIMIT 5;

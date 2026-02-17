@@ -1,0 +1,7 @@
+SELECT f.airplanetype, COUNT(*) AS cnt
+FROM flight_points f
+GROUP BY f.airplanetype
+HAVING (cnt >= 100)
+ORDER BY cnt DESC
+LIMIT 10
+OFFSET 0;

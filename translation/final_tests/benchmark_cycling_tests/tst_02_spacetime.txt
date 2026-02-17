@@ -1,0 +1,6 @@
+SELECT COUNT(*) AS n
+FROM (
+SELECT DISTINCT r.rider_id
+FROM ride_points r
+WHERE (r.t <@ EPOCHRANGE '[2022-10-04 18:00:00, 2022-10-04 19:00:00]')
+) _dedup;

@@ -1,0 +1,10 @@
+name: countActiveFlightsInPeriod
+source: "fsegment f"
+source_data:
+  type: table
+select: []
+aggregations:
+  - { function: "COUNT", field: "DISTINCT f.flightid", alias: "count" }
+filter:
+  time_filter:
+    - { field: "f.t", start: "2023-01-02 18:17:18", end: "2023-01-02 18:18:00" }

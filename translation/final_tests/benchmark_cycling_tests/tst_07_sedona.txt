@@ -1,0 +1,50 @@
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("r")
+df = df.filter("((ST_Distance(ST_Point(x, y), ST_GeomFromText('POINT(13.405 52.5208)', 4326)) <= 0.01) AND (t <= '2022-10-04T19:00:00Z'))")
+from pyspark.sql import functions as F
+df = df.agg(F.countDistinct(F.col("trip_id")).alias("n"))
+result = df
+
+# Final result variable is: result
+result.show()

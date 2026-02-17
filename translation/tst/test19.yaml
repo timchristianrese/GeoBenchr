@@ -1,0 +1,30 @@
+#spatial filter inside lookup
+- name: test19
+
+  source: "points_interet p"
+
+  select:
+    - p.name
+    - d.name
+
+  geometries:
+    - name: mitte_poly
+      type: polygon
+      srid: 4326
+      coordinates:
+        - [13.370, 52.5049]
+        - [13.430, 52.5049]
+        - [13.430, 52.540]
+        - [13.370, 52.540]
+        - [13.370, 52.5049]
+
+  joins:
+    - type: left
+      source: "districts d"
+      source_data:
+      clause:
+        spatial_filter:
+          - type: intersects
+            args: [d.geom, ":geometries.mitte_poly"]
+
+

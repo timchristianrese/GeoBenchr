@@ -1,0 +1,44 @@
+SELECT COUNT(DISTINCT f.flightid) AS count
+FROM flight_points f
+WHERE f.timestamp <@ EPOCHRANGE '[2023-01-02 18:17:18, 2023-01-02 18:18:00]';
+
+SELECT f.flightid, f.altitude, ST_AsText(f.geom) AS location, f.timestamp
+FROM flight_points f
+WHERE f.timestamp <@ EPOCHRANGE '[2023-01-02 18:17:18, 2023-01-02 18:17:18]';
+
+SELECT k.name, COUNT(DISTINCT f.flightid) AS flight_count
+FROM counties k
+JOIN flight_points f
+  ON ST_Intersects(f.geom, ST_ToGeom(k.geom::gmpolygon))
+WHERE k.name = 'Krs Hochsauerlandkreis'
+GROUP BY k.name;
+
+SELECT p.flightid, p.altitude, p.airplanetype, p.timestamp
+FROM flight_points p
+JOIN cities c
+  ON ST_DWithin(p.geom, ST_ToGeom(c.geom::gpoint), 0.01)
+WHERE p.altitude <= 920
+  AND CAST(c.population AS INT) >= 200000;
+
+SELECT f.flightid, f.airplanetype, f.origin, f.destination,
+       ST_Distance(f.geom, ST_ToGeom('POINT(8.73 51.18)'::gpoint)) AS dist_to_center
+FROM flight_points f
+WHERE ST_Within(
+        f.geom,
+        ST_ToGeom('POLYGON((8.71 51.16, 8.75 51.16, 8.75 51.2, 8.71 51.2, 8.71 51.16))'::gpolygon)
+      )
+  AND f.flightid IN ('69187756', '69187812', '69187819')
+ORDER BY dist_to_center ASC;
+
+SELECT DISTINCT f.flightid
+FROM flight_points f
+JOIN counties k
+  ON ST_Intersects(f.geom, ST_ToGeom(k.geom::gmpolygon))
+WHERE k.name = 'Krs Hochsauerlandkreis'
+  AND f.timestamp <@ EPOCHRANGE '[2023-01-02 18:17:18, 2023-01-02 18:18:00]';
+
+
+/opt/msql-server/msql-client -H 141.23.28.216:31339 -o mireo -u root -p '@2e9R]3]=O' -q "SELECT s.flightid, s.t, s.geom
+FROM fsegment s
+WHERE (s.t <@ EPOCHRANGE '['2023-01-02 18:17:18', '2023-01-02 18:17:18']');
+" -v

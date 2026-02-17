@@ -1,0 +1,5 @@
+SELECT g.name, f.flightid, MIN(f.timestamp) AS entry_time, MAX(f.timestamp) AS exit_time, COUNT(*) AS point_count
+FROM municipalities g
+INNER JOIN flight_points f ON (ST_Intersects(f.geom, g.geom))
+WHERE (g.name = 'Gem Brilon' AND f.timestamp <@ EPOCHRANGE '[2023-01-02 17:49:01, 2023-01-02 17:49:13]' AND f.altitude < 4000)
+GROUP BY g.name, f.flightid;

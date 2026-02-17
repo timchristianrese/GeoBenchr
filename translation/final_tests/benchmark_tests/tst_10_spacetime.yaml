@@ -1,0 +1,13 @@
+name: openIntervals
+source: "fsegment f"
+source_data: { type: table }
+select:
+  - "f.flightid"
+  - "f.t[0]"
+  - "f.t[1]"
+filter:
+  and:
+    - time_filter:
+        - { field: "f.t", start: "2023-01-02 18:00:00" }
+    - time_filter:
+        - { field: "f.t", end: "2023-01-02 19:00:00" }

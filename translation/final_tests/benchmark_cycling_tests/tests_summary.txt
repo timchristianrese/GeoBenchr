@@ -1,0 +1,1754 @@
+================================================================================
+summary test in — folder: /Users/3s/Translator2/DSpatiaL/final_tests/benchmark_cycling_tests
+================================================================================
+
+================================================================================
+TEST: tst_01
+================================================================================
+
+--- YAML (tst_01.yaml) ---
+name: countActiveRidesInPeriod
+source: "ride_points r"
+source_data:
+  type: table
+select: []
+aggregations:
+  - function: COUNT
+    field: "DISTINCT r.trip_id"
+filter:
+  time_filter:
+    - field: "r.t"
+      start: "'2022-10-04T18:00:00Z'"
+      end:   "'2022-10-04T19:00:00Z'"
+
+--------------------------------------------------------------------------------
+PostGIS (tst_01_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.trip_id)
+FROM ride_points r
+WHERE (r.t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z');
+
+--------------------------------------------------------------------------------
+Sedona (tst_01_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("r")
+df = df.filter("((t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z'))")
+from pyspark.sql import functions as F
+df = df.agg(F.countDistinct(F.col("trip_id")))
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_01_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.trip_id)
+FROM ride_points r
+WHERE (r.t <@ EPOCHRANGE '[2022-10-04 18:00:00, 2022-10-04 19:00:00]');
+
+
+================================================================================
+TEST: tst_02
+================================================================================
+
+--- YAML (tst_02.yaml) ---
+name: countActiveRidersInPeriod
+source: "ride_points r"
+source_data: { type: table }
+select: []
+aggregations:
+  - function: COUNT
+    field: "DISTINCT r.rider_id"
+filter:
+  time_filter:
+    - field: "r.t"
+      start: "'2022-10-04T18:00:00Z'"
+      end:   "'2022-10-04T19:00:00Z'"
+
+--------------------------------------------------------------------------------
+PostGIS (tst_02_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.rider_id)
+FROM ride_points r
+WHERE (r.t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z');
+
+--------------------------------------------------------------------------------
+Sedona (tst_02_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("r")
+df = df.filter("((t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z'))")
+from pyspark.sql import functions as F
+df = df.agg(F.countDistinct(F.col("rider_id")))
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_02_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.rider_id)
+FROM ride_points r
+WHERE (r.t <@ EPOCHRANGE '[2022-10-04 18:00:00, 2022-10-04 19:00:00]');
+
+
+================================================================================
+TEST: tst_03
+================================================================================
+
+--- YAML (tst_03.yaml) ---
+name: spatialIntersectsRows
+source: "ride_points r"
+source_data: { type: table }
+
+select:
+  - "r.trip_id"
+  - "d.name AS district"
+
+joins:
+  - type: inner
+    source: "berlin_districts d"
+    source_data:
+      type: table
+      schema:
+        - name: geom
+          type: string
+          format: "wkt:gpolygon"
+    clause:
+      spatial_filter:
+        - type: intersects
+          args: ["ST_Point(r.x, r.y)", "d.geom"]
+
+filter:
+  time_filter:
+    - field: "r.t"
+      start: "'2022-10-04T18:00:00Z'"
+      end:   "'2022-10-04T19:00:00Z'"
+
+order_by:
+  - field: "r.trip_id"
+    direction: "asc"
+limit: 5
+
+--------------------------------------------------------------------------------
+PostGIS (tst_03_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT r.trip_id, d.name AS district
+FROM ride_points r
+INNER JOIN berlin_districts d ON (ST_Intersects(ST_SetSRID(ST_Point(r.x, r.y), 4326), d.geom))
+WHERE (r.t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z')
+ORDER BY r.trip_id ASC
+LIMIT 5;
+
+--------------------------------------------------------------------------------
+Sedona (tst_03_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("r")
+df.createOrReplaceTempView("ride_points")
+df_d = spark.read.table("berlin_districts")
+df_d.createOrReplaceTempView("d")
+df_d.createOrReplaceTempView("berlin_districts")
+df = spark.sql("""
+    SELECT r.trip_id AS `r.trip_id`, d.name AS district
+    FROM r
+    JOIN d
+    ON (ST_Intersects(ST_Point(r.x, r.y), d.geom))
+    WHERE ((r.t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z'))
+""")
+from pyspark.sql import functions as F
+df = df.orderBy(F.col("`r.trip_id`").asc())
+df = df.limit(5)
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_03_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT r.trip_id, d.name AS district
+FROM ride_points r
+INNER JOIN berlin_districts d ON (ST_Point(r.x, r.y) <@ ST_ToGeom(d.geom::gpolygon))
+WHERE (r.t <@ EPOCHRANGE '[2022-10-04 18:00:00, 2022-10-04 19:00:00]')
+ORDER BY r.trip_id ASC
+LIMIT 5;
+
+
+================================================================================
+TEST: tst_04
+================================================================================
+
+--- YAML (tst_04.yaml) ---
+name: spatialDWithinConstant
+source: "ride_points r"
+source_data: { type: table }
+
+geometries:
+  - name: uni
+    type: point
+    srid: 4326
+    coordinates: [13.3946322544946, 52.5180609334192]
+
+select:
+  - "r.trip_id"
+
+filter:
+  spatial_filter:
+    - type: dwithin
+      args:
+        - "ST_Point(r.x, r.y)"
+        - ":geometries.uni"
+        - { value: 223, units: "m" }
+
+order_by:
+  - field: "r.trip_id"
+    direction: "asc"
+limit: 5
+
+--------------------------------------------------------------------------------
+PostGIS (tst_04_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT r.trip_id
+FROM ride_points r
+WHERE (ST_DWithin((ST_SetSRID(ST_Point(r.x, r.y), 4326))::geography, (ST_GeomFromText('POINT(13.3946322544946 52.5180609334192)', 4326))::geography, 223.0))
+ORDER BY r.trip_id ASC
+LIMIT 5;
+
+--------------------------------------------------------------------------------
+Sedona (tst_04_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("r")
+df = df.filter("((ST_Distance(ST_Transform(ST_Point(x, y), 'EPSG:4326', 'EPSG:3857'), ST_Transform(ST_GeomFromText('POINT(13.3946322544946 52.5180609334192)', 4326), 'EPSG:4326', 'EPSG:3857')) <= 223.0))")
+df = df.selectExpr('trip_id')
+from pyspark.sql import functions as F
+df = df.orderBy(F.col("trip_id").asc())
+df = df.limit(5)
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_04_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT r.trip_id
+FROM ride_points r
+WHERE (ST_DWithin(ST_Point(r.x, r.y), ST_ToGeom('POINT(13.3946322544946 52.5180609334192)'::gpoint), 223.0))
+ORDER BY r.trip_id ASC
+LIMIT 5;
+
+
+================================================================================
+TEST: tst_05
+================================================================================
+
+--- YAML (tst_05.yaml) ---
+name: withinStartOnly_list_via_groupby
+source: "ride_points r"
+source_data: { type: table }
+
+geometries:
+  - name: zone
+    type: polygon
+    srid: 4326
+    coordinates:
+      - [13.37, 52.50]
+      - [13.43, 52.50]
+      - [13.43, 52.54]
+      - [13.37, 52.54]
+      - [13.37, 52.50]
+
+select:
+  - "r.trip_id"
+aggregations:
+  - { function: COUNT, field: "*", alias: "n" }
+group_by: ["r.trip_id"]
+
+filter:
+  and:
+    - spatial_filter:
+      - { type: within, args: ["ST_Point(r.x, r.y)", ":geometries.zone"] }
+    - time_filter:
+      - { field: "r.t", start: "'2022-10-04T18:00:00Z'" }
+
+order_by:
+  - { field: "r.trip_id", direction: "asc" }
+limit: 10
+
+--------------------------------------------------------------------------------
+PostGIS (tst_05_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT r.trip_id, COUNT(*) AS n
+FROM ride_points r
+WHERE (ST_Within(ST_SetSRID(ST_Point(r.x, r.y), 4326), ST_GeomFromText('POLYGON((13.37 52.5, 13.43 52.5, 13.43 52.54, 13.37 52.54, 13.37 52.5))', 4326)) AND r.t >= '2022-10-04T18:00:00Z')
+GROUP BY r.trip_id
+ORDER BY r.trip_id ASC
+LIMIT 10;
+
+--------------------------------------------------------------------------------
+Sedona (tst_05_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("r")
+df = df.filter("(ST_Within(ST_Point(x, y), ST_GeomFromText('POLYGON((13.37 52.5, 13.43 52.5, 13.43 52.54, 13.37 52.54, 13.37 52.5))', 4326)) AND (t >= '2022-10-04T18:00:00Z'))")
+from pyspark.sql import functions as F
+df = df.filter("trip_id IS NOT NULL")
+df = df.groupBy(F.col("trip_id")).agg(F.count("*").alias("n"))
+from pyspark.sql import functions as F
+df = df.orderBy(F.col("trip_id").asc())
+df = df.limit(10)
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_05_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT r.trip_id, COUNT(*) AS n
+FROM ride_points r
+WHERE (ST_Within(ST_Point(r.x, r.y), ST_ToGeom('POLYGON((13.37 52.5, 13.43 52.5, 13.43 52.54, 13.37 52.54, 13.37 52.5))'::gpolygon)) AND r.t >= EPOCH '2022-10-04 18:00:00')
+GROUP BY r.trip_id
+ORDER BY r.trip_id ASC
+LIMIT 10;
+
+
+================================================================================
+TEST: tst_06
+================================================================================
+
+--- YAML (tst_06.yaml) ---
+name: T2b_intersects_wideZone_window_groupByTrip
+source: "ride_points r"
+source_data: { type: table }
+geometries:
+  - name: z_wide
+    type: polygon
+    srid: 4326
+    coordinates:
+      - [13.30,52.45]
+      - [13.50,52.45]
+      - [13.50,52.58]
+      - [13.30,52.58]
+      - [13.30,52.45]
+select:
+  - "r.trip_id"
+aggregations:
+  - { function: COUNT, field: "*", alias: "n" }
+group_by: ["r.trip_id"]
+filter:
+  and:
+    - spatial_filter: [ { type: intersects, args: ["ST_Point(r.x, r.y)", ":geometries.z_wide"] } ]
+    - time_filter:    [ { field: "r.t", start: "'2022-10-04T18:00:00Z'", end: "'2022-10-04T19:00:00Z'"} ]
+order_by:
+  - { field: "r.trip_id", direction: "asc" }
+limit: 10
+
+--------------------------------------------------------------------------------
+PostGIS (tst_06_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT r.trip_id, COUNT(*) AS n
+FROM ride_points r
+WHERE (ST_Intersects(ST_SetSRID(ST_Point(r.x, r.y), 4326), ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326)) AND r.t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z')
+GROUP BY r.trip_id
+ORDER BY r.trip_id ASC
+LIMIT 10;
+
+--------------------------------------------------------------------------------
+Sedona (tst_06_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("r")
+df = df.filter("(ST_Intersects(ST_Point(x, y), ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326)) AND (t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z'))")
+from pyspark.sql import functions as F
+df = df.filter("trip_id IS NOT NULL")
+df = df.groupBy(F.col("trip_id")).agg(F.count("*").alias("n"))
+from pyspark.sql import functions as F
+df = df.orderBy(F.col("trip_id").asc())
+df = df.limit(10)
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_06_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT r.trip_id, COUNT(*) AS n
+FROM ride_points r
+WHERE (ST_Intersects(ST_Point(r.x, r.y), ST_ToGeom('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))'::gpolygon)) AND r.t <@ EPOCHRANGE '[2022-10-04 18:00:00, 2022-10-04 19:00:00]')
+GROUP BY r.trip_id
+ORDER BY r.trip_id ASC
+LIMIT 10;
+
+
+================================================================================
+TEST: tst_07
+================================================================================
+
+--- YAML (tst_07.yaml) ---
+name: T2_dwithin_endOnly_countDistinct
+source: "ride_points r"
+source_data: { type: table }
+geometries:
+  - { name: poi, type: point, srid: 4326, coordinates: [13.4050, 52.5208] }
+select: []
+aggregations:
+  - { function: COUNT, field: "DISTINCT r.trip_id", alias: "n" }
+filter:
+  and:
+    - spatial_filter:
+      - { type: dwithin, args: ["ST_Point(r.x, r.y)", ":geometries.poi", 0.01] }
+    - time_filter:
+      - { field: "r.t", end: "'2022-10-04T19:00:00Z'" }
+
+--------------------------------------------------------------------------------
+PostGIS (tst_07_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.trip_id) AS n
+FROM ride_points r
+WHERE (ST_DWithin(ST_SetSRID(ST_Point(r.x, r.y), 4326), ST_GeomFromText('POINT(13.405 52.5208)', 4326), 0.01) AND r.t <= '2022-10-04T19:00:00Z');
+
+--------------------------------------------------------------------------------
+Sedona (tst_07_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("r")
+df = df.filter("((ST_Distance(ST_Point(x, y), ST_GeomFromText('POINT(13.405 52.5208)', 4326)) <= 0.01) AND (t <= '2022-10-04T19:00:00Z'))")
+from pyspark.sql import functions as F
+df = df.agg(F.countDistinct(F.col("trip_id")).alias("n"))
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_07_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.trip_id) AS n
+FROM ride_points r
+WHERE (ST_DWithin(ST_Point(r.x, r.y), ST_ToGeom('POINT(13.405 52.5208)'::gpoint), 1113.2) AND r.t <= EPOCH '2022-10-04 19:00:00');
+
+
+================================================================================
+TEST: tst_08
+================================================================================
+
+--- YAML (tst_08.yaml) ---
+name: T9_within_or_two_time_windows
+source: "ride_points r"
+source_data: { type: table }
+
+geometries:
+  - name: z_wide
+    type: polygon
+    srid: 4326
+    coordinates:
+      - [13.30,52.45]
+      - [13.50,52.45]
+      - [13.50,52.58]
+      - [13.30,52.58]
+      - [13.30,52.45]
+
+select: []
+aggregations:
+  - { function: COUNT, field: "DISTINCT r.trip_id", alias: "n" }
+
+filter:
+  and:
+    - spatial_filter:
+      - { type: within, args: ["ST_Point(r.x, r.y)", ":geometries.z_wide"] }
+
+    - or:
+      - time_filter:
+        - { field: "r.t", start: "'2022-10-04T00:00:00Z'", end: "'2022-10-04T08:00:00Z'" }
+      - time_filter:
+        - { field: "r.t", start: "'2022-10-04T18:00:00Z'", end: "'2022-10-04T23:59:59Z'" }
+
+--------------------------------------------------------------------------------
+PostGIS (tst_08_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.trip_id) AS n
+FROM ride_points r
+WHERE (ST_Within(ST_SetSRID(ST_Point(r.x, r.y), 4326), ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326)) AND (r.t BETWEEN '2022-10-04T00:00:00Z' AND '2022-10-04T08:00:00Z' OR r.t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T23:59:59Z'));
+
+--------------------------------------------------------------------------------
+Sedona (tst_08_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("r")
+df = df.filter("(ST_Within(ST_Point(x, y), ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326)) AND ((t BETWEEN '2022-10-04T00:00:00Z' AND '2022-10-04T08:00:00Z') OR (t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T23:59:59Z')))")
+from pyspark.sql import functions as F
+df = df.agg(F.countDistinct(F.col("trip_id")).alias("n"))
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_08_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.trip_id) AS n
+FROM ride_points r
+WHERE (ST_Within(ST_Point(r.x, r.y), ST_ToGeom('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))'::gpolygon)) AND (r.t <@ EPOCHRANGE '[2022-10-04 00:00:00, 2022-10-04 08:00:00]' OR r.t <@ EPOCHRANGE '[2022-10-04 18:00:00, 2022-10-04 23:59:59]'));
+
+
+================================================================================
+TEST: tst_09
+================================================================================
+
+--- YAML (tst_09.yaml) ---
+name: T11_within_not_time_window
+source: "ride_points r"
+source_data: { type: table }
+
+geometries:
+  - name: z_wide
+    type: polygon
+    srid: 4326
+    coordinates:
+      - [13.30,52.45]
+      - [13.50,52.45]
+      - [13.50,52.58]
+      - [13.30,52.58]
+      - [13.30,52.45]
+
+select: []
+aggregations:
+  - { function: COUNT, field: "DISTINCT r.trip_id", alias: "n" }
+
+filter:
+  and:
+    - spatial_filter:
+      - { type: within, args: ["ST_Point(r.x, r.y)", ":geometries.z_wide"] }
+
+    - not:
+        time_filter:
+          - { field: "r.t", start: "'2022-10-04T12:00:00Z'", end: "'2022-10-04T13:00:00Z'" }
+
+--------------------------------------------------------------------------------
+PostGIS (tst_09_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.trip_id) AS n
+FROM ride_points r
+WHERE (ST_Within(ST_SetSRID(ST_Point(r.x, r.y), 4326), ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326)) AND NOT (r.t BETWEEN '2022-10-04T12:00:00Z' AND '2022-10-04T13:00:00Z'));
+
+--------------------------------------------------------------------------------
+Sedona (tst_09_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("r")
+df = df.filter("(ST_Within(ST_Point(x, y), ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326)) AND (NOT (t BETWEEN '2022-10-04T12:00:00Z' AND '2022-10-04T13:00:00Z')))")
+from pyspark.sql import functions as F
+df = df.agg(F.countDistinct(F.col("trip_id")).alias("n"))
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_09_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.trip_id) AS n
+FROM ride_points r
+WHERE (ST_Within(ST_Point(r.x, r.y), ST_ToGeom('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))'::gpolygon)) AND NOT (r.t <@ EPOCHRANGE '[2022-10-04 12:00:00, 2022-10-04 13:00:00]'));
+
+
+================================================================================
+TEST: tst_10
+================================================================================
+
+--- YAML (tst_10.yaml) ---
+name: T12_disjoint_window_countDistinct
+source: "ride_points r"
+source_data: { type: table }
+
+geometries:
+  - name: z_wide
+    type: polygon
+    srid: 4326
+    coordinates:
+      - [13.30,52.45]
+      - [13.50,52.45]
+      - [13.50,52.58]
+      - [13.30,52.58]
+      - [13.30,52.45]
+
+select: []
+aggregations:
+  - { function: COUNT, field: "DISTINCT r.trip_id", alias: "n" }
+
+filter:
+  and:
+    - spatial_filter:
+      - { type: disjoint, args: ["ST_Point(r.x, r.y)", ":geometries.z_wide"] }
+    - time_filter:
+      - { field: "r.t", start: "'2022-10-04T00:00:00Z'", end: "'2022-10-04T23:59:59Z'" }
+
+--------------------------------------------------------------------------------
+PostGIS (tst_10_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.trip_id) AS n
+FROM ride_points r
+WHERE (ST_Disjoint(ST_SetSRID(ST_Point(r.x, r.y), 4326), ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326)) AND r.t BETWEEN '2022-10-04T00:00:00Z' AND '2022-10-04T23:59:59Z');
+
+--------------------------------------------------------------------------------
+Sedona (tst_10_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("r")
+df = df.filter("(ST_Disjoint(ST_Point(x, y), ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326)) AND (t BETWEEN '2022-10-04T00:00:00Z' AND '2022-10-04T23:59:59Z'))")
+from pyspark.sql import functions as F
+df = df.agg(F.countDistinct(F.col("trip_id")).alias("n"))
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_10_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.trip_id) AS n
+FROM ride_points r
+WHERE (ST_Disjoint(ST_Point(r.x, r.y), ST_ToGeom('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))'::gpolygon)) AND r.t <@ EPOCHRANGE '[2022-10-04 00:00:00, 2022-10-04 23:59:59]');
+
+
+================================================================================
+TEST: tst_11
+================================================================================
+
+--- YAML (tst_11.yaml) ---
+name: T13_coveredby_point_polygon_week
+source: "ride_points r"
+source_data: { type: table }
+
+geometries:
+  - name: poly
+    type: polygon
+    srid: 4326
+    coordinates:
+      - [13.38,52.505]
+      - [13.42,52.505]
+      - [13.42,52.525]
+      - [13.38,52.525]
+      - [13.38,52.505]
+
+select: []
+aggregations:
+  - { function: COUNT, field: "DISTINCT r.trip_id", alias: "n_trips" }
+
+filter:
+  and:
+    - spatial_filter:
+      - { type: coveredby, args: ["ST_Point(r.x, r.y)", ":geometries.poly"] }
+    - time_filter:
+      - { field: "r.t", start: "'2022-10-01T00:00:00Z'", end: "'2022-10-07T23:59:59Z'" }
+
+--------------------------------------------------------------------------------
+PostGIS (tst_11_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.trip_id) AS n_trips
+FROM ride_points r
+WHERE (ST_CoveredBy(ST_SetSRID(ST_Point(r.x, r.y), 4326), ST_GeomFromText('POLYGON((13.38 52.505, 13.42 52.505, 13.42 52.525, 13.38 52.525, 13.38 52.505))', 4326)) AND r.t BETWEEN '2022-10-01T00:00:00Z' AND '2022-10-07T23:59:59Z');
+
+--------------------------------------------------------------------------------
+Sedona (tst_11_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("r")
+df = df.filter("(ST_CoveredBy(ST_Point(x, y), ST_GeomFromText('POLYGON((13.38 52.505, 13.42 52.505, 13.42 52.525, 13.38 52.525, 13.38 52.505))', 4326)) AND (t BETWEEN '2022-10-01T00:00:00Z' AND '2022-10-07T23:59:59Z'))")
+from pyspark.sql import functions as F
+df = df.agg(F.countDistinct(F.col("trip_id")).alias("n_trips"))
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_11_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT COUNT(DISTINCT r.trip_id) AS n_trips
+FROM ride_points r
+WHERE (ST_CoveredBy(ST_Point(r.x, r.y), ST_ToGeom('POLYGON((13.38 52.505, 13.42 52.505, 13.42 52.525, 13.38 52.525, 13.38 52.505))'::gpolygon)) AND r.t <@ EPOCHRANGE '[2022-10-01 00:00:00, 2022-10-07 23:59:59]');
+
+
+================================================================================
+TEST: tst_12
+================================================================================
+
+--- YAML (tst_12.yaml) ---
+name: T14_left_join_districts_time_in_on
+source: "berlin_districts d"
+source_data:
+  type: table
+  schema:
+    - { name: geom, type: string, format: "wkt:gpolygon" }
+
+select:
+  - "d.name"
+aggregations:
+  - { function: COUNT, field: "DISTINCT r.trip_id", alias: "n_trips" }
+group_by: ["d.name"]
+order_by:
+  - { field: "n_trips", direction: "desc" }
+limit: 10
+
+joins:
+  - type: left
+    source: "ride_points r"
+    source_data: { type: table }
+    clause:
+      and:
+        - spatial_filter:
+          - { type: intersects, args: [":geometries.poly", "ST_Point(r.x, r.y)"] }
+        - time_filter:
+          - { field: "r.t", start: "'2022-10-04T18:00:00Z'", end: "'2022-10-04T19:00:00Z'" }
+
+geometries:
+  - name: poly
+    type: polygon
+    srid: 4326
+    coordinates:
+      - [13.30,52.45]
+      - [13.50,52.45]
+      - [13.50,52.58]
+      - [13.30,52.58]
+      - [13.30,52.45]
+
+--------------------------------------------------------------------------------
+PostGIS (tst_12_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT d.name, COUNT(DISTINCT r.trip_id) AS n_trips
+FROM berlin_districts d
+LEFT JOIN ride_points r ON (ST_Intersects(ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326), ST_SetSRID(ST_Point(r.x, r.y), 4326)) AND r.t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z')
+GROUP BY d.name
+ORDER BY n_trips DESC
+LIMIT 10;
+
+--------------------------------------------------------------------------------
+Sedona (tst_12_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("berlin_districts")
+df.createOrReplaceTempView("d")
+df.createOrReplaceTempView("berlin_districts")
+df_r = spark.read.table("ride_points")
+df_r.createOrReplaceTempView("r")
+df_r.createOrReplaceTempView("ride_points")
+df = spark.sql("""
+    SELECT d.name AS `d.name`, r.trip_id AS `r.trip_id`
+    FROM d
+    LEFT JOIN r
+    ON (ST_Intersects(ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326), ST_Point(r.x, r.y)) AND (r.t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z'))
+""")
+from pyspark.sql import functions as F
+df = df.filter("`d.name` IS NOT NULL")
+df = df.groupBy(F.col("`d.name`")).agg(F.countDistinct(F.col("`r.trip_id`")).alias("n_trips"))
+from pyspark.sql import functions as F
+df = df.orderBy(F.col("n_trips").desc())
+df = df.limit(10)
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_12_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT d.name, COUNT(DISTINCT r.trip_id) AS n_trips
+FROM berlin_districts d
+LEFT JOIN ride_points r ON (ST_Intersects(ST_ToGeom('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))'::gpolygon), ST_Point(r.x, r.y)) AND r.t <@ EPOCHRANGE '[2022-10-04 18:00:00, 2022-10-04 19:00:00]')
+GROUP BY d.name
+ORDER BY n_trips DESC
+LIMIT 10;
+
+
+================================================================================
+TEST: tst_13
+================================================================================
+
+--- YAML (tst_13.yaml) ---
+name: soft_bbox_rp
+source: "ride_points rp"
+select: ["rp.rider_id", "rp.trip_id", "rp.x", "rp.y"]
+filter:
+  and:
+    - { field: "rp.x", operator: ">", value: 12.0 }
+    - { field: "rp.x", operator: "<", value: 14.0 }
+    - { field: "rp.y", operator: ">", value: 52.0 }
+    - { field: "rp.y", operator: "<", value: 53.5 }
+order_by:
+  - { field: "rp.rider_id", direction: "asc" }
+limit: 10
+
+--------------------------------------------------------------------------------
+PostGIS (tst_13_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT rp.rider_id, rp.trip_id, rp.x, rp.y
+FROM ride_points rp
+WHERE (rp.x > 12.0 AND rp.x < 14.0 AND rp.y > 52.0 AND rp.y < 53.5)
+ORDER BY rp.rider_id ASC
+LIMIT 10;
+
+--------------------------------------------------------------------------------
+Sedona (tst_13_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("rp")
+df = df.filter("((x > 12.0) AND (x < 14.0) AND (y > 52.0) AND (y < 53.5))")
+df = df.selectExpr('rider_id', 'trip_id', 'x', 'y')
+from pyspark.sql import functions as F
+df = df.orderBy(F.col("rider_id").asc())
+df = df.limit(10)
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_13_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT rp.rider_id, rp.trip_id, rp.x, rp.y
+FROM ride_points rp
+WHERE ((rp.x > 9980000) AND (rp.x < 10100000) AND (rp.y > 46150000) AND (rp.y < 46180000))
+ORDER BY rp.rider_id ASC
+LIMIT 10;
+
+
+================================================================================
+TEST: tst_13_spacetime
+================================================================================
+
+--- YAML (tst_13_spacetime.yaml) ---
+name: soft_bbox_rp_local_spacetime
+source: "ride_points rp"
+select: ["rp.rider_id", "rp.trip_id", "rp.x", "rp.y"]
+filter:
+  and:
+    - { field: "rp.x", operator: ">", value: 9980000 }
+    - { field: "rp.x", operator: "<", value: 10100000 }
+    - { field: "rp.y", operator: ">", value: 46150000 }
+    - { field: "rp.y", operator: "<", value: 46180000 }
+order_by:
+  - { field: "rp.rider_id", direction: "asc" }
+limit: 10
+
+--------------------------------------------------------------------------------
+PostGIS (tst_13_spacetime_postgis.txt)
+--------------------------------------------------------------------------------
+[no file]
+
+--------------------------------------------------------------------------------
+Sedona (tst_13_spacetime_sedona.txt)
+--------------------------------------------------------------------------------
+[no file]
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_13_spacetime_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT rp.rider_id, rp.trip_id, rp.x, rp.y
+FROM ride_points rp
+WHERE ((rp.x > 9980000) AND (rp.x < 10100000) AND (rp.y > 46150000) AND (rp.y < 46180000))
+ORDER BY rp.rider_id ASC
+LIMIT 10;
+
+
+================================================================================
+TEST: tst_14
+================================================================================
+
+--- YAML (tst_14.yaml) ---
+name: where_in_rp
+source: "ride_points rp"
+select: ["rp.rider_id", "rp.trip_id", "rp.x", "rp.y"]
+filter:
+  and:
+    - { field: "rp.rider_id", operator: "IN", value: [8, 9] }
+    - { field: "rp.trip_id",  operator: "IN", value: [39795, 86403] }
+order_by:
+  - { field: "rp.rider_id", direction: "asc" }
+  - { field: "rp.trip_id",  direction: "asc" }
+limit: 10
+
+--------------------------------------------------------------------------------
+PostGIS (tst_14_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT rp.rider_id, rp.trip_id, rp.x, rp.y
+FROM ride_points rp
+WHERE (rp.rider_id IN (8, 9) AND rp.trip_id IN (39795, 86403))
+ORDER BY rp.rider_id ASC, rp.trip_id ASC
+LIMIT 10;
+
+--------------------------------------------------------------------------------
+Sedona (tst_14_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("rp")
+df = df.filter("((rider_id IN (8, 9)) AND (trip_id IN (39795, 86403)))")
+df = df.selectExpr('rider_id', 'trip_id', 'x', 'y')
+from pyspark.sql import functions as F
+df = df.orderBy(F.col("rider_id").asc(), F.col("trip_id").asc())
+df = df.limit(10)
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_14_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT rp.rider_id, rp.trip_id, rp.x, rp.y
+FROM ride_points rp
+WHERE ((rp.rider_id IN (8, 9)) AND (rp.trip_id IN (39795, 86403)))
+ORDER BY rp.rider_id ASC, rp.trip_id ASC
+LIMIT 10;
+
+
+================================================================================
+TEST: tst_15
+================================================================================
+
+--- YAML (tst_15.yaml) ---
+name: groupby_having_n
+source: "ride_points r"
+source_data: { type: table }
+
+geometries:
+  - name: z_wide
+    type: polygon
+    srid: 4326
+    coordinates:
+      - [13.30, 52.45]
+      - [13.50, 52.45]
+      - [13.50, 52.58]
+      - [13.30, 52.58]
+      - [13.30, 52.45]
+
+select:
+  - "r.trip_id"
+
+aggregations:
+  - { function: COUNT, field: "*", alias: "n" }
+
+group_by: ["r.trip_id"]
+
+filter:
+  and:
+    - spatial_filter:
+      - { type: intersects, args: ["ST_Point(r.x, r.y)", ":geometries.z_wide"] }
+    - time_filter:
+      - { field: "r.t", start: "'2022-10-04T18:00:00Z'", end: "'2022-10-04T19:00:00Z'" }
+
+having:
+  - { field: "n", operator: ">=", value: 5 }
+
+order_by:
+  - { field: "n", direction: "desc" }
+limit: 10
+
+--------------------------------------------------------------------------------
+PostGIS (tst_15_postgis.txt)
+--------------------------------------------------------------------------------
+SELECT r.trip_id, COUNT(*) AS n
+FROM ride_points r
+WHERE (ST_Intersects(ST_SetSRID(ST_Point(r.x, r.y), 4326), ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326)) AND r.t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z')
+GROUP BY r.trip_id
+HAVING COUNT(*) >= 5
+ORDER BY n DESC
+LIMIT 10;
+
+--------------------------------------------------------------------------------
+Sedona (tst_15_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("ride_points")
+df.createOrReplaceTempView("ride_points")
+df.createOrReplaceTempView("r")
+df = df.filter("(ST_Intersects(ST_Point(x, y), ST_GeomFromText('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))', 4326)) AND (t BETWEEN '2022-10-04T18:00:00Z' AND '2022-10-04T19:00:00Z'))")
+from pyspark.sql import functions as F
+df = df.filter("trip_id IS NOT NULL")
+df = df.groupBy(F.col("trip_id")).agg(F.count("*").alias("n"))
+df = df.filter("(n >= 5)")
+from pyspark.sql import functions as F
+df = df.orderBy(F.col("n").desc())
+df = df.limit(10)
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_15_spacetime.txt)
+--------------------------------------------------------------------------------
+SELECT r.trip_id, COUNT(*) AS n
+FROM ride_points r
+WHERE (ST_Intersects(ST_Point(r.x, r.y), ST_ToGeom('POLYGON((13.3 52.45, 13.5 52.45, 13.5 52.58, 13.3 52.58, 13.3 52.45))'::gpolygon)) AND r.t <@ EPOCHRANGE '[2022-10-04 18:00:00, 2022-10-04 19:00:00]')
+GROUP BY r.trip_id
+HAVING (COUNT(*) >= 5)
+ORDER BY n DESC
+LIMIT 10;
+
+
+================================================================================
+TEST: tst_16
+================================================================================
+
+--- YAML (tst_16.yaml) ---
+name: startTripsInDistrict
+
+with:
+  - name: ride_starts
+    source: "ride_points r"
+    source_data: { type: table }
+    select:
+      - "r.trip_id"
+      - "MIN(r.t) AS start_t"
+    group_by: ["r.trip_id"]
+
+  - name: start_points
+    source: "ride_points r"
+    source_data: { type: table }
+    select:
+      - "r.trip_id"
+      - "ST_SetSRID(ST_Point(r.x, r.y), 4326) AS geom"
+    joins:
+      - type: inner
+        source: "ride_starts s"
+        source_data: { type: table }
+        clause:
+          and:
+            - { field: "r.trip_id", operator: "=", value: "s.trip_id" }
+            - { field: "r.t",       operator: "=", value: "s.start_t" }
+
+source: "start_points s"
+source_data: { type: table }
+
+select:
+  - "s.trip_id"
+
+joins:
+  - type: inner
+    source: "berlin_districts d"
+    source_data:
+      type: table
+      schema:
+        - { name: geom, type: string, format: "wkt:gpolygon" }
+    clause:
+      spatial_filter:
+        - { type: intersects, args: ["s.geom", "d.geom"] }
+
+filter:
+  and:
+    - { field: "d.name", operator: "=", value: "Mitte", type: str }
+
+--------------------------------------------------------------------------------
+PostGIS (tst_16_postgis.txt)
+--------------------------------------------------------------------------------
+WITH ride_starts AS (
+SELECT r.trip_id, MIN(r.t) AS start_t
+FROM ride_points r
+GROUP BY r.trip_id
+),
+start_points AS (
+SELECT r.trip_id, ST_SetSRID(ST_Point(r.x, r.y), 4326) AS geom
+FROM ride_points r
+INNER JOIN ride_starts s ON (r.trip_id = s.trip_id AND r.t = s.start_t)
+)
+SELECT s.trip_id
+FROM start_points s
+INNER JOIN berlin_districts d ON (ST_Intersects(s.geom, d.geom))
+WHERE (d.name = 'Mitte');
+
+--------------------------------------------------------------------------------
+Sedona (tst_16_sedona.txt)
+--------------------------------------------------------------------------------
+# --- bootstrap Spark + Sedona ----------------------------------------------
+from pyspark.sql import SparkSession
+import pyspark
+
+# déterminer automatiquement la bonne paire Spark / Scala
+spark_mm  = '.'.join(pyspark.__version__.split('.')[:2])        # "3.4", "3.5", …
+scala_ver = '2.13' if float(spark_mm) >= 3.5 else '2.12'
+
+WAREHOUSE_DIR = "/home/arthur/Benchmark-Tests/cycling spark-warehouse" # en dur pour l'instant mais doit etre parametrable
+
+sedona_version = "1.7.2"
+sedona_pkg   = f"org.apache.sedona:sedona-spark-{spark_mm}_{scala_ver}:{sedona_version}"
+geotools_pkg = f"org.datasyslab:geotools-wrapper:{sedona_version}-28.5"
+
+try:
+    spark
+except NameError:
+    spark = (
+        SparkSession.builder
+        .appName("sedona_auto")
+        .config("spark.jars.packages", f"{sedona_pkg},{geotools_pkg}")
+        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .config("spark.kryo.registrator",
+                "org.apache.sedona.core.serde.SedonaKryoRegistrator")
+        .config("spark.sql.warehouse.dir", WAREHOUSE_DIR)
+        .config("spark.sql.catalogImplementation", "hive")
+        .enableHiveSupport()    
+        .getOrCreate()
+    )
+
+try:
+    from sedona.spark import SedonaContext
+    SedonaContext.create(spark)
+except Exception:
+    from sedona.register import SedonaRegistrator
+    SedonaRegistrator.registerAll(spark)
+# ---------------------------------------------------------------------------
+# Auto-generated Sedona query — DO NOT EDIT BY HAND
+
+df = None  # Placeholder to avoid NameError if joins exist
+df = spark.read.table("start_points")
+df.createOrReplaceTempView("s")
+df.createOrReplaceTempView("start_points")
+df_d = spark.read.table("berlin_districts")
+df_d.createOrReplaceTempView("d")
+df_d.createOrReplaceTempView("berlin_districts")
+df = spark.sql("""
+    SELECT s.trip_id AS `s.trip_id`
+    FROM s
+    JOIN d
+    ON (ST_Intersects(s.geom, d.geom))
+    WHERE ((d.name = 'Mitte'))
+""")
+result = df
+
+# Final result variable is: result
+result.show()
+
+--------------------------------------------------------------------------------
+SpaceTime (tst_16_spacetime.txt)
+--------------------------------------------------------------------------------
+WITH ride_starts AS (
+SELECT r.trip_id, MIN(r.t) AS start_t
+FROM ride_points r
+GROUP BY r.trip_id
+),
+start_points AS (
+SELECT r.trip_id, ST_SetSRID(ST_Point(r.x, r.y), 4326) AS geom
+FROM ride_points r
+INNER JOIN ride_starts s ON ((r.trip_id = s.trip_id) AND (r.t = s.start_t))
+)
+SELECT s.trip_id
+FROM start_points s
+INNER JOIN berlin_districts d ON (ST_Intersects(s.geom, ST_ToGeom(d.geom::gpolygon)))
+WHERE ((d.name = Mitte));

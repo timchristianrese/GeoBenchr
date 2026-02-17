@@ -1,0 +1,31 @@
+name: withinStartOnly_list_via_groupby
+source: "ride_points r"
+source_data: { type: table }
+
+geometries:
+  - name: zone
+    type: polygon
+    srid: 4326
+    coordinates:
+      - [13.37, 52.50]
+      - [13.43, 52.50]
+      - [13.43, 52.54]
+      - [13.37, 52.54]
+      - [13.37, 52.50]
+
+select:
+  - "r.trip_id"
+aggregations:
+  - { function: COUNT, field: "*", alias: "n" }
+group_by: ["r.trip_id"]
+
+filter:
+  and:
+    - spatial_filter:
+      - { type: within, args: ["ST_Point(r.x, r.y)", ":geometries.zone"] }
+    - time_filter:
+      - { field: "r.t", start: "'2022-10-04T18:00:00Z'" }
+
+order_by:
+  - { field: "r.trip_id", direction: "asc" }
+limit: 10

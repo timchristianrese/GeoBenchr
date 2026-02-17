@@ -1,0 +1,4 @@
+SELECT p.flightid, p.altitude, p.airplanetype, p.timestamp
+FROM flight_points p
+INNER JOIN cities c ON (ST_DWithin(p.geom, c.geom, 0.01))
+WHERE (p.altitude <= 920 AND c.population >= 200000);

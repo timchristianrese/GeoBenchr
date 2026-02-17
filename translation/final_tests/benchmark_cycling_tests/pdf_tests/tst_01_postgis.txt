@@ -1,0 +1,13 @@
+WITH ride_ends_in_period AS (
+SELECT r.trip_id, MIN(r.t) AS t_min, MAX(r.t) AS t_max
+FROM ride_points r
+GROUP BY r.trip_id
+),
+end_points AS (
+SELECT p.trip_id, ST_Point(p.x, p.y) AS geom, p.t AS t, e.t_min, e.t_max
+FROM ride_points p
+INNER JOIN ride_ends_in_period e ON (p.trip_id = e.trip_id AND p.t = e.t_max)
+)
+SELECT AVG(ep.t_max - ep.t_min) AS avg_duration
+FROM end_points ep
+INNER JOIN berlin_universities u ON (ST_DWithin((ep.geom)::geography, (u.geom)::geography, 2500.0) AND u.name = 'Technische-Universität-Berlin');

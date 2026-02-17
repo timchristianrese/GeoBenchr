@@ -1,0 +1,43 @@
+# ----------- POSTGIS OUTPUT -----------
+
+3s@Scalables-MacBook-Pro DSpatiaL % psql -d aviation -c "SELECT f.flightid, f.airplanetype, f.origin, f.destination
+FROM cities c
+INNER JOIN flight_points f ON (ST_DWithin(f.geom, c.geom, 1))
+WHERE (c.name = 'Aachen' AND f.timestamp BETWEEN '2023-01-02 18:17:18' AND '2023-01-02 18:18:00');
+"
+ flightid | airplanetype | origin | destination 
+----------+--------------+--------+-------------
+ 69188044 | CRJ9         | EDDL   | EKCH
+ 69188044 | CRJ9         | EDDL   | EKCH
+ 69188044 | CRJ9         | EDDL   | EKCH
+ 69188044 | CRJ9         | EDDL   | EKCH
+ 69188044 | CRJ9         | EDDL   | EKCH
+ 69187786 | A320         | EDDB   | LFPG
+ 69187786 | A320         | EDDB   | LFPG
+ 69187786 | A320         | EDDB   | LFPG
+ 69187786 | A320         | EDDB   | LFPG
+ 69187786 | A320         | EDDB   | LFPG
+ 69187786 | A320         | EDDB   | LFPG
+ 69187786 | A320         | EDDB   | LFPG
+ 69187786 | A320         | EDDB   | LFPG
+(13 rows)
+
+# ----------- SEDONA OUTPUT -----------
+
++----------+--------------+--------+-------------+                              
+|f.flightid|f.airplanetype|f.origin|f.destination|
++----------+--------------+--------+-------------+
+|  69187786|          A320|    EDDB|         LFPG|
+|  69187786|          A320|    EDDB|         LFPG|
+|  69187786|          A320|    EDDB|         LFPG|
+|  69187786|          A320|    EDDB|         LFPG|
+|  69187786|          A320|    EDDB|         LFPG|
+|  69187786|          A320|    EDDB|         LFPG|
+|  69187786|          A320|    EDDB|         LFPG|
+|  69187786|          A320|    EDDB|         LFPG|
+|  69188044|          CRJ9|    EDDL|         EKCH|
+|  69188044|          CRJ9|    EDDL|         EKCH|
+|  69188044|          CRJ9|    EDDL|         EKCH|
+|  69188044|          CRJ9|    EDDL|         EKCH|
+|  69188044|          CRJ9|    EDDL|         EKCH|
++----------+--------------+--------+-------------+

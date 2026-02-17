@@ -1,0 +1,5 @@
+SELECT b.name, COUNT(DISTINCT f.flightid) AS count
+FROM flight_points f
+INNER JOIN districts b ON (f.geom && b.geom)
+WHERE ()
+GROUP BY b.name;

@@ -1,0 +1,12 @@
+name: soft_bbox_rp_local_spacetime
+source: "ride_points rp"
+select: ["rp.rider_id", "rp.trip_id", "rp.x", "rp.y"]
+filter:
+  and:
+    - { field: "rp.x", operator: ">", value: 9980000 }
+    - { field: "rp.x", operator: "<", value: 10100000 }
+    - { field: "rp.y", operator: ">", value: 46150000 }
+    - { field: "rp.y", operator: "<", value: 46180000 }
+order_by:
+  - { field: "rp.rider_id", direction: "asc" }
+limit: 10

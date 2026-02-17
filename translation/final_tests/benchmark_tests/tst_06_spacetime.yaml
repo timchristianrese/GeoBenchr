@@ -1,0 +1,20 @@
+name: withinPolyAndDistanceOrder
+source: "flight_points f"
+source_data: { type: table }
+geometries:
+  - { name: "center", type: "point", srid: 4326, coordinates: [8.73, 51.18] }
+  - { name: "box", type: "polygon", srid: 4326,
+      coordinates: [[8.71,51.16],[8.75,51.16],[8.75,51.2],[8.71,51.2],[8.71,51.16]] }
+select:
+  - "f.flightid"
+  - "f.airplanetype"
+  - "f.origin"
+  - "f.destination"
+  - "ST_Distance(f.geom, :geometries.center) AS dist_to_center"
+filter:
+  and:
+    - spatial_filter:
+        - { type: "within", args: ["f.geom", ":geometries.box"] }
+    - { field: "f.flightid", operator: "in", value: ["69187756","69187812","69187819"], type: "str" }
+order_by:
+  - { field: "dist_to_center", direction: "asc" }

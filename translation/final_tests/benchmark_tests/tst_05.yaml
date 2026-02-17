@@ -1,0 +1,55 @@
+name: flightsCloseToMainCitiesLowAltitude
+source: "flight_points p"
+source_data:
+  type: csv
+  path: "point_NRW_HIGH_0123.csv"
+  geometry_column: wkt
+  csv_options:
+    delimiter: ";"
+    header: false
+    infer_schema: false
+  schema:
+    - { name: flightid }
+    - { name: airplanetype }
+    - { name: origin }
+    - { name: destination }
+    - { name: wkt }
+    - { name: timestamp }
+    - { name: altitude, type: double }
+
+select:
+  - "p.flightid"
+  - "p.altitude"
+  - "p.airplanetype"
+  - "p.timestamp"
+
+joins:
+  - type: inner
+    source: "cities c"
+    source_data:
+      type: csv
+      path: "cities.csv"
+      geometry_column: "concat('POINT(', longitude, ' ', latitude, ')')"
+      csv_options:
+        delimiter: ","
+        header: true
+        infer_schema: false
+      schema:
+        - { name: area }
+        - { name: latitude }
+        - { name: longitude }
+        - { name: district }
+        - { name: name }
+        - { name: population }
+    clause:
+      spatial_filter:
+        - type: dwithin
+          args: ["p.geom", "c.geom", 0.01]
+
+filter:
+  - field: p.altitude
+    operator: lte
+    value: 920
+  - field: "CAST(c.population AS INT)"
+    operator: gte
+    value: 200000

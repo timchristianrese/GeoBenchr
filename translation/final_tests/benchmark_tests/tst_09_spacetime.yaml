@@ -1,0 +1,14 @@
+name: booleanLogic
+source: "flight_points f"
+source_data: { type: table }
+select:
+  - "f.flightid"
+  - "f.origin"
+  - "f.destination"
+filter:
+  and:
+    - or:
+        - { field: "f.origin", operator: "=", value: "FRA", type: "str" }
+        - { field: "f.destination", operator: "=", value: "FRA", type: "str" }
+    - not:
+        { field: "f.airplanetype", operator: "=", value: "A320", type: "str" }

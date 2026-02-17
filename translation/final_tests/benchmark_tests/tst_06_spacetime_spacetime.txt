@@ -1,0 +1,4 @@
+SELECT f.flightid, f.airplanetype, f.origin, f.destination, ST_Distance(f.geom, :geometries.center) AS dist_to_center
+FROM flight_points f
+WHERE (ST_Within(f.geom, ST_ToGeom('POLYGON((8.71 51.16, 8.75 51.16, 8.75 51.2, 8.71 51.2, 8.71 51.16))'::gmpolygon)) AND f.flightid IN ('69187756', '69187812', '69187819'))
+ORDER BY dist_to_center ASC;

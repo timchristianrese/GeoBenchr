@@ -1,0 +1,9 @@
+#select distinct
+- name: test25
+                
+  source: "utilisateurs u"
+  select:
+    - DISTINCT u.nom
+  order_by:
+    - field: u.nom
+      direction: "asc"

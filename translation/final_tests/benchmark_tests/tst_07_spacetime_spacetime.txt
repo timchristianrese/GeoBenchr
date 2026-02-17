@@ -1,0 +1,4 @@
+SELECT DISTINCT f.flightid
+FROM flight_points f
+INNER JOIN counties k ON (ST_Intersects(ST_Envelope(f.geom), ST_Envelope(k.geom)))
+WHERE (k.name = 'Krs Hochsauerlandkreis' AND f.timestamp <@ EPOCHRANGE '[2023-01-02 18:17:18, 2023-01-02 18:18:00]');

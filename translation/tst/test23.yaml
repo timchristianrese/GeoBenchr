@@ -1,0 +1,35 @@
+#with + count distinct + group by
+- name: test23
+
+  with:
+    - name: paid_or_shipped
+      source: "commandes c"
+      select:
+        - c.utilisateur_id
+
+      filter:
+        - field: c.statut
+          operator: IN
+          value: ["payee", "expediee"]
+          type: str
+
+  source: "paid_or_shipped a"
+  select:
+    - u.pays
+  joins:
+    - type: inner
+      source: "utilisateurs u"
+      clause:
+        - field: a.utilisateur_id
+          operator: eq
+          value: u.id
+          type: var
+  aggregations:
+    - function: COUNT
+      field: "DISTINCT a.utilisateur_id"
+      alias: client_uniques
+  group_by:
+    - u.pays
+  order_by:
+    - field: u.pays
+      direction: "asc"

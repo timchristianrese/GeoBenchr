@@ -1,0 +1,20 @@
+# ----------- POSTGIS OUTPUT -----------
+
+3s@Scalables-MacBook-Pro DSpatiaL % psql -d aviation -c "SELECT g.name, f.flightid, MIN(f.timestamp) AS entry_time, MAX(f.timestamp) AS exit_time, COUNT(*) * INTERVAL '1 second' AS total_time_below_altitude
+FROM municipalities g
+INNER JOIN flight_points f ON (ST_Intersects(f.geom, g.geom))
+WHERE (g.name = 'Gem Brilon' AND f.timestamp BETWEEN '2023-01-02 17:49:01' AND '2023-01-02 17:49:13' AND f.altitude < 4000)
+GROUP BY g.name, f.flightid;
+"
+    name    | flightid |     entry_time      |      exit_time      | total_time_below_altitude 
+------------+----------+---------------------+---------------------+---------------------------
+ Gem Brilon | 69187710 | 2023-01-02 17:49:01 | 2023-01-02 17:49:13 | 00:00:04
+(1 row)
+
+# ----------- SEDONA OUTPUT -----------
+
++----------+----------+-------------------+-------------------+-----------+     
+|    g.name|f.flightid|         entry_time|          exit_time|point_count|
++----------+----------+-------------------+-------------------+-----------+
+|Gem Brilon|  69187710|2023-01-02 17:49:01|2023-01-02 17:49:13|          4|
++----------+----------+-------------------+-------------------+-----------+

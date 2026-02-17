@@ -1,0 +1,5 @@
+SELECT rp.rider_id, rp.trip_id, rp.x, rp.y
+FROM ride_points rp
+WHERE ((rp.rider_id IN (8, 9)) AND (rp.trip_id IN (39795, 86403)))
+ORDER BY rp.rider_id ASC, rp.trip_id ASC
+LIMIT 10;

@@ -1,0 +1,61 @@
+#with + final filter
+- name: test24
+
+  with:
+    - name: last_per_user
+      source: "commandes c"
+      select:
+        - c.utilisateur_id
+      aggregations:
+        - function: max
+          field: c.date_commande
+          alias: t_max
+      group_by:
+        - c.utilisateur_id
+
+    - name: last_orders
+      source: "commandes c2"
+      select:
+        - c2.utilisateur_id
+        - c2.statut
+        - c2.voiture_id
+        - e.t_max
+      joins:
+        - type: inner
+          source: "last_per_user e"
+          clause:
+            and:
+              - field: c2.utilisateur_id
+                operator: eq
+                value: e.utilisateur_id
+                type: var
+              - field: c2.date_commande
+                operator: eq
+                value: e.t_max
+                type: var
+                
+  source: "last_orders lo"
+  select:
+    - v.marque
+  aggregations:
+    - function: COUNT
+      field: "lo.utilisateur_id"
+      alias: nb_users
+  joins:
+    - type: inner
+      source: "voitures v"
+      clause:
+        - field: lo.voiture_id
+          operator: eq
+          value: v.id
+          type: var
+  filter:
+    - field: lo.statut
+      operator: eq
+      value: payee
+      type: str
+  group_by:
+    - v.marque
+  order_by:
+    - field: v.marque
+      direction: "asc"

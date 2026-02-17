@@ -1,0 +1,7 @@
+WITH per_trip_bounds AS (
+SELECT r.trip_id, MIN(r.t) AS t_min, MAX(r.t) AS t_max
+FROM ride_points r
+GROUP BY r.trip_id
+)
+SELECT AVG(e.t_max - e.t_min) AS avg_duration
+FROM per_trip_bounds e;

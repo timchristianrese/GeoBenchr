@@ -1,0 +1,21 @@
+name: countActiveRidesInDistrict
+source: "berlin_districts d"
+source_data:
+  type: table
+  schema: [{ name: "geom", type: "string", format: "wkt:gpolygon" }]
+joins:
+  - type: inner
+    source: "ride_points p"
+    source_data: { type: table }
+    clause:
+      spatial_filter:
+        - type: "contains"
+          args: ["d.geom", "ST_Point(p.x, p.y)"]
+filter:
+  - field: "d.name"
+    operator: "="
+    value: "'Reinickendorf'"
+select: []
+aggregations:
+  - function: COUNT
+    field: "DISTINCT p.trip_id"

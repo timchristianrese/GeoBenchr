@@ -1,0 +1,17 @@
+name: flightsInCountyGrouped
+source: "counties k"
+source_data: { type: table }
+select:
+  - "k.name"
+aggregations:
+  - { function: "COUNT", field: "DISTINCT f.flightid", alias: "flight_count" }
+joins:
+  - type: inner
+    source: "flight_points f"
+    source_data: {}
+    clause:
+      spatial_filter:
+        - { type: "intersects", args: ["f.geom", "k.geom"] }
+filter:
+  { field: "k.name", operator: "=", value: "Krs Hochsauerlandkreis", type: "str" }
+group_by: ["k.name"]

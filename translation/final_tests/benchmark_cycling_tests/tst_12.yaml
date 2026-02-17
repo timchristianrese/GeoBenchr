@@ -1,0 +1,37 @@
+name: T14_left_join_districts_time_in_on
+source: "berlin_districts d"
+source_data:
+  type: table
+  schema:
+    - { name: geom, type: string, format: "wkt:gpolygon" }
+
+select:
+  - "d.name"
+aggregations:
+  - { function: COUNT, field: "DISTINCT r.trip_id", alias: "n_trips" }
+group_by: ["d.name"]
+order_by:
+  - { field: "n_trips", direction: "desc" }
+limit: 10
+
+joins:
+  - type: left
+    source: "ride_points r"
+    source_data: { type: table }
+    clause:
+      and:
+        - spatial_filter:
+          - { type: intersects, args: [":geometries.poly", "ST_Point(r.x, r.y)"] }
+        - time_filter:
+          - { field: "r.t", start: "'2022-10-04T18:00:00Z'", end: "'2022-10-04T19:00:00Z'" }
+
+geometries:
+  - name: poly
+    type: polygon
+    srid: 4326
+    coordinates:
+      - [13.30,52.45]
+      - [13.50,52.45]
+      - [13.50,52.58]
+      - [13.30,52.58]
+      - [13.30,52.45]

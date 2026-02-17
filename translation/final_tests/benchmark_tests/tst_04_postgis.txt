@@ -1,0 +1,5 @@
+SELECT k.name, COUNT(DISTINCT f.flightid) AS flight_count
+FROM counties k
+INNER JOIN flight_points f ON (ST_Intersects(f.geom, k.geom))
+WHERE k.name = 'Krs Hochsauerlandkreis'
+GROUP BY k.name;

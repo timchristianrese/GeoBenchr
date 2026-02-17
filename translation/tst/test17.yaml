@@ -1,0 +1,24 @@
+#points disjoint from literal polygon
+- name: test17
+
+  source: "points_interet p"
+
+  select:
+    - p.name
+
+  geometries:
+    - name: potsdam_poly
+      type: polygon
+      srid: 4326
+      coordinates:
+        - [13.020, 52.380]
+        - [13.120, 52.380]
+        - [13.120, 52.450]
+        - [13.020, 52.450]
+        - [13.020, 52.380]
+
+  filter:
+    - spatial_filter:
+      - type: disjoint
+        args: [p.geom, ":geometries.potsdam_poly"]
+

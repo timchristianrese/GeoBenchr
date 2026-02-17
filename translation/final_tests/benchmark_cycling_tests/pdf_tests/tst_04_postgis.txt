@@ -1,0 +1,4 @@
+SELECT COUNT(DISTINCT p.trip_id)
+FROM berlin_districts d
+INNER JOIN ride_points p ON (ST_Contains(d.geom, ST_SetSRID(ST_Point(p.x, p.y), 4326)))
+WHERE d.name = 'Reinickendorf';

@@ -1,0 +1,7 @@
+SELECT COUNT(*) AS n
+FROM (
+SELECT DISTINCT p.trip_id
+FROM berlin_districts d
+INNER JOIN ride_points p ON (ST_Contains(ST_ToGeom(d.geom::gpolygon), ST_Point(p.x, p.y)))
+WHERE (d.name = 'Reinickendorf')
+) _dedup;

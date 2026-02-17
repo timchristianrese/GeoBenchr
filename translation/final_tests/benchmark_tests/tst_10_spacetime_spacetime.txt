@@ -1,0 +1,3 @@
+SELECT f.flightid, f.t[0], f.t[1]
+FROM fsegment f
+WHERE (f.t >= EPOCH '2023-01-02 18:00:00' AND f.t <= EPOCH '2023-01-02 19:00:00');

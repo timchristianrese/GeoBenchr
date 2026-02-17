@@ -1,0 +1,12 @@
+name: soft_bbox_rp
+source: "ride_points rp"
+select: ["rp.rider_id", "rp.trip_id", "rp.x", "rp.y"]
+filter:
+  and:
+    - { field: "rp.x", operator: ">", value: 12.0 }
+    - { field: "rp.x", operator: "<", value: 14.0 }
+    - { field: "rp.y", operator: ">", value: 52.0 }
+    - { field: "rp.y", operator: "<", value: 53.5 }
+order_by:
+  - { field: "rp.rider_id", direction: "asc" }
+limit: 10

@@ -1,0 +1,25 @@
+#inner join + gte in join clause
+- name: test9
+
+  source: "commandes c"
+
+  select:
+    - u.nom
+    - u.prenom
+    - c.date_commande
+    - u.date_inscription
+
+  joins:
+    - type: inner
+      source: "utilisateurs u"
+      source_data:
+      clause:
+        and:
+          - field: c.utilisateur_id
+            operator: eq
+            value: u.id
+            type: var
+          - field: u.date_inscription
+            operator: gte
+            value: c.date_commande
+            type: var

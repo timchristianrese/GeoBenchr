@@ -1,0 +1,19 @@
+#contains
+- name: test18
+
+  source: "districts d"
+
+  select:
+    - d.name
+
+  geometries:
+    - name: kotti_pt
+      type: point
+      srid: 4326
+      coordinates: [13.418, 52.499]
+
+  filter:
+    - spatial_filter:
+        - type: contains
+          args: [d.geom, ":geometries.kotti_pt"]
+

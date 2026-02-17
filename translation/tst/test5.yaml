@@ -1,0 +1,21 @@
+#inner join + select on join columns
+- name: test5
+
+  source: "utilisateurs u"
+
+  select:
+    - u.nom
+    - u.prenom
+    - v.marque
+    - v.modele
+    - v.annee
+
+  joins:
+    - type: inner
+      source: "voitures v"
+      source_data:
+      clause:
+        - field: v.owner_id
+          operator: eq
+          value: u.id
+          type: var

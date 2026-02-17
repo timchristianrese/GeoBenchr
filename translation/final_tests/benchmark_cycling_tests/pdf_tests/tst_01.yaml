@@ -1,0 +1,49 @@
+name: averageRideDurationToGoAtUniversityInPeriod
+
+with:
+  - name: ride_ends_in_period
+    source: "ride_points r"
+    source_data: { type: table }
+    filters:
+      time_filter:
+        - { field: "r.t", start: "'2022-10-04T00:00:00Z'", end: "'2022-10-04T23:59:59Z'" }
+    select:
+      - "r.trip_id"
+      - "MIN(r.t) AS t_min"
+      - "MAX(r.t) AS t_max"
+    group_by: ["r.trip_id"]
+
+  - name: end_points
+    source: "ride_points p"
+    source_data: { type: table }
+    select:
+      - "p.trip_id"
+      - "ST_Point(p.x, p.y) AS geom"
+      - "p.t AS t"
+      - "e.t_min"
+      - "e.t_max"
+    joins:
+      - type: inner
+        source: "ride_ends_in_period e"
+        source_data: { type: table }
+        clause:
+          and:
+            - { field: "p.trip_id", operator: "=", value: "e.trip_id" }
+            - { field: "p.t",       operator: "=", value: "e.t_max" }
+
+source: "end_points ep"
+source_data: { type: table }
+select:
+  - "AVG(ep.t_max - ep.t_min) AS avg_duration"
+joins:
+  - type: inner
+    source: "berlin_universities u"
+    source_data:
+      type: table
+      schema:
+        - { name: geom, type: string, format: "wkt:gmpolygon" }
+    clause:
+      and:
+        - spatial_filter:
+          - { type: dwithin, args: ["ep.geom", "u.geom", { value: 2500, units: "m" }] }
+        - { field: "u.name", operator: "=", value: "'Technische-Universität-Berlin'", type: str }

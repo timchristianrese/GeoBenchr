@@ -1,0 +1,31 @@
+#inner join with in filter in join clause
+- name: test14
+
+  source: "utilisateurs u"
+
+  select:
+    - u.nom
+    - u.prenom
+    - v.marque
+    - v.modele
+
+  joins:
+    - type: inner
+      source: "voitures v"
+      source_data:
+      clause:
+        and:
+          - field: v.owner_id
+            operator: eq
+            value: u.id
+            type: var
+          - field: v.marque
+            operator: in
+            value: [ "Tesla", "Peugeot" ]
+            type: str
+
+  order_by:
+    - field: nom
+      direction: asc
+    - field: prenom
+      direction: asc

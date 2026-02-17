@@ -1,0 +1,24 @@
+#left join + main-side time filter
+- name: test11
+
+  source: "utilisateurs u"
+
+  select:
+    - u.nom
+    - u.prenom
+    - v.marque
+
+  joins:
+    - type: left
+      source: "voitures v"
+      source_data:
+      clause:
+        - field: v.owner_id
+          operator: eq
+          value: u.id
+          type: var
+        
+  filter:
+    - time_filter:
+      - field: u.date_inscription
+        start: "'2024-06-06T00:00:00Z'"
