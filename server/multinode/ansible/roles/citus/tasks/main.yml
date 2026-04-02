@@ -1,0 +1,49 @@
+- name: Ensure /tmp exists for repo scripts
+  file:
+    path: /tmp
+    state: directory
+
+- name: Download Citus repo script
+  ansible.builtin.get_url:
+    url: https://install.citusdata.com/community/deb.sh
+    dest: /tmp/deb_citus.sh
+    mode: '0755'
+
+- name: Add Citus repository (runs once)
+  ansible.builtin.shell: bash /tmp/deb_citus.sh
+  args:
+    creates: /etc/apt/sources.list.d/citusdata.list
+
+- name: Download PostgreSQL repository key
+  ansible.builtin.get_url:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    dest: /usr/share/keyrings/pgdg-archive-keyring.gpg
+    mode: '0644'
+
+- name: Add PostgreSQL repository using keyring
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/pgdg.list
+    content: |
+      deb [signed-by=/usr/share/keyrings/pgdg-archive-keyring.gpg] http://apt.postgresql.org/pub/repos/apt trixie-pgdg main
+  become: true
+
+- name: Update apt cache after adding repos
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: true
+
+- name: Install Citus
+  ansible.builtin.apt:
+    name: "postgresql-{{ postgres_version }}-citus-13.2"
+    state: present
+  become: true
+
+- name: Configure PostgreSQL to load Citus extension
+  ansible.builtin.command: "sudo pg_conftool 17 main set shared_preload_libraries citus"
+
+- name: Restart PostgreSQL to apply changes
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted
+  become: true

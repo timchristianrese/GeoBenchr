@@ -1,0 +1,57 @@
+- name: Build MobilityDB
+  shell: |
+    cd /tmp/MobilityDB
+    mkdir -p build
+    cd build
+    cmake ..
+    make -j$(nproc)
+    make install
+  args:
+    creates: /usr/local/lib/mobilitydb
+
+- name: Preload PostGIS together with Citus
+  ansible.builtin.command: "sudo pg_conftool 17 main set shared_preload_libraries 'citus,postgis-3'"
+  become: true
+
+- name: Restart PostgreSQL to apply changes
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted
+  become: true
+
+- name: Ensure required PostgreSQL extensions are installed
+  become: true
+  ansible.builtin.shell: |
+    sudo -u postgres psql -c "CREATE EXTENSION IF NOT EXISTS {{ item }};"
+  loop:
+    - citus
+    - postgis
+    - mobilitydb
+  
+
+- name: Clone DistributedMobilityDB
+  git:
+    repo: https://github.com/mbakli/DistributedMobilityDB.git
+    dest: /tmp/DistributedMobilityDB
+
+- name: Build DistributedMobilityDB
+  shell: |
+    cd /tmp/DistributedMobilityDB
+    mkdir -p build
+    cd build
+    sudo cmake  ..
+    make
+    sudo make install
+
+- name: Restart PostgreSQL after installing DistributedMobilityDB
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted
+  become: true
+
+- name: Ensure DistributedMobilityDB extension is installed
+  become: true
+  ansible.builtin.shell: |
+    sudo -u postgres psql -c "CREATE EXTENSION distributed_mobilitydb;"
+  
+

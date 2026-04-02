@@ -1,0 +1,119 @@
+---
+
+# -------------------------
+# INSTALL THE OTHER JDK
+# -------------------------
+
+- name: Instead of uploading, download JDK directly on the server (if not already present)
+  get_url:
+    url: https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.18%2B8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+    dest: /opt/java/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+    mode: '0644'
+    creates: /opt/java/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+
+# - name: Upload OpenJDK 17 tarball
+#   copy:
+#     src: OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+#     dest: /opt/java/
+
+- name: Extract OpenJDK 17
+  unarchive:
+    src: /opt/java/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+    dest: /opt/java/
+    remote_src: yes
+
+# -------------------------
+# INSTALL SPARK
+# -------------------------
+- name: Create Spark directory
+  file:
+    path: /opt/spark
+    state: directory
+
+- name: Upload Spark tarball
+  copy:
+    src: spark-{{ spark_version }}-bin-hadoop3.tgz
+    dest: /opt/
+
+- name: Extract Spark
+  unarchive:
+    src: /opt/spark-{{ spark_version }}-bin-hadoop3.tgz
+    dest: /opt/
+    remote_src: yes
+    creates: /opt/spark-{{ spark_version }}-bin-hadoop3
+
+- name: Fix ownership
+  file:
+    path: /opt/spark-{{ spark_version }}-bin-hadoop3
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    recurse: yes
+
+- name: Create Spark symlink
+  file:
+    src: /opt/spark-{{ spark_version }}-bin-hadoop3
+    dest: /opt/spark
+    state: link
+    force: yes
+
+# -------------------------
+# ENVIRONMENT VARIABLES
+# -------------------------
+- name: Set Spark environment variables
+  copy:
+    dest: /etc/profile.d/spark.sh
+    content: |
+      export SPARK_HOME=/opt/spark
+      export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+      export HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop
+      export YARN_CONF_DIR=/opt/hadoop/etc/hadoop
+
+# -------------------------
+# CONFIGURATION FILES
+# -------------------------
+- name: Configure spark-env.sh
+  template:
+    src: spark-env.sh.j2
+    dest: /opt/spark/conf/spark-env.sh
+    mode: '0755'
+
+- name: Configure spark-defaults.conf
+  template:
+    src: spark-defaults.conf.j2
+    dest: /opt/spark/conf/spark-defaults.conf
+
+- name: Configure Spark to use uv Python env
+  blockinfile:
+    path: /opt/spark/conf/spark-defaults.conf
+    block: |
+      spark.pyspark.python /opt/venvs/sedona/bin/python
+      spark.pyspark.driver.python /opt/venvs/sedona/bin/python
+      spark.executorEnv.PYSPARK_PYTHON=/opt/venvs/sedona/bin/python
+
+- name: Set Python env for YARN containers
+  blockinfile:
+    path: /opt/spark/conf/spark-defaults.conf
+    block: |
+      spark.yarn.appMasterEnv.PYSPARK_PYTHON=/opt/venvs/sedona/bin/python
+
+# -------------------------
+# CREATE LOG DIR
+# -------------------------
+- name: Ensure Spark log directory exists
+  file:
+    path: /opt/spark/logs
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Create Spark log dir in HDFS
+  command: /opt/hadoop/bin/hdfs dfs -mkdir -p /spark-logs
+  become_user: debian
+  run_once: true
+
+- name: Set permissions for Spark logs
+  command: /opt/hadoop/bin/hdfs dfs -chmod 777 /spark-logs
+  become_user: debian
+  run_once: true
+
+ 

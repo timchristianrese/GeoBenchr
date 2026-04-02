@@ -1,0 +1,21 @@
+spark.master                     yarn
+spark.submit.deployMode          cluster
+
+spark.eventLog.enabled           true
+spark.eventLog.dir               hdfs:///spark-logs
+
+spark.history.fs.logDirectory    hdfs:///spark-logs
+spark.history.fs.update.interval 10s
+
+spark.executor.memory            2g
+spark.executor.cores             2
+spark.driver.memory              1g
+
+spark.driver.memory              10g
+spark.network.timeout            1000s
+spark.driver.maxResultSize       5g
+
+spark.yarn.appMasterEnv.JAVA_HOME=/opt/java/jdk-17.0.18+8
+spark.executorEnv.JAVA_HOME=/opt/java/jdk-17.0.18+8
+
+spark.yarn.submit.waitAppCompletion true

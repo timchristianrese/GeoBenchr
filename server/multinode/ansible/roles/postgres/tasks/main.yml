@@ -1,0 +1,23 @@
+- name: Remove any conflicting PostgreSQL versions
+  apt:
+    name: "postgresql-*"
+    state: absent
+    purge: yes
+  become: true
+
+- name: Remove any conflicting PostgreSQL versions
+  apt:
+    name: "postgresql-*"
+    state: absent
+    purge: yes
+  become: true
+- name: Install PostgreSQL
+  apt:
+    name: postgresql-17
+    state: present
+
+- name: Ensure PostgreSQL is running
+  service:
+    name: postgresql
+    state: started
+    enabled: yes

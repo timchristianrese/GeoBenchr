@@ -1,0 +1,14 @@
+# group_vars/all.yml
+
+ansible_user: debian
+ansible_python_interpreter: /usr/bin/python3
+
+postgres_version: 17
+db_name: mobilitydb
+db_user: mobility
+db_password: mobilitypass
+
+spark_home: /opt/spark
+
+sedona_jar: sedona-spark-shaded-4.0_2.13-1.8.1.jar
+geotools_jar: geotools-wrapper-1.8.1-33.1.jar

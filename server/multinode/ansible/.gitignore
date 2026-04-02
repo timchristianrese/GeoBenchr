@@ -1,0 +1,5 @@
+playbooks/tmp/*
+#anything in a files folder
+roles/*/files/*
+#any file ending with -openrc.sh
+*-openrc.sh

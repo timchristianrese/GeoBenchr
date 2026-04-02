@@ -1,0 +1,26 @@
+- name: Install PostGIS dependencies
+  apt:
+    name:
+      - postgresql-server-dev-17
+      - libpq-dev
+      - libproj-dev
+      - libgeos-dev
+      - libgdal-dev
+      - libjson-c-dev
+      - libgsl-dev          # <-- THIS is the missing one
+      - git
+      - cmake
+      - build-essential
+      - gcc
+    update_cache: yes
+      
+    state: present
+
+- name: Install PostGIS
+  apt:
+    name: postgresql-17-postgis-3
+    state: present
+- name: Clone MobilityDB
+  git:
+    repo: https://github.com/MobilityDB/MobilityDB.git
+    dest: /tmp/MobilityDB

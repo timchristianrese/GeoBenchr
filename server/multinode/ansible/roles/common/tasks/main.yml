@@ -1,0 +1,36 @@
+# roles/common/tasks/main.yml
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install base packages
+  apt:
+    name:
+      - curl
+      - wget
+      - gnupg
+      - lsb-release
+    state: present
+
+- name: Install prerequisites
+  apt:
+    name:
+      - python3
+      - python3-pip
+      - ssh
+      - rsync
+      - tar
+      - wget
+    state: present
+    update_cache: yes
+
+- name: Create spark and hadoop directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: debian
+    group: debian
+    mode: '0755'
+  loop:
+    - /opt/hadoop
+    - /opt/spark

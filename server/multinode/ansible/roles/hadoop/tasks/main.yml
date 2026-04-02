@@ -1,0 +1,229 @@
+- name: Install Hadoop prerequisites
+  apt:
+    name:
+      - ssh
+      - rsync
+      - pdsh
+    state: present
+    update_cache: yes
+
+- name: Ensure sshd is running
+  service:
+    name: ssh
+    state: started
+    enabled: yes
+
+# -------------------------
+# INSTALL CUSTOM JDK
+# -------------------------
+- name: Create Java directory
+  file:
+    path: /opt/java
+    state: directory
+    mode: '0755'
+
+- name: Instead of uploading, download JDK directly on the server (if not already present)
+  get_url:
+    url: https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.30%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
+    dest: /opt/java/OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
+    mode: '0644'
+    creates: /opt/java/OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
+
+# - name: Upload OpenJDK tarball
+#   copy:
+#     src: OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
+#     dest: /opt/java/
+
+- name: Extract OpenJDK
+  unarchive:
+    src: /opt/java/OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
+    dest: /opt/java/
+    remote_src: yes
+    creates: /opt/java/jdk-11.0.30+7
+
+- name: Create Java symlink
+  file:
+    src: /opt/java/jdk-11.0.30+7
+    dest: /opt/java/latest
+    state: link
+
+# -------------------------
+# SSH SETUP (CRITICAL)
+# -------------------------
+- name: Generate SSH key (if not exists)
+  openssh_keypair:
+    path: "/home/{{ ansible_user }}/.ssh/id_rsa"
+    type: rsa
+    size: 2048
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+  become: no
+
+- name: Collect public keys
+  fetch:
+    src: "/home/{{ ansible_user }}/.ssh/id_rsa.pub"
+    dest: "tmp/keys/{{ inventory_hostname }}.pub"
+    flat: yes
+
+- name: Distribute authorized_keys
+  authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ lookup('file', 'tmp/keys/' + item + '.pub') }}"
+  loop: "{{ groups['all'] }}"
+
+- name: Disable strict host key checking for cluster nodes
+  copy:
+    dest: "/home/{{ ansible_user }}/.ssh/config"
+    content: |
+      Host *
+        StrictHostKeyChecking no
+        UserKnownHostsFile=/dev/null
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+
+
+- name: Download Hadoop tarball directly on the server (if not already present)
+  get_url:
+    url: https://archive.apache.org/dist/hadoop/core/hadoop-{{ hadoop_version }}/hadoop-{{ hadoop_version }}.tar.gz
+    dest: /opt/hadoop-{{ hadoop_version }}.tar.gz
+    mode: '0644'
+    creates: /opt/hadoop-{{ hadoop_version }}.tar.gz
+
+# - name: Copy Hadoop to all nodes
+#   copy:
+#     src: hadoop-{{ hadoop_version }}.tar.gz
+#     dest: /opt/
+#     mode: '0644'
+
+- name: Extract Hadoop
+  unarchive:
+    src: "/opt/hadoop-{{ hadoop_version }}.tar.gz"
+    dest: /opt/
+    remote_src: yes
+    creates: /opt/hadoop-{{ hadoop_version }}
+
+- name: Fix ownership of Hadoop installation
+  file:
+    path: /opt/hadoop-{{ hadoop_version }}
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    recurse: yes
+
+- name: Remove existing Hadoop directory if not a symlink
+  file:
+    path: /opt/hadoop
+    state: absent
+
+- name: Symlink Hadoop
+  file:
+    src: /opt/hadoop-{{ hadoop_version }}
+    dest: /opt/hadoop
+    state: link
+
+- name: Set Hadoop environment variables
+  copy:
+    dest: /etc/profile.d/hadoop.sh
+    content: |
+      export JAVA_HOME=/opt/java/latest
+      export HADOOP_HOME=/opt/hadoop
+      export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+      export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+
+- name: Source environment (for current session)
+  shell: source /etc/profile.d/hadoop.sh
+  args:
+    executable: /bin/bash
+
+- name: Set JAVA_HOME in hadoop-env.sh
+  lineinfile:
+    path: /opt/hadoop/etc/hadoop/hadoop-env.sh
+    regexp: '^export JAVA_HOME='
+    line: 'export JAVA_HOME=/opt/java/latest'
+
+# -------------------------
+# CONFIG FILES
+# -------------------------
+- name: Configure core-site.xml
+  template:
+    src: core-site.xml.j2
+    dest: /opt/hadoop/etc/hadoop/core-site.xml
+
+- name: Configure hdfs-site.xml
+  template:
+    src: hdfs-site.xml.j2
+    dest: /opt/hadoop/etc/hadoop/hdfs-site.xml
+
+- name: Configure yarn-site.xml
+  template:
+    src: yarn-site.xml.j2
+    dest: /opt/hadoop/etc/hadoop/yarn-site.xml
+
+- name: Configure mapred-site.xml
+  template:
+    src: mapred-site.xml.j2
+    dest: /opt/hadoop/etc/hadoop/mapred-site.xml
+
+- name: Set JAVA_HOME for YARN
+  lineinfile:
+    path: /opt/hadoop/etc/hadoop/yarn-env.sh
+    line: 'export JAVA_HOME=/opt/java/jdk-17.0.18+8'
+
+# -------------------------
+# WORKERS FILE
+# -------------------------
+- name: Configure workers file
+  template:
+    src: workers.j2
+    dest: /opt/hadoop/etc/hadoop/workers
+
+
+
+# -------------------------
+# FORMAT HDFS (ONLY ON MASTER)
+# -------------------------
+
+- name: Ensure Hadoop directories exist with correct ownership
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+    recurse: yes
+  loop:
+    - /opt/hadoop
+    - /opt/hadoop/logs
+    - /opt/hadoop/data
+
+# - name: Format HDFS namenode
+#   command: /opt/hadoop/bin/hdfs namenode -format
+#   when: inventory_hostname in groups['masters']
+
+# -------------------------
+# START HDFS + YARN
+# -------------------------
+
+- name: Stop HDFS and YARN if running (only on master)
+  shell: |
+    /opt/hadoop/sbin/stop-yarn.sh
+    /opt/hadoop/sbin/stop-dfs.sh
+  when: inventory_hostname in groups['masters']
+  become: true
+  become_user: debian
+
+- name: Start HDFS
+  command: /opt/hadoop/sbin/start-dfs.sh
+  become: true
+  become_user: debian
+  when:
+    - inventory_hostname in groups['masters']
+
+- name: Start YARN
+  command: /opt/hadoop/sbin/start-yarn.sh
+  become: true
+  become_user: debian
+  when:
+    - inventory_hostname in groups['masters']

@@ -1,0 +1,12 @@
+# playbooks/mobilitydb_cluster.yml
+- name: Setup Distributed MobilityDB cluster
+  hosts: db_nodes
+  become: true
+  vars_files:
+  - ../group_vars/all.yml
+  roles:
+    - common
+    - postgres
+    - citus
+    - postgis
+    - mobilitydb
