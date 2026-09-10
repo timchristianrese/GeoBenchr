@@ -1,0 +1,930 @@
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1969) WHERE c.timestamp BETWEEN ['2024-08-07 13:47:26', '2024-08-09 19:44:29'] AND h.name = 'SIRI' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2024-08-07 13:47:26'
+    - '2024-08-09 19:44:29'
+  - 1969
+  - SIRI
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4816) WHERE c.timestamp BETWEEN ['2025-06-17 07:24:08', '2025-06-20 00:33:47'] AND i.id = 'Lagousa' AND c.id > 0;
+  params:
+  - 4816
+  - Lagousa
+  - - '2025-06-17 07:24:08'
+    - '2025-06-20 00:33:47'
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2915) WHERE c.timestamp BETWEEN ['2025-06-14 00:47:54', '2025-06-24 21:25:15'] AND h.name = 'FALIRO' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2025-06-14 00:47:54'
+    - '2025-06-24 21:25:15'
+  - 2915
+  - FALIRO
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(1.3596956853656164, 54.50012601184977), 3857)
+    WHERE id = 1767363074;
+  params:
+  - 1767363074
+  - ST_SetSRID(ST_Point(1.3596956853656164, 54.50012601184977), 3857)
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1902) WHERE c.timestamp BETWEEN ['2024-10-10 12:06:15', '2024-10-16 17:06:21'] AND i.id = 'Daskalio' AND c.id > 0;
+  params:
+  - 1902
+  - Daskalio
+  - - '2024-10-10 12:06:15'
+    - '2024-10-16 17:06:21'
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1370881048, ST_SetSRID(ST_Point(11.736261502040009, 54.726740345732004), 3857), TIMESTAMP '2025-06-25 03:25:26'), (1017475735, ST_SetSRID(ST_Point(11.369778190555643, 55.26893730064702), 3857), TIMESTAMP '2024-02-06 04:25:46'), (1978709313, ST_SetSRID(ST_Point(8.885523651797865, 55.006287809425906), 3857), TIMESTAMP '2024-11-21 08:56:22'), (1447794529, ST_SetSRID(ST_Point(10.296248842940784, 56.139369433085584), 3857), TIMESTAMP '2024-01-03 18:39:49'), (1961467287, ST_SetSRID(ST_Point(15.939949006864094, 54.54788587224678), 3857), TIMESTAMP '2025-06-09 21:53:22'), (1565066038, ST_SetSRID(ST_Point(18.468076125104012, 53.18370937382572), 3857), TIMESTAMP '2024-10-07 03:19:00'), (1369149703, ST_SetSRID(ST_Point(11.10461635079967, 56.74148583975161), 3857), TIMESTAMP '2024-05-06 08:04:29'), (1423720775, ST_SetSRID(ST_Point(4.117499247181434, 59.70286836888238), 3857), TIMESTAMP '2025-06-12 09:14:36'), (1919278252, ST_SetSRID(ST_Point(10.456242725803342, 56.91816057621099), 3857), TIMESTAMP '2024-10-25 15:50:12'), (1228162398, ST_SetSRID(ST_Point(15.492811153385627, 56.047783108262884), 3857), TIMESTAMP '2025-01-17 10:33:52');
+  params:
+  - (1370881048, ST_SetSRID(ST_Point(11.736261502040009, 54.726740345732004), 3857),
+    TIMESTAMP '2025-06-25 03:25:26'), (1017475735, ST_SetSRID(ST_Point(11.369778190555643,
+    55.26893730064702), 3857), TIMESTAMP '2024-02-06 04:25:46'), (1978709313, ST_SetSRID(ST_Point(8.885523651797865,
+    55.006287809425906), 3857), TIMESTAMP '2024-11-21 08:56:22'), (1447794529, ST_SetSRID(ST_Point(10.296248842940784,
+    56.139369433085584), 3857), TIMESTAMP '2024-01-03 18:39:49'), (1961467287, ST_SetSRID(ST_Point(15.939949006864094,
+    54.54788587224678), 3857), TIMESTAMP '2025-06-09 21:53:22'), (1565066038, ST_SetSRID(ST_Point(18.468076125104012,
+    53.18370937382572), 3857), TIMESTAMP '2024-10-07 03:19:00'), (1369149703, ST_SetSRID(ST_Point(11.10461635079967,
+    56.74148583975161), 3857), TIMESTAMP '2024-05-06 08:04:29'), (1423720775, ST_SetSRID(ST_Point(4.117499247181434,
+    59.70286836888238), 3857), TIMESTAMP '2025-06-12 09:14:36'), (1919278252, ST_SetSRID(ST_Point(10.456242725803342,
+    56.91816057621099), 3857), TIMESTAMP '2024-10-25 15:50:12'), (1228162398, ST_SetSRID(ST_Point(15.492811153385627,
+    56.047783108262884), 3857), TIMESTAMP '2025-01-17 10:33:52')
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4995) WHERE c.timestamp BETWEEN ['2024-05-03 02:18:26', '2024-05-14 15:58:48'] AND h.name = 'AEGINA' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2024-05-03 02:18:26'
+    - '2024-05-14 15:58:48'
+  - 4995
+  - AEGINA
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1555642705;
+  params:
+  - 1555642705
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(16.27865886857627, 53.13989553172531), 3857)
+    WHERE id = 1939533345;
+  params:
+  - 1939533345
+  - ST_SetSRID(ST_Point(16.27865886857627, 53.13989553172531), 3857)
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1359620969, ST_SetSRID(ST_Point(5.337498945850471, 53.0710169737054), 3857), '2024-06-27 10:48:50');
+  params:
+  - 1359620969
+  - ST_SetSRID(ST_Point(5.337498945850471, 53.0710169737054), 3857)
+  - '2024-06-27 10:48:50'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 4101) WHERE h.name = 'CORINTH CANAL' AND c.id > 0;
+  params:
+  - CORINTH CANAL
+  - 4101
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(14.545268182581665, 60.13087365284467), 3857)
+    WHERE id = 1425923484;
+  params:
+  - 1425923484
+  - ST_SetSRID(ST_Point(14.545268182581665, 60.13087365284467), 3857)
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1803817972, ST_SetSRID(ST_Point(14.71469501425752, 58.73928728235837), 3857), TIMESTAMP '2024-02-02 04:48:14'), (1977825393, ST_SetSRID(ST_Point(14.866418273360846, 60.391255667370395), 3857), TIMESTAMP '2025-06-27 16:12:44'), (1944103914, ST_SetSRID(ST_Point(2.3635218476234634, 58.186656579879916), 3857), TIMESTAMP '2025-05-31 10:37:46'), (1132142586, ST_SetSRID(ST_Point(6.94948728989814, 53.28052246262899), 3857), TIMESTAMP '2024-07-07 20:30:52'), (1111924750, ST_SetSRID(ST_Point(7.1145503561386585, 55.78238108051046), 3857), TIMESTAMP '2025-07-05 18:47:06'), (1173885530, ST_SetSRID(ST_Point(10.955961779736953, 60.292369614094184), 3857), TIMESTAMP '2024-08-23 05:23:07'), (1869362489, ST_SetSRID(ST_Point(4.467571000959513, 55.662564570592714), 3857), TIMESTAMP '2025-06-27 02:17:59'), (1563045112, ST_SetSRID(ST_Point(2.078281131673555, 56.16616189293223), 3857), TIMESTAMP '2025-07-03 00:46:15'), (1732552852, ST_SetSRID(ST_Point(8.343524639748567, 57.686890180350076), 3857), TIMESTAMP '2025-01-13 20:17:38'), (1492265403, ST_SetSRID(ST_Point(9.776373143584973, 59.00770391953672), 3857), TIMESTAMP '2025-03-26 13:06:27');
+  params:
+  - (1803817972, ST_SetSRID(ST_Point(14.71469501425752, 58.73928728235837), 3857),
+    TIMESTAMP '2024-02-02 04:48:14'), (1977825393, ST_SetSRID(ST_Point(14.866418273360846,
+    60.391255667370395), 3857), TIMESTAMP '2025-06-27 16:12:44'), (1944103914, ST_SetSRID(ST_Point(2.3635218476234634,
+    58.186656579879916), 3857), TIMESTAMP '2025-05-31 10:37:46'), (1132142586, ST_SetSRID(ST_Point(6.94948728989814,
+    53.28052246262899), 3857), TIMESTAMP '2024-07-07 20:30:52'), (1111924750, ST_SetSRID(ST_Point(7.1145503561386585,
+    55.78238108051046), 3857), TIMESTAMP '2025-07-05 18:47:06'), (1173885530, ST_SetSRID(ST_Point(10.955961779736953,
+    60.292369614094184), 3857), TIMESTAMP '2024-08-23 05:23:07'), (1869362489, ST_SetSRID(ST_Point(4.467571000959513,
+    55.662564570592714), 3857), TIMESTAMP '2025-06-27 02:17:59'), (1563045112, ST_SetSRID(ST_Point(2.078281131673555,
+    56.16616189293223), 3857), TIMESTAMP '2025-07-03 00:46:15'), (1732552852, ST_SetSRID(ST_Point(8.343524639748567,
+    57.686890180350076), 3857), TIMESTAMP '2025-01-13 20:17:38'), (1492265403, ST_SetSRID(ST_Point(9.776373143584973,
+    59.00770391953672), 3857), TIMESTAMP '2025-03-26 13:06:27')
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2367) WHERE i.id = 'Nisis Metopi' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Nisis Metopi
+  - 2367
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1924959383;
+  params:
+  - 1924959383
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2538) WHERE c.timestamp BETWEEN ['2024-01-15 13:10:23', '2024-01-20 22:55:18'] AND i.id = 'Nisida Kyra' AND c.id > 0;
+  params:
+  - 2538
+  - Nisida Kyra
+  - - '2024-01-15 13:10:23'
+    - '2024-01-20 22:55:18'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 3968) WHERE h.name = 'AGIOS KOSMAS' AND c.id > 0;
+  params:
+  - AGIOS KOSMAS
+  - 3968
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(1.9676403755967997, 59.19976328121274), 3857)
+    WHERE id = 1916008858;
+  params:
+  - 1916008858
+  - ST_SetSRID(ST_Point(1.9676403755967997, 59.19976328121274), 3857)
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1087185896, ST_SetSRID(ST_Point(15.947155646247692, 54.541952486873754), 3857), '2024-02-22 06:52:59');
+  params:
+  - 1087185896
+  - ST_SetSRID(ST_Point(15.947155646247692, 54.541952486873754), 3857)
+  - '2024-02-22 06:52:59'
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings
+    FROM crossing_points c
+    WHERE c.timestamp BETWEEN '' AND c.id > 0
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - ''
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1004766142, ST_SetSRID(ST_Point(9.754215008422806, 55.052471780463016), 3857), '2024-09-03 11:22:56');
+  params:
+  - 1004766142
+  - ST_SetSRID(ST_Point(9.754215008422806, 55.052471780463016), 3857)
+  - '2024-09-03 11:22:56'
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3583) WHERE i.id = 'Agistri' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Agistri
+  - 3583
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 2566) WHERE h.name = 'FLISVOS' AND c.id > 0;
+  params:
+  - FLISVOS
+  - 2566
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(4.346385519259317, 58.17999423056411), 3857)
+    WHERE id = 1743604059;
+  params:
+  - 1743604059
+  - ST_SetSRID(ST_Point(4.346385519259317, 58.17999423056411), 3857)
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1228) WHERE c.timestamp BETWEEN ['2024-09-01 10:40:24', '2024-09-09 20:14:30'] AND h.name = 'FALIRO' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2024-09-01 10:40:24'
+    - '2024-09-09 20:14:30'
+  - 1228
+  - FALIRO
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1501489594, ST_SetSRID(ST_Point(12.20042242449671, 58.34606656242535), 3857), '2024-12-13 20:05:33');
+  params:
+  - 1501489594
+  - ST_SetSRID(ST_Point(12.20042242449671, 58.34606656242535), 3857)
+  - '2024-12-13 20:05:33'
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1894439355, ST_SetSRID(ST_Point(4.263230725295285, 54.34865735200643), 3857), '2024-03-29 01:27:03');
+  params:
+  - 1894439355
+  - ST_SetSRID(ST_Point(4.263230725295285, 54.34865735200643), 3857)
+  - '2024-03-29 01:27:03'
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings
+    FROM crossing_points c
+    WHERE c.timestamp BETWEEN '' AND c.id > 0
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - ''
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1392790040;
+  params:
+  - 1392790040
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 4820) WHERE h.name = 'AGISTRI' AND c.id > 0;
+  params:
+  - AGISTRI
+  - 4820
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(3.861081124307333, 52.637906555954565), 3857)
+    WHERE id = 1726865509;
+  params:
+  - 1726865509
+  - ST_SetSRID(ST_Point(3.861081124307333, 52.637906555954565), 3857)
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4861) WHERE i.id = 'Nisis Metopi' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Nisis Metopi
+  - 4861
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings
+    FROM crossing_points c
+    WHERE c.timestamp BETWEEN '' AND c.id > 0
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - ''
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1327116292;
+  params:
+  - 1327116292
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(6.74534448197497, 57.330396075410526), 3857)
+    WHERE id = 1474030391;
+  params:
+  - 1474030391
+  - ST_SetSRID(ST_Point(6.74534448197497, 57.330396075410526), 3857)
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1436320091, ST_SetSRID(ST_Point(16.305064939114423, 57.78663492899695), 3857), TIMESTAMP '2024-07-01 11:06:56'), (1696361716, ST_SetSRID(ST_Point(17.70506896919889, 58.840574469140776), 3857), TIMESTAMP '2024-03-23 13:41:51'), (1042077046, ST_SetSRID(ST_Point(9.432777331806264, 60.28144381870053), 3857), TIMESTAMP '2025-04-23 12:27:45'), (1951152363, ST_SetSRID(ST_Point(12.492482721216696, 54.65271485355042), 3857), TIMESTAMP '2025-06-07 05:21:51'), (1523589832, ST_SetSRID(ST_Point(5.822761457415488, 53.24699222211065), 3857), TIMESTAMP '2024-12-04 06:11:15'), (1700351704, ST_SetSRID(ST_Point(12.111888848760838, 59.01078655128752), 3857), TIMESTAMP '2025-02-12 03:35:12'), (1540782782, ST_SetSRID(ST_Point(2.2950312678735454, 52.93354261413784), 3857), TIMESTAMP '2024-10-25 04:58:51'), (1333387231, ST_SetSRID(ST_Point(8.819488786533439, 53.52202222222617), 3857), TIMESTAMP '2025-02-27 07:55:40'), (1104417744, ST_SetSRID(ST_Point(15.426171821595144, 58.83065287223226), 3857), TIMESTAMP '2024-05-13 08:43:59'), (1216216439, ST_SetSRID(ST_Point(15.813577121063366, 55.88302213601197), 3857), TIMESTAMP '2024-04-11 01:27:19');
+  params:
+  - (1436320091, ST_SetSRID(ST_Point(16.305064939114423, 57.78663492899695), 3857),
+    TIMESTAMP '2024-07-01 11:06:56'), (1696361716, ST_SetSRID(ST_Point(17.70506896919889,
+    58.840574469140776), 3857), TIMESTAMP '2024-03-23 13:41:51'), (1042077046, ST_SetSRID(ST_Point(9.432777331806264,
+    60.28144381870053), 3857), TIMESTAMP '2025-04-23 12:27:45'), (1951152363, ST_SetSRID(ST_Point(12.492482721216696,
+    54.65271485355042), 3857), TIMESTAMP '2025-06-07 05:21:51'), (1523589832, ST_SetSRID(ST_Point(5.822761457415488,
+    53.24699222211065), 3857), TIMESTAMP '2024-12-04 06:11:15'), (1700351704, ST_SetSRID(ST_Point(12.111888848760838,
+    59.01078655128752), 3857), TIMESTAMP '2025-02-12 03:35:12'), (1540782782, ST_SetSRID(ST_Point(2.2950312678735454,
+    52.93354261413784), 3857), TIMESTAMP '2024-10-25 04:58:51'), (1333387231, ST_SetSRID(ST_Point(8.819488786533439,
+    53.52202222222617), 3857), TIMESTAMP '2025-02-27 07:55:40'), (1104417744, ST_SetSRID(ST_Point(15.426171821595144,
+    58.83065287223226), 3857), TIMESTAMP '2024-05-13 08:43:59'), (1216216439, ST_SetSRID(ST_Point(15.813577121063366,
+    55.88302213601197), 3857), TIMESTAMP '2024-04-11 01:27:19')
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1508852761;
+  params:
+  - 1508852761
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3052) WHERE c.timestamp BETWEEN ['2024-09-11 20:44:55', '2024-09-23 04:53:02'] AND i.id = 'Daskalio' AND c.id > 0;
+  params:
+  - 3052
+  - Daskalio
+  - - '2024-09-11 20:44:55'
+    - '2024-09-23 04:53:02'
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1694256838;
+  params:
+  - 1694256838
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings
+    FROM crossing_points c
+    WHERE c.timestamp BETWEEN '' AND c.id > 0
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - ''
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 15 AND c.timestamp BETWEEN ['2024-06-29 07:32:18', '2024-07-05 00:51:45'] AND c.id > 0;
+  params:
+  - 15
+  - - '2024-06-29 07:32:18'
+    - '2024-07-05 00:51:45'
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2427) WHERE c.timestamp BETWEEN ['2024-08-26 08:41:40', '2024-09-08 19:51:24'] AND i.id = 'Nisis Metopi' AND c.id > 0;
+  params:
+  - 2427
+  - Nisis Metopi
+  - - '2024-08-26 08:41:40'
+    - '2024-09-08 19:51:24'
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1217709710;
+  params:
+  - 1217709710
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings
+    FROM crossing_points c
+    WHERE c.timestamp BETWEEN '' AND c.id > 0
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - ''
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4011) WHERE c.timestamp BETWEEN ['2024-11-20 13:19:55', '2024-11-22 15:57:30'] AND h.name = 'SOUSAKI' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2024-11-20 13:19:55'
+    - '2024-11-22 15:57:30'
+  - 4011
+  - SOUSAKI
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1560018247, ST_SetSRID(ST_Point(4.663392857718261, 53.87038529149699), 3857), TIMESTAMP '2024-04-13 13:15:02'), (1697701811, ST_SetSRID(ST_Point(12.014498673844578, 59.64305237685039), 3857), TIMESTAMP '2025-01-28 22:56:09'), (1164481576, ST_SetSRID(ST_Point(16.73388649648007, 57.50496252208656), 3857), TIMESTAMP '2024-07-09 00:40:55'), (1713224529, ST_SetSRID(ST_Point(2.635517667112503, 52.694681201231255), 3857), TIMESTAMP '2024-06-10 20:02:24'), (1137705841, ST_SetSRID(ST_Point(6.2390442195331275, 52.88926391480374), 3857), TIMESTAMP '2024-03-23 23:17:08'), (1800122228, ST_SetSRID(ST_Point(18.54415836712647, 56.405010745696195), 3857), TIMESTAMP '2025-06-07 05:38:03'), (1135368952, ST_SetSRID(ST_Point(11.499716742119443, 57.96500003754712), 3857), TIMESTAMP '2024-12-03 08:05:29'), (1687331589, ST_SetSRID(ST_Point(7.1147790365604076, 59.122903481460675), 3857), TIMESTAMP '2024-03-17 18:28:31'), (1221431258, ST_SetSRID(ST_Point(18.361278648883395, 55.48176980630676), 3857), TIMESTAMP '2024-04-30 18:10:35'), (1258559521, ST_SetSRID(ST_Point(11.696396830026632, 55.7225402227453), 3857), TIMESTAMP '2024-10-13 20:32:56');
+  params:
+  - (1560018247, ST_SetSRID(ST_Point(4.663392857718261, 53.87038529149699), 3857),
+    TIMESTAMP '2024-04-13 13:15:02'), (1697701811, ST_SetSRID(ST_Point(12.014498673844578,
+    59.64305237685039), 3857), TIMESTAMP '2025-01-28 22:56:09'), (1164481576, ST_SetSRID(ST_Point(16.73388649648007,
+    57.50496252208656), 3857), TIMESTAMP '2024-07-09 00:40:55'), (1713224529, ST_SetSRID(ST_Point(2.635517667112503,
+    52.694681201231255), 3857), TIMESTAMP '2024-06-10 20:02:24'), (1137705841, ST_SetSRID(ST_Point(6.2390442195331275,
+    52.88926391480374), 3857), TIMESTAMP '2024-03-23 23:17:08'), (1800122228, ST_SetSRID(ST_Point(18.54415836712647,
+    56.405010745696195), 3857), TIMESTAMP '2025-06-07 05:38:03'), (1135368952, ST_SetSRID(ST_Point(11.499716742119443,
+    57.96500003754712), 3857), TIMESTAMP '2024-12-03 08:05:29'), (1687331589, ST_SetSRID(ST_Point(7.1147790365604076,
+    59.122903481460675), 3857), TIMESTAMP '2024-03-17 18:28:31'), (1221431258, ST_SetSRID(ST_Point(18.361278648883395,
+    55.48176980630676), 3857), TIMESTAMP '2024-04-30 18:10:35'), (1258559521, ST_SetSRID(ST_Point(11.696396830026632,
+    55.7225402227453), 3857), TIMESTAMP '2024-10-13 20:32:56')
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 7 AND c.timestamp BETWEEN ['2024-04-03 00:31:17', '2024-04-17 07:48:58'] AND c.id > 0;
+  params:
+  - 7
+  - - '2024-04-03 00:31:17'
+    - '2024-04-17 07:48:58'
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1578600158, ST_SetSRID(ST_Point(13.90539339137009, 59.07318497587222), 3857), TIMESTAMP '2024-04-05 16:39:06'), (1772714019, ST_SetSRID(ST_Point(9.259171782143536, 59.277852150570965), 3857), TIMESTAMP '2025-07-07 22:33:46'), (1080859784, ST_SetSRID(ST_Point(3.0484212606561414, 53.63150439262161), 3857), TIMESTAMP '2024-08-07 02:23:37'), (1638644690, ST_SetSRID(ST_Point(8.941370762347313, 52.50896093250151), 3857), TIMESTAMP '2025-03-13 12:44:33'), (1031628078, ST_SetSRID(ST_Point(8.634463635384023, 54.85532693033648), 3857), TIMESTAMP '2025-05-21 00:48:50'), (1956682156, ST_SetSRID(ST_Point(8.655846014379405, 54.099367367709576), 3857), TIMESTAMP '2024-06-04 16:44:22'), (1304754233, ST_SetSRID(ST_Point(13.82010765284576, 55.12471672722921), 3857), TIMESTAMP '2024-09-28 17:25:51'), (1971477142, ST_SetSRID(ST_Point(14.708174304348718, 52.899093237946495), 3857), TIMESTAMP '2025-02-14 21:09:01'), (1644143455, ST_SetSRID(ST_Point(17.596569056683634, 59.122292134514296), 3857), TIMESTAMP '2025-05-02 01:38:37'), (1383028783, ST_SetSRID(ST_Point(6.752853063908431, 59.05857228182569), 3857), TIMESTAMP '2025-01-31 01:44:35');
+  params:
+  - (1578600158, ST_SetSRID(ST_Point(13.90539339137009, 59.07318497587222), 3857),
+    TIMESTAMP '2024-04-05 16:39:06'), (1772714019, ST_SetSRID(ST_Point(9.259171782143536,
+    59.277852150570965), 3857), TIMESTAMP '2025-07-07 22:33:46'), (1080859784, ST_SetSRID(ST_Point(3.0484212606561414,
+    53.63150439262161), 3857), TIMESTAMP '2024-08-07 02:23:37'), (1638644690, ST_SetSRID(ST_Point(8.941370762347313,
+    52.50896093250151), 3857), TIMESTAMP '2025-03-13 12:44:33'), (1031628078, ST_SetSRID(ST_Point(8.634463635384023,
+    54.85532693033648), 3857), TIMESTAMP '2025-05-21 00:48:50'), (1956682156, ST_SetSRID(ST_Point(8.655846014379405,
+    54.099367367709576), 3857), TIMESTAMP '2024-06-04 16:44:22'), (1304754233, ST_SetSRID(ST_Point(13.82010765284576,
+    55.12471672722921), 3857), TIMESTAMP '2024-09-28 17:25:51'), (1971477142, ST_SetSRID(ST_Point(14.708174304348718,
+    52.899093237946495), 3857), TIMESTAMP '2025-02-14 21:09:01'), (1644143455, ST_SetSRID(ST_Point(17.596569056683634,
+    59.122292134514296), 3857), TIMESTAMP '2025-05-02 01:38:37'), (1383028783, ST_SetSRID(ST_Point(6.752853063908431,
+    59.05857228182569), 3857), TIMESTAMP '2025-01-31 01:44:35')
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 4 AND c.timestamp BETWEEN ['2024-11-05 07:49:41', '2024-11-08 02:43:36'] AND c.id > 0;
+  params:
+  - 4
+  - - '2024-11-05 07:49:41'
+    - '2024-11-08 02:43:36'
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 18 AND c.timestamp BETWEEN ['2024-05-16 03:48:07', '2024-05-24 00:50:45'] AND c.id > 0;
+  params:
+  - 18
+  - - '2024-05-16 03:48:07'
+    - '2024-05-24 00:50:45'
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(17.391649442346047, 58.14620756111823), 3857)
+    WHERE id = 1836015607;
+  params:
+  - 1836015607
+  - ST_SetSRID(ST_Point(17.391649442346047, 58.14620756111823), 3857)
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings
+    FROM crossing_points c
+    WHERE c.timestamp BETWEEN '' AND c.id > 0
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - ''
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 1451) WHERE h.name = 'CORINTH CANAL' AND c.id > 0;
+  params:
+  - CORINTH CANAL
+  - 1451
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1890) WHERE i.id = 'Kasidis' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Kasidis
+  - 1890
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1334057444, ST_SetSRID(ST_Point(3.886149365211394, 56.12183112340598), 3857), '2024-04-07 19:10:10');
+  params:
+  - 1334057444
+  - ST_SetSRID(ST_Point(3.886149365211394, 56.12183112340598), 3857)
+  - '2024-04-07 19:10:10'
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 11 AND c.timestamp BETWEEN ['2024-10-07 12:45:48', '2024-10-22 09:24:00'] AND c.id > 0;
+  params:
+  - 11
+  - - '2024-10-07 12:45:48'
+    - '2024-10-22 09:24:00'
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2092) WHERE c.timestamp BETWEEN ['2024-12-21 18:23:59', '2024-12-26 16:08:22'] AND h.name = 'AEGINA' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2024-12-21 18:23:59'
+    - '2024-12-26 16:08:22'
+  - 2092
+  - AEGINA
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1186935877, ST_SetSRID(ST_Point(5.875291099639799, 53.00383139303), 3857), TIMESTAMP '2025-01-22 19:07:18'), (1909527740, ST_SetSRID(ST_Point(16.73257138342771, 58.55315954523635), 3857), TIMESTAMP '2025-02-08 13:11:01'), (1963688716, ST_SetSRID(ST_Point(11.186979753919879, 59.72946919671352), 3857), TIMESTAMP '2025-01-03 07:35:30'), (1874570297, ST_SetSRID(ST_Point(2.873859738364404, 58.771687028772035), 3857), TIMESTAMP '2024-01-29 16:58:52'), (1370038828, ST_SetSRID(ST_Point(15.146600989367451, 55.04210199577963), 3857), TIMESTAMP '2024-12-29 05:22:31'), (1541566092, ST_SetSRID(ST_Point(12.026967214666064, 54.71499963552254), 3857), TIMESTAMP '2024-01-04 10:13:40'), (1222741166, ST_SetSRID(ST_Point(14.291374275699253, 56.391473041642534), 3857), TIMESTAMP '2025-02-24 19:26:51'), (1399169189, ST_SetSRID(ST_Point(14.814778528856793, 58.57856954875197), 3857), TIMESTAMP '2025-01-09 16:43:25'), (1335820949, ST_SetSRID(ST_Point(5.921022256408131, 56.03017537645363), 3857), TIMESTAMP '2024-05-21 08:38:22'), (1737546203, ST_SetSRID(ST_Point(6.607666513934484, 59.72827737704365), 3857), TIMESTAMP '2025-03-24 11:22:02');
+  params:
+  - (1186935877, ST_SetSRID(ST_Point(5.875291099639799, 53.00383139303), 3857), TIMESTAMP
+    '2025-01-22 19:07:18'), (1909527740, ST_SetSRID(ST_Point(16.73257138342771, 58.55315954523635),
+    3857), TIMESTAMP '2025-02-08 13:11:01'), (1963688716, ST_SetSRID(ST_Point(11.186979753919879,
+    59.72946919671352), 3857), TIMESTAMP '2025-01-03 07:35:30'), (1874570297, ST_SetSRID(ST_Point(2.873859738364404,
+    58.771687028772035), 3857), TIMESTAMP '2024-01-29 16:58:52'), (1370038828, ST_SetSRID(ST_Point(15.146600989367451,
+    55.04210199577963), 3857), TIMESTAMP '2024-12-29 05:22:31'), (1541566092, ST_SetSRID(ST_Point(12.026967214666064,
+    54.71499963552254), 3857), TIMESTAMP '2024-01-04 10:13:40'), (1222741166, ST_SetSRID(ST_Point(14.291374275699253,
+    56.391473041642534), 3857), TIMESTAMP '2025-02-24 19:26:51'), (1399169189, ST_SetSRID(ST_Point(14.814778528856793,
+    58.57856954875197), 3857), TIMESTAMP '2025-01-09 16:43:25'), (1335820949, ST_SetSRID(ST_Point(5.921022256408131,
+    56.03017537645363), 3857), TIMESTAMP '2024-05-21 08:38:22'), (1737546203, ST_SetSRID(ST_Point(6.607666513934484,
+    59.72827737704365), 3857), TIMESTAMP '2025-03-24 11:22:02')
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 10 AND c.timestamp BETWEEN ['2024-02-07 07:38:26', '2024-02-14 03:50:12'] AND c.id > 0;
+  params:
+  - 10
+  - - '2024-02-07 07:38:26'
+    - '2024-02-14 03:50:12'
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 4 AND c.timestamp BETWEEN ['2025-04-29 07:16:49', '2025-05-06 02:15:33'] AND c.id > 0;
+  params:
+  - 4
+  - - '2025-04-29 07:16:49'
+    - '2025-05-06 02:15:33'
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 3 AND c.timestamp BETWEEN ['2024-06-02 11:48:18', '2024-06-05 11:40:33'] AND c.id > 0;
+  params:
+  - 3
+  - - '2024-06-02 11:48:18'
+    - '2024-06-05 11:40:33'
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 10 AND c.timestamp BETWEEN ['2024-07-16 12:11:48', '2024-07-22 14:46:59'] AND c.id > 0;
+  params:
+  - 10
+  - - '2024-07-16 12:11:48'
+    - '2024-07-22 14:46:59'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 1762) WHERE h.name = 'ERMIONI' AND c.id > 0;
+  params:
+  - ERMIONI
+  - 1762
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3995) WHERE i.id = 'Phlevopoula' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Phlevopoula
+  - 3995
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings
+    FROM crossing_points c
+    WHERE c.timestamp BETWEEN '' AND c.id > 0
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - ''
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1726744286, ST_SetSRID(ST_Point(14.101147012548733, 56.22833056903542), 3857), '2025-05-24 03:33:26');
+  params:
+  - 1726744286
+  - ST_SetSRID(ST_Point(14.101147012548733, 56.22833056903542), 3857)
+  - '2025-05-24 03:33:26'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 4718) WHERE h.name = 'AEGINA' AND c.id > 0;
+  params:
+  - AEGINA
+  - 4718
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings
+    FROM crossing_points c
+    WHERE c.timestamp BETWEEN '' AND c.id > 0
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - ''
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3017) WHERE c.timestamp BETWEEN ['2024-03-18 22:38:54', '2024-03-25 21:31:21'] AND h.name = 'AEGINA' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2024-03-18 22:38:54'
+    - '2024-03-25 21:31:21'
+  - 3017
+  - AEGINA
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3307) WHERE c.timestamp BETWEEN ['2024-08-18 15:21:29', '2024-08-25 18:56:00'] AND h.name = 'AGIOS KOSMAS' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2024-08-18 15:21:29'
+    - '2024-08-25 18:56:00'
+  - 3307
+  - AGIOS KOSMAS
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4273) WHERE c.timestamp BETWEEN ['2025-06-30 16:05:09', '2025-07-04 16:38:44'] AND i.id = 'Nisis Metopi' AND c.id > 0;
+  params:
+  - 4273
+  - Nisis Metopi
+  - - '2025-06-30 16:05:09'
+    - '2025-07-04 16:38:44'
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3953) WHERE c.timestamp BETWEEN ['2025-06-02 20:07:51', '2025-06-11 14:28:31'] AND i.id = 'Vrachonisis Tragonisi' AND c.id > 0;
+  params:
+  - 3953
+  - Vrachonisis Tragonisi
+  - - '2025-06-02 20:07:51'
+    - '2025-06-11 14:28:31'
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings
+    FROM crossing_points c
+    WHERE c.timestamp BETWEEN '' AND c.id > 0
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - ''
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1653460585, ST_SetSRID(ST_Point(9.75281362579179, 55.087514482330974), 3857), '2024-10-27 16:52:57');
+  params:
+  - 1653460585
+  - ST_SetSRID(ST_Point(9.75281362579179, 55.087514482330974), 3857)
+  - '2024-10-27 16:52:57'
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1741340284, ST_SetSRID(ST_Point(2.7684828350362696, 59.71128259428808), 3857), TIMESTAMP '2025-06-19 14:47:38'), (1308392898, ST_SetSRID(ST_Point(4.976022986440073, 59.25591116634865), 3857), TIMESTAMP '2024-06-01 13:49:15'), (1664669986, ST_SetSRID(ST_Point(3.446257021549286, 53.722565365636875), 3857), TIMESTAMP '2024-07-26 10:50:18'), (1522701347, ST_SetSRID(ST_Point(5.247967114463571, 54.46424280193847), 3857), TIMESTAMP '2024-06-06 22:41:20'), (1891558120, ST_SetSRID(ST_Point(3.0006135713641235, 60.002180906110176), 3857), TIMESTAMP '2025-01-24 03:27:36'), (1884991623, ST_SetSRID(ST_Point(9.446198262532294, 53.24752052467972), 3857), TIMESTAMP '2024-07-17 08:45:49'), (1020825397, ST_SetSRID(ST_Point(7.197660650715719, 59.59025135810153), 3857), TIMESTAMP '2025-03-13 09:36:25'), (1561751611, ST_SetSRID(ST_Point(12.21218357122045, 58.97387235923503), 3857), TIMESTAMP '2024-08-07 19:20:58'), (1327237005, ST_SetSRID(ST_Point(5.066249337261472, 58.76863737528755), 3857), TIMESTAMP '2024-09-20 21:25:54'), (1111144581, ST_SetSRID(ST_Point(3.9271234987444332, 55.5047996503625), 3857), TIMESTAMP '2024-05-02 17:18:25');
+  params:
+  - (1741340284, ST_SetSRID(ST_Point(2.7684828350362696, 59.71128259428808), 3857),
+    TIMESTAMP '2025-06-19 14:47:38'), (1308392898, ST_SetSRID(ST_Point(4.976022986440073,
+    59.25591116634865), 3857), TIMESTAMP '2024-06-01 13:49:15'), (1664669986, ST_SetSRID(ST_Point(3.446257021549286,
+    53.722565365636875), 3857), TIMESTAMP '2024-07-26 10:50:18'), (1522701347, ST_SetSRID(ST_Point(5.247967114463571,
+    54.46424280193847), 3857), TIMESTAMP '2024-06-06 22:41:20'), (1891558120, ST_SetSRID(ST_Point(3.0006135713641235,
+    60.002180906110176), 3857), TIMESTAMP '2025-01-24 03:27:36'), (1884991623, ST_SetSRID(ST_Point(9.446198262532294,
+    53.24752052467972), 3857), TIMESTAMP '2024-07-17 08:45:49'), (1020825397, ST_SetSRID(ST_Point(7.197660650715719,
+    59.59025135810153), 3857), TIMESTAMP '2025-03-13 09:36:25'), (1561751611, ST_SetSRID(ST_Point(12.21218357122045,
+    58.97387235923503), 3857), TIMESTAMP '2024-08-07 19:20:58'), (1327237005, ST_SetSRID(ST_Point(5.066249337261472,
+    58.76863737528755), 3857), TIMESTAMP '2024-09-20 21:25:54'), (1111144581, ST_SetSRID(ST_Point(3.9271234987444332,
+    55.5047996503625), 3857), TIMESTAMP '2024-05-02 17:18:25')
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 9 AND c.timestamp BETWEEN ['2024-01-24 21:12:37', '2024-02-01 07:02:29'] AND c.id > 0;
+  params:
+  - 9
+  - - '2024-01-24 21:12:37'
+    - '2024-02-01 07:02:29'
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3412) WHERE c.timestamp BETWEEN ['2024-03-01 21:27:56', '2024-03-06 12:55:07'] AND h.name = 'ASPROPYRGOS' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2024-03-01 21:27:56'
+    - '2024-03-06 12:55:07'
+  - 3412
+  - ASPROPYRGOS
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4344) WHERE i.id = 'Phlevopoula' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Phlevopoula
+  - 4344
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1283849060;
+  params:
+  - 1283849060
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1071513640, ST_SetSRID(ST_Point(4.648963149184726, 55.62284682972627), 3857), '2025-05-02 18:19:17');
+  params:
+  - 1071513640
+  - ST_SetSRID(ST_Point(4.648963149184726, 55.62284682972627), 3857)
+  - '2025-05-02 18:19:17'
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2295) WHERE c.timestamp BETWEEN ['2025-03-22 13:52:52', '2025-03-29 15:21:31'] AND h.name = 'SIRI' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2025-03-22 13:52:52'
+    - '2025-03-29 15:21:31'
+  - 2295
+  - SIRI
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2576) WHERE c.timestamp BETWEEN ['2024-01-07 21:33:21', '2024-01-14 16:46:24'] AND i.id = 'Agistri' AND c.id > 0;
+  params:
+  - 2576
+  - Agistri
+  - - '2024-01-07 21:33:21'
+    - '2024-01-14 16:46:24'
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(12.5647606968559, 56.881480061371924), 3857)
+    WHERE id = 1117702452;
+  params:
+  - 1117702452
+  - ST_SetSRID(ST_Point(12.5647606968559, 56.881480061371924), 3857)
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1115209488, ST_SetSRID(ST_Point(5.555118402367854, 53.3646372476732), 3857), TIMESTAMP '2025-03-06 04:21:03'), (1555132041, ST_SetSRID(ST_Point(7.33512911170829, 52.7789958199909), 3857), TIMESTAMP '2025-05-08 01:28:30'), (1566741777, ST_SetSRID(ST_Point(14.507464165158853, 57.32640401733051), 3857), TIMESTAMP '2024-03-08 00:14:38'), (1092610221, ST_SetSRID(ST_Point(7.091792894192082, 52.48132184832351), 3857), TIMESTAMP '2024-04-07 15:02:03'), (1941227693, ST_SetSRID(ST_Point(9.537892984934722, 52.45564093785927), 3857), TIMESTAMP '2024-11-21 05:54:48'), (1533011446, ST_SetSRID(ST_Point(2.3023411375484746, 52.77140147885817), 3857), TIMESTAMP '2024-06-04 03:42:56'), (1234127740, ST_SetSRID(ST_Point(9.87329473564508, 53.085840261352864), 3857), TIMESTAMP '2025-05-20 11:11:08'), (1737269724, ST_SetSRID(ST_Point(7.294110124345809, 54.29419686925785), 3857), TIMESTAMP '2024-08-02 22:50:54'), (1310284210, ST_SetSRID(ST_Point(12.746415147377544, 52.76234893163782), 3857), TIMESTAMP '2025-01-12 15:33:38'), (1439677598, ST_SetSRID(ST_Point(3.731063067568063, 60.20451690104772), 3857), TIMESTAMP '2024-12-29 02:06:16');
+  params:
+  - (1115209488, ST_SetSRID(ST_Point(5.555118402367854, 53.3646372476732), 3857),
+    TIMESTAMP '2025-03-06 04:21:03'), (1555132041, ST_SetSRID(ST_Point(7.33512911170829,
+    52.7789958199909), 3857), TIMESTAMP '2025-05-08 01:28:30'), (1566741777, ST_SetSRID(ST_Point(14.507464165158853,
+    57.32640401733051), 3857), TIMESTAMP '2024-03-08 00:14:38'), (1092610221, ST_SetSRID(ST_Point(7.091792894192082,
+    52.48132184832351), 3857), TIMESTAMP '2024-04-07 15:02:03'), (1941227693, ST_SetSRID(ST_Point(9.537892984934722,
+    52.45564093785927), 3857), TIMESTAMP '2024-11-21 05:54:48'), (1533011446, ST_SetSRID(ST_Point(2.3023411375484746,
+    52.77140147885817), 3857), TIMESTAMP '2024-06-04 03:42:56'), (1234127740, ST_SetSRID(ST_Point(9.87329473564508,
+    53.085840261352864), 3857), TIMESTAMP '2025-05-20 11:11:08'), (1737269724, ST_SetSRID(ST_Point(7.294110124345809,
+    54.29419686925785), 3857), TIMESTAMP '2024-08-02 22:50:54'), (1310284210, ST_SetSRID(ST_Point(12.746415147377544,
+    52.76234893163782), 3857), TIMESTAMP '2025-01-12 15:33:38'), (1439677598, ST_SetSRID(ST_Point(3.731063067568063,
+    60.20451690104772), 3857), TIMESTAMP '2024-12-29 02:06:16')
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(11.948244142662093, 52.631246923564035), 3857)
+    WHERE id = 1482083871;
+  params:
+  - 1482083871
+  - ST_SetSRID(ST_Point(11.948244142662093, 52.631246923564035), 3857)
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1186496777, ST_SetSRID(ST_Point(6.649635086123043, 55.671101454863766), 3857), '2024-04-11 20:52:43');
+  params:
+  - 1186496777
+  - ST_SetSRID(ST_Point(6.649635086123043, 55.671101454863766), 3857)
+  - '2024-04-11 20:52:43'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 1885) WHERE h.name = 'AGIOS KOSMAS' AND c.id > 0;
+  params:
+  - AGIOS KOSMAS
+  - 1885
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1288) WHERE i.id = 'Nisis Ipsili' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Nisis Ipsili
+  - 1288
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 3504) WHERE h.name = 'ASPROPYRGOS' AND c.id > 0;
+  params:
+  - ASPROPYRGOS
+  - 3504
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1110) WHERE i.id = 'Anagnostis' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Anagnostis
+  - 1110
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 4004) WHERE h.name = 'ZEA' AND c.id > 0;
+  params:
+  - ZEA
+  - 4004
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1778444228;
+  params:
+  - 1778444228
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1907264209, ST_SetSRID(ST_Point(5.958705195450995, 54.06556626176997), 3857), TIMESTAMP '2025-02-01 09:21:49'), (1996755148, ST_SetSRID(ST_Point(15.761142813308194, 57.10764831957558), 3857), TIMESTAMP '2024-02-02 13:21:29'), (1588637286, ST_SetSRID(ST_Point(12.401062408300177, 55.5989182530188), 3857), TIMESTAMP '2025-04-22 23:15:07'), (1872220994, ST_SetSRID(ST_Point(15.580567209947294, 53.39987242731177), 3857), TIMESTAMP '2024-04-25 13:16:22'), (1308048419, ST_SetSRID(ST_Point(6.0995072543244175, 55.090354592768215), 3857), TIMESTAMP '2024-01-23 13:14:54'), (1824365957, ST_SetSRID(ST_Point(11.120344832222495, 52.48997694041445), 3857), TIMESTAMP '2024-12-09 13:57:04'), (1324743903, ST_SetSRID(ST_Point(15.211362295174041, 57.79316628084977), 3857), TIMESTAMP '2024-09-06 16:19:45'), (1052751799, ST_SetSRID(ST_Point(17.06064809606988, 59.25443527039448), 3857), TIMESTAMP '2024-06-03 15:50:56'), (1278320084, ST_SetSRID(ST_Point(4.475590913370315, 54.83204921164317), 3857), TIMESTAMP '2024-03-16 08:03:12'), (1678242160, ST_SetSRID(ST_Point(4.4464270278358935, 55.27367697533882), 3857), TIMESTAMP '2024-08-17 03:11:19');
+  params:
+  - (1907264209, ST_SetSRID(ST_Point(5.958705195450995, 54.06556626176997), 3857),
+    TIMESTAMP '2025-02-01 09:21:49'), (1996755148, ST_SetSRID(ST_Point(15.761142813308194,
+    57.10764831957558), 3857), TIMESTAMP '2024-02-02 13:21:29'), (1588637286, ST_SetSRID(ST_Point(12.401062408300177,
+    55.5989182530188), 3857), TIMESTAMP '2025-04-22 23:15:07'), (1872220994, ST_SetSRID(ST_Point(15.580567209947294,
+    53.39987242731177), 3857), TIMESTAMP '2024-04-25 13:16:22'), (1308048419, ST_SetSRID(ST_Point(6.0995072543244175,
+    55.090354592768215), 3857), TIMESTAMP '2024-01-23 13:14:54'), (1824365957, ST_SetSRID(ST_Point(11.120344832222495,
+    52.48997694041445), 3857), TIMESTAMP '2024-12-09 13:57:04'), (1324743903, ST_SetSRID(ST_Point(15.211362295174041,
+    57.79316628084977), 3857), TIMESTAMP '2024-09-06 16:19:45'), (1052751799, ST_SetSRID(ST_Point(17.06064809606988,
+    59.25443527039448), 3857), TIMESTAMP '2024-06-03 15:50:56'), (1278320084, ST_SetSRID(ST_Point(4.475590913370315,
+    54.83204921164317), 3857), TIMESTAMP '2024-03-16 08:03:12'), (1678242160, ST_SetSRID(ST_Point(4.4464270278358935,
+    55.27367697533882), 3857), TIMESTAMP '2024-08-17 03:11:19')
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings
+    FROM crossing_points c
+    WHERE c.timestamp BETWEEN '' AND c.id > 0
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - ''
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1345) WHERE i.id = 'Nisis Ledou' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Nisis Ledou
+  - 1345
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1241) WHERE c.timestamp BETWEEN ['2024-02-26 14:22:06', '2024-03-09 03:36:36'] AND i.id = 'Vrachonisis Petronisi' AND c.id > 0;
+  params:
+  - 1241
+  - Vrachonisis Petronisi
+  - - '2024-02-26 14:22:06'
+    - '2024-03-09 03:36:36'
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2568) WHERE i.id = 'Kasidis' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Kasidis
+  - 2568
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1892452671;
+  params:
+  - 1892452671
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1678049964, ST_SetSRID(ST_Point(16.217857386690863, 55.227670067976106), 3857), TIMESTAMP '2024-05-03 19:11:12'), (1017544893, ST_SetSRID(ST_Point(16.80281108810564, 54.679881731995636), 3857), TIMESTAMP '2024-01-03 01:49:33'), (1035721115, ST_SetSRID(ST_Point(3.6208079409925826, 53.59859463406407), 3857), TIMESTAMP '2024-08-24 10:56:19'), (1028154287, ST_SetSRID(ST_Point(17.78167042142681, 60.3641171579722), 3857), TIMESTAMP '2025-07-04 06:51:34'), (1904153748, ST_SetSRID(ST_Point(6.513068778014712, 54.527302381710385), 3857), TIMESTAMP '2024-07-11 08:09:54'), (1190816741, ST_SetSRID(ST_Point(13.031645724329508, 53.64416884522575), 3857), TIMESTAMP '2025-04-17 06:28:09'), (1615772442, ST_SetSRID(ST_Point(10.362285935288044, 53.259597456052084), 3857), TIMESTAMP '2024-03-07 19:16:39'), (1225453840, ST_SetSRID(ST_Point(8.00028773008196, 54.43714607902564), 3857), TIMESTAMP '2024-08-16 05:13:16'), (1683762732, ST_SetSRID(ST_Point(3.685378366376166, 55.768941460434846), 3857), TIMESTAMP '2024-12-17 20:55:01'), (1323956777, ST_SetSRID(ST_Point(3.6148977415910855, 56.570717012496395), 3857), TIMESTAMP '2024-10-11 00:13:47');
+  params:
+  - (1678049964, ST_SetSRID(ST_Point(16.217857386690863, 55.227670067976106), 3857),
+    TIMESTAMP '2024-05-03 19:11:12'), (1017544893, ST_SetSRID(ST_Point(16.80281108810564,
+    54.679881731995636), 3857), TIMESTAMP '2024-01-03 01:49:33'), (1035721115, ST_SetSRID(ST_Point(3.6208079409925826,
+    53.59859463406407), 3857), TIMESTAMP '2024-08-24 10:56:19'), (1028154287, ST_SetSRID(ST_Point(17.78167042142681,
+    60.3641171579722), 3857), TIMESTAMP '2025-07-04 06:51:34'), (1904153748, ST_SetSRID(ST_Point(6.513068778014712,
+    54.527302381710385), 3857), TIMESTAMP '2024-07-11 08:09:54'), (1190816741, ST_SetSRID(ST_Point(13.031645724329508,
+    53.64416884522575), 3857), TIMESTAMP '2025-04-17 06:28:09'), (1615772442, ST_SetSRID(ST_Point(10.362285935288044,
+    53.259597456052084), 3857), TIMESTAMP '2024-03-07 19:16:39'), (1225453840, ST_SetSRID(ST_Point(8.00028773008196,
+    54.43714607902564), 3857), TIMESTAMP '2024-08-16 05:13:16'), (1683762732, ST_SetSRID(ST_Point(3.685378366376166,
+    55.768941460434846), 3857), TIMESTAMP '2024-12-17 20:55:01'), (1323956777, ST_SetSRID(ST_Point(3.6148977415910855,
+    56.570717012496395), 3857), TIMESTAMP '2024-10-11 00:13:47')
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4584) WHERE c.timestamp BETWEEN ['2024-07-24 00:44:21', '2024-08-07 22:42:16'] AND i.id = 'Aegina Moni' AND c.id > 0;
+  params:
+  - 4584
+  - Aegina Moni
+  - - '2024-07-24 00:44:21'
+    - '2024-08-07 22:42:16'

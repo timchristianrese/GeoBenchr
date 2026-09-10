@@ -1,0 +1,317 @@
+
+- name: Ensure data directory exists
+  ansible.builtin.file:
+    path: "{{ aviation_data_dir }}"
+    state: directory
+
+- name: Ensure venv directory parent exists
+  ansible.builtin.file:
+    path: "{{ venv_dir | dirname }}"
+    state: directory
+
+# - name: Download Flight data from TUBCLOUD if aviation data directory is empty
+#   ansible.builtin.shell: |
+#     if [ -z "$(ls -A {{ aviation_data_dir }})" ]; then
+#     wget https://tubcloud.tu-berlin.de/public.php/dav/files/Xj5WfEofSF8QCR9/?accept=zip -O /tmp/flight_data.zip
+#     unzip -o /tmp/flight_data.zip -d {{ aviation_data_dir }}
+#     rm /tmp/flight_data.zip
+#     fi
+#   when: inventory_hostname in groups['masters']
+
+
+- name: Ensure python venv package is installed (Debian/Ubuntu)
+  become: true
+  ansible.builtin.apt:
+    name: "python3-venv"
+    state: present
+    update_cache: true
+  when: inventory_hostname in groups['masters']
+
+# ---------------------------------------
+# 1. Sync data
+# ---------------------------------------
+# FIX: this was commented out (and, even uncommented, used local_parquet_dir -- the cycling data
+# generator's own output directory, not aviation's) so nothing ever actually put a parquet file on
+# the target machine; "Find parquet files" below always found zero, silently no-opping the rest of
+# this role. Syncing one real file (aviation_sample_parquet_file) rather than the whole
+# data_generator_aviation/parquet_flights directory (~676 files, ~70GB) -- see that variable's
+# comment in group_vars/all/all.yml.
+- name: Sync sample aviation parquet file to target machine
+  ansible.posix.synchronize:
+    src: "{{ aviation_sample_parquet_file }}"
+    dest: "{{ aviation_data_dir }}/"
+  when: inventory_hostname in groups['masters']
+
+- name: Install build dependencies for pg_parquet
+  become: true
+  ansible.builtin.apt:
+    name:
+      - git
+      - curl
+      - build-essential
+      - clang
+      - pkg-config
+      - libssl-dev
+      - libpq-dev
+      - postgresql-server-dev-all
+    state: present
+    update_cache: true
+  when: inventory_hostname in groups['masters']
+- name: Install prerequisites
+  become: true
+  ansible.builtin.apt:
+    name:
+      - unzip
+      - curl
+    state: present
+    update_cache: true
+  when: inventory_hostname in groups['masters']
+
+# FIX: this play's become: true (play level) also applies to fact-gathering, so
+# ansible_env.HOME resolved to /root -- redundantly installing (and only this role ever using) a
+# second DuckDB CLI copy there, separate from the one every other role reading DuckDB installs
+# under /home/{{ ansible_user }} (see roles/duckdb's own matching fix). become: false + the real
+# path reuses whichever one's already there instead.
+- name: Check whether DuckDB is installed
+  become: false
+  ansible.builtin.stat:
+    path: "/home/{{ ansible_user }}/.duckdb/cli/latest/duckdb"
+  register: duckdb_installed
+  when: inventory_hostname in groups['masters']
+- name: Install DuckDB CLI
+  become: false
+  ansible.builtin.shell: |
+    curl -fsSL https://install.duckdb.org | sh
+  args:
+    creates: "/home/{{ ansible_user }}/.duckdb/cli/latest/duckdb"
+  when: not duckdb_installed.stat.exists and inventory_hostname in groups['masters']
+
+- name: Ensure duckdb is in PATH by checking if it already is, and if not, adding it to .bashrc
+  become: false
+  ansible.builtin.shell: |
+    if ! echo $PATH | grep -q "/home/{{ ansible_user }}/.duckdb/cli/latest"; then
+      echo 'export PATH="/home/{{ ansible_user }}/.duckdb/cli/latest:$PATH"' >> ~/.bashrc
+    fi
+  args:
+    executable: /bin/bash
+  when: inventory_hostname in groups['masters']
+  
+- name: Resource .bashrc to update PATH for current session
+  ansible.builtin.shell: |
+    source ~/.bashrc
+  args:
+    executable: /bin/bash
+  when: inventory_hostname in groups['masters']
+
+- name: Find parquet files
+  ansible.builtin.find:
+    paths: "{{ aviation_data_dir }}"
+    patterns: "*.parquet"
+  register: parquet_files
+  when: inventory_hostname in groups['masters']
+
+# ---------------------------------------
+# 2. Create virtualenv
+# ---------------------------------------
+- name: Create Python virtual environment
+  ansible.builtin.command: "python3 -m venv {{ venv_dir }}"
+  args:
+    creates: "{{ venv_dir }}/bin/activate"
+  when: inventory_hostname in groups['masters']
+- name: Install deps with bash
+  ansible.builtin.shell: |
+    source {{ venv_dir }}/bin/activate
+    pip install pandas pyarrow psycopg2
+  args:
+    executable: /bin/bash
+  when: inventory_hostname in groups['masters']
+
+- name: Switch Ansible to venv Python
+  ansible.builtin.set_fact:
+    ansible_python_interpreter: "{{ venv_dir }}/bin/python"
+  when: inventory_hostname in groups['masters']
+
+# - name: Create pg_parquet extension in database
+#   community.postgresql.postgresql_query:
+#     db: "{{ db_name }}"
+#     login_host: "{{ db_host }}"
+#     login_port: "{{ db_port }}"
+#     login_user: "{{ db_user }}"
+#     query: |
+#       CREATE EXTENSION IF NOT EXISTS pg_parquet;
+
+# ---------------------------------------
+# 3. Ensure table exists
+# ---------------------------------------
+- name: Drop final PostGIS table
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      DROP TABLE IF EXISTS flight_points;
+  when: inventory_hostname in groups['masters']
+
+- name: Create final PostGIS table
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS flight_points (
+        id BIGINT,
+        timestamp timestamp,
+        geom geometry(Point, 3857),
+        altitude BIGINT
+      )
+      PARTITION BY RANGE (timestamp);
+
+  when: inventory_hostname in groups['masters']
+
+- name: Distribute final PostGIS table
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      Select create_distributed_table('flight_points', 'id');
+
+      SELECT create_time_partitions(
+        table_name := 'flight_points',
+        partition_interval := '1 Month',
+        start_from := '2024-01-01 00:00:00',
+        end_at:= '2025-01-02 23:59:59'
+      );
+
+  when: inventory_hostname in groups['masters']
+    
+- name: Create staging table and loop
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS flight_points_raw (
+          id BIGINT,
+          lat DOUBLE PRECISION,
+          lon DOUBLE PRECISION,
+          timestamp timestamp,
+          altitude BIGINT
+      );
+  when: inventory_hostname in groups['masters']
+  
+- name: Process parquet files
+  ansible.builtin.include_tasks: process_parquet.yml
+  when: inventory_hostname in groups['masters']
+  loop: "{{ parquet_files.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+# ---------------------------------------
+# 4. Run high-performance loader (venv)
+# ---------------------------------------
+
+- name: Create line_geom column in flight_points from point data
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      ALTER TABLE flight_points
+      ADD COLUMN IF NOT EXISTS line_geom geometry(LineString, 3857);
+  when: inventory_hostname in groups['masters']
+
+- name: Update line_geom column in flight_points from point data
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      UPDATE flight_points t                                                           
+      SET line_geom = sub.line_geom
+      FROM (
+      SELECT
+      id,
+      ST_MakeLine(
+      geom,
+      LEAD(geom) OVER (
+      PARTITION BY id
+      ORDER BY timestamp
+      )
+      ) AS line_geom
+      FROM flight_points
+      ) sub
+      WHERE t.id = sub.id;
+
+
+# FIX: this used to be one query string with all 5 CREATE INDEX statements semicolon-joined.
+# flight_points is a Citus-distributed table, and Citus propagates DDL to worker shards over a
+# prepared statement -- which, unlike a plain query, can only ever hold a single SQL command
+# ("cannot insert multiple commands into a prepared statement"). Splitting into one statement per
+# loop iteration (matching the working pattern already used by add_supporting_datasets'
+# "Add geom indexes" task) avoids that entirely.
+- name: Create final PostGIS table index
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: "{{ item }}"
+  loop:
+    - "CREATE INDEX IF NOT EXISTS flight_points_geom_idx ON flight_points USING GIST (geom);"
+    - "CREATE INDEX IF NOT EXISTS flight_points_timestamp_idx ON flight_points (timestamp);"
+    - "CREATE INDEX IF NOT EXISTS flight_points_flightid_idx ON flight_points (id);"
+    - "CREATE INDEX IF NOT EXISTS flight_points_altitude_idx ON flight_points (altitude);"
+    - "CREATE INDEX IF NOT EXISTS flight_points_line_geom_idx ON flight_points USING GIST (line_geom);"
+  when: inventory_hostname in groups['masters']
+
+
+# - name: Import Parquet files using pg_parquet
+#   community.postgresql.postgresql_query:
+#     db: "{{ db_name }}"
+#     login_host: "{{ db_host }}"
+#     login_port: "{{ db_port }}"
+#     login_user: "{{ db_user }}"
+#     query: |
+#       INSERT INTO flight_points (id, rider_id, geom, timestamp)
+#       SELECT
+#           id,
+#           rider_id,
+#           ST_SetSRID(ST_MakePoint(lon, lat), 3857),
+#           to_timestamp(timestamp / 1000.0)
+#       FROM pg_parquet.read_parquet('{{ aviation_data_dir }}/*.parquet');
+
+# ---------------------------------------
+# 5. Add spatial index (critical)
+# ---------------------------------------
+
+
+
+
+# - name: Create spatial index
+#   community.postgresql.postgresql_query:
+#     db: "{{ db_name }}"
+#     login_host: "{{ db_host }}"
+#     login_port: "{{ db_port }}"
+#     login_user: "{{ db_user }}"
+#     query: |
+#       CREATE INDEX IF NOT EXISTS flight_points_geom_idx
+#       ON flight_points
+#       USING GIST (geom);
+
+- name: Swap python interpreter back to system Python
+  ansible.builtin.set_fact:
+    ansible_python_interpreter: /usr/bin/python3
+  when: inventory_hostname in groups['masters']

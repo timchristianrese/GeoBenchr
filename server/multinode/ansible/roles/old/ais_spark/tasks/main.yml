@@ -1,0 +1,25 @@
+- name: Ensure Spark job directory exists
+  ansible.builtin.file:
+    path: "/opt/spark/jobs"
+    state: directory
+- name: Copy Spark job script
+  copy:
+    src: files/ais_to_postgis.py
+    dest: /opt/spark/jobs/ais_to_postgis.py
+    mode: '0755'
+  when: inventory_hostname in groups['masters']
+  
+
+- name: Start Spark services
+  shell: |
+    {{ spark_home }}/sbin/start-all.sh
+  when: inventory_hostname in groups['masters']
+
+- name: Run Spark job
+  shell: |
+    {{ spark_home }}/bin/spark-submit \
+      --master yarn \
+      --deploy-mode cluster \
+      --jars {{ postgres_jdbc_jar }} \
+      /opt/spark/jobs/ais_to_postgis.py
+  when: inventory_hostname in groups['masters']

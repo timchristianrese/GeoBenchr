@@ -1,0 +1,51 @@
+# FIX: was {{ ansible_env.HOME }}, which under this play's play-level `become: yes` (which also
+# applies to Ansible's implicit fact-gathering) resolves to /root -- but the duckdb role installs
+# the CLI under the connecting ansible_user's own home (see its own matching fix), so root has
+# nothing at that path. Hardcoding the actual install location keeps this consistent with it.
+# FIX: `set -o pipefail` is a bash-ism -- ansible.builtin.shell defaults to /bin/sh, which is
+# dash on Debian/Ubuntu and doesn't support that option ("Illegal option -o pipefail"). Every
+# other shell task in this codebase that relies on bash features sets executable: /bin/bash
+# explicitly; this one just hadn't been.
+- name: Load parquet into staging (DuckDB → Postgres)
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    /home/{{ ansible_user }}/.duckdb/cli/latest/duckdb <<EOF
+    LOAD postgres;
+    INSTALL spatial;
+    LOAD spatial;
+    ATTACH
+      'host={{ db_host }}
+       dbname={{ db_name }}
+       user={{ db_user }}
+       port={{ db_port }}
+       password={{ db_password }}'
+    AS pg (TYPE postgres);
+
+    
+    INSERT INTO pg.public.islands_staging (id, name, geom)
+    SELECT
+        id,
+        featurecla AS name,
+        ST_GeomFromWKB(geometry) AS geom
+    FROM read_parquet('/var/lib/data/supporting_datasets/islands_coastlines.parquet');
+  args:
+    executable: /bin/bash
+
+- name: Move staging data into production table and transform geometry to EPSG:3857
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      INSERT INTO islands (id, name, geom)
+      SELECT
+          id,
+          name,
+          ST_Transform(geom, 3857) AS geom
+      FROM islands_staging;
+
+      DROP TABLE IF EXISTS islands_staging;
+  when: inventory_hostname in groups['masters']

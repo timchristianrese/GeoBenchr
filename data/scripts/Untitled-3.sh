@@ -104,11 +104,11 @@ cat > /opt/hadoop/etc/hadoop/yarn-site.xml <<EOF
   </property>
   <property>
     <name>yarn.scheduler.maximum-allocation-mb</name>
-    <value>4096</value>
+    <value>12288</value>
   </property>
   <property>
     <name>yarn.nodemanager.resource.memory-mb</name>
-    <value>8192</value>
+    <value>12288</value>
   </property>
 </configuration>
 EOF

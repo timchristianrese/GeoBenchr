@@ -1,0 +1,24 @@
+#!/bin/sh
+# Wrapper for duckdb-quack.service. quack_serve() starts its HTTP listener on a background
+# thread and returns immediately -- so `duckdb -c "...; CALL quack_serve(...);"` runs the
+# statement, then (having no more -c commands) exits, tearing the listener down with it. Feeding
+# the same statements over a pipe that's kept open by a trailing `sleep infinity` keeps the CLI
+# blocked reading for more input instead, so the process (and its listener) stays up.
+#
+# FIX: this used to run `INSTALL quack;` here too. On the nst-cluster hardware, DNS for
+# extensions.duckdb.org returns a working IPv4 address alongside an IPv6 one whose route is
+# black-holed (not rejected -- SYNs just vanish); `curl` recovers via its own Happy-Eyeballs
+# fallback in under a second, but DuckDB's own installer doesn't retry over IPv4 the way curl
+# does, so INSTALL hung/timed out here instead of ever reaching the address that works fine.
+# roles/duckdb's "Download the quack extension over IPv4" task now pre-fetches the same file
+# with `curl -4` (proven to work) straight into ~/.duckdb/extensions/, in the exact path DuckDB's
+# own INSTALL would have used -- so LOAD here finds it locally and never touches the network at
+# all, sidestepping the broken route entirely rather than depending on it failing fast.
+set -e
+{
+  cat <<SQL
+LOAD quack;
+CALL quack_serve('quack:0.0.0.0:{{ duckdb_quack_port }}', token=>'{{ duckdb_quack_token }}', allow_other_hostname=>true);
+SQL
+  sleep infinity
+} | /home/{{ ansible_user }}/.duckdb/cli/latest/duckdb {{ duckdb_db_file }} -unsigned

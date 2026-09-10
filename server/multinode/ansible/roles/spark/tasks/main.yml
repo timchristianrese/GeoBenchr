@@ -4,23 +4,22 @@
 # INSTALL THE OTHER JDK
 # -------------------------
 
-- name: Instead of uploading, download JDK directly on the server (if not already present)
-  get_url:
-    url: https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.18%2B8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
-    dest: /opt/java/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
-    mode: '0644'
-    creates: /opt/java/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+# - name: Instead of uploading, download JDK directly on the server (if not already present)
+#   get_url:
+#     url: https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.18%2B8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+#     dest: /opt/java/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+#     mode: '0644'
 
-# - name: Upload OpenJDK 17 tarball
-#   copy:
-#     src: OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+# # - name: Upload OpenJDK 17 tarball
+# #   copy:
+# #     src: OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+# #     dest: /opt/java/
+
+# - name: Extract OpenJDK 17
+#   unarchive:
+#     src: /opt/java/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
 #     dest: /opt/java/
-
-- name: Extract OpenJDK 17
-  unarchive:
-    src: /opt/java/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
-    dest: /opt/java/
-    remote_src: yes
+#     remote_src: yes
 
 # -------------------------
 # INSTALL SPARK
@@ -30,10 +29,16 @@
     path: /opt/spark
     state: directory
 
-- name: Upload Spark tarball
-  copy:
-    src: spark-{{ spark_version }}-bin-hadoop3.tgz
-    dest: /opt/
+- name: Instead of uploading, download Spark tarball directly on the server (if not already present)
+  get_url:
+    url: "https://dlcdn.apache.org/spark/spark-{{ spark_version }}/spark-{{ spark_version }}-bin-hadoop3.tgz"
+    dest: /opt/spark-{{ spark_version }}-bin-hadoop3.tgz
+    mode: '0644'
+
+# - name: Upload Spark tarball
+#   copy:
+#     src: spark-{{ spark_version }}-bin-hadoop3.tgz
+#     dest: /opt/
 
 - name: Extract Spark
   unarchive:
@@ -41,6 +46,8 @@
     dest: /opt/
     remote_src: yes
     creates: /opt/spark-{{ spark_version }}-bin-hadoop3
+
+
 
 - name: Fix ownership
   file:
@@ -108,12 +115,60 @@
 
 - name: Create Spark log dir in HDFS
   command: /opt/hadoop/bin/hdfs dfs -mkdir -p /spark-logs
-  become_user: debian
+  become_user: "{{ ansible_user }}"
   run_once: true
 
 - name: Set permissions for Spark logs
   command: /opt/hadoop/bin/hdfs dfs -chmod 777 /spark-logs
-  become_user: debian
+  become_user: "{{ ansible_user }}"
   run_once: true
 
- 
+- name: Download Postgres JDBC driver to Spark jars directory (if not already present)
+  get_url:
+    url: "https://jdbc.postgresql.org/download/{{ postgres_jdbc_jar }}"
+    dest: "{{ spark_home }}/jars/{{ postgres_jdbc_jar }}"
+    mode: '0644'
+
+- name: Test Spark installation
+  command: /opt/spark/bin/spark-submit --version
+  become_user: "{{ ansible_user }}"
+
+# -------------------------
+# EXTERNAL SHUFFLE SERVICE (dynamic allocation's hard requirement)
+# -------------------------
+# NEW: spark.dynamicAllocation.enabled (set below in spark-defaults.conf) needs every NodeManager
+# running Spark's external shuffle service as a YARN aux-service -- without it, releasing an idle
+# executor would lose any shuffle data it was still serving, so Spark refuses to enable dynamic
+# allocation at all without this in place first. The shuffle jar only exists once Spark itself is
+# installed (above), so this can't live in roles/hadoop -- that role runs, and starts YARN, before
+# Spark is ever installed, and hadoop.yml needs to keep working fine on its own with no Spark role
+# involved at all.
+- name: Copy Spark's YARN shuffle service jar onto the Hadoop NodeManager classpath
+  become: true
+  ansible.builtin.copy:
+    src: "{{ spark_home }}/yarn/spark-{{ spark_version }}-yarn-shuffle.jar"
+    dest: "{{ hadoop_home }}/share/hadoop/yarn/lib/spark-{{ spark_version }}-yarn-shuffle.jar"
+    remote_src: true
+    mode: '0644'
+  notify: restart yarn nodemanagers
+
+- name: Register the Spark shuffle service in yarn-site.xml's aux-services list
+  become: true
+  ansible.builtin.lineinfile:
+    path: "{{ hadoop_home }}/etc/hadoop/yarn-site.xml"
+    regexp: '^\s*<value>mapreduce_shuffle</value>\s*$'
+    line: "    <value>mapreduce_shuffle,spark_shuffle</value>"
+  notify: restart yarn nodemanagers
+
+- name: Register the Spark shuffle service's implementation class in yarn-site.xml
+  become: true
+  ansible.builtin.blockinfile:
+    path: "{{ hadoop_home }}/etc/hadoop/yarn-site.xml"
+    marker: "  <!-- {mark} SPARK SHUFFLE SERVICE -->"
+    insertbefore: '</configuration>'
+    block: |
+      <property>
+        <name>yarn.nodemanager.aux-services.spark_shuffle.class</name>
+        <value>org.apache.spark.network.yarn.YarnShuffleService</value>
+      </property>
+  notify: restart yarn nodemanagers

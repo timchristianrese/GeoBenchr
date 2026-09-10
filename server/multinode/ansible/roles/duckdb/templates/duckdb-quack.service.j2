@@ -1,0 +1,19 @@
+[Unit]
+Description=DuckDB Quack server (GeoBenchr benchmark SUT)
+After=network.target
+
+[Service]
+Type=simple
+User={{ ansible_user }}
+WorkingDirectory={{ duckdb_data_dir }}
+# FIX: `duckdb -c "...; CALL quack_serve(...);"` used to be the whole ExecStart -- quack_serve()
+# starts its HTTP listener on a background thread and returns immediately, so with no more -c
+# commands left the CLI just exits right after, tearing the listener down with it (confirmed via
+# journalctl: the unit logged the listen_uri table then exited 0/SUCCESS a moment later). See
+# duckdb-quack-start.sh.j2 for how the wrapper script keeps the CLI's stdin open instead.
+ExecStart=/usr/local/bin/duckdb-quack-start.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

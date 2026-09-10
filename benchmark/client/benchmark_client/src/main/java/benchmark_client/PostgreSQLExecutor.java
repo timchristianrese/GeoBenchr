@@ -33,23 +33,24 @@ public class PostgreSQLExecutor implements QueryExecutor {
         QueryLogger.logStart(dbType, application, queryName, runID);
         long start = System.currentTimeMillis();
         try (Connection conn = DriverManager.getConnection(url, user, password);
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery()) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            
-            //print the first row and last row
-            
+            // read queries return a ResultSet; write queries (insert/update/delete) don't -- branch
+            // on execute()'s return value instead of assuming executeQuery(), which throws for writes.
+            boolean hasResultSet = stmt.execute();
             int count = 0;
-            while (rs.next()) {
-                count++;
-                //print the entire row, all columns, all rows
-            }  
+            if (hasResultSet) {
+                try (ResultSet rs = stmt.getResultSet()) {
+                    while (rs.next()) {
+                        count++;
+                    }
+                }
+            } else {
+                count = stmt.getUpdateCount();
+            }
 
-            // Optional: Print row count and last row
-            System.out.println("Rows returned: " + count);
+            System.out.println("Rows returned/affected: " + count);
             long duration = System.currentTimeMillis() - start;
-            // Optional: Print row count
-            // System.out.println("Rows returned: " + count);
             QueryLogger.logSuccess(dbType, application, queryName, runID, duration);
 
         } catch (Exception e) {

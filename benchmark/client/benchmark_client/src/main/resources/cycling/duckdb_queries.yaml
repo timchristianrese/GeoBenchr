@@ -1,0 +1,1870 @@
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Pankow' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Pankow'
+        AND r.timestamp BETWEEN '2026-06-01 13:11:59' AND '2026-06-01 14:48:28'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Pankow
+  - '''2026-06-01 13:11:59'' AND ''2026-06-01 14:48:28'''
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 235)
+    WHERE u.name = 'Katholische-Hochschule-für-Sozialwesen-Berlin'
+      AND r.timestamp BETWEEN '2026-06-04 03:59:08' AND '2026-06-04 05:45:18';
+  params:
+  - Katholische-Hochschule-für-Sozialwesen-Berlin
+  - 235
+  - '''2026-06-04 03:59:08'' AND ''2026-06-04 05:45:18'''
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Charlottenburg-Wilmersdorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Charlottenburg-Wilmersdorf'
+        AND r.timestamp BETWEEN '2026-06-03 00:29:30' AND '2026-06-03 02:18:28'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Charlottenburg-Wilmersdorf
+  - '''2026-06-03 00:29:30'' AND ''2026-06-03 02:18:28'''
+- name: updateridePoint
+  type: update
+  sql: |
+    UPDATE ride_points
+    SET geom = ST_Transform(ST_SetSRID(ST_Point(6.215617392053327, 50.982088181109866), 4326), 3857)
+    WHERE id = 1767363074;
+  params:
+  - 1767363074
+  - ST_Transform(ST_SetSRID(ST_Point(6.215617392053327, 50.982088181109866), 4326),
+    3857)
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 754)
+    WHERE u.name = 'European-School-of-Management-and-Technology-Berlin'
+      AND r.timestamp BETWEEN '2026-06-02 09:57:01' AND '2026-06-02 11:53:32';
+  params:
+  - European-School-of-Management-and-Technology-Berlin
+  - 754
+  - '''2026-06-02 09:57:01'' AND ''2026-06-02 11:53:32'''
+- name: bulkInsertridePoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1370881048, ST_Transform(ST_SetSRID(ST_Point(7.884981561350585, 50.96747718178266), 4326), 3857), TIMESTAMP '2026-06-04 18:47:48'), (1017475735, ST_Transform(ST_SetSRID(ST_Point(7.8008985623207465, 51.12106869174589), 4326), 3857), TIMESTAMP '2026-06-01 14:49:13'), (1978709313, ST_Transform(ST_SetSRID(ST_Point(7.230931075598908, 51.04666633374289), 4326), 3857), TIMESTAMP '2026-06-03 10:19:54'), (1447794529, ST_Transform(ST_SetSRID(ST_Point(7.554596577304293, 51.36764142574937), 4326), 3857), TIMESTAMP '2026-06-01 09:47:38'), (1961467287, ST_Transform(ST_SetSRID(ST_Point(8.84944199191768, 50.916811960598274), 4326), 3857), TIMESTAMP '2026-06-04 16:30:18'), (1565066038, ST_Transform(ST_SetSRID(ST_Point(9.429475252284414, 50.53037318341686), 4326), 3857), TIMESTAMP '2026-06-03 03:31:33'), (1369149703, ST_Transform(ST_SetSRID(ST_Point(7.740061951167437, 51.53820669218094), 4326), 3857), TIMESTAMP '2026-06-02 04:23:05'), (1423720775, ST_Transform(ST_SetSRID(ST_Point(6.136993701578235, 52.377095974211706), 4326), 3857), TIMESTAMP '2026-06-04 16:52:38'), (1919278252, ST_Transform(ST_SetSRID(ST_Point(7.591304293797643, 51.58825444567562), 4326), 3857), TIMESTAMP '2026-06-03 06:18:45'), (1228162398, ST_Transform(ST_SetSRID(ST_Point(8.746854260029, 51.341697196822984), 4326), 3857), TIMESTAMP '2026-06-03 18:55:06');
+  params:
+  - (1370881048, ST_Transform(ST_SetSRID(ST_Point(7.884981561350585, 50.96747718178266),
+    4326), 3857), TIMESTAMP '2026-06-04 18:47:48'), (1017475735, ST_Transform(ST_SetSRID(ST_Point(7.8008985623207465,
+    51.12106869174589), 4326), 3857), TIMESTAMP '2026-06-01 14:49:13'), (1978709313,
+    ST_Transform(ST_SetSRID(ST_Point(7.230931075598908, 51.04666633374289), 4326),
+    3857), TIMESTAMP '2026-06-03 10:19:54'), (1447794529, ST_Transform(ST_SetSRID(ST_Point(7.554596577304293,
+    51.36764142574937), 4326), 3857), TIMESTAMP '2026-06-01 09:47:38'), (1961467287,
+    ST_Transform(ST_SetSRID(ST_Point(8.84944199191768, 50.916811960598274), 4326),
+    3857), TIMESTAMP '2026-06-04 16:30:18'), (1565066038, ST_Transform(ST_SetSRID(ST_Point(9.429475252284414,
+    50.53037318341686), 4326), 3857), TIMESTAMP '2026-06-03 03:31:33'), (1369149703,
+    ST_Transform(ST_SetSRID(ST_Point(7.740061951167437, 51.53820669218094), 4326),
+    3857), TIMESTAMP '2026-06-02 04:23:05'), (1423720775, ST_Transform(ST_SetSRID(ST_Point(6.136993701578235,
+    52.377095974211706), 4326), 3857), TIMESTAMP '2026-06-04 16:52:38'), (1919278252,
+    ST_Transform(ST_SetSRID(ST_Point(7.591304293797643, 51.58825444567562), 4326),
+    3857), TIMESTAMP '2026-06-03 06:18:45'), (1228162398, ST_Transform(ST_SetSRID(ST_Point(8.746854260029,
+    51.341697196822984), 4326), 3857), TIMESTAMP '2026-06-03 18:55:06')
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Spandau' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Spandau'
+        AND r.timestamp BETWEEN '2026-06-01 09:22:34' AND '2026-06-01 10:57:57'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Spandau
+  - '''2026-06-01 09:22:34'' AND ''2026-06-01 10:57:57'''
+- name: deleteridePoint
+  type: delete
+  sql: |
+    DELETE FROM ride_points
+    WHERE id = 1555642705;
+  params:
+  - 1555642705
+- name: updateridePoint
+  type: update
+  sql: |
+    UPDATE ride_points
+    SET geom = ST_Transform(ST_SetSRID(ST_Point(8.389093008182043, 50.69613373821788), 4326), 3857)
+    WHERE id = 1939533345;
+  params:
+  - 1939533345
+  - ST_Transform(ST_SetSRID(ST_Point(8.389093008182043, 50.69613373821788), 4326),
+    3857)
+- name: insertSingleridePoint
+  type: insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1359620969, ST_Transform(ST_SetSRID(ST_Point(6.7951253837447805, 50.681653743854), 4326), 3857), '2026-06-02 12:13:33');
+  params:
+  - 1359620969
+  - ST_Transform(ST_SetSRID(ST_Point(6.7951253837447805, 50.681653743854), 4326),
+    3857)
+  - '2026-06-02 12:13:33'
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Reinickendorf' GROUP BY d.name;
+  params:
+  - Reinickendorf
+- name: updateridePoint
+  type: update
+  sql: |
+    UPDATE ride_points
+    SET geom = ST_Transform(ST_SetSRID(ST_Point(8.136563234968733, 52.16581206340276), 4326), 3857)
+    WHERE id = 1425923484;
+  params:
+  - 1425923484
+  - ST_Transform(ST_SetSRID(ST_Point(8.136563234968733, 52.16581206340276), 4326),
+    3857)
+- name: bulkInsertridePoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1803817972, ST_Transform(ST_SetSRID(ST_Point(8.568329518189012, 52.10413635555352), 4326), 3857), TIMESTAMP '2026-06-01 14:13:15'), (1977825393, ST_Transform(ST_SetSRID(ST_Point(8.60313968893408, 52.57209973374196), 4326), 3857), TIMESTAMP '2026-06-04 19:10:40'), (1944103914, ST_Transform(ST_SetSRID(ST_Point(5.734575159276665, 51.9475892129031), 4326), 3857), TIMESTAMP '2026-06-04 15:04:49'), (1132142586, ST_Transform(ST_SetSRID(ST_Point(6.786742381494374, 50.55779803034509), 4326), 3857), TIMESTAMP '2026-06-02 13:47:28'), (1111924750, ST_Transform(ST_SetSRID(ST_Point(6.8246131308672435, 51.266515110645116), 4326), 3857), TIMESTAMP '2026-06-04 20:23:51'), (1173885530, ST_Transform(ST_SetSRID(ST_Point(7.705955835656143, 52.544087665250395), 4326), 3857), TIMESTAMP '2026-06-02 20:46:05'), (1869362489, ST_Transform(ST_SetSRID(ST_Point(6.2173113641044635, 51.23257394127858), 4326), 3857), TIMESTAMP '2026-06-04 19:05:26'), (1563045112, ST_Transform(ST_SetSRID(ST_Point(5.6691318114053955, 51.37523109279964), 4326), 3857), TIMESTAMP '2026-06-04 19:59:02'), (1732552852, ST_Transform(ST_SetSRID(ST_Point(7.106579158400467, 51.806017270757636), 4326), 3857), TIMESTAMP '2026-06-03 18:22:39'), (1492265403, ST_Transform(ST_SetSRID(ST_Point(7.435320455978272, 52.180172408928144), 4326), 3857), TIMESTAMP '2026-06-04 05:09:56');
+  params:
+  - (1803817972, ST_Transform(ST_SetSRID(ST_Point(8.568329518189012, 52.10413635555352),
+    4326), 3857), TIMESTAMP '2026-06-01 14:13:15'), (1977825393, ST_Transform(ST_SetSRID(ST_Point(8.60313968893408,
+    52.57209973374196), 4326), 3857), TIMESTAMP '2026-06-04 19:10:40'), (1944103914,
+    ST_Transform(ST_SetSRID(ST_Point(5.734575159276665, 51.9475892129031), 4326),
+    3857), TIMESTAMP '2026-06-04 15:04:49'), (1132142586, ST_Transform(ST_SetSRID(ST_Point(6.786742381494374,
+    50.55779803034509), 4326), 3857), TIMESTAMP '2026-06-02 13:47:28'), (1111924750,
+    ST_Transform(ST_SetSRID(ST_Point(6.8246131308672435, 51.266515110645116), 4326),
+    3857), TIMESTAMP '2026-06-04 20:23:51'), (1173885530, ST_Transform(ST_SetSRID(ST_Point(7.705955835656143,
+    52.544087665250395), 4326), 3857), TIMESTAMP '2026-06-02 20:46:05'), (1869362489,
+    ST_Transform(ST_SetSRID(ST_Point(6.2173113641044635, 51.23257394127858), 4326),
+    3857), TIMESTAMP '2026-06-04 19:05:26'), (1563045112, ST_Transform(ST_SetSRID(ST_Point(5.6691318114053955,
+    51.37523109279964), 4326), 3857), TIMESTAMP '2026-06-04 19:59:02'), (1732552852,
+    ST_Transform(ST_SetSRID(ST_Point(7.106579158400467, 51.806017270757636), 4326),
+    3857), TIMESTAMP '2026-06-03 18:22:39'), (1492265403, ST_Transform(ST_SetSRID(ST_Point(7.435320455978272,
+    52.180172408928144), 4326), 3857), TIMESTAMP '2026-06-04 05:09:56')
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Treptow-Köpenick'
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 646));
+  params:
+  - Treptow-Köpenick
+  - 646
+- name: deleteridePoint
+  type: delete
+  sql: |
+    DELETE FROM ride_points
+    WHERE id = 1924959383;
+  params:
+  - 1924959383
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 593)
+    WHERE u.name = 'Humboldt-Universität-zu-Berlin'
+      AND r.timestamp BETWEEN '2026-06-02 07:12:59' AND '2026-06-02 09:04:46';
+  params:
+  - Humboldt-Universität-zu-Berlin
+  - 593
+  - '''2026-06-02 07:12:59'' AND ''2026-06-02 09:04:46'''
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Lichtenberg' GROUP BY d.name;
+  params:
+  - Lichtenberg
+- name: updateridePoint
+  type: update
+  sql: |
+    UPDATE ride_points
+    SET geom = ST_Transform(ST_SetSRID(ST_Point(6.304186077688225, 51.97006939222942), 4326), 3857)
+    WHERE id = 1916008858;
+  params:
+  - 1916008858
+  - ST_Transform(ST_SetSRID(ST_Point(6.304186077688225, 51.97006939222942), 4326),
+    3857)
+- name: insertSingleridePoint
+  type: insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1087185896, ST_Transform(ST_SetSRID(ST_Point(8.34079781758796, 50.990881151520675), 4326), 3857), '2026-06-01 17:14:35');
+  params:
+  - 1087185896
+  - ST_Transform(ST_SetSRID(ST_Point(8.34079781758796, 50.990881151520675), 4326),
+    3857)
+  - '2026-06-01 17:14:35'
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-01 23:22:20' AND '2026-06-02 01:17:30'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-01 23:22:20'' AND ''2026-06-02 01:17:30'''
+- name: insertSingleridePoint
+  type: insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1004766142, ST_Transform(ST_SetSRID(ST_Point(7.438576577200912, 51.0982050663403), 4326), 3857), '2026-06-02 22:27:38');
+  params:
+  - 1004766142
+  - ST_Transform(ST_SetSRID(ST_Point(7.438576577200912, 51.0982050663403), 4326),
+    3857)
+  - '2026-06-02 22:27:38'
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Neukölln'
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 373));
+  params:
+  - Neukölln
+  - 373
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Spandau' GROUP BY d.name;
+  params:
+  - Spandau
+- name: updateridePoint
+  type: update
+  sql: |
+    UPDATE ride_points
+    SET geom = ST_Transform(ST_SetSRID(ST_Point(6.650734594716098, 51.75568845089804), 4326), 3857)
+    WHERE id = 1743604059;
+  params:
+  - 1743604059
+  - ST_Transform(ST_SetSRID(ST_Point(6.650734594716098, 51.75568845089804), 4326),
+    3857)
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Friedrichshain-Kreuzberg' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Friedrichshain-Kreuzberg'
+        AND r.timestamp BETWEEN '2026-06-03 23:04:32' AND '2026-06-04 00:16:37'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Friedrichshain-Kreuzberg
+  - '''2026-06-03 23:04:32'' AND ''2026-06-04 00:16:37'''
+- name: insertSingleridePoint
+  type: insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1501489594, ST_Transform(ST_SetSRID(ST_Point(7.794953364618231, 51.79060100566803), 4326), 3857), '2026-06-03 13:42:43');
+  params:
+  - 1501489594
+  - ST_Transform(ST_SetSRID(ST_Point(7.794953364618231, 51.79060100566803), 4326),
+    3857)
+  - '2026-06-03 13:42:43'
+- name: insertSingleridePoint
+  type: insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1894439355, ST_Transform(ST_SetSRID(ST_Point(6.638620152524268, 50.95024568318471), 4326), 3857), '2026-06-01 22:37:32');
+  params:
+  - 1894439355
+  - ST_Transform(ST_SetSRID(ST_Point(6.638620152524268, 50.95024568318471), 4326),
+    3857)
+  - '2026-06-01 22:37:32'
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-01 11:37:44' AND '2026-06-01 13:37:12'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-01 11:37:44'' AND ''2026-06-01 13:37:12'''
+- name: deleteridePoint
+  type: delete
+  sql: |
+    DELETE FROM ride_points
+    WHERE id = 1392790040;
+  params:
+  - 1392790040
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Neukölln' GROUP BY d.name;
+  params:
+  - Neukölln
+- name: updateridePoint
+  type: update
+  sql: |
+    UPDATE ride_points
+    SET geom = ST_Transform(ST_SetSRID(ST_Point(6.580032813642244, 50.590603109400256), 4326), 3857)
+    WHERE id = 1726865509;
+  params:
+  - 1726865509
+  - ST_Transform(ST_SetSRID(ST_Point(6.580032813642244, 50.590603109400256), 4326),
+    3857)
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Steglitz-Zehlendorf'
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 256));
+  params:
+  - Steglitz-Zehlendorf
+  - 256
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-02 13:12:22' AND '2026-06-02 15:11:05'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-02 13:12:22'' AND ''2026-06-02 15:11:05'''
+- name: deleteridePoint
+  type: delete
+  sql: |
+    DELETE FROM ride_points
+    WHERE id = 1327116292;
+  params:
+  - 1327116292
+- name: updateridePoint
+  type: update
+  sql: |
+    UPDATE ride_points
+    SET geom = ST_Transform(ST_SetSRID(ST_Point(7.000227970731911, 51.57708168484706), 4326), 3857)
+    WHERE id = 1474030391;
+  params:
+  - 1474030391
+  - ST_Transform(ST_SetSRID(ST_Point(7.000227970731911, 51.57708168484706), 4326),
+    3857)
+- name: bulkInsertridePoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1436320091, ST_Transform(ST_SetSRID(ST_Point(8.933211270395432, 51.83427258723756), 4326), 3857), TIMESTAMP '2026-06-02 12:49:46'), (1696361716, ST_Transform(ST_SetSRID(ST_Point(9.254416994679506, 52.13282860809536), 4326), 3857), TIMESTAMP '2026-06-01 21:47:59'), (1042077046, ST_Transform(ST_SetSRID(ST_Point(7.356488581775242, 52.54099264710828), 4326), 3857), TIMESTAMP '2026-06-04 09:22:28'), (1951152363, ST_Transform(ST_SetSRID(ST_Point(8.058482907921693, 50.94650751934381), 4326), 3857), TIMESTAMP '2026-06-04 16:06:02'), (1523589832, ST_Transform(ST_SetSRID(ST_Point(6.528235420574889, 50.54829971017941), 4326), 3857), TIMESTAMP '2026-06-03 12:16:14'), (1700351704, ST_Transform(ST_SetSRID(ST_Point(7.9711624946705335, 52.18104564523272), 4326), 3857), TIMESTAMP '2026-06-03 22:47:11'), (1540782782, ST_Transform(ST_SetSRID(ST_Point(5.718861228600422, 50.45950688655783), 4326), 3857), TIMESTAMP '2026-06-03 06:14:40'), (1333387231, ST_Transform(ST_SetSRID(ST_Point(7.215780564407893, 50.62620917208251), 4326), 3857), TIMESTAMP '2026-06-04 01:04:14'), (1104417744, ST_Transform(ST_SetSRID(ST_Point(8.731565064874125, 52.1300180555155), 4326), 3857), TIMESTAMP '2026-06-02 05:26:31'), (1216216439, ST_Transform(ST_SetSRID(ST_Point(8.820448237445902, 51.29502432955284), 4326), 3857), TIMESTAMP '2026-06-02 00:34:54');
+  params:
+  - (1436320091, ST_Transform(ST_SetSRID(ST_Point(8.933211270395432, 51.83427258723756),
+    4326), 3857), TIMESTAMP '2026-06-02 12:49:46'), (1696361716, ST_Transform(ST_SetSRID(ST_Point(9.254416994679506,
+    52.13282860809536), 4326), 3857), TIMESTAMP '2026-06-01 21:47:59'), (1042077046,
+    ST_Transform(ST_SetSRID(ST_Point(7.356488581775242, 52.54099264710828), 4326),
+    3857), TIMESTAMP '2026-06-04 09:22:28'), (1951152363, ST_Transform(ST_SetSRID(ST_Point(8.058482907921693,
+    50.94650751934381), 4326), 3857), TIMESTAMP '2026-06-04 16:06:02'), (1523589832,
+    ST_Transform(ST_SetSRID(ST_Point(6.528235420574889, 50.54829971017941), 4326),
+    3857), TIMESTAMP '2026-06-03 12:16:14'), (1700351704, ST_Transform(ST_SetSRID(ST_Point(7.9711624946705335,
+    52.18104564523272), 4326), 3857), TIMESTAMP '2026-06-03 22:47:11'), (1540782782,
+    ST_Transform(ST_SetSRID(ST_Point(5.718861228600422, 50.45950688655783), 4326),
+    3857), TIMESTAMP '2026-06-03 06:14:40'), (1333387231, ST_Transform(ST_SetSRID(ST_Point(7.215780564407893,
+    50.62620917208251), 4326), 3857), TIMESTAMP '2026-06-04 01:04:14'), (1104417744,
+    ST_Transform(ST_SetSRID(ST_Point(8.731565064874125, 52.1300180555155), 4326),
+    3857), TIMESTAMP '2026-06-02 05:26:31'), (1216216439, ST_Transform(ST_SetSRID(ST_Point(8.820448237445902,
+    51.29502432955284), 4326), 3857), TIMESTAMP '2026-06-02 00:34:54')
+- name: deleteridePoint
+  type: delete
+  sql: |
+    DELETE FROM ride_points
+    WHERE id = 1508852761;
+  params:
+  - 1508852761
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 452)
+    WHERE u.name = 'Bard-College'
+      AND r.timestamp BETWEEN '2026-06-03 20:24:50' AND '2026-06-03 21:15:25';
+  params:
+  - Bard-College
+  - 452
+  - '''2026-06-03 20:24:50'' AND ''2026-06-03 21:15:25'''
+- name: deleteridePoint
+  type: delete
+  sql: |
+    DELETE FROM ride_points
+    WHERE id = 1694256838;
+  params:
+  - 1694256838
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-04 14:18:48' AND '2026-06-04 15:56:57'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-04 14:18:48'' AND ''2026-06-04 15:56:57'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-02 22:36:11' AND '2026-06-02 23:34:54'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-02 22:36:11'' AND ''2026-06-02 23:34:54'''
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 439)
+    WHERE u.name = 'Charité-Campus-Klinik'
+      AND r.timestamp BETWEEN '2026-06-02 21:26:36' AND '2026-06-02 23:15:58';
+  params:
+  - Charité-Campus-Klinik
+  - 439
+  - '''2026-06-02 21:26:36'' AND ''2026-06-02 23:15:58'''
+- name: deleteridePoint
+  type: delete
+  sql: |
+    DELETE FROM ride_points
+    WHERE id = 1217709710;
+  params:
+  - 1217709710
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-03 16:15:57' AND '2026-06-03 17:11:49'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-03 16:15:57'' AND ''2026-06-03 17:11:49'''
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Steglitz-Zehlendorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Steglitz-Zehlendorf'
+        AND r.timestamp BETWEEN '2026-06-02 21:16:33' AND '2026-06-02 21:58:09'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Steglitz-Zehlendorf
+  - '''2026-06-02 21:16:33'' AND ''2026-06-02 21:58:09'''
+- name: bulkInsertridePoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1560018247, ST_Transform(ST_SetSRID(ST_Point(6.262239164295903, 50.72489214943918), 4326), 3857), TIMESTAMP '2026-06-02 00:57:23'), (1697701811, ST_Transform(ST_SetSRID(ST_Point(7.948818072083235, 52.360151525422644), 4326), 3857), TIMESTAMP '2026-06-03 20:39:03'), (1164481576, ST_Transform(ST_SetSRID(ST_Point(9.031596657838886, 51.75448148937142), 4326), 3857), TIMESTAMP '2026-06-02 13:58:04'), (1713224529, ST_Transform(ST_SetSRID(ST_Point(5.796979704066402, 50.391843125727554), 4326), 3857), TIMESTAMP '2026-06-02 09:43:33'), (1137705841, ST_Transform(ST_SetSRID(ST_Point(6.623744007150103, 50.446963783487476), 4326), 3857), TIMESTAMP '2026-06-01 21:51:35'), (1800122228, ST_Transform(ST_SetSRID(ST_Point(9.446930953217294, 51.442891295640045), 4326), 3857), TIMESTAMP '2026-06-04 16:06:08'), (1135368952, ST_Transform(ST_SetSRID(ST_Point(7.830710624050995, 51.88479918296746), 4326), 3857), TIMESTAMP '2026-06-03 12:07:55'), (1687331589, ST_Transform(ST_SetSRID(ST_Point(6.824665597473709, 52.21280570666729), 4326), 3857), TIMESTAMP '2026-06-01 20:55:37'), (1221431258, ST_Transform(ST_SetSRID(ST_Point(9.40497249374658, 51.1813590818287), 4326), 3857), TIMESTAMP '2026-06-02 03:32:43'), (1258559521, ST_Transform(ST_SetSRID(ST_Point(7.875835329931072, 51.24956361798488), 4326), 3857), TIMESTAMP '2026-06-03 04:32:12');
+  params:
+  - (1560018247, ST_Transform(ST_SetSRID(ST_Point(6.262239164295903, 50.72489214943918),
+    4326), 3857), TIMESTAMP '2026-06-02 00:57:23'), (1697701811, ST_Transform(ST_SetSRID(ST_Point(7.948818072083235,
+    52.360151525422644), 4326), 3857), TIMESTAMP '2026-06-03 20:39:03'), (1164481576,
+    ST_Transform(ST_SetSRID(ST_Point(9.031596657838886, 51.75448148937142), 4326),
+    3857), TIMESTAMP '2026-06-02 13:58:04'), (1713224529, ST_Transform(ST_SetSRID(ST_Point(5.796979704066402,
+    50.391843125727554), 4326), 3857), TIMESTAMP '2026-06-02 09:43:33'), (1137705841,
+    ST_Transform(ST_SetSRID(ST_Point(6.623744007150103, 50.446963783487476), 4326),
+    3857), TIMESTAMP '2026-06-01 21:51:35'), (1800122228, ST_Transform(ST_SetSRID(ST_Point(9.446930953217294,
+    51.442891295640045), 4326), 3857), TIMESTAMP '2026-06-04 16:06:08'), (1135368952,
+    ST_Transform(ST_SetSRID(ST_Point(7.830710624050995, 51.88479918296746), 4326),
+    3857), TIMESTAMP '2026-06-03 12:07:55'), (1687331589, ST_Transform(ST_SetSRID(ST_Point(6.824665597473709,
+    52.21280570666729), 4326), 3857), TIMESTAMP '2026-06-01 20:55:37'), (1221431258,
+    ST_Transform(ST_SetSRID(ST_Point(9.40497249374658, 51.1813590818287), 4326), 3857),
+    TIMESTAMP '2026-06-02 03:32:43'), (1258559521, ST_Transform(ST_SetSRID(ST_Point(7.875835329931072,
+    51.24956361798488), 4326), 3857), TIMESTAMP '2026-06-03 04:32:12')
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-04 06:58:13' AND '2026-06-04 08:49:03'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-04 06:58:13'' AND ''2026-06-04 08:49:03'''
+- name: bulkInsertridePoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1578600158, ST_Transform(ST_SetSRID(ST_Point(8.38264982844687, 52.198721635782675), 4326), 3857), TIMESTAMP '2026-06-01 23:46:27'), (1772714019, ST_Transform(ST_SetSRID(ST_Point(7.316657913347961, 52.25669898168425), 4326), 3857), TIMESTAMP '2026-06-04 20:43:20'), (1080859784, ST_Transform(ST_SetSRID(ST_Point(5.891713001238181, 50.6572228686971), 4326), 3857), TIMESTAMP '2026-06-02 18:20:31'), (1638644690, ST_Transform(ST_SetSRID(ST_Point(7.243744189852676, 50.33923298794202), 4326), 3857), TIMESTAMP '2026-06-04 03:12:26'), (1031628078, ST_Transform(ST_SetSRID(ST_Point(7.173329873975142, 51.00390270485391), 4326), 3857), TIMESTAMP '2026-06-04 13:30:51'), (1956682156, ST_Transform(ST_SetSRID(ST_Point(7.178235675947523, 50.7897573290039), 4326), 3857), TIMESTAMP '2026-06-02 08:48:08'), (1304754233, ST_Transform(ST_SetSRID(ST_Point(8.36308255090685, 51.08021443124479), 4326), 3857), TIMESTAMP '2026-06-03 02:15:36'), (1971477142, ST_Transform(ST_SetSRID(ST_Point(8.566833458674829, 50.44974819710273), 4326), 3857), TIMESTAMP '2026-06-03 23:11:51'), (1644143455, ST_Transform(ST_SetSRID(ST_Point(9.22952364277814, 52.21263252660836), 4326), 3857), TIMESTAMP '2026-06-04 10:39:38'), (1383028783, ST_Transform(ST_SetSRID(ST_Point(6.741628197805737, 52.194582206885315), 4326), 3857), TIMESTAMP '2026-06-03 20:58:10');
+  params:
+  - (1578600158, ST_Transform(ST_SetSRID(ST_Point(8.38264982844687, 52.198721635782675),
+    4326), 3857), TIMESTAMP '2026-06-01 23:46:27'), (1772714019, ST_Transform(ST_SetSRID(ST_Point(7.316657913347961,
+    52.25669898168425), 4326), 3857), TIMESTAMP '2026-06-04 20:43:20'), (1080859784,
+    ST_Transform(ST_SetSRID(ST_Point(5.891713001238181, 50.6572228686971), 4326),
+    3857), TIMESTAMP '2026-06-02 18:20:31'), (1638644690, ST_Transform(ST_SetSRID(ST_Point(7.243744189852676,
+    50.33923298794202), 4326), 3857), TIMESTAMP '2026-06-04 03:12:26'), (1031628078,
+    ST_Transform(ST_SetSRID(ST_Point(7.173329873975142, 51.00390270485391), 4326),
+    3857), TIMESTAMP '2026-06-04 13:30:51'), (1956682156, ST_Transform(ST_SetSRID(ST_Point(7.178235675947523,
+    50.7897573290039), 4326), 3857), TIMESTAMP '2026-06-02 08:48:08'), (1304754233,
+    ST_Transform(ST_SetSRID(ST_Point(8.36308255090685, 51.08021443124479), 4326),
+    3857), TIMESTAMP '2026-06-03 02:15:36'), (1971477142, ST_Transform(ST_SetSRID(ST_Point(8.566833458674829,
+    50.44974819710273), 4326), 3857), TIMESTAMP '2026-06-03 23:11:51'), (1644143455,
+    ST_Transform(ST_SetSRID(ST_Point(9.22952364277814, 52.21263252660836), 4326),
+    3857), TIMESTAMP '2026-06-04 10:39:38'), (1383028783, ST_Transform(ST_SetSRID(ST_Point(6.741628197805737,
+    52.194582206885315), 4326), 3857), TIMESTAMP '2026-06-03 20:58:10')
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-02 15:53:40' AND '2026-06-02 16:25:10'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-02 15:53:40'' AND ''2026-06-02 16:25:10'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-04 13:35:53' AND '2026-06-04 14:17:04'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-04 13:35:53'' AND ''2026-06-04 14:17:04'''
+- name: updateridePoint
+  type: update
+  sql: |
+    UPDATE ride_points
+    SET geom = ST_Transform(ST_SetSRID(ST_Point(8.551239522210047, 51.74858564855701), 4326), 3857)
+    WHERE id = 1836015607;
+  params:
+  - 1836015607
+  - ST_Transform(ST_SetSRID(ST_Point(8.551239522210047, 51.74858564855701), 4326),
+    3857)
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-04 13:28:14' AND '2026-06-04 15:04:03'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-04 13:28:14'' AND ''2026-06-04 15:04:03'''
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Lichtenberg' GROUP BY d.name;
+  params:
+  - Lichtenberg
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Mitte'
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 378));
+  params:
+  - Mitte
+  - 378
+- name: insertSingleridePoint
+  type: insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1334057444, ST_Transform(ST_SetSRID(ST_Point(6.583684891181086, 51.323011126512256), 4326), 3857), '2026-06-02 00:05:27');
+  params:
+  - 1334057444
+  - ST_Transform(ST_SetSRID(ST_Point(6.583684891181086, 51.323011126512256), 4326),
+    3857)
+  - '2026-06-02 00:05:27'
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-01 15:45:12' AND '2026-06-01 16:59:29'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-01 15:45:12'' AND ''2026-06-01 16:59:29'''
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Charlottenburg-Wilmersdorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Charlottenburg-Wilmersdorf'
+        AND r.timestamp BETWEEN '2026-06-02 22:09:19' AND '2026-06-02 23:23:37'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Charlottenburg-Wilmersdorf
+  - '''2026-06-02 22:09:19'' AND ''2026-06-02 23:23:37'''
+- name: bulkInsertridePoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1186935877, ST_Transform(ST_SetSRID(ST_Point(6.540287401436705, 50.47941802693893), 4326), 3857), TIMESTAMP '2026-06-03 19:43:27'), (1909527740, ST_Transform(ST_SetSRID(ST_Point(9.031294928821382, 52.05141079165748), 4326), 3857), TIMESTAMP '2026-06-03 22:14:41'), (1963688716, ST_Transform(ST_SetSRID(ST_Point(7.758958751451742, 52.38463135646684), 4326), 3857), TIMESTAMP '2026-06-03 16:47:35'), (1874570297, ST_Transform(ST_SetSRID(ST_Point(5.851663002098918, 52.11331443360982), 4326), 3857), TIMESTAMP '2026-06-01 13:41:43'), (1370038828, ST_Transform(ST_SetSRID(ST_Point(8.667422569763609, 51.05681164147712), 4326), 3857), TIMESTAMP '2026-06-03 16:01:37'), (1541566092, ST_Transform(ST_SetSRID(ST_Point(7.951678754337905, 50.96415131764277), 4326), 3857), TIMESTAMP '2026-06-01 09:53:29'), (1222741166, ST_Transform(ST_SetSRID(ST_Point(8.471206194604813, 51.43905638585645), 4326), 3857), TIMESTAMP '2026-06-04 00:41:29'), (1399169189, ST_Transform(ST_SetSRID(ST_Point(8.591291879085798, 52.05860884168848), 4326), 3857), TIMESTAMP '2026-06-03 17:45:11'), (1335820949, ST_Transform(ST_SetSRID(ST_Point(6.550779592185066, 51.33670934491586), 4326), 3857), TIMESTAMP '2026-06-02 06:38:42'), (1737546203, ST_Transform(ST_SetSRID(ST_Point(6.7083177573080235, 52.38429374228248), 4326), 3857), TIMESTAMP '2026-06-04 04:51:13');
+  params:
+  - (1186935877, ST_Transform(ST_SetSRID(ST_Point(6.540287401436705, 50.47941802693893),
+    4326), 3857), TIMESTAMP '2026-06-03 19:43:27'), (1909527740, ST_Transform(ST_SetSRID(ST_Point(9.031294928821382,
+    52.05141079165748), 4326), 3857), TIMESTAMP '2026-06-03 22:14:41'), (1963688716,
+    ST_Transform(ST_SetSRID(ST_Point(7.758958751451742, 52.38463135646684), 4326),
+    3857), TIMESTAMP '2026-06-03 16:47:35'), (1874570297, ST_Transform(ST_SetSRID(ST_Point(5.851663002098918,
+    52.11331443360982), 4326), 3857), TIMESTAMP '2026-06-01 13:41:43'), (1370038828,
+    ST_Transform(ST_SetSRID(ST_Point(8.667422569763609, 51.05681164147712), 4326),
+    3857), TIMESTAMP '2026-06-03 16:01:37'), (1541566092, ST_Transform(ST_SetSRID(ST_Point(7.951678754337905,
+    50.96415131764277), 4326), 3857), TIMESTAMP '2026-06-01 09:53:29'), (1222741166,
+    ST_Transform(ST_SetSRID(ST_Point(8.471206194604813, 51.43905638585645), 4326),
+    3857), TIMESTAMP '2026-06-04 00:41:29'), (1399169189, ST_Transform(ST_SetSRID(ST_Point(8.591291879085798,
+    52.05860884168848), 4326), 3857), TIMESTAMP '2026-06-03 17:45:11'), (1335820949,
+    ST_Transform(ST_SetSRID(ST_Point(6.550779592185066, 51.33670934491586), 4326),
+    3857), TIMESTAMP '2026-06-02 06:38:42'), (1737546203, ST_Transform(ST_SetSRID(ST_Point(6.7083177573080235,
+    52.38429374228248), 4326), 3857), TIMESTAMP '2026-06-04 04:51:13')
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-02 04:20:48' AND '2026-06-02 05:57:41'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-02 04:20:48'' AND ''2026-06-02 05:57:41'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-04 14:39:49' AND '2026-06-04 16:24:09'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-04 14:39:49'' AND ''2026-06-04 16:24:09'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-04 01:02:05' AND '2026-06-04 02:51:52'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-04 01:02:05'' AND ''2026-06-04 02:51:52'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-01 16:32:41' AND '2026-06-01 17:35:46'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-01 16:32:41'' AND ''2026-06-01 17:35:46'''
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Mitte' GROUP BY d.name;
+  params:
+  - Mitte
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Lichtenberg'
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 758));
+  params:
+  - Lichtenberg
+  - 758
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-01 19:51:49' AND '2026-06-01 21:33:51'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-01 19:51:49'' AND ''2026-06-01 21:33:51'''
+- name: insertSingleridePoint
+  type: insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1726744286, ST_Transform(ST_SetSRID(ST_Point(8.071861249862996, 51.34539997170303), 4326), 3857), '2026-06-04 13:58:58');
+  params:
+  - 1726744286
+  - ST_Transform(ST_SetSRID(ST_Point(8.071861249862996, 51.34539997170303), 4326),
+    3857)
+  - '2026-06-04 13:58:58'
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+  params:
+  - Tempelhof-Schöneberg
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-03 00:43:51' AND '2026-06-03 01:44:24'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-03 00:43:51'' AND ''2026-06-03 01:44:24'''
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Reinickendorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Reinickendorf'
+        AND r.timestamp BETWEEN '2026-06-04 09:56:58' AND '2026-06-04 11:05:36'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Reinickendorf
+  - '''2026-06-04 09:56:58'' AND ''2026-06-04 11:05:36'''
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Reinickendorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Reinickendorf'
+        AND r.timestamp BETWEEN '2026-06-04 14:43:21' AND '2026-06-04 16:34:18'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Reinickendorf
+  - '''2026-06-04 14:43:21'' AND ''2026-06-04 16:34:18'''
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 249)
+    WHERE u.name = 'Freie-Universität-Berlin'
+      AND r.timestamp BETWEEN '2026-06-02 14:28:08' AND '2026-06-02 15:40:12';
+  params:
+  - Freie-Universität-Berlin
+  - 249
+  - '''2026-06-02 14:28:08'' AND ''2026-06-02 15:40:12'''
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 497)
+    WHERE u.name = 'Bard-College'
+      AND r.timestamp BETWEEN '2026-06-03 15:39:43' AND '2026-06-03 16:15:02';
+  params:
+  - Bard-College
+  - 497
+  - '''2026-06-03 15:39:43'' AND ''2026-06-03 16:15:02'''
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-03 22:31:13' AND '2026-06-03 23:11:09'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-03 22:31:13'' AND ''2026-06-03 23:11:09'''
+- name: insertSingleridePoint
+  type: insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1653460585, ST_Transform(ST_SetSRID(ST_Point(7.438372416165057, 51.105571918088216), 4326), 3857), '2026-06-03 06:37:12');
+  params:
+  - 1653460585
+  - ST_Transform(ST_SetSRID(ST_Point(7.438372416165057, 51.105571918088216), 4326),
+    3857)
+  - '2026-06-03 06:37:12'
+- name: bulkInsertridePoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1741340284, ST_Transform(ST_SetSRID(ST_Point(5.8274861684406005, 52.37947952427321), 4326), 3857), TIMESTAMP '2026-06-04 17:57:55'), (1308392898, ST_Transform(ST_SetSRID(ST_Point(6.333966519911483, 52.25048362236466), 4326), 3857), TIMESTAMP '2026-06-02 08:19:58'), (1664669986, ST_Transform(ST_SetSRID(ST_Point(5.9829892554330195, 50.68301827794341), 4326), 3857), TIMESTAMP '2026-06-02 16:35:21'), (1522701347, ST_Transform(ST_SetSRID(ST_Point(6.396359205024909, 50.89311786687429), 4326), 3857), TIMESTAMP '2026-06-02 09:08:26'), (1891558120, ST_Transform(ST_SetSRID(ST_Point(5.88074438748036, 52.46188410171225), 4326), 3857), TIMESTAMP '2026-06-03 19:55:37'), (1884991623, ST_Transform(ST_SetSRID(ST_Point(7.359567772750257, 50.54844936574012), 4326), 3857), TIMESTAMP '2026-06-02 15:13:20'), (1020825397, ST_Transform(ST_SetSRID(ST_Point(6.843681291952091, 52.34519425182729), 4326), 3857), TIMESTAMP '2026-06-04 03:11:15'), (1561751611, ST_Transform(ST_SetSRID(ST_Point(7.994173313409082, 52.17058873202984), 4326), 3857), TIMESTAMP '2026-06-02 18:26:53'), (1327237005, ST_Transform(ST_SetSRID(ST_Point(6.3546673320108225, 52.11245053926424), 4326), 3857), TIMESTAMP '2026-06-03 01:04:53'), (1111144581, ST_Transform(ST_SetSRID(ST_Point(6.093315412909924, 51.187882889258226), 4326), 3857), TIMESTAMP '2026-06-02 03:50:26');
+  params:
+  - (1741340284, ST_Transform(ST_SetSRID(ST_Point(5.8274861684406005, 52.37947952427321),
+    4326), 3857), TIMESTAMP '2026-06-04 17:57:55'), (1308392898, ST_Transform(ST_SetSRID(ST_Point(6.333966519911483,
+    52.25048362236466), 4326), 3857), TIMESTAMP '2026-06-02 08:19:58'), (1664669986,
+    ST_Transform(ST_SetSRID(ST_Point(5.9829892554330195, 50.68301827794341), 4326),
+    3857), TIMESTAMP '2026-06-02 16:35:21'), (1522701347, ST_Transform(ST_SetSRID(ST_Point(6.396359205024909,
+    50.89311786687429), 4326), 3857), TIMESTAMP '2026-06-02 09:08:26'), (1891558120,
+    ST_Transform(ST_SetSRID(ST_Point(5.88074438748036, 52.46188410171225), 4326),
+    3857), TIMESTAMP '2026-06-03 19:55:37'), (1884991623, ST_Transform(ST_SetSRID(ST_Point(7.359567772750257,
+    50.54844936574012), 4326), 3857), TIMESTAMP '2026-06-02 15:13:20'), (1020825397,
+    ST_Transform(ST_SetSRID(ST_Point(6.843681291952091, 52.34519425182729), 4326),
+    3857), TIMESTAMP '2026-06-04 03:11:15'), (1561751611, ST_Transform(ST_SetSRID(ST_Point(7.994173313409082,
+    52.17058873202984), 4326), 3857), TIMESTAMP '2026-06-02 18:26:53'), (1327237005,
+    ST_Transform(ST_SetSRID(ST_Point(6.3546673320108225, 52.11245053926424), 4326),
+    3857), TIMESTAMP '2026-06-03 01:04:53'), (1111144581, ST_Transform(ST_SetSRID(ST_Point(6.093315412909924,
+    51.187882889258226), 4326), 3857), TIMESTAMP '2026-06-02 03:50:26')
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-02 11:14:37' AND '2026-06-02 12:57:39'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-02 11:14:37'' AND ''2026-06-02 12:57:39'''
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Tempelhof-Schöneberg' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Tempelhof-Schöneberg'
+        AND r.timestamp BETWEEN '2026-06-03 12:09:49' AND '2026-06-03 14:07:37'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Tempelhof-Schöneberg
+  - '''2026-06-03 12:09:49'' AND ''2026-06-03 14:07:37'''
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Mitte'
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 550));
+  params:
+  - Mitte
+  - 550
+- name: deleteridePoint
+  type: delete
+  sql: |
+    DELETE FROM ride_points
+    WHERE id = 1283849060;
+  params:
+  - 1283849060
+- name: insertSingleridePoint
+  type: insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1071513640, ST_Transform(ST_SetSRID(ST_Point(6.694815747846698, 51.21811215696559), 4326), 3857), '2026-06-04 10:45:55');
+  params:
+  - 1071513640
+  - ST_Transform(ST_SetSRID(ST_Point(6.694815747846698, 51.21811215696559), 4326),
+    3857)
+  - '2026-06-04 10:45:55'
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Marzahn-Hellersdorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Marzahn-Hellersdorf'
+        AND r.timestamp BETWEEN '2026-06-04 06:02:13' AND '2026-06-04 07:22:55'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Marzahn-Hellersdorf
+  - '''2026-06-04 06:02:13'' AND ''2026-06-04 07:22:55'''
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 478)
+    WHERE u.name = 'Charité-Campus-Klinik'
+      AND r.timestamp BETWEEN '2026-06-04 05:15:30' AND '2026-06-04 07:04:15';
+  params:
+  - Charité-Campus-Klinik
+  - 478
+  - '''2026-06-04 05:15:30'' AND ''2026-06-04 07:04:15'''
+- name: updateridePoint
+  type: update
+  sql: |
+    UPDATE ride_points
+    SET geom = ST_Transform(ST_SetSRID(ST_Point(7.848032143704322, 51.4827083190275), 4326), 3857)
+    WHERE id = 1117702452;
+  params:
+  - 1117702452
+  - ST_Transform(ST_SetSRID(ST_Point(7.848032143704322, 51.4827083190275), 4326),
+    3857)
+- name: bulkInsertridePoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1115209488, ST_Transform(ST_SetSRID(ST_Point(6.466829539235397, 50.58162574964167), 4326), 3857), TIMESTAMP '2026-06-04 02:06:05'), (1555132041, ST_Transform(ST_SetSRID(ST_Point(6.875220955860539, 50.41572745316591), 4326), 3857), TIMESTAMP '2026-06-04 11:33:45'), (1566741777, ST_Transform(ST_SetSRID(ST_Point(8.520784130069861, 51.70390010909319), 4326), 3857), TIMESTAMP '2026-06-01 19:27:30'), (1092610221, ST_Transform(ST_SetSRID(ST_Point(6.8193918408635446, 50.331403492341906), 4326), 3857), TIMESTAMP '2026-06-02 00:03:54'), (1941227693, ST_Transform(ST_SetSRID(ST_Point(7.380605476277811, 50.32412870081149), 4326), 3857), TIMESTAMP '2026-06-03 10:18:46'), (1533011446, ST_Transform(ST_SetSRID(ST_Point(5.7205383466178725, 50.41357615683128), 4326), 3857), TIMESTAMP '2026-06-02 08:43:14'), (1234127740, ST_Transform(ST_SetSRID(ST_Point(7.457557370663835, 50.50264919008344), 4326), 3857), TIMESTAMP '2026-06-04 13:25:44'), (1737269724, ST_Transform(ST_SetSRID(ST_Point(6.865809887562135, 50.844947895931504), 4326), 3857), TIMESTAMP '2026-06-02 17:43:04'), (1310284210, ST_Transform(ST_SetSRID(ST_Point(8.116743132257824, 50.411011785371834), 4326), 3857), TIMESTAMP '2026-06-03 18:11:50'), (1439677598, ST_Transform(ST_SetSRID(ST_Point(6.048332876112759, 52.519201079796794), 4326), 3857), TIMESTAMP '2026-06-03 16:00:23');
+  params:
+  - (1115209488, ST_Transform(ST_SetSRID(ST_Point(6.466829539235397, 50.58162574964167),
+    4326), 3857), TIMESTAMP '2026-06-04 02:06:05'), (1555132041, ST_Transform(ST_SetSRID(ST_Point(6.875220955860539,
+    50.41572745316591), 4326), 3857), TIMESTAMP '2026-06-04 11:33:45'), (1566741777,
+    ST_Transform(ST_SetSRID(ST_Point(8.520784130069861, 51.70390010909319), 4326),
+    3857), TIMESTAMP '2026-06-01 19:27:30'), (1092610221, ST_Transform(ST_SetSRID(ST_Point(6.8193918408635446,
+    50.331403492341906), 4326), 3857), TIMESTAMP '2026-06-02 00:03:54'), (1941227693,
+    ST_Transform(ST_SetSRID(ST_Point(7.380605476277811, 50.32412870081149), 4326),
+    3857), TIMESTAMP '2026-06-03 10:18:46'), (1533011446, ST_Transform(ST_SetSRID(ST_Point(5.7205383466178725,
+    50.41357615683128), 4326), 3857), TIMESTAMP '2026-06-02 08:43:14'), (1234127740,
+    ST_Transform(ST_SetSRID(ST_Point(7.457557370663835, 50.50264919008344), 4326),
+    3857), TIMESTAMP '2026-06-04 13:25:44'), (1737269724, ST_Transform(ST_SetSRID(ST_Point(6.865809887562135,
+    50.844947895931504), 4326), 3857), TIMESTAMP '2026-06-02 17:43:04'), (1310284210,
+    ST_Transform(ST_SetSRID(ST_Point(8.116743132257824, 50.411011785371834), 4326),
+    3857), TIMESTAMP '2026-06-03 18:11:50'), (1439677598, ST_Transform(ST_SetSRID(ST_Point(6.048332876112759,
+    52.519201079796794), 4326), 3857), TIMESTAMP '2026-06-03 16:00:23')
+- name: updateridePoint
+  type: update
+  sql: |
+    UPDATE ride_points
+    SET geom = ST_Transform(ST_SetSRID(ST_Point(7.758214662353613, 50.58920308822889), 4326), 3857)
+    WHERE id = 1482083871;
+  params:
+  - 1482083871
+  - ST_Transform(ST_SetSRID(ST_Point(7.758214662353613, 50.58920308822889), 4326),
+    3857)
+- name: insertSingleridePoint
+  type: insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1186496777, ST_Transform(ST_SetSRID(ST_Point(6.986284505923801, 51.228256485187735), 4326), 3857), '2026-06-02 00:42:12');
+  params:
+  - 1186496777
+  - ST_Transform(ST_SetSRID(ST_Point(6.986284505923801, 51.228256485187735), 4326),
+    3857)
+  - '2026-06-02 00:42:12'
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Lichtenberg' GROUP BY d.name;
+  params:
+  - Lichtenberg
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Friedrichshain-Kreuzberg'
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 723));
+  params:
+  - Friedrichshain-Kreuzberg
+  - 723
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Pankow' GROUP BY d.name;
+  params:
+  - Pankow
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Pankow'
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 778));
+  params:
+  - Pankow
+  - 778
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Lichtenberg' GROUP BY d.name;
+  params:
+  - Lichtenberg
+- name: deleteridePoint
+  type: delete
+  sql: |
+    DELETE FROM ride_points
+    WHERE id = 1778444228;
+  params:
+  - 1778444228
+- name: bulkInsertridePoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1907264209, ST_Transform(ST_SetSRID(ST_Point(6.5594252642462285, 50.78018227910251), 4326), 3857), TIMESTAMP '2026-06-03 21:10:03'), (1996755148, ST_Transform(ST_SetSRID(ST_Point(8.808418129361986, 51.64193181947691), 4326), 3857), TIMESTAMP '2026-06-01 14:16:28'), (1588637286, ST_Transform(ST_SetSRID(ST_Point(8.03750816271124, 51.21454445230569), 4326), 3857), TIMESTAMP '2026-06-04 09:17:30'), (1872220994, ST_Transform(ST_SetSRID(ST_Point(8.76698830757635, 50.59160703853578), 4326), 3857), TIMESTAMP '2026-06-02 02:45:44'), (1308048419, ST_Transform(ST_SetSRID(ST_Point(6.591729762182851, 51.07048045529826), 4326), 3857), TIMESTAMP '2026-06-01 12:46:09'), (1824365957, ST_Transform(ST_SetSRID(ST_Point(7.743670568113349, 50.33385527421023), 4326), 3857), TIMESTAMP '2026-06-03 13:04:17'), (1324743903, ST_Transform(ST_SetSRID(ST_Point(8.68228088566141, 51.83612276397515), 4326), 3857), TIMESTAMP '2026-06-02 22:56:35'), (1052751799, ST_Transform(ST_SetSRID(ST_Point(9.106566225075156, 52.2500655361211), 4326), 3857), TIMESTAMP '2026-06-02 08:38:47'), (1278320084, ST_Transform(ST_SetSRID(ST_Point(6.219151388646715, 50.997308680431246), 4326), 3857), TIMESTAMP '2026-06-01 20:42:40'), (1678242160, ST_Transform(ST_SetSRID(ST_Point(6.212460260067995, 51.122411328929765), 4326), 3857), TIMESTAMP '2026-06-02 19:51:05');
+  params:
+  - (1907264209, ST_Transform(ST_SetSRID(ST_Point(6.5594252642462285, 50.78018227910251),
+    4326), 3857), TIMESTAMP '2026-06-03 21:10:03'), (1996755148, ST_Transform(ST_SetSRID(ST_Point(8.808418129361986,
+    51.64193181947691), 4326), 3857), TIMESTAMP '2026-06-01 14:16:28'), (1588637286,
+    ST_Transform(ST_SetSRID(ST_Point(8.03750816271124, 51.21454445230569), 4326),
+    3857), TIMESTAMP '2026-06-04 09:17:30'), (1872220994, ST_Transform(ST_SetSRID(ST_Point(8.76698830757635,
+    50.59160703853578), 4326), 3857), TIMESTAMP '2026-06-02 02:45:44'), (1308048419,
+    ST_Transform(ST_SetSRID(ST_Point(6.591729762182851, 51.07048045529826), 4326),
+    3857), TIMESTAMP '2026-06-01 12:46:09'), (1824365957, ST_Transform(ST_SetSRID(ST_Point(7.743670568113349,
+    50.33385527421023), 4326), 3857), TIMESTAMP '2026-06-03 13:04:17'), (1324743903,
+    ST_Transform(ST_SetSRID(ST_Point(8.68228088566141, 51.83612276397515), 4326),
+    3857), TIMESTAMP '2026-06-02 22:56:35'), (1052751799, ST_Transform(ST_SetSRID(ST_Point(9.106566225075156,
+    52.2500655361211), 4326), 3857), TIMESTAMP '2026-06-02 08:38:47'), (1278320084,
+    ST_Transform(ST_SetSRID(ST_Point(6.219151388646715, 50.997308680431246), 4326),
+    3857), TIMESTAMP '2026-06-01 20:42:40'), (1678242160, ST_Transform(ST_SetSRID(ST_Point(6.212460260067995,
+    51.122411328929765), 4326), 3857), TIMESTAMP '2026-06-02 19:51:05')
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-01 13:34:11' AND '2026-06-01 14:25:30'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-01 13:34:11'' AND ''2026-06-01 14:25:30'''
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Tempelhof-Schöneberg'
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 619));
+  params:
+  - Tempelhof-Schöneberg
+  - 619
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 852)
+    WHERE u.name = 'Charité-Campus-Klinik'
+      AND r.timestamp BETWEEN '2026-06-04 02:24:35' AND '2026-06-04 03:14:40';
+  params:
+  - Charité-Campus-Klinik
+  - 852
+  - '''2026-06-04 02:24:35'' AND ''2026-06-04 03:14:40'''
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Steglitz-Zehlendorf'
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 321));
+  params:
+  - Steglitz-Zehlendorf
+  - 321
+- name: deleteridePoint
+  type: delete
+  sql: |
+    DELETE FROM ride_points
+    WHERE id = 1892452671;
+  params:
+  - 1892452671
+- name: bulkInsertridePoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (1678049964, ST_Transform(ST_SetSRID(ST_Point(8.91320306724936, 51.10937866560231), 4326), 3857), TIMESTAMP '2026-06-02 04:00:11'), (1017544893, ST_Transform(ST_SetSRID(ST_Point(9.047410164727676, 50.954203250283584), 4326), 3857), TIMESTAMP '2026-06-01 09:41:18'), (1035721115, ST_Transform(ST_SetSRID(ST_Point(6.023036821939562, 50.647900316322804), 4326), 3857), TIMESTAMP '2026-06-02 20:57:12'), (1028154287, ST_Transform(ST_SetSRID(ST_Point(9.271991819048116, 52.56441203907891), 4326), 3857), TIMESTAMP '2026-06-04 20:10:21'), (1904153748, ST_Transform(ST_SetSRID(ST_Point(6.6866140095838755, 50.910981146973924), 4326), 3857), TIMESTAMP '2026-06-02 14:18:56'), (1190816741, ST_Transform(ST_SetSRID(ST_Point(8.18218415391852, 50.660810407101174), 4326), 3857), TIMESTAMP '2026-06-04 08:26:02'), (1615772442, ST_Transform(ST_SetSRID(ST_Point(7.569747599459376, 50.55187047334389), 4326), 3857), TIMESTAMP '2026-06-01 19:25:38'), (1225453840, ST_Transform(ST_SetSRID(ST_Point(7.027829627826732, 50.88544200932933), 4326), 3857), TIMESTAMP '2026-06-02 19:42:50'), (1683762732, ST_Transform(ST_SetSRID(ST_Point(6.037851343760198, 51.26270798572117), 4326), 3857), TIMESTAMP '2026-06-03 14:19:08'), (1323956777, ST_Transform(ST_SetSRID(ST_Point(6.021680833071939, 51.489831942387504), 4326), 3857), TIMESTAMP '2026-06-03 04:06:30');
+  params:
+  - (1678049964, ST_Transform(ST_SetSRID(ST_Point(8.91320306724936, 51.10937866560231),
+    4326), 3857), TIMESTAMP '2026-06-02 04:00:11'), (1017544893, ST_Transform(ST_SetSRID(ST_Point(9.047410164727676,
+    50.954203250283584), 4326), 3857), TIMESTAMP '2026-06-01 09:41:18'), (1035721115,
+    ST_Transform(ST_SetSRID(ST_Point(6.023036821939562, 50.647900316322804), 4326),
+    3857), TIMESTAMP '2026-06-02 20:57:12'), (1028154287, ST_Transform(ST_SetSRID(ST_Point(9.271991819048116,
+    52.56441203907891), 4326), 3857), TIMESTAMP '2026-06-04 20:10:21'), (1904153748,
+    ST_Transform(ST_SetSRID(ST_Point(6.6866140095838755, 50.910981146973924), 4326),
+    3857), TIMESTAMP '2026-06-02 14:18:56'), (1190816741, ST_Transform(ST_SetSRID(ST_Point(8.18218415391852,
+    50.660810407101174), 4326), 3857), TIMESTAMP '2026-06-04 08:26:02'), (1615772442,
+    ST_Transform(ST_SetSRID(ST_Point(7.569747599459376, 50.55187047334389), 4326),
+    3857), TIMESTAMP '2026-06-01 19:25:38'), (1225453840, ST_Transform(ST_SetSRID(ST_Point(7.027829627826732,
+    50.88544200932933), 4326), 3857), TIMESTAMP '2026-06-02 19:42:50'), (1683762732,
+    ST_Transform(ST_SetSRID(ST_Point(6.037851343760198, 51.26270798572117), 4326),
+    3857), TIMESTAMP '2026-06-03 14:19:08'), (1323956777, ST_Transform(ST_SetSRID(ST_Point(6.021680833071939,
+    51.489831942387504), 4326), 3857), TIMESTAMP '2026-06-03 04:06:30')
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 273)
+    WHERE u.name = 'European-School-of-Management-and-Technology-Berlin'
+      AND r.timestamp BETWEEN '2026-06-04 19:24:01' AND '2026-06-04 20:11:16';
+  params:
+  - European-School-of-Management-and-Technology-Berlin
+  - 273
+  - '''2026-06-04 19:24:01'' AND ''2026-06-04 20:11:16'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM ride_points
+    WHERE timestamp between '2026-06-02 21:40:34' AND '2026-06-02 22:30:35'
+    GROUP BY hour, id
+    ORDER BY hour;
+  params:
+  - '''2026-06-02 21:40:34'' AND ''2026-06-02 22:30:35'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.70348258578733, 7.127427439924154, 50.47348262527616, 7.527427401958547), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.70348258578733, 7.127427439924154,
+    50.47348262527616, 7.527427401958547), 4326), 3857)
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM ride_points
+    WHERE timestamp between '2026-06-02 07:22:45' AND '2026-06-02 08:12:45'
+    GROUP BY hour, id
+    ORDER BY hour;
+  params:
+  - '''2026-06-02 07:22:45'' AND ''2026-06-02 08:12:45'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-02 22:47:58' AND '2026-06-02 23:37:59';
+  params:
+  - '''2026-06-02 22:47:58'' AND ''2026-06-02 23:37:59'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-03 23:38:53' AND '2026-06-04 00:28:54'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.37942872070653, 7.183361754329648, 51.14942876019536, 7.583361716364041), 4326), 3857));
+  params:
+  - '''2026-06-03 23:38:53'' AND ''2026-06-04 00:28:54'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.37942872070653, 7.183361754329648,
+    51.14942876019536, 7.583361716364041), 4326), 3857)
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM ride_points
+    WHERE timestamp between '2026-06-02 03:30:06' AND '2026-06-02 04:20:07'
+    GROUP BY hour, id
+    ORDER BY hour;
+  params:
+  - '''2026-06-02 03:30:06'' AND ''2026-06-02 04:20:07'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-03 11:36:53' AND '2026-06-03 12:26:54';
+  params:
+  - '''2026-06-03 11:36:53'' AND ''2026-06-03 12:26:54'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(50.91803139005113, 8.130873825233449), 4326), 3857)) <= 11219.17319065961
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(50.91803139005113, 8.130873825233449), 4326), 3857))
+    LIMIT 5;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(50.91803139005113, 8.130873825233449), 4326),
+    3857)
+  - 5
+  - 11219.17319065961
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.9266893313363, 6.719679012149765, 51.69668937082513, 7.119678974184158), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.9266893313363, 6.719679012149765, 51.69668937082513,
+    7.119678974184158), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ride_points
+        WHERE timestamp BETWEEN '2026-06-02 21:28:32' AND '2026-06-02 22:18:33'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.602466549229575, 5.925678725539483, 51.37246658871841, 6.325678687573876), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.45664848209396, 7.388396808079426, 51.226648521582796, 7.788396770113819), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.602466549229575, 5.925678725539483,
+    51.37246658871841, 6.325678687573876), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.45664848209396, 7.388396808079426,
+    51.226648521582796, 7.788396770113819), 4326), 3857)
+  - '''2026-06-02 21:28:32'' AND ''2026-06-02 22:18:33'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(50.3067450851117, 6.233582109305969), 4326), 3857)) <= 11268.944526732505
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(50.3067450851117, 6.233582109305969), 4326), 3857))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(50.3067450851117, 6.233582109305969), 4326),
+    3857)
+  - 1
+  - 11268.944526732505
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(51.98353490549389, 8.168726329209512), 4326), 3857)) <= 9493.013043983368
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(51.98353490549389, 8.168726329209512), 4326), 3857))
+    LIMIT 7;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(51.98353490549389, 8.168726329209512), 4326),
+    3857)
+  - 7
+  - 9493.013043983368
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ride_points
+        WHERE timestamp BETWEEN '2026-06-04 06:54:15' AND '2026-06-04 07:44:16'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.10984513200133, 7.453832782342268, 51.87984517149017, 7.8538327443766605), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.54887805661577, 8.854524808031233, 51.318878096104605, 9.254524770065625), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.10984513200133, 7.453832782342268,
+    51.87984517149017, 7.8538327443766605), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.54887805661577, 8.854524808031233,
+    51.318878096104605, 9.254524770065625), 4326), 3857)
+  - '''2026-06-04 06:54:15'' AND ''2026-06-04 07:44:16'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(50.46559262630454, 6.792908909363417), 4326), 3857)) <= 4412.922717035614
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(50.46559262630454, 6.792908909363417), 4326), 3857))
+    LIMIT 3;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(50.46559262630454, 6.792908909363417), 4326),
+    3857)
+  - 3
+  - 4412.922717035614
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.63749837236915, 8.264186527224258, 50.407498411857986, 8.66418648925865), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.63749837236915, 8.264186527224258,
+    50.407498411857986, 8.66418648925865), 4326), 3857)
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-04 18:52:02' AND '2026-06-04 19:42:02'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.79774801338846, 6.425572970047606, 50.56774805287729, 6.8255729320819984), 4326), 3857));
+  params:
+  - '''2026-06-04 18:52:02'' AND ''2026-06-04 19:42:02'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.79774801338846, 6.425572970047606,
+    50.56774805287729, 6.8255729320819984), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ride_points
+        WHERE timestamp BETWEEN '2026-06-03 14:07:09' AND '2026-06-03 14:57:10'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.14411906731428, 6.025627086226105, 51.91411910680311, 6.425627048260498), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.92989379691528, 7.3422664096758545, 51.699893836404115, 7.742266371710247), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.14411906731428, 6.025627086226105,
+    51.91411910680311, 6.425627048260498), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.92989379691528, 7.3422664096758545,
+    51.699893836404115, 7.742266371710247), 4326), 3857)
+  - '''2026-06-03 14:07:09'' AND ''2026-06-03 14:57:10'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM ride_points
+    WHERE timestamp between '2026-06-02 16:49:02' AND '2026-06-02 17:39:03'
+    GROUP BY hour, id
+    ORDER BY hour;
+  params:
+  - '''2026-06-02 16:49:02'' AND ''2026-06-02 17:39:03'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-01 18:28:51' AND '2026-06-01 19:18:51';
+  params:
+  - '''2026-06-01 18:28:51'' AND ''2026-06-01 19:18:51'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.441626553872986, 6.49742014168962, 52.21162659336182, 6.897420103724013), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.441626553872986, 6.49742014168962,
+    52.21162659336182, 6.897420103724013), 4326), 3857)
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-02 16:32:29' AND '2026-06-02 17:22:30'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.332875273083836, 7.08041412677515, 52.10287531257267, 7.4804140888095425), 4326), 3857));
+  params:
+  - '''2026-06-02 16:32:29'' AND ''2026-06-02 17:22:30'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.332875273083836, 7.08041412677515,
+    52.10287531257267, 7.4804140888095425), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.22594072208112, 7.889337057305802, 51.995940761569955, 8.289337019340195), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.22594072208112, 7.889337057305802,
+    51.995940761569955, 8.289337019340195), 4326), 3857)
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-01 10:04:14' AND '2026-06-01 10:54:15'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.42456201679844, 7.5296588995296565, 52.194562056287275, 7.929658861564049), 4326), 3857));
+  params:
+  - '''2026-06-01 10:04:14'' AND ''2026-06-01 10:54:15'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.42456201679844, 7.5296588995296565,
+    52.194562056287275, 7.929658861564049), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(50.40704796750499, 7.56303792256743), 4326), 3857)) <= 5937.628246534844
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(50.40704796750499, 7.56303792256743), 4326), 3857))
+    LIMIT 6;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(50.40704796750499, 7.56303792256743), 4326),
+    3857)
+  - 6
+  - 5937.628246534844
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-02 03:04:45' AND '2026-06-02 03:54:46'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.580803994460865, 7.6934541606945395, 50.3508040339497, 8.093454122728932), 4326), 3857));
+  params:
+  - '''2026-06-02 03:04:45'' AND ''2026-06-02 03:54:46'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.580803994460865, 7.6934541606945395,
+    50.3508040339497, 8.093454122728932), 4326), 3857)
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-03 07:52:19' AND '2026-06-03 08:42:20'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.09098083256194, 7.501574083223966, 51.860980872050774, 7.901574045258359), 4326), 3857));
+  params:
+  - '''2026-06-03 07:52:19'' AND ''2026-06-03 08:42:20'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.09098083256194, 7.501574083223966,
+    51.860980872050774, 7.901574045258359), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ride_points
+        WHERE timestamp BETWEEN '2026-06-02 04:15:15' AND '2026-06-02 05:05:16'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.56277585965798, 7.312593734568006, 51.33277589914682, 7.712593696602399), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.11294907537556, 7.2298421526787315, 50.882949114864395, 7.629842114713124), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.56277585965798, 7.312593734568006,
+    51.33277589914682, 7.712593696602399), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.11294907537556, 7.2298421526787315,
+    50.882949114864395, 7.629842114713124), 4326), 3857)
+  - '''2026-06-02 04:15:15'' AND ''2026-06-02 05:05:16'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-01 14:20:04' AND '2026-06-01 15:10:05'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.784022853562895, 7.189356541181215, 50.55402289305173, 7.589356503215607), 4326), 3857));
+  params:
+  - '''2026-06-01 14:20:04'' AND ''2026-06-01 15:10:05'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.784022853562895, 7.189356541181215,
+    50.55402289305173, 7.589356503215607), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.920200773676235, 6.617190178479175, 50.69020081316507, 7.017190140513568), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.920200773676235, 6.617190178479175,
+    50.69020081316507, 7.017190140513568), 4326), 3857)
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-03 05:28:31' AND '2026-06-03 06:18:32';
+  params:
+  - '''2026-06-03 05:28:31'' AND ''2026-06-03 06:18:32'''
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ride_points
+        WHERE timestamp BETWEEN '2026-06-03 22:00:31' AND '2026-06-03 22:50:32'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.237270804398975, 7.3732047100486335, 51.00727084388781, 7.773204672083026), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.34535828885325, 5.71268176571751, 52.11535832834208, 6.1126817277519025), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.237270804398975, 7.3732047100486335,
+    51.00727084388781, 7.773204672083026), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.34535828885325, 5.71268176571751, 52.11535832834208,
+    6.1126817277519025), 4326), 3857)
+  - '''2026-06-03 22:00:31'' AND ''2026-06-03 22:50:32'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-03 14:28:02' AND '2026-06-03 15:18:03';
+  params:
+  - '''2026-06-03 14:28:02'' AND ''2026-06-03 15:18:03'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM ride_points
+    WHERE timestamp between '2026-06-03 16:04:30' AND '2026-06-03 16:54:31'
+    GROUP BY hour, id
+    ORDER BY hour;
+  params:
+  - '''2026-06-03 16:04:30'' AND ''2026-06-03 16:54:31'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(52.561486023116245, 8.615581109871044), 4326), 3857)) <= 10922.781770545507
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(52.561486023116245, 8.615581109871044), 4326), 3857))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(52.561486023116245, 8.615581109871044), 4326),
+    3857)
+  - 1
+  - 10922.781770545507
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.76504537144939, 8.249338861094712, 50.535045410938224, 8.649338823129105), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.76504537144939, 8.249338861094712,
+    50.535045410938224, 8.649338823129105), 4326), 3857)
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-04 16:14:09' AND '2026-06-04 17:04:10';
+  params:
+  - '''2026-06-04 16:14:09'' AND ''2026-06-04 17:04:10'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.98198833542401, 8.47299085614316, 50.75198837491285, 8.872990818177552), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.98198833542401, 8.47299085614316, 50.75198837491285,
+    8.872990818177552), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.30799242303082, 6.826678484297638, 52.07799246251965, 7.226678446332031), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.30799242303082, 6.826678484297638,
+    52.07799246251965, 7.226678446332031), 4326), 3857)
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM ride_points
+    WHERE timestamp between '2026-06-03 11:38:08' AND '2026-06-03 12:28:09'
+    GROUP BY hour, id
+    ORDER BY hour;
+  params:
+  - '''2026-06-03 11:38:08'' AND ''2026-06-03 12:28:09'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(51.05974971711294, 8.35100422418123), 4326), 3857)) <= 4306.347316616851
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(51.05974971711294, 8.35100422418123), 4326), 3857))
+    LIMIT 10;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(51.05974971711294, 8.35100422418123), 4326),
+    3857)
+  - 10
+  - 4306.347316616851
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ride_points
+        WHERE timestamp BETWEEN '2026-06-04 13:13:00' AND '2026-06-04 14:03:01'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.86081784103377, 7.129674684309916, 50.630817880522606, 7.529674646344309), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.61644199200273, 8.134805777626, 51.38644203149156, 8.534805739660392), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.86081784103377, 7.129674684309916,
+    50.630817880522606, 7.529674646344309), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.61644199200273, 8.134805777626, 51.38644203149156,
+    8.534805739660392), 4326), 3857)
+  - '''2026-06-04 13:13:00'' AND ''2026-06-04 14:03:01'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-02 07:48:43' AND '2026-06-02 08:38:44';
+  params:
+  - '''2026-06-02 07:48:43'' AND ''2026-06-02 08:38:44'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-02 11:28:48' AND '2026-06-02 12:18:48'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.581132292245925, 7.088449390537721, 51.35113233173476, 7.488449352572114), 4326), 3857));
+  params:
+  - '''2026-06-02 11:28:48'' AND ''2026-06-02 12:18:48'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.581132292245925, 7.088449390537721,
+    51.35113233173476, 7.488449352572114), 4326), 3857)
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-02 20:47:46' AND '2026-06-02 21:37:47'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.861507798065624, 6.925868669442405, 50.63150783755446, 7.325868631476798), 4326), 3857));
+  params:
+  - '''2026-06-02 20:47:46'' AND ''2026-06-02 21:37:47'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.861507798065624, 6.925868669442405,
+    50.63150783755446, 7.325868631476798), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ride_points
+        WHERE timestamp BETWEEN '2026-06-03 22:49:28' AND '2026-06-03 23:39:29'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.94585259997514, 7.609972470433666, 50.715852639463975, 8.009972432468059), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.91747681918949, 8.546396614576121, 51.68747685867832, 8.946396576610514), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.94585259997514, 7.609972470433666,
+    50.715852639463975, 8.009972432468059), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.91747681918949, 8.546396614576121,
+    51.68747685867832, 8.946396576610514), 4326), 3857)
+  - '''2026-06-03 22:49:28'' AND ''2026-06-03 23:39:29'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM ride_points
+    WHERE timestamp between '2026-06-04 00:46:37' AND '2026-06-04 01:36:38'
+    GROUP BY hour, id
+    ORDER BY hour;
+  params:
+  - '''2026-06-04 00:46:37'' AND ''2026-06-04 01:36:38'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-04 01:02:43' AND '2026-06-04 01:52:44';
+  params:
+  - '''2026-06-04 01:02:43'' AND ''2026-06-04 01:52:44'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM ride_points
+    WHERE timestamp between '2026-06-01 22:01:19' AND '2026-06-01 22:51:20'
+    GROUP BY hour, id
+    ORDER BY hour;
+  params:
+  - '''2026-06-01 22:01:19'' AND ''2026-06-01 22:51:20'''
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ride_points
+        WHERE timestamp BETWEEN '2026-06-04 14:39:37' AND '2026-06-04 15:29:38'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.249861588261595, 7.036118204806046, 52.01986162775043, 7.436118166840439), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.10717534297979, 6.256281344468345, 50.87717538246862, 6.656281306502738), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.249861588261595, 7.036118204806046,
+    52.01986162775043, 7.436118166840439), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(51.10717534297979, 6.256281344468345,
+    50.87717538246862, 6.656281306502738), 4326), 3857)
+  - '''2026-06-04 14:39:37'' AND ''2026-06-04 15:29:38'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-03 21:54:32' AND '2026-06-03 22:44:32';
+  params:
+  - '''2026-06-03 21:54:32'' AND ''2026-06-03 22:44:32'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(51.57280247846784, 8.223434651754898), 4326), 3857)) <= 6588.0245865390825
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(51.57280247846784, 8.223434651754898), 4326), 3857))
+    LIMIT 6;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(51.57280247846784, 8.223434651754898), 4326),
+    3857)
+  - 6
+  - 6588.0245865390825
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM ride_points
+    WHERE timestamp between '2026-06-04 14:21:03' AND '2026-06-04 15:11:04'
+    GROUP BY hour, id
+    ORDER BY hour;
+  params:
+  - '''2026-06-04 14:21:03'' AND ''2026-06-04 15:11:04'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM ride_points
+    WHERE timestamp between '2026-06-04 18:45:30' AND '2026-06-04 19:35:31'
+    GROUP BY hour, id
+    ORDER BY hour;
+  params:
+  - '''2026-06-04 18:45:30'' AND ''2026-06-04 19:35:31'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-02 18:25:04' AND '2026-06-02 19:15:05'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.75179811279605, 5.56866078725052, 50.52179815228489, 5.968660749284913), 4326), 3857));
+  params:
+  - '''2026-06-02 18:25:04'' AND ''2026-06-02 19:15:05'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.75179811279605, 5.56866078725052, 50.52179815228489,
+    5.968660749284913), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ride_points
+        WHERE timestamp BETWEEN '2026-06-03 17:01:45' AND '2026-06-03 17:51:46'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.95016636156982, 6.692489069500704, 50.720166401058655, 7.092489031535097), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.43191946013214, 6.791663329328225, 52.20191949962098, 7.191663291362618), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.95016636156982, 6.692489069500704,
+    50.720166401058655, 7.092489031535097), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.43191946013214, 6.791663329328225,
+    52.20191949962098, 7.191663291362618), 4326), 3857)
+  - '''2026-06-03 17:01:45'' AND ''2026-06-03 17:51:46'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.06181754842032, 7.2709626187820104, 51.83181758790916, 7.670962580816403), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.06181754842032, 7.2709626187820104,
+    51.83181758790916, 7.670962580816403), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(51.652121019117644, 5.587581474471264), 4326), 3857)) <= 10669.336433187025
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(51.652121019117644, 5.587581474471264), 4326), 3857))
+    LIMIT 4;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(51.652121019117644, 5.587581474471264), 4326),
+    3857)
+  - 4
+  - 10669.336433187025
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ride_points
+    WHERE timestamp BETWEEN '2026-06-03 05:22:38' AND '2026-06-03 06:12:39';
+  params:
+  - '''2026-06-03 05:22:38'' AND ''2026-06-03 06:12:39'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(50.84432980537739, 8.030745476954076), 4326), 3857)) <= 11245.698301720162
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(50.84432980537739, 8.030745476954076), 4326), 3857))
+    LIMIT 10;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(50.84432980537739, 8.030745476954076), 4326),
+    3857)
+  - 10
+  - 11245.698301720162
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ride_points
+        WHERE timestamp BETWEEN '2026-06-04 09:35:24' AND '2026-06-04 10:25:25'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.03202978049187, 6.885572413631663, 51.8020298199807, 7.285572375666056), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.91424871116048, 6.709998955154177, 50.68424875064932, 7.10999891718857), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(52.03202978049187, 6.885572413631663,
+    51.8020298199807, 7.285572375666056), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(50.91424871116048, 6.709998955154177,
+    50.68424875064932, 7.10999891718857), 4326), 3857)
+  - '''2026-06-04 09:35:24'' AND ''2026-06-04 10:25:25'''

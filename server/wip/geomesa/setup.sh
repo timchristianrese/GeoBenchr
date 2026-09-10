@@ -13,8 +13,8 @@ sudo chmod 777 /opt/hadoop/pids
 ulimit -n 32768
 /opt/accumulo/bin/accumulo-cluster start
  cd /opt/geomesa-accumulo;yes | sudo bin/install-dependencies.sh;yes | sudo bin/install-shapefile-support.sh
- cd /opt/geomesa-accumulo; bin/geomesa-accumulo create-schema -i test -z localhost -u root  -p test -c example -s ride_id:Integer:index=full,rider_id:Integer:index=full,latitude:Double,longitude:Double,geom:Point:srid=4326,x:Double,y:Double,z:Double,timestamp:Date -f ride_data
- cd /opt/geomesa-accumulo; bin/geomesa-accumulo create-schema -i test -z localhost -u root  -p test -c example -s ride_id:Integer:index=full,rider_id:Integer:index=full,trip:MultiLineString:srid=4326,timestamp:List[Date] -f trip_data
+ cd /opt/geomesa-accumulo; bin/geomesa-accumulo create-schema -i test -z localhost -u root  -p test -c example -s id:Integer:index=full,rider_id:Integer:index=full,latitude:Double,longitude:Double,geom:Point:srid=4326,x:Double,y:Double,z:Double,timestamp:Date -f ride_data
+ cd /opt/geomesa-accumulo; bin/geomesa-accumulo create-schema -i test -z localhost -u root  -p test -c example -s id:Integer:index=full,rider_id:Integer:index=full,trip:MultiLineString:srid=4326,timestamp:List[Date] -f trip_data
 # scp ../../converter/ride_data.converter $SSH_USER@$IP:/opt/geomesa-accumulo
 # scp ../../converter/trip_data.converter $SSH_USER@$IP:/opt/geomesa-accumulo
 #  /opt/geomesa-accumulo/bin/geomesa-accumulo ingest -C /opt/geomesa-accumulo/ride_data.converter -c example -i test -z localhost -u root -p test -f ride_data -t 8 ~/geomesa_merged*.csv

@@ -9,7 +9,7 @@ geomesa: {
       }
       id-field = "uuid()",  
       fields = [
-        { name = "ride_id",    transform = "$1::int"     }  
+        { name = "id",    transform = "$1::int"     }  
         { name = "rider_id",   transform = "$2::int"     }  
         { name = "latitude",   transform = "$3::double"  }  
         { name = "longitude",  transform = "$4::double"  }  

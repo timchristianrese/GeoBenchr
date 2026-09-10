@@ -49,7 +49,7 @@ def format_tgeogpoint(coords, times):
 
     return f"[{', '.join(points)}]" if points else None
 
-def extract_data(filepath, ride_writer, ride_id_start, rider_id_iter, incident_writer, incident_id_start):
+def extract_data(filepath, ride_writer, id_start, rider_id_iter, incident_writer, incident_id_start):
     with open(filepath, 'r', encoding='utf-8') as f:
         lines = f.read().splitlines()
 
@@ -57,7 +57,7 @@ def extract_data(filepath, ride_writer, ride_id_start, rider_id_iter, incident_w
     separator_index = find_separator_index(lines)
     if separator_index == -1:
         print(f"Ignored file: {filepath} (missing separator)")
-        return ride_id_start
+        return id_start
 
     i_header = lines[1].split(",")
     i_data = lines[2:separator_index]
@@ -74,7 +74,7 @@ def extract_data(filepath, ride_writer, ride_id_start, rider_id_iter, incident_w
         r_ts_idx = r_header.index("timeStamp")
     except ValueError as e:
         print(f"Missing expected columns in {filepath}: {e}")
-        return ride_id_start
+        return id_start
     
     for row in i_data:
         if not row.strip():
@@ -92,7 +92,7 @@ def extract_data(filepath, ride_writer, ride_id_start, rider_id_iter, incident_w
 
         if lat and lon and ts:
             del parts[i_key_idx]
-            row_data = parts + [ride_id_start]
+            row_data = parts + [id_start]
             incident_writer.writerow([incident_id_start] + row_data)
             incident_id_start += 1
 
@@ -117,14 +117,14 @@ def extract_data(filepath, ride_writer, ride_id_start, rider_id_iter, incident_w
                 rider_id = next(rider_id_iter)
             except StopIteration:
                 rider_id = random.randint(0, 6000)
-            ride_writer.writerow([ride_id_start, rider_id, tgeog])
-            ride_id_start += 1
+            ride_writer.writerow([id_start, rider_id, tgeog])
+            id_start += 1
 
-    return ride_id_start, incident_id_start
+    return id_start, incident_id_start
 
 def process_all_files(source_root, output_root):
     os.makedirs(output_root, exist_ok=True)
-    ride_id = 1
+    id = 1
     incident_id = 1
 
     rider_traj_counts = generate_rider_distribution(n_riders=2000, mean=3, std=1)
@@ -149,16 +149,16 @@ def process_all_files(source_root, output_root):
                 ride_writer = csv.writer(ride_file)
                 incident_writer = csv.writer(incident_file)
 
-                ride_writer.writerow(["ride_id", "rider_id","traj"])
+                ride_writer.writerow(["id", "rider_id","traj"])
                 incident_writer.writerow(["incident_id", "lat", "lon", "ts", "bike", "childCheckBox",
                                           "trailerCheckBox", "pLoc", "incident", "i1", "i2", "i3", "i4", "i5",
-                                          "i6", "i7", "i8", "i9", "scary", "desc", "i10", "ride_id"])
+                                          "i6", "i7", "i8", "i9", "scary", "desc", "i10", "id"])
 
                 for file in os.listdir(source_folder_path):
                     if file.startswith("VM"):
                         filepath = os.path.join(source_folder_path, file)
                         try:
-                            ride_id, incident_id = extract_data(filepath, ride_writer, ride_id, rider_id_iter, incident_writer, incident_id)
+                            id, incident_id = extract_data(filepath, ride_writer, id, rider_id_iter, incident_writer, incident_id)
                         except Exception as e:
                             print(f"Error in {filepath} : {e}")
 

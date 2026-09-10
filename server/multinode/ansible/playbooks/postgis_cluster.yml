@@ -1,0 +1,11 @@
+# playbooks/postgis_cluster.yml
+# PostGIS + Citus only, without the (slower, built-from-source) MobilityDB extension layer --
+# see mobilitydb_cluster.yml for the full stack.
+- name: Setup Distributed PostGIS/Citus cluster (no MobilityDB)
+  hosts: all
+  become: true
+  roles:
+    - common
+    - postgres
+    - postgis
+    - citus

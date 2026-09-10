@@ -10,9 +10,12 @@ As of now, GeoBenchr supports the following database systems:
 - TimeScaleDB
 - MobilityDB
 
+## Query Templates 
+The query templates used to generate the experiment queries can be found here [here](docs/query-templates.md)
+
 ## Setup 
 The benchmark deployment is split into separate categories for clarity, those being `server`, `data`, and `client`.  All steps are necessary in order to run a benchmark experiment with GeoBenchr, in the above mentioned order. Detailed setup instructions for each category can be found in the subdirectories (in nearly all cases, in the `single` subfolder)
 ## Results
-Key results are included in the paper. All generated graphs are hosted here in the repository, found [here] (./analysis/results)
+Key results are included in the paper. All generated graphs are hosted here in the repository, found [here](analysis/results/)
 
 

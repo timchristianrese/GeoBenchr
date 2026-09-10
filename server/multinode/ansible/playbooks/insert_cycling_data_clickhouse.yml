@@ -1,0 +1,5 @@
+- name: Load Data
+  hosts: masters
+  become: true
+  roles:
+    - clickhouse_cycling

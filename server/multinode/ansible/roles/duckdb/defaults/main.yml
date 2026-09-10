@@ -1,0 +1,4 @@
+duckdb_data_dir: /var/lib/duckdb
+duckdb_db_file: "{{ duckdb_data_dir }}/geobenchr.duckdb"
+duckdb_quack_port: 9494
+duckdb_quack_token: my-secret-token

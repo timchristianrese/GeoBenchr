@@ -1,0 +1,156 @@
+# roles/ais_hdfs/tasks/main.yml
+
+
+- name: Stop HDFS and YARN if running (only on master)
+  shell: |
+    /opt/hadoop/sbin/stop-yarn.sh
+    /opt/hadoop/sbin/stop-dfs.sh
+  when: inventory_hostname in groups['masters']
+  become: true
+  become_user: debian
+
+- name: Start HDFS
+  command: /opt/hadoop/sbin/start-dfs.sh
+  become: true
+  become_user: debian
+  when:
+    - inventory_hostname in groups['masters']
+
+- name: Start YARN
+  command: /opt/hadoop/sbin/start-yarn.sh
+  become: true
+  become_user: debian
+  when:
+    - inventory_hostname in groups['masters']
+
+
+# - name: Ensure HDFS directory exists
+#   command: >
+#     /opt/hadoop/bin/hdfs dfs -test -d {{ hdfs_target_dir }}
+#   register: hdfs_dir_check
+#   ignore_errors: true
+#   changed_when: false
+#   when:
+#   - inventory_hostname in groups['masters']
+
+- name: Disable safe mode so that we can create a directory
+  become_user: debian
+  command: >
+    {{ hadoop_home }}/bin/hdfs dfsadmin -safemode leave
+  when: inventory_hostname in groups['masters']
+
+- name: Create HDFS directory
+  command: >
+    {{ hadoop_home }}/bin/hdfs dfs -mkdir -p {{ hdfs_target_dir }}
+  when: inventory_hostname in groups['masters']
+
+- name: Create the local data directory
+  ansible.builtin.file:
+    path: "{{ local_data_path }}"
+    state: directory
+  when:
+    - inventory_hostname in groups['masters']
+
+- name: Get file listing
+  uri:
+    url: "http://aisdata.ais.dk/?prefix=2024/"
+    return_content: yes
+  register: ais_page
+  when:
+  - inventory_hostname in groups['masters']
+
+- name: Extract zip filenames
+  set_fact:
+    ais_files: "{{ ais_page.content | regex_findall('href=\"[^\"]*/([^\"/]+\\.zip)\"') }}"
+  when:
+    - inventory_hostname in groups['masters']
+
+- name: Download AIS data (test)
+  get_url:
+    url: "http://aisdata.ais.dk/2024/{{ item }}"
+    dest: "{{ local_data_path }}/{{ item }}"
+    mode: '0644'
+  loop:
+    - "aisdk-2024-03-01.zip"
+    - "aisdk-2024-03-02.zip"
+    - "aisdk-2024-03-03.zip"
+    - "aisdk-2024-03-04.zip"
+    - "aisdk-2024-03-05.zip"
+    - "aisdk-2024-03-06.zip"
+    - "aisdk-2024-03-07.zip"
+    - "aisdk-2024-03-08.zip"
+    - "aisdk-2024-03-09.zip"
+    - "aisdk-2024-03-10.zip"
+    - "aisdk-2024-03-11.zip"
+    - "aisdk-2024-03-12.zip"
+    - "aisdk-2024-03-13.zip"
+    - "aisdk-2024-03-14.zip"
+    - "aisdk-2024-03-15.zip"
+    - "aisdk-2024-03-16.zip"
+    - "aisdk-2024-03-17.zip"
+    - "aisdk-2024-03-18.zip"
+    - "aisdk-2024-03-19.zip"
+    - "aisdk-2024-03-20.zip"
+    - "aisdk-2024-03-21.zip"
+    - "aisdk-2024-03-22.zip"
+    - "aisdk-2024-03-23.zip"
+    - "aisdk-2024-03-24.zip"
+    - "aisdk-2024-03-25.zip"
+    - "aisdk-2024-03-26.zip"
+    - "aisdk-2024-03-27.zip"
+    - "aisdk-2024-03-28.zip"
+    - "aisdk-2024-03-29.zip"
+    - "aisdk-2024-03-30.zip"
+    - "aisdk-2024-03-31.zip"
+    # - "ais_2024_01.zip"
+    # - "ais_2024_02.zip"
+
+
+# - name: Download first 10 AIS zip files (test)
+#   get_url:
+#     url: "http://aisdata.ais.dk/?prefix=2024/{{ item }}"
+#     dest: "{{ local_data_path }}/{{ item }}"
+#     mode: '0644'
+#   loop: "{{ ais_files[20:30] }}"
+#   when:
+#     - inventory_hostname in groups['masters']
+
+
+- name: Find downloaded zip files
+  find:
+    paths: "{{ local_data_path }}"
+    patterns: "*.zip"
+  register: zip_files
+  when:
+    - inventory_hostname in groups['masters']
+
+- name: Extract AIS zip files (idempotent)
+  unarchive:
+    src: "{{ item.path }}"
+    dest: "{{ local_data_path }}"
+    remote_src: yes
+    creates: "{{ item.path | regex_replace('\\.zip$', '.csv') }}"
+  loop: "{{ zip_files.files }}"
+  when:
+    - inventory_hostname in groups['masters']
+
+- name: List local AIS files
+  find:
+    paths: "{{ local_data_path }}"
+    patterns: "*.csv"
+  register: local_files
+  when:
+    - inventory_hostname in groups['masters']
+
+
+- name: Upload files to HDFS (idempotent)
+  become_user: debian
+  command: >
+    {{ hadoop_home }}/bin/hdfs dfs -put -f {{ item.path }} {{ hdfs_target_dir }}/
+  loop: "{{ local_files.files }}"
+  register: upload_results
+  retries: 3
+  delay: 5
+  until: upload_results is succeeded
+  when:
+  - inventory_hostname in groups['masters']

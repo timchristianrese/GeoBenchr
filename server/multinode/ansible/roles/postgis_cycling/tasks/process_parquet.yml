@@ -1,0 +1,52 @@
+# FIX: ansible_env.HOME resolves to /root under this play's become: true, but the duckdb CLI
+# this role installs (main.yml's "Install DuckDB CLI", same fix applied there) lands under
+# /home/{{ ansible_user }}.
+- name: Load parquet into staging (DuckDB → Postgres)
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    /home/{{ ansible_user }}/.duckdb/cli/latest/duckdb <<EOF
+    LOAD postgres;
+
+    ATTACH
+      'host={{ db_host }}
+       dbname={{ db_name }}
+       user={{ db_user }}
+       port={{ db_port }}
+       password={{ db_password }}'
+    AS pg (TYPE postgres);
+
+    INSERT INTO pg.public.trip_points_raw
+    SELECT
+        trip_id,
+        rider_id,
+        lat,
+        lon,
+        timestamp
+    FROM read_parquet('{{ item.path }}');
+    EOF
+  args:
+    executable: /bin/bash
+
+- name: Move staging data into production table
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      INSERT INTO ride_points (
+          id,
+          rider_id,
+          timestamp,
+          geom
+      )
+      SELECT
+          trip_id,
+          rider_id,
+          to_timestamp(timestamp / 1000.0),
+          ST_Transform(ST_SetSRID(ST_MakePoint(lon, lat), 4326), 3857)
+      FROM trip_points_raw;
+
+      TRUNCATE TABLE trip_points_raw;

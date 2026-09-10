@@ -2,6 +2,33 @@
   file:
     path: /tmp
     state: directory
+- name: Clean any apt lists to avoid conflicts
+  ansible.builtin.shell: | 
+   sudo apt clean
+    sudo rm -rf /var/lib/apt/lists/*
+    sudo apt update
+# - name: Add bookworm repo to download older PostgreSQL versions
+#   ansible.builtin.shell: |
+#     echo "deb http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+#     curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+#     sudo apt update
+- name: Add PG server dev
+  ansible.builtin.apt:
+    name: postgresql-server-dev-{{ postgres_version }}
+    state: present
+  become: true
+
+- name: Add libpq-dev
+  ansible.builtin.apt:
+    name: libpq-dev
+    state: present
+  become: true
+
+- name: Add libsafec-dev
+  ansible.builtin.apt:
+    name: libsafec-dev
+    state: present
+  become: true
 
 - name: Download Citus repo script
   ansible.builtin.get_url:
@@ -14,18 +41,6 @@
   args:
     creates: /etc/apt/sources.list.d/citusdata.list
 
-- name: Download PostgreSQL repository key
-  ansible.builtin.get_url:
-    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-    dest: /usr/share/keyrings/pgdg-archive-keyring.gpg
-    mode: '0644'
-
-- name: Add PostgreSQL repository using keyring
-  ansible.builtin.copy:
-    dest: /etc/apt/sources.list.d/pgdg.list
-    content: |
-      deb [signed-by=/usr/share/keyrings/pgdg-archive-keyring.gpg] http://apt.postgresql.org/pub/repos/apt trixie-pgdg main
-  become: true
 
 - name: Update apt cache after adding repos
   ansible.builtin.apt:
@@ -35,15 +50,85 @@
 
 - name: Install Citus
   ansible.builtin.apt:
-    name: "postgresql-{{ postgres_version }}-citus-13.2"
+    name: postgresql-{{ postgres_version }}-citus-{{ citus_version }}
     state: present
   become: true
 
+
+# - name: Download PostgreSQL repository key
+#   ansible.builtin.get_url:
+#     url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+#     dest: /usr/share/keyrings/pgdg-archive-keyring.gpg
+#     mode: '0644'
+
+# - name: Add PostgreSQL repository using keyring
+#   ansible.builtin.copy:
+#     dest: /etc/apt/sources.list.d/pgdg.list
+#     content: |
+#       deb [signed-by=/usr/share/keyrings/pgdg-archive-keyring.gpg] http://apt.postgresql.org/pub/repos/apt trixie-pgdg main
+#   become: true
+
+# - name: Update apt cache after adding repos
+#   ansible.builtin.apt:
+#     update_cache: yes
+#     cache_valid_time: 3600
+#   become: true
+
+# - name: Install Citus
+#   ansible.builtin.get_url:
+#     url: "https://github.com/citusdata/citus/archive/refs/tags/v{{ citus_version }}.tar.gz"
+#     dest: "/tmp/citus-{{ citus_version }}.tar.gz"
+#     mode: '0644'
+
+# - name: Delete previous Citus source if it exists
+#   ansible.builtin.file:
+#     path: "/tmp/citus-{{ citus_version }}"
+#     state: absent
+
+
+# - name: Extract Citus source
+#   ansible.builtin.unarchive:
+#     src: "/tmp/citus-{{ citus_version }}.tar.gz"
+#     dest: /tmp/
+#     remote_src: yes
+#     creates: "/tmp/citus-{{ citus_version }}"
+
+# - name: Build and install Citus
+#   ansible.builtin.shell: |
+#     cd /tmp/citus-{{ citus_version }}
+#     ./configure --without-lz4
+#     make 
+#     sudo make install
+
 - name: Configure PostgreSQL to load Citus extension
-  ansible.builtin.command: "sudo pg_conftool 17 main set shared_preload_libraries citus"
+  ansible.builtin.command: "sudo pg_conftool {{ postgres_version }} main set shared_preload_libraries citus"
 
 - name: Restart PostgreSQL to apply changes
   ansible.builtin.service:
     name: postgresql
     state: restarted
   become: true
+  
+- name: Ensure Citus extension is installed in the database
+  ansible.builtin.shell: |
+    sudo -u postgres psql -c "CREATE EXTENSION IF NOT EXISTS citus;"
+
+- name: Register workers with Citus coordinator
+  become: true
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  vars:
+    worker_nodes: "{{ groups['workers'] }}"
+  loop: "{{ worker_nodes }}"
+  loop_control:
+    loop_var: worker
+  shell: |
+    sudo -u postgres psql -tAc "
+    SELECT * FROM citus_add_node('{{ worker }}', 5433);"
+  
+- name: Run verification to see if all workers are registered
+  become: true
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  shell: |
+    sudo -u postgres psql -c "SELECT * FROM citus_get_active_worker_nodes();"

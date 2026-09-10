@@ -1,0 +1,8 @@
+- name: Load Data 
+  #only on master
+  hosts: masters
+  become: true
+  roles:
+    #- postgis_geolife
+    #- geolife_spark
+    - clickhouse_geolife

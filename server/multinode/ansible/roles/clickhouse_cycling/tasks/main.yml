@@ -1,0 +1,103 @@
+# - name: Make sure HDFS is not running
+#   ansible.builtin.shell: | 
+#     {{ hadoop_home }}/sbin/stop-all.sh || true
+#   become_user: debian
+- name: Make sure Clickhouse is running
+  systemd:
+    name: clickhouse-server
+    state: started
+    enabled: yes
+    
+
+# FIX: nothing ever synced a parquet file onto the target machine -- "Find parquet files" always
+# found zero. data_generator_cycling/output/parquet exists but is empty locally, so this syncs a
+# small dummy file matching the pipeline's expected schema instead of real data.
+- name: Sync sample cycling parquet file to target machine
+  ansible.posix.synchronize:
+    src: "{{ cycling_sample_parquet_file }}"
+    dest: "{{ clickhouse_cycling_data_dir }}/"
+  when: inventory_hostname in groups['masters']
+
+- name: Find parquet files
+  ansible.builtin.find:
+    paths: "{{ clickhouse_cycling_data_dir }}"
+    patterns: "*.parquet"
+  register: parquet_files
+  when: inventory_hostname in groups['masters']
+
+# FIX: hardcoded to /root/data, which is neither where this role's own data lives
+# ({{ clickhouse_cycling_data_dir }}, /var/lib/data/cycling) nor a path anything else in this
+# project ever creates.
+- name: Fix data directory permissions recursively
+  ansible.builtin.file:
+    path: "{{ clickhouse_cycling_data_dir }}"
+    mode: "0777"
+    recurse: yes
+  when: inventory_hostname in groups['masters']
+
+- name: Drop Clickhouse table if exists
+  ansible.builtin.shell: |
+    clickhouse-client --port {{ ch_port}}  --query "DROP TABLE IF EXISTS ride_points ON CLUSTER cluster_1"
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+- name: Drop local Clickhouse table if exists
+  ansible.builtin.shell: |
+    clickhouse-client --port {{ ch_port}}  --query "DROP TABLE IF EXISTS ride_points_local ON CLUSTER cluster_1"
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+- name: Create ride_points table (optimized for geo queries)
+  shell: |
+    clickhouse-client --port {{ ch_port }} --query "
+    CREATE TABLE IF NOT EXISTS ride_points_local ON CLUSTER cluster_1 (
+        id UInt64,
+        rider_id UInt64,
+        timestamp DateTime,
+        lat Float64,
+        lon Float64,
+        Point Tuple(Float64, Float64) MATERIALIZED (lon, lat),
+        h3 UInt64 MATERIALIZED geoToH3(lat, lon, 9)
+    )
+    ENGINE = ReplicatedMergeTree()
+    PARTITION BY toYYYYMM(timestamp)
+    ORDER BY (h3, timestamp, id)
+    SETTINGS index_granularity = 8192;
+    "
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+- name: Create distributed ride_points table
+  shell: |
+    clickhouse-client --port {{ ch_port }} --query "
+    CREATE TABLE IF NOT EXISTS ride_points ON CLUSTER cluster_1 AS ride_points_local
+    ENGINE = Distributed(cluster_1, default, ride_points_local, rand());
+    "
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+
+# - name: Add skipping index on H3
+#   shell: |
+#     clickhouse-client --port {{ ch_port }} --query "
+#     ALTER TABLE ride_points
+#     ADD INDEX idx_h3 h3 TYPE set(1000) GRANULARITY 4;
+#     "
+
+- name: Load parquet into ClickHouse directly
+  ansible.builtin.shell: |
+    clickhouse-client --port {{ ch_port}}  --query "
+    INSERT INTO ride_points
+    SELECT
+        trip_id AS id,
+        rider_id,
+        toDateTime(timestamp / 1000),
+        lat,
+        lon
+    FROM file('{{ item.path }}', Parquet)
+    "
+  when: inventory_hostname in groups['masters']
+  loop: "{{ parquet_files.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  become_user: "{{ ansible_user }}"

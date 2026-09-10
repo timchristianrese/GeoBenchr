@@ -20,7 +20,7 @@ Gets data points surrounding a generated data point
 - "ride_traffic"
 gets intersections of rides
 - "intersections"
-Gets intersections of a specific ride_id
+Gets intersections of a specific id
 - "bounding_box"
 Gets data contained by a bounding box
 - "polygonal_area"

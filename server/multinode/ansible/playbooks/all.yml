@@ -1,0 +1,41 @@
+# Installs every SUT across the whole 5-node cluster in one run: Hadoop/Spark/Sedona, then
+# Postgres/PostGIS/Citus/MobilityDB, then ClickHouse (all across every node), then DuckDB (master
+# only, matching every other SUT's single-coordinator-host setup -- benchmark_client only ever
+# connects to one DuckDB host). Equivalent to running hadoop.yml + spark.yml + sedona.yml +
+# mobilitydb_cluster.yml + clickhouse_cluster.yml + duckdb.yml back to back, as one command.
+#
+# FIX: this used to list only [common, hadoop, spark, sedona] with postgres/citus/mobilitydb
+# commented out (and postgis missing from the list entirely) -- despite the filename/README both
+# describing this as the "install everything" playbook, it never actually installed a working
+# Postgres/PostGIS/Citus/MobilityDB stack, or ClickHouse, or DuckDB at all.
+- name: Install Hadoop/Spark/Sedona stack
+  hosts: all
+  become: yes
+  roles:
+    - common
+    - hadoop
+    - spark
+    - sedona
+
+- name: Install Postgres/PostGIS/Citus/MobilityDB stack
+  hosts: all
+  become: yes
+  roles:
+    - common
+    - postgres
+    - postgis
+    - citus
+    - mobilitydb
+
+- name: Install ClickHouse
+  hosts: clickhouse
+  become: yes
+  roles:
+    - clickhouse
+
+- name: Install DuckDB (master only)
+  hosts: masters
+  become: yes
+  roles:
+    - common
+    - duckdb

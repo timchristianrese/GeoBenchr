@@ -36,7 +36,7 @@ ssh $SSH_USER@$GCP_IP 'chmod +x ~/setupRideData.sh; ~/setupRideData.sh'
 ```
 This script does the following:
 1. We first create a table for point data, which includes several variables: 
-- ride_id float,
+- id float,
 - rider_id float,
 - latitude float,
 - longitude float,
@@ -46,7 +46,7 @@ This script does the following:
 - timestamp timestamp
 2. We adjust the table to store longitude and latitude in point form as well, and ingest data
 3. We create a trip table, which only contains:
-- ride_id float,
+- id float,
 - rider_id float,
 - trip GEOMETRY(MultiLineString, 4326) (this contains the trip)
 - time timestamp[] (Array of timestamps)

@@ -1,0 +1,46 @@
+- name: Ensure config directory exists
+  file:
+    path: /etc/clickhouse-server/config.d
+    state: directory
+
+- name: Ensure users directory exists
+  file:
+    path: /etc/clickhouse-server/users.d
+    state: directory
+
+- name: Delete /etc/clickhouse-server/config.d/keeper.xml
+  ansible.builtin.file:
+    state: absent
+    path: /etc/clickhouse-server/config.d/keeper.xml
+- name: Deploy main ClickHouse config
+  template:
+    src: config.xml.j2
+    dest: /etc/clickhouse-server/config.d/config.xml
+
+# - name: Deploy cluster config remote_servers
+#   template:
+#     src: remote_servers.xml.j2
+#     dest: /etc/clickhouse-server/config.d/remote_servers.xml
+
+- name: Overwrite users config to disable default user
+  template:
+    src: users.xml.j2
+    dest: /etc/clickhouse-server/users.d/users.xml
+
+- name: Deploy keeper config
+  template:
+    src: keeper.xml.j2
+    dest: /etc/clickhouse-keeper/keeper_config.xml
+  # notify: restart clickhouse
+
+- name: Restart ClickHouse Keeper
+  service:
+    name: clickhouse-keeper
+    state: restarted
+    enabled: yes
+
+- name: Restart ClickHouse server
+  service:
+    name: clickhouse-server
+    state: restarted
+    enabled: yes

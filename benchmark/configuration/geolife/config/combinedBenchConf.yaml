@@ -1,0 +1,822 @@
+benchmark:
+  sut: MobilityDB
+  mixed: false
+  nodes:
+  - ''
+  threads: 16
+  test: false
+  random_seed: 1500
+
+# DuckDB dialect notes (added when a "duckdb:" query block was introduced below -- see the fuller
+# version of this note in crossings_benchmark.yaml for the full research write-up; summarized here):
+#   - "Distributed DuckDB" means DuckLake (Postgres-backed catalog + Parquet on shared object
+#     storage) attached by multiple independent DuckDB engines. ATTACH is a one-time setup step,
+#     not part of each query -- duckdb: blocks below are plain DuckDB SQL. This is shared storage
+#     queried by independent single-node engines, not shared-nothing parallel query execution
+#     (no cross-node shuffle/parallel join, unlike Sedona/Spark).
+#   - GEOMETRY is a core DuckDB type (since 1.5.0); the "spatial" extension supplies
+#     ST_Distance/ST_DWithin/ST_Buffer/ST_Intersects/ST_Contains etc. generically over geometry
+#     type, including point-to-polygon distance.
+#   - EXTRACT/date_trunc/INTERVAL/CTEs/window functions/GROUP BY-HAVING/COUNT(DISTINCT ...)/
+#     standard DML all supported with Postgres-compatible syntax -- DuckDB's COUNT(DISTINCT ...)
+#     is exact (like postgis/sedona), not an approximate estimator, so it needs no "uniqExact()"-
+#     style fix the way ClickHouse's default uniq() did for a couple of queries below.
+#   - Write consistency for the DuckLake configuration above is snapshot-isolated with a
+#     documented (but still-maturing) retry-on-conflict mechanism for concurrent writers --
+#     different from a single Postgres instance's immediate read-after-write.
+
+queryConfigs:
+- name: FirstAndLastActivityInPeriod #temporal
+  use: true
+  description: "Find the first and last activity of each user within a specified time period. This query retrieves the earliest and latest timestamps of user activities."
+  type: temporal
+  mobilitydb: |
+    -- NOT IMPLEMENTED: left blank. Unlike the crossings/rides files, no trajectory-table
+    -- equivalent (e.g. a "geolife_trajectories"/"users" table with a temporal "trip" column) is
+    -- referenced anywhere else in this file, so there's no confident basis to fill this in.
+  postgis: |
+    SELECT id,
+       MIN(timestamp) AS first_seen,
+       MAX(timestamp) AS last_seen
+    FROM geolife_points
+    WHERE timestamp BETWEEN :period_medium
+    GROUP BY id;
+  sample_postgis: |
+      SELECT id,
+       MIN(timestamp) AS first_seen,
+       MAX(timestamp) AS last_seen
+      FROM geolife_points
+      WHERE timestamp BETWEEN '2019-07-02 03:48:22' AND '2019-07-03 04:20:27'
+      GROUP BY id;
+  sedona: |
+      SELECT id,
+       MIN(timestamp) AS first_seen,
+       MAX(timestamp) AS last_seen
+      FROM geolife_points
+      WHERE timestamp BETWEEN :period_medium
+      GROUP BY id;
+  spacetime: |
+    -- NOT IMPLEMENTED: left blank in the source file.
+  clickhouse: |
+      SELECT id,
+       MIN(timestamp) AS first_seen,
+       MAX(timestamp) AS last_seen
+      FROM geolife_points
+      WHERE timestamp BETWEEN :period_medium
+      GROUP BY id;
+  duckdb: |
+    SELECT id,
+       MIN(timestamp) AS first_seen,
+       MAX(timestamp) AS last_seen
+    FROM geolife_points
+    WHERE timestamp BETWEEN :period_medium
+    GROUP BY id;
+  repetition: 10
+  parameters:
+  - period_medium
+- name: AverageDailyActivityPerUserInPeriod #temporal
+  use: true
+  description: "Find the average daily number of activities per user within a specified time period, specific to each user."
+  type: temporal
+  # EQUIVALENCE NOTE: clickhouse's default uniq() is an approximate (HyperLogLog) distinct count;
+  # it was already fixed below to uniqExact() so it matches postgis/sedona's exact
+  # COUNT(DISTINCT DATE(timestamp)). duckdb's COUNT(DISTINCT ...) is exact by default (see header
+  # note), so no equivalent fix is needed there -- flagging only so it's clear this was a
+  # deliberate non-issue for duckdb, not an overlooked one.
+  # NOT IMPLEMENTED: left blank, same reasoning as FirstAndLastActivityInPeriod above.
+  mobilitydb: |
+  postgis: |
+    SELECT
+    id,
+    COUNT(*)::float / COUNT(DISTINCT DATE(timestamp)) AS avg_points_per_day
+    FROM geolife_points
+    WHERE timestamp BETWEEN :period_medium
+    GROUP BY id;
+  sample_postgis: |
+    SELECT
+    id,
+    COUNT(*)::float / COUNT(DISTINCT DATE(timestamp)) AS avg_points_per_day
+    FROM geolife_points
+    WHERE timestamp BETWEEN '2019-07-02 03:48:22' AND '2019-07-06 04:20:27'
+    GROUP BY id;
+  sedona: |
+    SELECT
+    id,
+    COUNT(*)::float / COUNT(DISTINCT DATE(timestamp)) AS avg_points_per_day
+    FROM geolife_points
+    WHERE timestamp BETWEEN :period_medium
+    GROUP BY id;
+  spacetime: |
+    -- NOT IMPLEMENTED: left blank in the source file.
+  clickhouse: |
+    -- FIX: uniq() is an APPROXIMATE distinct count in ClickHouse (HyperLogLog-based) -- it is not
+    -- the same statistic as postgis/sedona's exact COUNT(DISTINCT DATE(timestamp)) above, so
+    -- results could diverge between dialects. Switched to uniqExact() for a true equivalent.
+    SELECT
+    id,
+    COUNT(*) / uniqExact(toDate(timestamp)) AS avg_points_per_day
+    FROM geolife_points
+    WHERE timestamp BETWEEN :period_medium
+    GROUP BY id;
+  duckdb: |
+    SELECT
+    id,
+    COUNT(*)::float / COUNT(DISTINCT DATE(timestamp)) AS avg_points_per_day
+    FROM geolife_points
+    WHERE timestamp BETWEEN :period_medium
+    GROUP BY id;
+  repetition: 10
+  parameters:
+  - period_medium
+
+- name: ClosestRestaurantToPoint #spatial
+  use: true
+  description: "Find the closest restaurant to a specified point using CheckInData. This query identifies the nearest restaurant based on spatial proximity. This query assumes that there is a restaurant within 5 km of the given point."
+  type: spatial
+  # EQUIVALENCE NOTE: clickhouse's greatCircleDistance is a true great-circle metric, while
+  # postgis/sedona/duckdb's ST_DWithin/ST_Distance here run in EPSG:3857 (a planar, latitude-
+  # distorted "meter") -- at Beijing's latitude these are not the same 5000m radius, so results
+  # can diverge (already flagged inline on the clickhouse block below, which also needed an arity
+  # fix for greatCircleDistance's 4-scalar signature).
+  # NOT IMPLEMENTED: left blank in the source file.
+  mobilitydb: |
+  postgis: |
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 'restaurant' AND ST_DWithin(geom, :point, 5000)
+    ORDER BY ST_Distance(geom, :point)
+    LIMIT 1;
+  sample_postgis: |
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 'restaurant' AND ST_DWithin(
+        geom,
+        ST_Transform(
+            ST_SetSRID(ST_MakePoint(116.4074, 39.9042), 4326),
+            3857
+        ),
+        5000
+    )
+    ORDER BY ST_Distance(
+        geom,
+        ST_Transform(
+            ST_SetSRID(ST_MakePoint(116.4074, 39.9042), 4326),
+            3857
+        )
+    )
+    LIMIT 1;
+  sedona: |
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 'restaurant' AND ST_DWithin(geom, :point, 5000)
+    ORDER BY ST_Distance(geom, :point)
+    LIMIT 1;
+  spacetime: |
+    -- NOT IMPLEMENTED: left blank in the source file.
+  clickhouse: |
+    -- NOTE: greatCircleDistance needs 4 scalar args (lon1, lat1, lon2, lat2).
+    -- The original passed :point (a single packed geometry parameter, the same
+    -- shape postgis/sedona use above) as if it were two scalars -- wrong arity,
+    -- would not run. Fixed assuming decomposed :point_lon / :point_lat parameters,
+    -- which are NOT currently in this query's shared `parameters:` list below --
+    -- the harness needs to supply them for ClickHouse specifically. Also note: this
+    -- is a true great-circle distance, while postgis/sedona's ST_DWithin/ST_Distance
+    -- run in EPSG:3857 (a planar, latitude-distorted "meter"), so even once the
+    -- arity is fixed the two families of dialects are not measuring quite the same
+    -- thing at Beijing's latitude.
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 'restaurant' AND greatCircleDistance(lon, lat, :point_lon, :point_lat) <= 5000
+    ORDER BY greatCircleDistance(lon, lat, :point_lon, :point_lat)
+    LIMIT 1;
+  duckdb: |
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 'restaurant' AND ST_DWithin(geom, :point, 5000)
+    ORDER BY ST_Distance(geom, :point)
+    LIMIT 1;
+  repetition: 10
+  parameters:
+  - point
+- name: CountPOIsByTypeInRegion #spatial
+  use: true
+  description: "Count the number of points of interest (POIs) by type within a specified region. This query aggregates POIs based on their types, providing insights into the distribution of different categories of POIs within the defined spatial area."
+  type: spatial
+  mobilitydb: |
+    -- NOT IMPLEMENTED: left blank in the source file.
+  postgis: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE ST_Intersects(geom, :region_medium)
+    GROUP BY venue_type;
+  sample_postgis: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE ST_Intersects(
+        geom,
+        ST_Transform(
+            ST_MakeEnvelope(
+                116.38087376650985,
+                39.84297123506521,
+                116.48446967405202,
+                39.89995452866296,
+                4326
+            ),
+            3857
+        )
+    )
+    GROUP BY venue_type;
+  sedona: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE ST_Intersects(geom, :region_medium)
+    GROUP BY venue_type;
+  spacetime: |
+    -- NOT IMPLEMENTED: left blank in the source file.
+  clickhouse: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE pointInPolygon((lon, lat), :region_medium)
+    GROUP BY venue_type;
+  duckdb: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE ST_Intersects(geom, :region_medium)
+    GROUP BY venue_type;
+  repetition: 10
+  parameters:
+  - region_medium
+
+- name: "SlidingWindowActivityInRegionPerMinuteWithNonZeroID" #spatiotemporal
+  use: true
+  description: "Counts the number of Non-Zero Venue_ID activities in a specified region for each minute within a given time period. For every minute, the query aggregates activities occurring within a 20-minute sliding window centered on that minute (10 minutes before and after), providing a smoothed view of activity patterns over time."
+  type: spatiotemporal
+  mobilitydb: |
+    -- NOT IMPLEMENTED: left blank. This is a non-trivial windowed aggregation; no confident
+    -- analogous template exists elsewhere in this benchmark to extrapolate from.
+  postgis: |
+   WITH minute_activity AS (
+    SELECT
+        date_trunc('minute', timestamp) AS minute,
+        COUNT(*) FILTER (WHERE venue_id <> 0) AS venue_updates
+    FROM geolife_points
+    WHERE timestamp BETWEEN :period_short
+      AND ST_Intersects(geom, :region_medium)
+    GROUP BY date_trunc('minute', timestamp)
+    ),
+    minute_windows AS (
+        SELECT
+            minute,
+            minute - INTERVAL '10 minutes' AS window_start,
+            minute + INTERVAL '10 minutes' AS window_end
+        FROM minute_activity
+    )
+    SELECT
+        w.minute,
+        SUM(m.venue_updates) AS updates_in_window
+    FROM minute_windows w
+    JOIN minute_activity m
+        ON m.minute BETWEEN w.window_start AND w.window_end
+    GROUP BY w.minute
+    ORDER BY w.minute;
+  sample_postgis: |
+    WITH minute_activity AS (
+        SELECT
+            date_trunc('minute', timestamp) AS minute,
+            COUNT(*) AS updates,
+            COUNT(*) FILTER (WHERE venue_id <> 0) AS venue_updates
+        FROM geolife_points
+        WHERE timestamp BETWEEN '2019-07-02 03:48:22' AND '2019-07-03 04:20:27'
+          AND ST_Intersects(
+                geom,
+                ST_Transform(
+                    ST_MakeEnvelope(
+                        116.38087376650985,
+                        39.84297123506521,
+                        116.48446967405202,
+                        39.89995452866296,
+                        4326
+                    ),
+                    3857
+                )
+            )
+        GROUP BY 1
+    )
+    SELECT
+        a.minute,
+        SUM(b.venue_updates) AS updates_in_window
+    FROM minute_activity a
+    JOIN minute_activity b
+        ON b.minute BETWEEN a.minute - interval '10 minutes'
+                        AND a.minute + interval '10 minutes'
+    GROUP BY a.minute
+    ORDER BY a.minute;
+  sedona: |
+    WITH minute_activity AS (
+    SELECT
+        date_trunc('minute', timestamp) AS minute,
+        COUNT(*) FILTER (WHERE venue_id <> 0) AS venue_updates
+    FROM geolife_points
+    WHERE timestamp BETWEEN :period_short
+      AND ST_Intersects(geom, :region_medium)
+    GROUP BY date_trunc('minute', timestamp)
+    ),
+    minute_windows AS (
+        SELECT
+            minute,
+            minute - INTERVAL '10 minutes' AS window_start,
+            minute + INTERVAL '10 minutes' AS window_end
+        FROM minute_activity
+    )
+    SELECT
+        w.minute,
+        SUM(m.venue_updates) AS updates_in_window
+    FROM minute_windows w
+    JOIN minute_activity m
+        ON m.minute BETWEEN w.window_start AND w.window_end
+    GROUP BY w.minute
+    ORDER BY w.minute;
+  spacetime: |
+    -- NOT IMPLEMENTED: left blank in the source file.
+  clickhouse: |
+    -- FIX: "COUNTIf" -> "countIf". ClickHouse function names are case-sensitive; the built-in
+    -- combinator is lowercase-c "countIf", not "COUNTIf" -- as written this would fail with an
+    -- unknown-function error.
+    WITH minute_activity AS (
+        SELECT
+            toStartOfMinute(timestamp) AS minute,
+            COUNT(*) AS updates,
+            countIf(venue_id <> 0) AS venue_updates
+        FROM geolife_points
+        WHERE timestamp BETWEEN :period_short
+          AND pointInPolygon((lon, lat), :region_medium)
+        GROUP BY minute
+    ),
+    minute_windows AS (
+        SELECT
+            minute,
+            minute - INTERVAL 10 MINUTE AS window_start,
+            minute + INTERVAL 10 MINUTE AS window_end
+        FROM minute_activity
+    )
+    SELECT
+        w.minute,
+        SUM(m.venue_updates) AS updates_in_window
+    FROM minute_windows w
+    JOIN minute_activity m
+        ON m.minute BETWEEN w.window_start AND w.window_end
+    GROUP BY w.minute
+    ORDER BY w.minute;
+  duckdb: |
+    WITH minute_activity AS (
+      SELECT
+          date_trunc('minute', timestamp) AS minute,
+          COUNT(*) FILTER (WHERE venue_id <> 0) AS venue_updates
+      FROM geolife_points
+      WHERE timestamp BETWEEN :period_short
+        AND ST_Intersects(geom, :region_medium)
+      GROUP BY date_trunc('minute', timestamp)
+    ),
+    minute_windows AS (
+        SELECT
+            minute,
+            minute - INTERVAL '10 minutes' AS window_start,
+            minute + INTERVAL '10 minutes' AS window_end
+        FROM minute_activity
+    )
+    SELECT
+        w.minute,
+        SUM(m.venue_updates) AS updates_in_window
+    FROM minute_windows w
+    JOIN minute_activity m
+        ON m.minute BETWEEN w.window_start AND w.window_end
+    GROUP BY w.minute
+    ORDER BY w.minute;
+  repetition: 10
+  parameters:
+  - period_short
+  - region_medium
+
+
+- name: UniqueUsersPerHourInRegionInPeriod #spatiotemporal
+  use: true
+  description: "Find the number of unique users in a specified region during a given time period, grouped by hour. This query counts distinct user IDs whose activities fall within the defined spatial area and temporal window, providing insights into user distribution and engagement."
+  type: spatiotemporal
+  # EQUIVALENCE NOTE: same approximate-vs-exact distinct count issue as
+  # AverageDailyActivityPerUserInPeriod above -- clickhouse's uniqExact() (already fixed from
+  # uniq()) matches postgis/sedona/duckdb's exact COUNT(DISTINCT id).
+  # NOT IMPLEMENTED: left blank in the source file.
+  mobilitydb: |
+  postgis: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       COUNT(DISTINCT id) AS users
+    FROM geolife_points
+    WHERE ST_Intersects(geom, :region_medium)
+      AND timestamp BETWEEN :period_medium
+    GROUP BY hour
+    ORDER BY hour;
+  sample_postgis: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       COUNT(DISTINCT id) AS users
+    FROM geolife_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
+                116.38087376650985,
+                39.84297123506521,
+                116.48446967405202,
+                39.89995452866296,
+                4326
+            ), 3857))
+      AND timestamp BETWEEN '2019-07-02 03:48:22' AND '2019-07-03 04:20:27'
+    GROUP BY hour
+    ORDER BY hour;
+  sedona: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       COUNT(DISTINCT id) AS users
+    FROM geolife_points
+    WHERE ST_Intersects(geom, :region_medium)
+      AND timestamp BETWEEN :period_medium
+    GROUP BY hour
+    ORDER BY hour;
+  spacetime: |
+    -- NOT IMPLEMENTED: left blank in the source file.
+  clickhouse: |
+    -- FIX: uniq() is an APPROXIMATE distinct count in ClickHouse; switched to uniqExact() so
+    -- this matches postgis/sedona's exact COUNT(DISTINCT id) above rather than an estimate.
+    SELECT toStartOfHour(timestamp) AS hour,
+       uniqExact(id) AS users
+    FROM geolife_points
+    WHERE pointInPolygon((lon, lat), :region_medium)
+      AND timestamp BETWEEN :period_medium
+    GROUP BY hour
+    ORDER BY hour;
+  duckdb: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       COUNT(DISTINCT id) AS users
+    FROM geolife_points
+    WHERE ST_Intersects(geom, :region_medium)
+      AND timestamp BETWEEN :period_medium
+    GROUP BY hour
+    ORDER BY hour;
+  repetition: 10
+  parameters:
+  - region_medium
+  - period_medium
+
+
+#Write Operations
+
+- name: insertSinglegeolifePoint
+  use: true
+  description: "Insert a single geolife point"
+  type: insert
+  mobilitydb: |
+    -- FIX: was blank. geolife_points has the same id/geom/timestamp shape used by
+    -- postgis/clickhouse below, and MobilityDB is a Postgres extension, so a plain
+    -- point-table insert works the same way as postgis.
+    INSERT INTO geolife_points (id, geom, timestamp)
+    VALUES (:id, :point, :instant);
+  postgis: |
+    INSERT INTO geolife_points (id, geom, timestamp)
+    VALUES (:id, :point, :instant);
+  sedona: |
+  spacetime: |
+
+  clickhouse: |
+    INSERT INTO geolife_points (id, geom, timestamp)
+    VALUES (:id, :point, :instant);
+  duckdb: |
+    INSERT INTO geolife_points (id, geom, timestamp)
+    VALUES (:id, :point, :instant);
+
+  repetition: 10
+  parameters:
+  - id
+  - point
+  - instant
+
+- name: updategeolifePoint
+  use: true
+  description: "Update location of a geolife point"
+  type: update
+  # EQUIVALENCE NOTE: write immediacy differs by system -- see the same note on
+  # updateCrossingPoint in crossings_benchmark.yaml (clickhouse's UPDATE is an async mutation;
+  # duckdb's write goes through DuckLake's snapshot-commit-with-possible-retry path; sedona
+  # doesn't support live updates).
+  # FIX: was blank -- filled in analogous to postgis below.
+  mobilitydb: |
+    UPDATE geolife_points
+    SET geom = :point
+    WHERE id = :id;
+  postgis: |
+    UPDATE geolife_points
+    SET geom = :point
+    WHERE id = :id;
+  sedona: |
+  spacetime: |
+  clickhouse: |
+    -- FIX: ClickHouse has no standalone UPDATE statement; needs the ALTER TABLE mutation form.
+    ALTER TABLE geolife_points UPDATE geom = :point WHERE id = :id;
+  duckdb: |
+    UPDATE geolife_points
+    SET geom = :point
+    WHERE id = :id;
+  repetition: 10
+  parameters:
+  - id
+  - point
+
+- name: deletegeolifePoint
+  use: true
+  description: "Delete a geolife point"
+  type: delete
+  mobilitydb: |
+    -- FIX: was blank -- filled in analogous to postgis below.
+    DELETE FROM geolife_points
+    WHERE id = :id;
+  postgis: |
+    DELETE FROM geolife_points
+    WHERE id = :id;
+  sedona: |
+  spacetime: |
+  clickhouse: |
+    -- FIX: this block was completely empty for an active (use: true) query -- it would
+    -- have been a no-op or an error at benchmark time. NOTE: this is ClickHouse's
+    -- "lightweight delete", valid on >=23.3 (or older versions with
+    -- allow_experimental_lightweight_delete=1); otherwise use
+    -- "ALTER TABLE geolife_points DELETE WHERE id = :id;".
+    DELETE FROM geolife_points
+    WHERE id = :id;
+  duckdb: |
+    DELETE FROM geolife_points
+    WHERE id = :id;
+  repetition: 10
+  parameters:
+  - id
+
+- name: bulkInsertgeolifePoints
+  use: true
+  description: "Insert multiple points in one statement"
+  type: bulk_insert
+  mobilitydb: |
+    -- FIX: was blank -- filled in analogous to postgis below.
+    INSERT INTO geolife_points (id, geom, timestamp)
+    VALUES :bulk_values;
+  postgis: |
+    INSERT INTO geolife_points (id, geom, timestamp)
+    VALUES :bulk_values;
+  sedona: |
+  spacetime: |
+  clickhouse: |
+    INSERT INTO geolife_points (id, geom, timestamp)
+    VALUES :bulk_values;
+  duckdb: |
+    INSERT INTO geolife_points (id, geom, timestamp)
+    VALUES :bulk_values;
+  repetition: 10
+  parameters:
+  - bulk_values
+
+
+# BACKUP
+# - name: UsersWithActivitiesInTwoRegionsInPeriod #spatiotemporal
+#   use: true
+#   description: "Find users who have activities in two specified regions during a given time period. This query identifies users whose activities intersect with both defined spatial areas within the temporal window, providing insights into user mobility and behavior across different locations."
+#   type: spatiotemporal
+#   mobilitydb: |
+#   postgis: |
+#     SELECT id
+#     FROM geolife_points
+#     WHERE ST_Intersects(geom, :region_medium) AND ST_Intersects(geom, :region_medium2)
+#       AND timestamp BETWEEN :period
+#     GROUP BY id;
+#   sample_postgis: |
+#     SELECT id
+#     FROM geolife_points
+#     WHERE ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
+#                 116.38087376650985,
+#                 39.84297123506521,
+#                 116.48446967405202,
+#                 39.89995452866296,
+#                 4326
+#             ), 3857))
+#       AND ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
+#                 116.4074,
+#                 39.9042,
+#                 116.4174,
+#                 39.9142,
+#                 4326
+#             ), 3857))
+#       AND timestamp BETWEEN '2019-07-02 03:48:22' AND '2019-07-03 04:20:27'
+#     GROUP BY id;
+#   sedona: |
+#   spacetime: |
+#   clickhouse: |
+#     SELECT id
+#     FROM geolife_points
+#     WHERE pointInPolygon((lon, lat), :region_polygon1) AND pointInPolygon((lon, lat), :region_polygon2)
+#       AND timestamp BETWEEN :period_medium
+#     GROUP BY id;
+#   repetition: 52
+#   parameters:
+#   - region_medium
+#   - region_medium2
+#   - period_medium
+
+# - name: AverageDistanceToPointInPeriod #spatiotemporal
+#   use: true
+#   description: "Find the average distance to a point within a specified time period. This query calculates the mean distance from user activities to a reference point, providing insights into spatial proximity over time."
+#   type: spatiotemporal
+#   mobilitydb: |
+#   postgis: |
+#     SELECT AVG(ST_Distance(geom, :point)) AS avg_distance
+#     FROM geolife_points
+#     WHERE timestamp BETWEEN :period_medium;
+#   sample_postgis: |
+#     SELECT AVG(ST_Distance(geom, ST_Transform(ST_SetSRID(ST_MakePoint(116.4074, 39.9042), 4326), 3857))) AS avg_distance
+#     FROM geolife_points
+#     WHERE timestamp BETWEEN '2019-07-02 03:48:22' AND '2019-07-03 04:20:27';
+#   sedona: |
+
+#   spacetime: |
+#   clickhouse: |
+#     SELECT AVG(greatCircleDistance(lon, lat, :ref_lon, :ref_lat)) AS avg_distance
+#     FROM geolife_points
+#     WHERE timestamp BETWEEN :period_medium;
+#   repetition: 52
+#   parameters:
+#   - region_medium
+#   - period_medium
+
+# - name: POIsWithinRadius #spatial
+#   use: true
+#   description: "Find the number of points of interest (POIs) within a specified radius from a given point. This query counts the number of POIs that fall within the defined spatial buffer.
+#   type: spatial
+#   mobilitydb: |
+#   postgis: |
+#     SELECT COUNT(*) AS poi_count
+#     FROM geolife_points
+#     WHERE ST_DWithin(geom, :point, :radius) AND venue_id != 0;
+#   sample_postgis: |
+#     SELECT COUNT(*) AS poi_count
+#     FROM geolife_points
+#     WHERE ST_DWithin(
+#         geom,
+#         ST_Transform(
+#             ST_SetSRID(ST_MakePoint(116.4074, 39.9042), 4326),
+#             3857
+#         ),
+#         1000
+#     ) AND venue_id != 0;
+#   sedona: |
+#     SELECT COUNT(*) AS poi_count
+#     FROM geolife_points
+#     WHERE ST_DWithin(geom, :point, :radius) AND venue_id != 0;
+#   spacetime: |
+#   clickhouse: |
+#     SELECT COUNT(*) AS poi_count
+#     FROM geolife_points
+#     WHERE greatCircleDistance(lon, lat, :ref_lon, :ref_lat) <= :radius AND venue_id != 0;
+#   repetition: 52
+#   parameters:
+#   - point
+#   - radius
+# - name: ActivityPerHour # temporal
+#   use: true
+#   description: "Find the number of activities per hour within a specified time period. This query aggregates user activities into hourly intervals, allowing for analysis of temporal patterns in user behavior."
+#   type: temporal
+#   mobilitydb: |
+#   postgis: |
+#       SELECT date_trunc('hour', timestamp) AS hour,
+#        COUNT(*) AS cnt
+#       FROM geolife_points
+#       WHERE timestamp BETWEEN :period_medium
+#       GROUP BY hour
+#       ORDER BY hour;
+#   sample_postgis: |
+#       SELECT date_trunc('hour', timestamp) AS hour,
+#        COUNT(*) AS cnt
+#       FROM geolife_points
+#       WHERE timestamp BETWEEN '2019-07-02 03:48:22' AND '2019-07-03 04:20:27'
+#       GROUP BY hour
+#       ORDER BY hour;
+#   sedona: |
+#       SELECT date_trunc('hour', timestamp) AS hour,
+#        COUNT(*) AS cnt
+#       FROM geolife_points
+#       WHERE timestamp BETWEEN :period_medium
+#       GROUP BY hour
+#       ORDER BY hour;
+#   spacetime: |
+#   clickhouse: |
+#       SELECT toStartOfHour(timestamp) AS hour,
+#        COUNT(*) AS cnt
+#       FROM geolife_points
+#       WHERE timestamp BETWEEN :period_medium
+#       GROUP BY hour
+#       ORDER BY hour;
+#   repetition: 52
+#   parameters:
+#   - period_medium
+# - name: CheckInsDuringRushHourInPeriod #temporal
+#   use: true
+#   description: "Find the number of check-ins during rush hours within a specified time period. This query counts user activities that occur during defined rush hour intervals, providing insights into peak activity times."
+#   type: temporal
+#   mobilitydb: |
+#   postgis: |
+#     SELECT COUNT(*) AS rush_hour_checkins
+#     FROM geolife_points
+#     WHERE timestamp BETWEEN :period_medium
+#       AND (EXTRACT(HOUR FROM timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM timestamp) BETWEEN 16 AND 18);
+#   sample_postgis: |
+#     SELECT COUNT(*) AS rush_hour_checkins
+#     FROM geolife_points
+#     WHERE timestamp BETWEEN '2019-07-02 03:48:22' AND '2019-07-03 04:20:27'
+#       AND (EXTRACT(HOUR FROM timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM timestamp) BETWEEN 16 AND 18);
+#   sedona: |
+#     SELECT COUNT(*) AS rush_hour_checkins
+#     FROM geolife_points
+#     WHERE timestamp BETWEEN :period_medium
+#       AND (EXTRACT(HOUR FROM timestamp) BETWEEN 7 AND 9 OR EXTRACT (HOUR FROM timestamp) BETWEEN 16 AND 18);
+#   spacetime: |
+#   clickhouse: |
+#     SELECT COUNT(*) AS rush_hour_checkins
+#     FROM geolife_points
+#     WHERE timestamp BETWEEN :period_medium
+#       AND (toHour(timestamp) BETWEEN 7 AND 9 OR toHour(timestamp) BETWEEN 16 AND 18);
+#   repetition: 52
+#   parameters:
+#   - period_medium
+# - name: UsersInsideRegion1AndRegion2 #spatial
+#   use: true
+#   description: "Find the number of users who have activities in both specified regions. This query identifies users whose activities intersect with both defined spatial areas, providing insights into user mobility and behavior across different locations."
+#   type: spatial
+#   mobilitydb: |
+#   postgis: |
+#     SELECT COUNT(*) AS user_count
+#     FROM (
+#         SELECT id
+#         FROM geolife_points
+#         WHERE ST_Intersects(geom, :region_medium1)
+#           OR ST_Intersects(geom, :region_medium2)
+#         GROUP BY id
+#         HAVING
+#             COUNT(*) FILTER (WHERE ST_Intersects(geom, :region_medium1)) > 0
+#             AND
+#             COUNT(*) FILTER (WHERE ST_Intersects(geom, :region_medium2)) > 0
+#     ) t;
+#   sample_postgis: |
+#     SELECT COUNT(*) AS user_count
+#     FROM (
+#         SELECT id
+#         FROM geolife_points
+#         WHERE ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
+#                 116.38087376650985,
+#                 39.84297123506521,
+#                 116.48446967405202,
+#                 39.89995452866296,
+#                 4326
+#             ), 3857))
+#           OR ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
+#                 116.4074,
+#                 39.9042,
+#                 116.4174,
+#                 39.9142,
+#                 4326
+#             ), 3857))
+#         GROUP BY id
+#         HAVING
+#             COUNT(*) FILTER (WHERE ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
+#                 116.38087376650985,
+#                 39.84297123506521,
+#                 116.48446967405202,
+#                 39.89995452866296,
+#                 4326
+#             ), 3857))) > 0
+#             AND
+#             COUNT(*) FILTER (WHERE ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
+#                 116.4074,
+#                 39.9042,
+#                 116.4174,
+#                 39.9142,
+#                 4326
+#             ), 3857))) > 0
+#     ) t;
+#   sedona: |
+#   spacetime: |
+#   clickhouse: |
+#     SELECT COUNT(*) AS user_count
+#     FROM (
+#         SELECT id
+#         FROM geolife_points
+#         WHERE pointInPolygon((lon, lat), :region_polygon1)
+#           OR pointInPolygon((lon, lat), :region_polygon2)
+#         GROUP BY id
+#         HAVING
+#             COUNT(*) FILTER (WHERE pointInPolygon((lon, lat), :region_polygon1)) > 0
+#             AND
+#             COUNT(*) FILTER (WHERE pointInPolygon((lon, lat), :region_polygon2)) > 0
+#     ) t;
+#   repetition: 52
+#   parameters:
+#   - region_medium
+#   - region_medium2

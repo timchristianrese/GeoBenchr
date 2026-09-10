@@ -1,0 +1,49 @@
+<clickhouse replace="true">
+    <logger>
+        <level>debug</level>
+        <log>/var/log/clickhouse-server/clickhouse-server.log</log>
+        <errorlog>/var/log/clickhouse-server/clickhouse-server.err.log</errorlog>
+        <size>1000M</size>
+        <count>3</count>
+    </logger>
+    <display_name>{{ inventory_hostname }}</display_name>
+    <listen_host>0.0.0.0</listen_host>
+    <http_port>8123</http_port>
+    <user_files_path>/var/lib/data/</user_files_path>
+    <tcp_port>{{ ch_port }}</tcp_port>
+    <user_directories>
+        <users_xml>
+            <path>users.xml</path>
+        </users_xml>
+        <local_directory>
+            <path>/var/lib/clickhouse/access/</path>
+        </local_directory>
+    </user_directories>
+    <distributed_ddl>
+        <path>/clickhouse/task_queue/ddl</path>
+    </distributed_ddl>
+    <remote_servers>
+        <cluster_1>
+{% for host in groups['clickhouse'] | sort %}
+            <shard>
+                <replica>
+                    <host>{{ host }}</host>
+                    <port>{{ ch_port }}</port>
+                </replica>
+            </shard>
+{% endfor %}
+        </cluster_1>
+    </remote_servers>
+    <zookeeper>
+{% for host in groups['clickhouse'] | sort %}
+        <node>
+            <host>{{ host }}</host>
+            <port>9555</port>
+        </node>
+{% endfor %}
+    </zookeeper>
+    <macros>
+        <shard>{{ num_id }}</shard>
+        <replica>{{ num_id }}</replica>
+    </macros>
+</clickhouse>

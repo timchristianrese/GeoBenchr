@@ -24,7 +24,7 @@ def extract_data(filepath, ride_writer):
     data = lines[1:]
 
     try:
-        ride_id_idx = header.index("ride_id")
+        id_idx = header.index("id")
         rider_id_idx = header.index("rider_id")
         traj_idx = header.index("traj")
     except ValueError as e:
@@ -36,13 +36,13 @@ def extract_data(filepath, ride_writer):
 
     for row in data:
         parts = list(csv.reader([row]))[0]
-        ride_id = parts[ride_id_idx].strip()
+        id = parts[id_idx].strip()
         rider_id = parts[rider_id_idx].strip()
         traj = parts[traj_idx].strip()
 
         points, times = parse_tgeogpoint(traj)
         for pt, ts in zip(points, times):
-            ride_writer.writerow([ride_id, rider_id, pt, ts])
+            ride_writer.writerow([id, rider_id, pt, ts])
 
 
 
@@ -64,7 +64,7 @@ def process_all_files(source_root, output_root):
 
                 ride_writer = csv.writer(ride_file)
 
-                ride_writer.writerow(["ride_id", "rider_id","geom", "timestamp"])
+                ride_writer.writerow(["id", "rider_id","geom", "timestamp"])
 
                 for file in os.listdir(source_folder_path):
                     if file == "rides.csv":

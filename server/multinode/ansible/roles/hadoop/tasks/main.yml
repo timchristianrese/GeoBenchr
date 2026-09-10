@@ -22,28 +22,42 @@
     state: directory
     mode: '0755'
 
+# - name: Instead of uploading, download JDK directly on the server (if not already present)
+#   get_url:
+#     url: https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.30%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
+#     dest: /opt/java/OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
+#     mode: '0644'
+# # - name: Upload OpenJDK tarball
+# #   copy:
+# #     src: OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
+# #     dest: /opt/java/
+
+# - name: Extract OpenJDK
+#   unarchive:
+#     src: /opt/java/OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
+#     dest: /opt/java/
+#     remote_src: yes
+
 - name: Instead of uploading, download JDK directly on the server (if not already present)
   get_url:
-    url: https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.30%2B7/OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
-    dest: /opt/java/OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
+    url: https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.18%2B8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
+    dest: /opt/java/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
     mode: '0644'
-    creates: /opt/java/OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
 
-# - name: Upload OpenJDK tarball
+# - name: Upload OpenJDK 17 tarball
 #   copy:
-#     src: OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
+#     src: OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
 #     dest: /opt/java/
 
-- name: Extract OpenJDK
+- name: Extract OpenJDK 17
   unarchive:
-    src: /opt/java/OpenJDK11U-jdk_x64_linux_hotspot_11.0.30_7.tar.gz
+    src: /opt/java/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
     dest: /opt/java/
     remote_src: yes
-    creates: /opt/java/jdk-11.0.30+7
 
 - name: Create Java symlink
   file:
-    src: /opt/java/jdk-11.0.30+7
+    src: /opt/java/jdk-17.0.18+8
     dest: /opt/java/latest
     state: link
 
@@ -84,12 +98,15 @@
     mode: '0600'
 
 
+# FIX: archive.apache.org deliberately throttles bandwidth on older releases (its responses carry
+# a literal "Vary: Slow,Glacial" header) -- downloading a ~700MB tarball on 5 nodes at once over
+# that stalled for over 50 minutes with no progress. The same file is on dlcdn.apache.org (the
+# CDN-backed mirror network, already used by the spark role's own get_url below) at full speed.
 - name: Download Hadoop tarball directly on the server (if not already present)
   get_url:
-    url: https://archive.apache.org/dist/hadoop/core/hadoop-{{ hadoop_version }}/hadoop-{{ hadoop_version }}.tar.gz
+    url: https://dlcdn.apache.org/hadoop/common/hadoop-{{ hadoop_version }}/hadoop-{{ hadoop_version }}.tar.gz
     dest: /opt/hadoop-{{ hadoop_version }}.tar.gz
     mode: '0644'
-    creates: /opt/hadoop-{{ hadoop_version }}.tar.gz
 
 # - name: Copy Hadoop to all nodes
 #   copy:
@@ -169,7 +186,7 @@
 - name: Set JAVA_HOME for YARN
   lineinfile:
     path: /opt/hadoop/etc/hadoop/yarn-env.sh
-    line: 'export JAVA_HOME=/opt/java/jdk-17.0.18+8'
+    line: 'export JAVA_HOME=/opt/java/latest'
 
 # -------------------------
 # WORKERS FILE
@@ -198,32 +215,87 @@
     - /opt/hadoop/logs
     - /opt/hadoop/data
 
-# - name: Format HDFS namenode
-#   command: /opt/hadoop/bin/hdfs namenode -format
-#   when: inventory_hostname in groups['masters']
+# FIX: "Format HDFS namenode" below used to run unconditionally on every play, which wipes the
+# namenode's metadata every single time -- fine for a first install, but silently destroys any
+# real data ever loaded into HDFS on every subsequent rerun (e.g. re-running hadoop.yml, or the
+# "install everything" playbooks/all.yml, after this cluster has real data on it). A fresh
+# namenode format also requires a matching DataNode storage wipe (mismatched cluster IDs would
+# otherwise make every DataNode refuse to join), so this check gates both together: only wipe/
+# reformat when there's no existing namenode metadata to lose in the first place.
+- name: Check whether HDFS namenode is already formatted
+  ansible.builtin.stat:
+    path: /opt/hadoop/data/namenode/current/VERSION
+  register: hdfs_namenode_formatted
+  when: inventory_hostname in groups['masters']
 
+- name: Clean DataNode storage (safe cluster reset)
+  file:
+    path: /opt/hadoop/data/datanode
+    state: absent
+  when: not hostvars[groups['masters'][0]].hdfs_namenode_formatted.stat.exists
 # -------------------------
 # START HDFS + YARN
 # -------------------------
 
+# FIX: start-dfs.sh/start-yarn.sh (and their stop-* counterparts) launch each daemon across the
+# cluster via `pdsh`, which defaults to the legacy "rsh" rcmd module -- that needs a privileged
+# source port and failed here with "pdsh@...: rcmd: socket: Permission denied" on every node,
+# silently leaving only the single local ResourceManager up (it doesn't go through pdsh) while
+# NameNode/DataNodes/SecondaryNameNode never started at all (no log files, nothing on port 9000).
+# PDSH_RCMD_TYPE=ssh is the standard fix -- tells pdsh to dispatch over plain SSH instead.
 - name: Stop HDFS and YARN if running (only on master)
   shell: |
     /opt/hadoop/sbin/stop-yarn.sh
     /opt/hadoop/sbin/stop-dfs.sh
+    /opt/hadoop/sbin/stop-all.sh
   when: inventory_hostname in groups['masters']
   become: true
-  become_user: debian
+  become_user: "{{ ansible_user }}"
+  environment:
+    PDSH_RCMD_TYPE: ssh
+
+- name: Format HDFS namenode
+  command: /opt/hadoop/bin/hdfs namenode -format -force
+  when:
+    - inventory_hostname in groups['masters']
+    - not hdfs_namenode_formatted.stat.exists
+  become_user: "{{ ansible_user }}"
+  become: true
 
 - name: Start HDFS
   command: /opt/hadoop/sbin/start-dfs.sh
   become: true
-  become_user: debian
+  become_user: "{{ ansible_user }}"
+  environment:
+    PDSH_RCMD_TYPE: ssh
   when:
     - inventory_hostname in groups['masters']
 
+# FIX: the local ResourceManager JVM (unlike the *remote* NodeManagers, spawned via pdsh over
+# their own separate SSH sessions and confirmed to survive fine) installs its own SIGHUP handler
+# and treats SIGHUP as a shutdown signal (confirmed in its log: "RECEIVED SIGNAL 1: SIGHUP",
+# immediately followed by a graceful-shutdown sequence) -- and it's still a member of this task's
+# own SSH session when that session's teardown delivers SIGHUP to it. A trailing `sleep` just
+# delays that teardown, it doesn't prevent it (verified: the RM survived exactly as long as an
+# added `sleep 5`, then died the instant that finished) -- what's actually needed is detaching the
+# whole start-yarn.sh process tree into its own session via `setsid`, so it's no longer a member of
+# this SSH session at all by the time it closes.
 - name: Start YARN
-  command: /opt/hadoop/sbin/start-yarn.sh
+  shell: setsid /opt/hadoop/sbin/start-yarn.sh > /tmp/start-yarn.log 2>&1 < /dev/null &
   become: true
-  become_user: debian
+  become_user: "{{ ansible_user }}"
+  environment:
+    PDSH_RCMD_TYPE: ssh
   when:
     - inventory_hostname in groups['masters']
+
+# retries/delay: the NameNode JVM takes a few seconds to finish binding its RPC port after
+# start-dfs.sh (run on masters, above) returns -- workers reaching this same task moments later
+# would otherwise race it with "Connection refused".
+- name: Check HDFS
+  command: /opt/hadoop/bin/hdfs dfs -ls /
+  become_user: "{{ ansible_user }}"
+  register: hdfs_check
+  retries: 6
+  delay: 5
+  until: hdfs_check.rc == 0

@@ -24,28 +24,26 @@
     state: directory
     mode: '0755'
 
-- name: Upload Sedona shaded jar
-  copy:
-    src: "{{ sedona_jar }}"
-    dest: "{{ spark_home }}/jars/{{ sedona_jar }}"
-    mode: '0644'
+# - name: Upload Sedona shaded jar
+#   copy:
+#     src: "{{ sedona_jar }}"
+#     dest: "{{ spark_home }}/jars/{{ sedona_jar }}"
+#     mode: '0644'
 
-- name: Upload GeoTools wrapper jar
-  copy:
-    src: "{{ geotools_jar }}"
-    dest: "{{ spark_home }}/jars/{{ geotools_jar }}"
-    mode: '0644'
+# - name: Upload GeoTools wrapper jar
+#   copy:
+#     src: "{{ geotools_jar }}"
+#     dest: "{{ spark_home }}/jars/{{ geotools_jar }}"
+#     mode: '0644'
   
 - name: Download Sedona shaded jar instead
   get_url:
     url: "https://repo.maven.apache.org/maven2/org/apache/sedona/sedona-spark-shaded-{{spark_version}}_{{scala_version}}/{{sedona_version}}/sedona-spark-shaded-{{spark_version}}_{{scala_version}}-{{sedona_version}}.jar"
-    dest: "{{ spark_home }}/jars/{{ sedona_jar }}"
+    dest: "{{ spark_home }}/jars/sedona-spark-shaded-{{spark_version}}_{{scala_version}}-{{sedona_version}}.jar"
     mode: '0644'
-    creates: "{{ spark_home }}/jars/{{ sedona_jar }}"
 
 - name: Download GeoTools wrapper jar instead
   get_url:
     url: "https://repo.maven.apache.org/maven2/org/datasyslab/geotools-wrapper/{{ sedona_version }}-{{ geotools_version }}/geotools-wrapper-{{ sedona_version }}-{{ geotools_version }}.jar"
-    dest: "{{ spark_home }}/jars/{{ geotools_jar }}"
+    dest: "{{ spark_home }}/jars/geotools-wrapper-{{ sedona_version }}-{{ geotools_version }}.jar"
     mode: '0644'
-    creates: "{{ spark_home }}/jars/{{ geotools_jar }}"

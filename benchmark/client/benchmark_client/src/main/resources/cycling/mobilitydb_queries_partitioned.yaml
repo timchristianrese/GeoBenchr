@@ -16,7 +16,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 125))
@@ -28,7 +28,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 497))
@@ -64,7 +64,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 315))
@@ -76,7 +76,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2023-08-24 00:44:44, 2023-09-06 00:22:18]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2023-08-24 00:44:44, 2023-09-06 00:22:18]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2023-08-24 00:44:44'
     - '2023-09-06 00:22:18'
@@ -113,7 +113,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2020-08-10 08:48:23, 2020-08-18 22:34:26]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2020-08-10 08:48:23, 2020-08-18 22:34:26]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2020-08-10 08:48:23'
     - '2020-08-18 22:34:26'
@@ -162,7 +162,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-05-12 23:20:17, 2022-05-16 17:17:25]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-05-12 23:20:17, 2022-05-16 17:17:25]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2022-05-12 23:20:17'
     - '2022-05-16 17:17:25'
@@ -181,7 +181,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 838))
@@ -193,7 +193,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 553))
@@ -217,7 +217,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-12-28 23:59:02, 2022-01-10 03:24:34]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-12-28 23:59:02, 2022-01-10 03:24:34]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2021-12-28 23:59:02'
     - '2022-01-10 03:24:34'
@@ -230,7 +230,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 166))
@@ -254,7 +254,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 249))
@@ -281,7 +281,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2020-09-12 13:53:52, 2020-09-19 23:47:38]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2020-09-12 13:53:52, 2020-09-19 23:47:38]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2020-09-12 13:53:52'
     - '2020-09-19 23:47:38'
@@ -300,7 +300,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-11-25 18:37:15, 2022-11-27 23:12:48]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-11-25 18:37:15, 2022-11-27 23:12:48]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2022-11-25 18:37:15'
     - '2022-11-27 23:12:48'
@@ -370,7 +370,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 160))
@@ -403,7 +403,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2023-12-06 16:31:17, 2023-12-10 10:51:22]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2023-12-06 16:31:17, 2023-12-10 10:51:22]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2023-12-06 16:31:17'
     - '2023-12-10 10:51:22'
@@ -419,7 +419,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2023-01-05 17:24:21, 2023-01-08 11:44:27]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2023-01-05 17:24:21, 2023-01-08 11:44:27]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2023-01-05 17:24:21'
     - '2023-01-08 11:44:27'
@@ -462,14 +462,14 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2023-07-13 00:14:42, 2023-07-27 12:50:27]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2023-07-13 00:14:42, 2023-07-27 12:50:27]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2023-07-13 00:14:42'
     - '2023-07-27 12:50:27'
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 325))
@@ -481,7 +481,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 536))
@@ -580,7 +580,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 510))
@@ -592,7 +592,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 962))
@@ -622,7 +622,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 225))
@@ -673,7 +673,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 185))
@@ -709,7 +709,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 494))
@@ -751,7 +751,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 506))
@@ -763,14 +763,14 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-04-09 22:03:41, 2021-04-13 16:39:32]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-04-09 22:03:41, 2021-04-13 16:39:32]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2021-04-09 22:03:41'
     - '2021-04-13 16:39:32'
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 725))
@@ -857,7 +857,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 764))
@@ -893,28 +893,28 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-06-16 17:42:26, 2021-07-01 17:00:35]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-06-16 17:42:26, 2021-07-01 17:00:35]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2021-06-16 17:42:26'
     - '2021-07-01 17:00:35'
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2024-08-08 15:43:16, 2024-08-23 01:17:43]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2024-08-08 15:43:16, 2024-08-23 01:17:43]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2024-08-08 15:43:16'
     - '2024-08-23 01:17:43'
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2024-11-19 23:00:03, 2024-11-28 15:15:34]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2024-11-19 23:00:03, 2024-11-28 15:15:34]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2024-11-19 23:00:03'
     - '2024-11-28 15:15:34'
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-07-29 00:38:46, 2022-08-11 17:57:30]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-07-29 00:38:46, 2022-08-11 17:57:30]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2022-07-29 00:38:46'
     - '2022-08-11 17:57:30'
@@ -936,7 +936,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-01-17 10:41:29, 2021-01-29 13:01:18]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-01-17 10:41:29, 2021-01-29 13:01:18]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2021-01-17 10:41:29'
     - '2021-01-29 13:01:18'
@@ -949,7 +949,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 918))
@@ -961,14 +961,14 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-08-11 16:05:46, 2021-08-23 19:32:07]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-08-11 16:05:46, 2021-08-23 19:32:07]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2021-08-11 16:05:46'
     - '2021-08-23 19:32:07'
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-03-30 18:55:18, 2021-04-06 06:11:12]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-03-30 18:55:18, 2021-04-06 06:11:12]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2021-03-30 18:55:18'
     - '2021-04-06 06:11:12'
@@ -984,7 +984,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-08-03 04:10:29, 2021-08-12 22:12:12]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-08-03 04:10:29, 2021-08-12 22:12:12]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2021-08-03 04:10:29'
     - '2021-08-12 22:12:12'
@@ -1036,7 +1036,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 478))
@@ -1114,7 +1114,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-11-17 06:54:35, 2021-11-20 03:17:17]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-11-17 06:54:35, 2021-11-20 03:17:17]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2021-11-17 06:54:35'
     - '2021-11-20 03:17:17'
@@ -1175,7 +1175,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 862))
@@ -1208,7 +1208,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 624))
@@ -1220,7 +1220,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-12-28 01:01:47, 2022-12-31 03:15:32]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-12-28 01:01:47, 2022-12-31 03:15:32]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2022-12-28 01:01:47'
     - '2022-12-31 03:15:32'
@@ -1239,7 +1239,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 700))
@@ -1260,14 +1260,14 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-05-26 10:10:08, 2021-05-28 21:27:10]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-05-26 10:10:08, 2021-05-28 21:27:10]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2021-05-26 10:10:08'
     - '2021-05-28 21:27:10'
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-11-15 17:43:32, 2021-11-19 16:21:27]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2021-11-15 17:43:32, 2021-11-19 16:21:27]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2021-11-15 17:43:32'
     - '2021-11-19 16:21:27'
@@ -1304,7 +1304,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 996))
@@ -1337,7 +1337,7 @@
 - name: rides_adaptgridPastOrToUniversity
   type: spatial
   sql: |
-    SELECT DISTINCT r.ride_id
+    SELECT DISTINCT r.id
     from rides_adaptgrid r
     JOIN universities u
       ON r.trajectory && st_expand(u.geom, 119))
@@ -1349,7 +1349,7 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2020-06-18 18:40:58, 2020-06-28 03:09:49]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2020-06-18 18:40:58, 2020-06-28 03:09:49]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2020-06-18 18:40:58'
     - '2020-06-28 03:09:49'
@@ -1362,14 +1362,14 @@
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-03-31 14:00:13, 2022-04-06 19:17:25]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2022-03-31 14:00:13, 2022-04-06 19:17:25]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2022-03-31 14:00:13'
     - '2022-04-06 19:17:25'
 - name: rideCrossSeveralDistrictsOnEveningInPeriod
   type: spatiotemporal
   sql: |
-    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2024-11-24 12:56:39, 2024-11-30 06:57:10]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.ride_id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.ride_id, d.name) SELECT ride_id FROM ride_districts GROUP BY ride_id HAVING COUNT(*) > 1;
+    WITH evening_ride AS ( SELECT * FROM rides_adaptgrid r WHERE r.trip && tstzspan '[2024-11-24 12:56:39, 2024-11-30 06:57:10]' AND EXISTS ( SELECT 1 FROM unnest(timestamps(r.trip)) AS t WHERE EXTRACT(HOUR FROM t) BETWEEN 18 AND 23) ), ride_districts AS ( SELECT r.id, d.name FROM evening_ride r JOIN berlin_districts d ON eintersects(r.trip, d.geom) GROUP BY r.id, d.name) SELECT id FROM ride_districts GROUP BY id HAVING COUNT(*) > 1;
   params:
   - - '2024-11-24 12:56:39'
     - '2024-11-30 06:57:10'

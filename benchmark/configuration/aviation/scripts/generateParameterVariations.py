@@ -11,6 +11,20 @@ import re
 import psycopg2
 import shutil
 from pyproj import Transformer
+from typing import Tuple
+
+def get_random_id(rnd):
+    return rnd.randint(1_000_000_000, 2_000_000_000)
+
+def generate_bulk_values(rnd, bbox, lower, upper, batch_size=10):
+    rows = []
+    for _ in range(batch_size):
+        point = get_random_point(rnd, bbox)
+        ts = generate_random_timestamp_in_bounds(rnd, lower, upper)
+        id_val = get_random_id(rnd)
+        rows.append(f"({id_val}, {point}, TIMESTAMP '{ts}')")
+    return ", ".join(rows)
+
 
 def convert_st_points_in_yaml(input_path, output_path):
     """
@@ -48,14 +62,14 @@ def convert_st_points_in_yaml(input_path, output_path):
 class LiteralString(str): pass
 
 
-def get_db_connection():
-    return psycopg2.connect(
-        host="localhost",
-        port=5433,
-        dbname="postgres",
-        user="postgres",
-        password="test"
-    )
+# def get_db_connection():
+#     return psycopg2.connect(
+#         host="localhost",
+#         port=5433,
+#         dbname="postgres",
+#         user="postgres",
+#         password="test"
+#     )
 
 def literal_str_representer(dumper, data):
     return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
@@ -77,12 +91,43 @@ def load_config(path="../config/mobilityDBBenchConf.yaml"):
         print(f"Failed to load config: {e}")
         return None
 
-def return_param_values(bbox, lower,upper, sql1,sql2, sql3, sql4, params, rnd) -> List[Any]:
+def substitute_outside_comments(text: str, token: str, replacement: str) -> str:
+    """
+    Like text.replace(token, replacement), but skips "-- " comment lines. Several FIX comments
+    in combinedBenchConf.yaml mention parameter names like ":point_lon" as plain prose explaining
+    a bug -- a blind whole-string replace would substitute those mentions too, turning readable
+    documentation into "assuming decomposed 50.74 / 6.70 parameters". Substitution should only
+    ever touch the actual SQL.
+    """
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        if not line.strip().startswith("--"):
+            lines[i] = line.replace(token, replacement)
+    return "\n".join(lines)
+
+
+def strip_comment_lines(text: str) -> str:
+    """
+    Removes "-- " comment lines from a fully-substituted query before it's written to the
+    generated queries/*.yaml files. Those files are consumed directly by the Java benchmark
+    client to execute against a real database -- they're a compiled artifact, not documentation,
+    so the developer-facing FIX/NOT IMPLEMENTED/etc. comments that belong in
+    combinedBenchConf.yaml (for readability there) have no reason to also ship in every generated
+    query. This runs after substitution, so it operates on the same lines
+    substitute_outside_comments() was told to leave alone.
+    """
+    lines = [l for l in text.split("\n") if not l.strip().startswith("--")]
+    return "\n".join(lines)
+
+
+def return_param_values(bbox, lower,upper, sql1,sql2, sql3, sql4, sql5, sql6, params, rnd) -> List[Any]:
     parsedSQL1 = sql1
     parsedSQL2 = sql2
     parsedSQL3 = sql3
     print("SQL3 before processing:", parsedSQL3)
     parsedSQL4 = sql4
+    parsedSQL5 = sql5  # clickhouse
+    parsedSQL6 = sql6  # duckdb
     values = []
     formatter = "%Y-%m-%d %H:%M:%S"  # Default formatter for datetime
 
@@ -93,24 +138,42 @@ def return_param_values(bbox, lower,upper, sql1,sql2, sql3, sql4, params, rnd) -
             "period_long": lambda: generate_random_time_span_in_bounds(rnd, lower, upper, mode=3),
             "period": lambda: generate_random_time_span_in_bounds(rnd, lower, upper),
             "instant": lambda: generate_random_timestamp_in_bounds(rnd, lower, upper),
+            "duration": lambda: rnd.randint(3600, 6 * 3600),
             "day": lambda: get_random_day(rnd, lower, upper),
             "city": lambda: get_random_place("cities", rnd),
             "municipality": lambda: get_random_place("municipalities", rnd),
+            "region_medium": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.05),
+            "region_medium2": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.05),
             "county": lambda: get_random_place("counties", rnd),
             "district": lambda: get_random_place("districts", rnd),
             "point": lambda: get_random_point(rnd, bbox),
             "radius": lambda: rnd.randint(1000,5000), #in meters
             "distance": lambda: rnd.randint(1000,5000), #in meters
-            "low_altitude": lambda: rnd.randint(50, 150) * 10
+            # Bounds picked from the actual altitude distribution in
+            # data_generator_aviation/parquet_flights (sampled 2 of 676 files, ~8M points): values
+            # are ~uniform across 1000-9075 (climb/descent) but over half of all points sit in
+            # [9550, 10500] (cruise, observed max), so anchoring both bounds up there gives a band
+            # that actually splits the data instead of matching almost everything or almost
+            # nothing. Ranges stay disjoint (low tops out at 9600, high starts at 9610) so
+            # low_altitude < high_altitude always holds without generating them together; typical
+            # draws land in the 500-1300 unit-wide range, matching ~15-50% of points in testing
+            # (vs. the previous 1000-6000 range, most of which undershoots the real data entirely).
+            "low_altitude": lambda: rnd.randint(880, 960) * 10,
+            "high_altitude": lambda: rnd.randint(961, 1050) * 10,
+            "id": lambda: get_random_id(rnd),
+            "bulk_values": lambda: generate_bulk_values(rnd, bbox, lower, upper, batch_size=10)
         }.get(param, lambda: "")()
 
         if replacement is not None:
-            if isinstance(replacement, str):
+            if param == "bulk_values":
+                quoted = replacement
+            elif isinstance(replacement, str):
                 # Detect SQL expressions like ST_*, SELECT, or functions with parentheses
                 if replacement.strip().upper().startswith(("ST_", "SELECT", "POINT(", "POLYGON(", "LINESTRING(")):
                     quoted = replacement  # leave unquoted (SQL expression)
                 else:
                     quoted = f"'{replacement}'"
+            
             elif isinstance(replacement, list):
                 # Keep your old list quoting (used for time spans)
                 quoted = ", ".join([f"'{ts}'" for ts in replacement])
@@ -119,11 +182,27 @@ def return_param_values(bbox, lower,upper, sql1,sql2, sql3, sql4, params, rnd) -
                 quoted = str(replacement)
 
 
+            # ClickHouse has no PostGIS-style point/geometry type, so a couple of queries
+            # decompose ":point" into ":point_lon"/":point_lat" scalars for that dialect only
+            # (see the FIX comments on those clickhouse: blocks in combinedBenchConf.yaml).
+            # Extract the same lon/lat this point substitution already used, so the ClickHouse
+            # query targets the identical location as every other dialect's ":point". This MUST
+            # run before the generic ":point" replace below -- str.replace(":point", ...) would
+            # otherwise also match the ":point" prefix inside ":point_lon"/":point_lat" and mangle
+            # them into "<value>_lon"/"<value>_lat".
+            if param == "point" and isinstance(replacement, str):
+                point_coords = re.search(r"ST_Point\(\s*([^,]+?)\s*,\s*([^)]+?)\s*\)", replacement)
+                if point_coords:
+                    parsedSQL5 = substitute_outside_comments(parsedSQL5, ":point_lon", point_coords.group(1))
+                    parsedSQL5 = substitute_outside_comments(parsedSQL5, ":point_lat", point_coords.group(2))
+
             values.append(replacement)
-            parsedSQL1 = parsedSQL1.replace(f":{param}", quoted)
-            parsedSQL2 = parsedSQL2.replace(f":{param}", quoted)
-            parsedSQL3 = parsedSQL3.replace(f":{param}", quoted)
-            parsedSQL4 = parsedSQL4.replace(f":{param}", quoted)
+            parsedSQL1 = substitute_outside_comments(parsedSQL1, f":{param}", quoted)
+            parsedSQL2 = substitute_outside_comments(parsedSQL2, f":{param}", quoted)
+            parsedSQL3 = substitute_outside_comments(parsedSQL3, f":{param}", quoted)
+            parsedSQL4 = substitute_outside_comments(parsedSQL4, f":{param}", quoted)
+            parsedSQL5 = substitute_outside_comments(parsedSQL5, f":{param}", quoted)
+            parsedSQL6 = substitute_outside_comments(parsedSQL6, f":{param}", quoted)
         # if replacement is not None:
         #     # Quote strings and timestamps
         #     if param == "point" and isinstance(replacement, list) and len(replacement) == 2:
@@ -146,7 +225,7 @@ def return_param_values(bbox, lower,upper, sql1,sql2, sql3, sql4, params, rnd) -
             # parsedSQL2 = parsedSQL2.replace(f":{param}", formatted)
             # parsedSQL3 = parsedSQL3.replace(f":{param}", formatted)
             # parsedSQL4 = parsedSQL4.replace(f":{param}", formatted)
-    return parsedSQL1, parsedSQL2, parsedSQL3, parsedSQL4, values
+    return parsedSQL1, parsedSQL2, parsedSQL3, parsedSQL4, parsedSQL5, parsedSQL6, values
 
 
 
@@ -173,11 +252,19 @@ def adjust_timestamp_format(ts: str) -> str:
     replacement = r"'[\1, \2]'"
     return re.sub(pattern, replacement, ts)
 
-def get_time_bounds(conn, table, time_col="timestamp_col"):
-    with conn.cursor() as cur:
-        cur.execute(f"SELECT MIN({time_col}), MAX({time_col}) FROM {table};")
-        lower, upper = cur.fetchone()
-    return lower, upper
+def get_time_bounds(table, time_col="timestamp_col"):
+    if os.path.exists("time_bounds.txt"):
+        with open("time_bounds.txt", "r") as f:
+            bounds = f.read().strip().split(",")
+            lower = datetime.strptime(bounds[0], "%Y-%m-%d %H:%M:%S")
+            upper = datetime.strptime(bounds[1], "%Y-%m-%d %H:%M:%S")
+            return lower, upper
+    # with conn.cursor() as cur:
+    #     cur.execute(f"SELECT MIN({time_col}), MAX({time_col}) FROM {table};")
+    #     lower, upper = cur.fetchone()
+    # with open("time_bounds.txt", "w") as f:
+    #     f.write(f"{lower},{upper}")
+    # return lower, upper
 
 def generate_random_timestamp_in_bounds(rnd, lower, upper):
     delta = (upper - lower).total_seconds()
@@ -196,28 +283,77 @@ def generate_random_time_span_in_bounds(rnd, lower, upper, mode=0):
     ts2 = ts1 + timedelta(seconds=rnd.choice([-1, 1]) * seconds)
     ts2 = max(lower, min(upper, ts2))
     start, end = sorted([ts1, ts2])
-    return [
-        start.strftime("%Y-%m-%d %H:%M:%S"),
-        end.strftime("%Y-%m-%d %H:%M:%S")
-    ]
+    return f"'{start.strftime('%Y-%m-%d %H:%M:%S')}' AND '{end.strftime('%Y-%m-%d %H:%M:%S')}'"
+
+def generate_random_region_bbox(
+    rnd,
+    bbox: Tuple[float, float, float, float],
+    coverage: float
+) -> Tuple[float, float, float, float]:
+    """
+    Generate a random bbox covering approximately `coverage` fraction
+    of the original bbox area.
+
+    bbox format:
+        (min_lat, min_lon, max_lat, max_lon)
+
+    coverage:
+        0.02 -> 2%
+        0.05 -> 5%
+        0.08 -> 8%
+    """
+    
+    min_lat, min_lon = bbox[0]
+    max_lat, max_lon = bbox[1]
+
+    lat_span = max_lat - min_lat
+    lon_span = max_lon - min_lon
+
+    # Scale dimensions so width*height = coverage of original area
+    scale = math.sqrt(coverage)
+
+    new_lat_span = lat_span * scale
+    new_lon_span = lon_span * scale
+
+    # Random lower-left corner
+    start_lat = rnd.uniform(
+        min_lat,
+        max_lat - new_lat_span
+    )
+
+    start_lon = rnd.uniform(
+        min_lon,
+        max_lon - new_lon_span
+    )
+
+    return (f"ST_Transform(ST_SetSRID(ST_MakeEnvelope({start_lon}, {start_lat}, {start_lon + new_lon_span}, {start_lat + new_lat_span}), 4326), 3857)"
+    )
 
 # --- Spatial bounds ---
-def get_spatial_bounds(conn, table, geom_col="geom"):
-    with conn.cursor() as cur:
-        cur.execute(f"""
-            SELECT
-                ST_XMin(env),
-                ST_YMin(env),
-                ST_XMax(env),
-                ST_YMax(env)
-            FROM (
-                SELECT ST_Envelope(ST_Extent({geom_col}::geometry)) AS env
-                FROM {table}
-            ) AS sub;
-        """)
-        xmin, ymin, xmax, ymax = cur.fetchone()
-    # same format as before: [[ul_lon, ul_lat], [br_lon, br_lat]]
-    return [[xmin, ymax], [xmax, ymin]]
+def get_spatial_bounds(table, geom_col="geom"):
+    #check if file exists with the spatial bounds, if yes, read from file and return
+    if os.path.exists("spatial_bounds.txt"):
+        with open("spatial_bounds.txt", "r") as f:
+            bounds = f.read().strip().split(",")
+            return [[float(bounds[0]), float(bounds[3])], [float(bounds[2]), float(bounds[1])]]
+    # with conn.cursor() as cur:
+    #     cur.execute(f"""
+    #         SELECT
+    #             ST_XMin(env),
+    #             ST_YMin(env),
+    #             ST_XMax(env),
+    #             ST_YMax(env)
+    #         FROM (
+    #             SELECT ST_Envelope(ST_Extent({geom_col}::geometry)) AS env
+    #             FROM {table}
+    #         ) AS sub;
+    #     """)
+    #     xmin, ymin, xmax, ymax = cur.fetchone()
+    # # same format as before: [[ul_lon, ul_lat], [br_lon, br_lat]]
+    # # save the spatial bounds to a file and check the file to prevent executing the request in the future
+    # with open("spatial_bounds.txt", "w") as f:
+    #     f.write(f"{xmin},{ymin},{xmax},{ymax}")
+    # return [[xmin, ymax], [xmax, ymin]]
 
 def get_random_point(rnd, rect):
     ul_lon, ul_lat = rect[0]
@@ -318,15 +454,16 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
     postgis_queries = []
     sedona_queries = []
     spacetime_queries = []
+    clickhouse_queries = []
+    duckdb_queries = []
 
-    conn = get_db_connection()
-    lower, upper = get_time_bounds(conn, "flight_points", "timestamp")
-    bbox = get_spatial_bounds(conn, "flight_points", "geom")
+    lower, upper = get_time_bounds("flight_points", "timestamp")
+    bbox = get_spatial_bounds("flight_points", "geom")
 
     for query_config in config['queryConfigs']:
         if query_config['use']:
             for _ in range(query_config['repetition']):
-                mobilitydb_sql, postgis_sql, sedona_sql, spacetime_sql, values = return_param_values(
+                mobilitydb_sql, postgis_sql, sedona_sql, spacetime_sql, clickhouse_sql, duckdb_sql, values = return_param_values(
                     bbox,
                     lower,
                     upper,
@@ -334,6 +471,8 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
                     query_config['postgis'],
                     query_config['sedona'],
                     query_config['spacetime'],
+                    query_config['clickhouse'],
+                    query_config['duckdb'],
                     query_config['parameters'],
                     rnd,
                 )
@@ -344,7 +483,7 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
                 mobilitydb_queries.append(QueryTask(
                     name=query_config['name'],
                     type=query_config['type'],
-                    sql=LiteralString(mobilitydb_sql), 
+                    sql=LiteralString(strip_comment_lines(mobilitydb_sql)), 
                     params=values
                 ))
 
@@ -358,7 +497,7 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
                 postgis_queries.append(QueryTask(
                     name=query_config['name'],
                     type=query_config['type'],
-                    sql=LiteralString(postgis_sql),
+                    sql=LiteralString(strip_comment_lines(postgis_sql)),
                     params=values
                 ))
 
@@ -367,7 +506,7 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
                 spacetime_queries.append(QueryTask(
                     name=query_config['name'],
                     type=query_config['type'],
-                    sql=LiteralString(spacetime_sql),
+                    sql=LiteralString(strip_comment_lines(spacetime_sql)),
                     params=values
                 ))
 
@@ -377,14 +516,35 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
                 sedona_queries.append(QueryTask(
                     name=query_config['name'],
                     type=query_config['type'],
-                    sql=LiteralString(sedona_sql),
+                    sql=LiteralString(strip_comment_lines(sedona_sql)),
+                    params=values
+                ))
+
+                # ClickHouse and DuckDB both use Postgres-compatible BETWEEN/ST_* syntax, same
+                # as the postgis translation above -- give them the same post-processing.
+                pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
+                clickhouse_sql = re.sub(pattern, convert_to_tsrange, clickhouse_sql)
+                clickhouse_sql = clickhouse_sql.replace("OVERLAPS tsrange", "OVERLAPS")
+                clickhouse_queries.append(QueryTask(
+                    name=query_config['name'],
+                    type=query_config['type'],
+                    sql=LiteralString(strip_comment_lines(clickhouse_sql)),
+                    params=values
+                ))
+
+                duckdb_sql = re.sub(pattern, convert_to_tsrange, duckdb_sql)
+                duckdb_sql = duckdb_sql.replace("OVERLAPS tsrange", "OVERLAPS")
+                duckdb_queries.append(QueryTask(
+                    name=query_config['name'],
+                    type=query_config['type'],
+                    sql=LiteralString(strip_comment_lines(duckdb_sql)),
                     params=values
                 ))
 
     if config['benchmark']['mixed']:
         random.shuffle(sedona_queries)
 
-    return mobilitydb_queries, postgis_queries, sedona_queries, spacetime_queries
+    return mobilitydb_queries, postgis_queries, sedona_queries, spacetime_queries, clickhouse_queries, duckdb_queries
 #main function
 if __name__ == "__main__":
     config = load_config("../config/combinedBenchConf.yaml")
@@ -417,7 +577,7 @@ if __name__ == "__main__":
     print(f"Distributed: {distributed}")
 
 
-    mobilityDB_queries,postgisSQL_queries, sedonaSQL_queries, spaceTimeSQL_queries = prepare_query_tasks(config, main_random)
+    mobilityDB_queries,postgisSQL_queries, sedonaSQL_queries, spaceTimeSQL_queries, clickhouseSQL_queries, duckdbSQL_queries = prepare_query_tasks(config, main_random)
 
     num_queries = len(mobilityDB_queries)
     indices = list(range(num_queries))
@@ -428,6 +588,8 @@ if __name__ == "__main__":
     postgisSQL_queries   = [postgisSQL_queries[i] for i in indices]
     sedonaSQL_queries    = [sedonaSQL_queries[i] for i in indices]
     spaceTimeSQL_queries = [spaceTimeSQL_queries[i] for i in indices]
+    clickhouseSQL_queries = [clickhouseSQL_queries[i] for i in indices]
+    duckdbSQL_queries    = [duckdbSQL_queries[i] for i in indices]
 
     mobilityDB_data = [query.__dict__ for query in mobilityDB_queries]
     with open("../queries/mobilitydb_queries.yaml", "w") as file:
@@ -519,9 +681,17 @@ if __name__ == "__main__":
     #     file.write(content)
     # print("Queries written to ../queries/queries.yaml")
     # #return all_queries
+    clickhouseSQL_data = [query.__dict__ for query in clickhouseSQL_queries]
+    with open("../queries/clickhouse_queries.yaml", "w") as file:
+        yaml.dump(clickhouseSQL_data, file, sort_keys=False, allow_unicode=True)
+
+    duckdbSQL_data = [query.__dict__ for query in duckdbSQL_queries]
+    with open("../queries/duckdb_queries.yaml", "w") as file:
+        yaml.dump(duckdbSQL_data, file, sort_keys=False, allow_unicode=True)
+
     #rep
-    #copy all files to /Users/gov/Prog/git/GeoBenchr/benchmark/benchmark/client/benchmark_client/src/main/resources/aviation
-    resource_path = "/Users/gov/Prog/git/GeoBenchr/benchmark/benchmark/client/benchmark_client/src/main/resources/aviation"
+    #copy all files to /Users/gov/Prog/git/GeoBenchr/benchmark/client/benchmark_client/src/main/resources/aviation
+    resource_path = "/Users/gov/Prog/git/GeoBenchr/benchmark/client/benchmark_client/src/main/resources/aviation"
     shutil.copy("../queries/mobilitydb_queries.yaml", os.path.join(resource_path, "mobilitydb_queries.yaml"))
     shutil.copy("../queries/mobilitydb_queries_space_partitioned.yaml", os.path.join(resource_path, "mobilitydb_queries_space_partitioned.yaml"))
     shutil.copy("../queries/mobilitydb_queries_time_partitioned.yaml", os.path.join(resource_path, "mobilitydb_queries_time_partitioned.yaml"))
@@ -529,3 +699,5 @@ if __name__ == "__main__":
     shutil.copy("../queries/tsdb_queries.yaml", os.path.join(resource_path, "tsdb_queries.yaml"))
     shutil.copy("../queries/sedonaSQL_queries.yaml", os.path.join(resource_path, "sedonaSQL_queries.yaml"))
     shutil.copy("../queries/spaceTimeSQL_queries.yaml", os.path.join(resource_path, "spaceTimeSQL_queries.yaml"))
+    shutil.copy("../queries/clickhouse_queries.yaml", os.path.join(resource_path, "clickhouse_queries.yaml"))
+    shutil.copy("../queries/duckdb_queries.yaml", os.path.join(resource_path, "duckdb_queries.yaml"))

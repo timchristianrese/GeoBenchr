@@ -1,0 +1,680 @@
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.99448999475674, 116.37688092030065,
+    39.93750670115899, 116.48047682784282), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-01 00:00:00'' AND ''2019-07-01 14:11:23'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.85408955197674, 116.25022735346231,
+    39.79710625837899, 116.35382326100448), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_SetSRID(ST_Point(116.44838856656139, 39.881107662373864), 3857)
+- name: deletegeolifePoint
+  type: delete
+  sql: ''
+  params:
+  - 1876975571
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(40.01369097792439, 116.46457235675952,
+    39.95670768432664, 116.56816826430169), 4326), 3857)
+  - '''2019-07-29 12:56:47'' AND ''2019-07-31 23:59:59'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-23 17:45:07'' AND ''2019-07-25 23:02:53'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 16:58:24'' AND ''2019-07-30 05:18:55'''
+- name: deletegeolifePoint
+  type: delete
+  sql: ''
+  params:
+  - 1090266975
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_SetSRID(ST_Point(116.32971211168956, 39.90914862576934), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-15 01:21:08'' AND ''2019-07-16 17:47:39'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.8710240858773, 116.45249165751531,
+    39.81404079227955, 116.55608756505748), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.890221266151705, 116.23820836849234,
+    39.83323797255395, 116.34180427603451), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-01 20:06:27'' AND ''2019-07-05 19:49:29'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(40.03037968816706, 116.28342754389581,
+    39.973396394569306, 116.38702345143798), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.95996907749182, 116.19914154852425,
+    39.90298578389407, 116.30273745606642), 4326), 3857)
+  - '''2019-07-15 19:22:16'' AND ''2019-07-17 21:58:55'''
+- name: deletegeolifePoint
+  type: delete
+  sql: ''
+  params:
+  - 1872220994
+- name: bulkInsertgeolifePoints
+  type: bulk_insert
+  sql: ''
+  params:
+  - (1941227693, ST_SetSRID(ST_Point(116.38287311045231, 39.786288530765944), 3857),
+    TIMESTAMP '2019-07-19 04:47:34'), (1533011446, ST_SetSRID(ST_Point(116.19059789908631,
+    39.79619919532912), 3857), TIMESTAMP '2019-07-09 16:22:00'), (1234127740, ST_SetSRID(ST_Point(116.39178596794687,
+    39.806068374325015), 3857), TIMESTAMP '2019-07-29 06:49:14'), (1737269724, ST_SetSRID(ST_Point(116.32324755142395,
+    39.84399463634548), 3857), TIMESTAMP '2019-07-13 00:40:18'), (1310284210, ST_SetSRID(ST_Point(116.46813533923158,
+    39.795915066227174), 3857), TIMESTAMP '2019-07-22 03:09:59'), (1439677598, ST_SetSRID(ST_Point(116.22856429292496,
+    40.02949976346112), 3857), TIMESTAMP '2019-07-21 07:36:43'), (1741340284, ST_SetSRID(ST_Point(116.20298499758293,
+    40.01401879250166), 3857), TIMESTAMP '2019-07-30 23:18:40'), (1308392898, ST_SetSRID(ST_Point(116.26164745459558,
+    39.9997262103453), 3857), TIMESTAMP '2019-07-09 12:54:11'), (1664669986, ST_SetSRID(ST_Point(116.22099594930009,
+    39.82605304026064), 3857), TIMESTAMP '2019-07-12 14:35:56'), (1522701347, ST_SetSRID(ST_Point(116.26887400977732,
+    39.849331807968625), 3857), TIMESTAMP '2019-07-09 20:06:51')
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-29 07:11:36'' AND ''2019-07-31 23:59:59'''
+- name: deletegeolifePoint
+  type: delete
+  sql: ''
+  params:
+  - 1621343808
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-05 04:04:00'' AND ''2019-07-08 15:44:21'''
+- name: deletegeolifePoint
+  type: delete
+  sql: ''
+  params:
+  - 1223960525
+- name: insertSinglegeolifePoint
+  type: insert
+  sql: ''
+  params:
+  - 1276532741
+  - ST_SetSRID(ST_Point(116.5547414997585, 39.81155008106152), 3857)
+  - '2019-07-16 20:45:10'
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(40.02740951761727, 116.46492639666987,
+    39.97042622401952, 116.56852230421204), 4326), 3857)
+- name: bulkInsertgeolifePoints
+  type: bulk_insert
+  sql: ''
+  params:
+  - (1308048419, ST_SetSRID(ST_Point(116.29150256166, 39.868983357583836), 3857),
+    TIMESTAMP '2019-07-02 06:17:11'), (1824365957, ST_SetSRID(ST_Point(116.42492467332289,
+    39.78736622274952), 3857), TIMESTAMP '2019-07-20 05:24:57'), (1324743903, ST_SetSRID(ST_Point(116.53363804639825,
+    39.95381555331442), 3857), TIMESTAMP '2019-07-14 23:18:38'), (1052751799, ST_SetSRID(ST_Point(116.58278036833072,
+    39.99967988692032), 3857), TIMESTAMP '2019-07-09 15:42:09'), (1278320084, ST_SetSRID(ST_Point(116.2483491347641,
+    39.86087601782854), 3857), TIMESTAMP '2019-07-05 05:10:21'), (1678242160, ST_SetSRID(ST_Point(116.24757414311541,
+    39.87473723245), 3857), TIMESTAMP '2019-07-13 19:42:58'), (1370881048, ST_SetSRID(ST_Point(116.44129184342559,
+    39.85757072565279), 3857), TIMESTAMP '2019-07-31 06:43:58'), (1017475735, ST_SetSRID(ST_Point(116.43155303460159,
+    39.87458846995466), 3857), TIMESTAMP '2019-07-03 00:35:39'), (1978709313, ST_SetSRID(ST_Point(116.36553725908074,
+    39.86634478315026), 3857), TIMESTAMP '2019-07-19 04:57:43'), (1447794529, ST_SetSRID(ST_Point(116.40302541340918,
+    39.90190841582985), 3857), TIMESTAMP '2019-07-01 03:43:49')
+- name: updategeolifePoint
+  type: update
+  sql: ''
+  params:
+  - 1996755148
+  - ST_SetSRID(ST_Point(116.45895804739503, 39.88494546554647), 3857)
+- name: insertSinglegeolifePoint
+  type: insert
+  sql: ''
+  params:
+  - 1162415255
+  - ST_SetSRID(ST_Point(116.3613322851618, 39.835239345358175), 3857)
+  - '2019-07-30 05:35:25'
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-26 23:45:57'' AND ''2019-07-27 21:02:27'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.984164711576035, 116.30349575381784,
+    39.92718141797828, 116.40709166136001), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-24 16:11:47'' AND ''2019-07-28 10:44:46'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-13 07:58:46'' AND ''2019-07-16 00:16:29'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.99640462190267, 116.31245139101533,
+    39.93942132830492, 116.4160472985575), 4326), 3857)
+- name: updategeolifePoint
+  type: update
+  sql: ''
+  params:
+  - 1337238055
+  - ST_SetSRID(ST_Point(116.4973807992366, 39.998941104339735), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.85227050633296, 116.39330108445994,
+    39.795287212735204, 116.4968969920021), 4326), 3857)
+  - '''2019-07-03 17:00:17'' AND ''2019-07-06 04:41:59'''
+- name: updategeolifePoint
+  type: update
+  sql: ''
+  params:
+  - 1140037645
+  - ST_SetSRID(ST_Point(116.21992515586028, 39.88971247656978), 3857)
+- name: insertSinglegeolifePoint
+  type: insert
+  sql: ''
+  params:
+  - 1377853810
+  - ST_SetSRID(ST_Point(116.40076421161058, 39.98231275714902), 3857)
+  - '2019-07-28 11:49:05'
+- name: insertSinglegeolifePoint
+  type: insert
+  sql: ''
+  params:
+  - 1423507357
+  - ST_SetSRID(ST_Point(116.32590316588103, 39.99820288056171), 3857)
+  - '2019-07-24 16:38:15'
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-29 04:04:41'' AND ''2019-07-30 20:32:21'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.880758545829174, 116.28420355744429,
+    39.82377525223142, 116.38779946498646), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-10 14:53:09'' AND ''2019-07-14 05:50:15'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.86050011092035, 116.50680331184162,
+    39.803516817322596, 116.6103992193838), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-11 10:03:58'' AND ''2019-07-13 01:09:22'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.84188872806635, 116.30786006715631,
+    39.7849054344686, 116.41145597469848), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 17:43:21'' AND ''2019-07-30 09:21:45'''
+- name: bulkInsertgeolifePoints
+  type: bulk_insert
+  sql: ''
+  params:
+  - (1137705841, ST_SetSRID(ST_Point(116.29521057178069, 39.7998985019732), 3857),
+    TIMESTAMP '2019-07-05 15:25:32'), (1800122228, ST_SetSRID(ST_Point(116.62220268979941,
+    39.910246005875386), 3857), TIMESTAMP '2019-07-30 06:40:59'), (1135368952, ST_SetSRID(ST_Point(116.43500597958678,
+    39.95920883873847), 3857), TIMESTAMP '2019-07-19 21:01:48'), (1687331589, ST_SetSRID(ST_Point(116.31848206517829,
+    39.99555154512247), 3857), TIMESTAMP '2019-07-05 07:05:55'), (1221431258, ST_SetSRID(ST_Point(116.6173429033973,
+    39.88126856863026), 3857), TIMESTAMP '2019-07-07 18:10:20'), (1258559521, ST_SetSRID(ST_Point(116.44023249254273,
+    39.88882554464288), 3857), TIMESTAMP '2019-07-17 01:14:10'), (1186935877, ST_SetSRID(ST_Point(116.28554431418378,
+    39.803494390943236), 3857), TIMESTAMP '2019-07-22 16:47:43'), (1909527740, ST_SetSRID(ST_Point(116.57406216402536,
+    39.977669193448754), 3857), TIMESTAMP '2019-07-23 15:17:36'), (1963688716, ST_SetSRID(ST_Point(116.42669540815058,
+    40.01458960896787), 3857), TIMESTAMP '2019-07-21 14:38:02'), (1874570297, ST_SetSRID(ST_Point(116.20578524928285,
+    39.984528038383296), 3857), TIMESTAMP '2019-07-02 14:33:11')
+- name: bulkInsertgeolifePoints
+  type: bulk_insert
+  sql: ''
+  params:
+  - (1523589832, ST_SetSRID(ST_Point(116.28414840848444, 39.81112639399307), 3857),
+    TIMESTAMP '2019-07-19 22:15:59'), (1700351704, ST_SetSRID(ST_Point(116.45127364288041,
+    39.992032570638564), 3857), TIMESTAMP '2019-07-23 20:07:41'), (1540782782, ST_SetSRID(ST_Point(116.19040364897707,
+    39.801288261868486), 3857), TIMESTAMP '2019-07-17 16:28:50'), (1333387231, ST_SetSRID(ST_Point(116.36378246995835,
+    39.81975866345693), 3857), TIMESTAMP '2019-07-24 16:30:56'), (1104417744, ST_SetSRID(ST_Point(116.53934632518157,
+    39.98637877848328), 3857), TIMESTAMP '2019-07-08 11:06:08'), (1216216439, ST_SetSRID(ST_Point(116.5496411081381,
+    39.89386253376701), 3857), TIMESTAMP '2019-07-06 15:43:13'), (1997732300, ST_SetSRID(ST_Point(116.56307799409824,
+    39.963792907291825), 3857), TIMESTAMP '2019-07-06 23:17:37'), (1692143451, ST_SetSRID(ST_Point(116.61541048984886,
+    39.834141184719556), 3857), TIMESTAMP '2019-07-23 06:05:43'), (1992754785, ST_SetSRID(ST_Point(116.27927124367453,
+    39.851001586294835), 3857), TIMESTAMP '2019-07-23 05:54:41'), (1902928117, ST_SetSRID(ST_Point(116.49387333018213,
+    39.92122232235539), 3857), TIMESTAMP '2019-07-21 21:12:09')
+- name: updategeolifePoint
+  type: update
+  sql: ''
+  params:
+  - 1442322616
+  - ST_SetSRID(ST_Point(116.37475708612234, 39.81788122503292), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.913448334460305, 116.18396349629158,
+    39.85646504086255, 116.28755940383375), 4326), 3857)
+  - '''2019-07-04 01:55:58'' AND ''2019-07-06 21:09:38'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(40.02238678080409, 116.29411269437377,
+    39.96540348720634, 116.39770860191594), 4326), 3857)
+  - '''2019-07-21 21:45:29'' AND ''2019-07-24 19:29:13'''
+- name: deletegeolifePoint
+  type: delete
+  sql: ''
+  params:
+  - 1136135053
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.904533427445564, 116.1666509584532,
+    39.84755013384781, 116.27024686599538), 4326), 3857)
+  - '''2019-07-10 07:04:17'' AND ''2019-07-14 02:21:34'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_SetSRID(ST_Point(116.44153310075025, 39.95534209006046), 3857)
+- name: updategeolifePoint
+  type: update
+  sql: ''
+  params:
+  - 1099755939
+  - ST_SetSRID(ST_Point(116.215789234712, 39.81434424123173), 3857)
+- name: bulkInsertgeolifePoints
+  type: bulk_insert
+  sql: ''
+  params:
+  - (1370038828, ST_SetSRID(ST_Point(116.53191710043242, 39.86746887036658), 3857),
+    TIMESTAMP '2019-07-21 07:47:42'), (1541566092, ST_SetSRID(ST_Point(116.44901696288011,
+    39.857202224128656), 3857), TIMESTAMP '2019-07-01 04:36:04'), (1222741166, ST_SetSRID(ST_Point(116.50919058273138,
+    39.909821102740224), 3857), TIMESTAMP '2019-07-24 13:07:52'), (1399169189, ST_SetSRID(ST_Point(116.52309935783636,
+    39.97846672825344), 3857), TIMESTAMP '2019-07-21 23:12:09'), (1335820949, ST_SetSRID(ST_Point(116.28675955913249,
+    39.898481180545325), 3857), TIMESTAMP '2019-07-08 21:50:26'), (1737546203, ST_SetSRID(ST_Point(116.30500622124394,
+    40.014552201744884), 3857), TIMESTAMP '2019-07-26 02:16:55'), (1436320091, ST_SetSRID(ST_Point(116.56270174623354,
+    39.95361055608091), 3857), TIMESTAMP '2019-07-11 05:02:26'), (1696361716, ST_SetSRID(ST_Point(116.59990499990036,
+    39.986690184140805), 3857), TIMESTAMP '2019-07-05 14:53:21'), (1042077046, ST_SetSRID(ST_Point(116.38007980113058,
+    40.031914241452334), 3857), TIMESTAMP '2019-07-27 18:37:55'), (1951152363, ST_SetSRID(ST_Point(116.46138742118157,
+    39.85524731367796), 3857), TIMESTAMP '2019-07-30 06:40:05')
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 21:10:25'' AND ''2019-07-30 16:17:23'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_SetSRID(ST_Point(116.5385155663071, 39.88283616365462), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(40.01024845410354, 116.24016839604914,
+    39.95326516050579, 116.34376430359131), 4326), 3857)
+  - '''2019-07-10 17:57:40'' AND ''2019-07-13 08:34:35'''
+- name: bulkInsertgeolifePoints
+  type: bulk_insert
+  sql: ''
+  params:
+  - (1111924750, ST_SetSRID(ST_Point(116.31847598829883, 39.89070374850777), 3857),
+    TIMESTAMP '2019-07-31 21:01:19'), (1173885530, ST_SetSRID(ST_Point(116.42055641132598,
+    40.032257165533), 3857), TIMESTAMP '2019-07-14 03:53:48'), (1869362489, ST_SetSRID(ST_Point(116.24813601620916,
+    39.88694311003417), 3857), TIMESTAMP '2019-07-31 09:21:21'), (1563045112, ST_SetSRID(ST_Point(116.184643801058,
+    39.902749341303064), 3857), TIMESTAMP '2019-07-31 17:19:41'), (1732552852, ST_SetSRID(ST_Point(116.35113435287538,
+    39.950479902888304), 3857), TIMESTAMP '2019-07-22 04:46:27'), (1492265403, ST_SetSRID(ST_Point(116.38921040495012,
+    39.99193581716469), 3857), TIMESTAMP '2019-07-26 05:03:55'), (1115209488, ST_SetSRID(ST_Point(116.27703614862295,
+    39.81481887685426), 3857), TIMESTAMP '2019-07-25 01:42:58'), (1555132041, ST_SetSRID(ST_Point(116.32433757670901,
+    39.79643755623168), 3857), TIMESTAMP '2019-07-28 14:09:42'), (1566741777, ST_SetSRID(ST_Point(116.5149328854674,
+    39.93916545102534), 3857), TIMESTAMP '2019-07-04 17:59:31'), (1092610221, ST_SetSRID(ST_Point(116.31787123887567,
+    39.78709456843133), 3857), TIMESTAMP '2019-07-06 11:06:30')
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_SetSRID(ST_Point(116.2512819378058, 39.96829364052934), 3857)
+- name: deletegeolifePoint
+  type: delete
+  sql: ''
+  params:
+  - 1926381112
+- name: deletegeolifePoint
+  type: delete
+  sql: ''
+  params:
+  - 1895504523
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.957895344845646, 116.41018279348046,
+    39.90091205124789, 116.51377870102263), 4326), 3857)
+- name: updategeolifePoint
+  type: update
+  sql: ''
+  params:
+  - 1111483319
+  - ST_SetSRID(ST_Point(116.4353631649011, 39.798590969271686), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-06 04:55:27'' AND ''2019-07-10 02:21:15'''
+- name: insertSinglegeolifePoint
+  type: insert
+  sql: ''
+  params:
+  - 1139576896
+  - ST_SetSRID(ST_Point(116.37306245955462, 39.97772798126953), 3857)
+  - '2019-07-11 04:53:52'
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-01 00:00:00'' AND ''2019-07-02 21:03:57'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-06 22:31:15'' AND ''2019-07-07 02:51:30'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(40.02676329180465, 116.40185258665842,
+    39.969779998206896, 116.50544849420059), 4326), 3857)
+- name: deletegeolifePoint
+  type: delete
+  sql: ''
+  params:
+  - 1588637286
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_SetSRID(ST_Point(116.58560221970244, 39.83870485305211), 3857)
+- name: insertSinglegeolifePoint
+  type: insert
+  sql: ''
+  params:
+  - 1001144953
+  - ST_SetSRID(ST_Point(116.47514610999741, 40.02045296076881), 3857)
+  - '2019-07-06 08:14:54'
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_SetSRID(ST_Point(116.40026489497906, 39.94726587766132), 3857)
+- name: bulkInsertgeolifePoints
+  type: bulk_insert
+  sql: ''
+  params:
+  - (1031628078, ST_SetSRID(ST_Point(116.35886567151704, 39.8616066273627), 3857),
+    TIMESTAMP '2019-07-29 07:34:59'), (1956682156, ST_SetSRID(ST_Point(116.3594338799312,
+    39.83787959160066), 3857), TIMESTAMP '2019-07-09 17:05:43'), (1304754233, ST_SetSRID(ST_Point(116.49666729612794,
+    39.87006186976031), 3857), TIMESTAMP '2019-07-16 04:55:02'), (1971477142, ST_SetSRID(ST_Point(116.52026649170091,
+    39.80020701146664), 3857), TIMESTAMP '2019-07-23 23:47:49'), (1644143455, ST_SetSRID(ST_Point(116.59702175836577,
+    39.99553235699181), 3857), TIMESTAMP '2019-07-28 06:06:48'), (1383028783, ST_SetSRID(ST_Point(116.30886436160041,
+    39.99353240448345), 3857), TIMESTAMP '2019-07-23 03:54:34'), (1560018247, ST_SetSRID(ST_Point(116.25333972280853,
+    39.83069261205868), 3857), TIMESTAMP '2019-07-06 19:03:58'), (1697701811, ST_SetSRID(ST_Point(116.44868562791459,
+    40.01187727476813), 3857), TIMESTAMP '2019-07-23 01:03:59'), (1164481576, ST_SetSRID(ST_Point(116.57409711141368,
+    39.9447698037413), 3857), TIMESTAMP '2019-07-11 15:12:01'), (1713224529, ST_SetSRID(ST_Point(116.19945162427484,
+    39.79379120307541), 3857), TIMESTAMP '2019-07-10 01:20:16')
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-23 19:40:51'' AND ''2019-07-25 07:48:06'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.95923116612224, 116.51592531375306,
+    39.902247872524484, 116.61952122129523), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-14 20:16:33'' AND ''2019-07-17 11:35:40'''
+- name: insertSinglegeolifePoint
+  type: insert
+  sql: ''
+  params:
+  - 1491144783
+  - ST_SetSRID(ST_Point(116.62524323938045, 39.790297122555266), 3857)
+  - '2019-07-10 01:11:17'
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_SetSRID(ST_Point(116.4432904332238, 39.78564035557738), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_SetSRID(ST_Point(116.32938015081987, 39.801036416802624), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-03 08:55:21'' AND ''2019-07-06 08:32:07'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_SetSRID(ST_Point(116.26861214253434, 39.85696234372768), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-11 08:24:10'' AND ''2019-07-15 07:43:01'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-03 15:59:07'' AND ''2019-07-06 09:37:38'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-19 04:26:57'' AND ''2019-07-21 18:14:14'''
+- name: bulkInsertgeolifePoints
+  type: bulk_insert
+  sql: ''
+  params:
+  - (1961467287, ST_SetSRID(ST_Point(116.55299927370245, 39.85195708347087), 3857),
+    TIMESTAMP '2019-07-30 10:16:43'), (1565066038, ST_SetSRID(ST_Point(116.62018090494117,
+    39.809140157587564), 3857), TIMESTAMP '2019-07-16 16:12:51'), (1369149703, ST_SetSRID(ST_Point(116.42450670975165,
+    39.92080683079828), 3857), TIMESTAMP '2019-07-08 01:39:53'), (1423720775, ST_SetSRID(ST_Point(116.23883332280434,
+    40.01375469818103), 3857), TIMESTAMP '2019-07-30 13:36:00'), (1919278252, ST_SetSRID(ST_Point(116.40727703903408,
+    39.92635205834412), 3857), TIMESTAMP '2019-07-17 17:05:17'), (1228162398, ST_SetSRID(ST_Point(116.54111717720164,
+    39.89903382820398), 3857), TIMESTAMP '2019-07-22 09:36:06'), (1803817972, ST_SetSRID(ST_Point(116.52043977093412,
+    39.98351111898728), 3857), TIMESTAMP '2019-07-02 19:14:36'), (1977825393, ST_SetSRID(ST_Point(116.5244716156819,
+    40.03536086715732), 3857), TIMESTAMP '2019-07-31 10:08:03'), (1944103914, ST_SetSRID(ST_Point(116.19222369546084,
+    39.966165894336186), 3857), TIMESTAMP '2019-07-29 21:33:43'), (1132142586, ST_SetSRID(ST_Point(116.31408965583663,
+    39.81217879580822), 3857), TIMESTAMP '2019-07-11 13:37:27')
+- name: bulkInsertgeolifePoints
+  type: bulk_insert
+  sql: ''
+  params:
+  - (1891558120, ST_SetSRID(ST_Point(116.20915356458838, 40.02314911505983), 3857),
+    TIMESTAMP '2019-07-22 18:36:17'), (1884991623, ST_SetSRID(ST_Point(116.38043644459697,
+    39.81114297563919), 3857), TIMESTAMP '2019-07-12 02:23:47'), (1020825397, ST_SetSRID(ST_Point(116.32068453434943,
+    40.01022002784374), 3857), TIMESTAMP '2019-07-25 11:24:39'), (1561751611, ST_SetSRID(ST_Point(116.45393884235193,
+    39.99087395793194), 3857), TIMESTAMP '2019-07-13 07:11:27'), (1327237005, ST_SetSRID(ST_Point(116.2640451004201,
+    39.98443231998662), 3857), TIMESTAMP '2019-07-15 18:23:51'), (1111144581, ST_SetSRID(ST_Point(116.23377433932363,
+    39.88199139821073), 3857), TIMESTAMP '2019-07-07 20:48:34'), (1578600158, ST_SetSRID(ST_Point(116.49893365172143,
+    39.9939910479498), 3857), TIMESTAMP '2019-07-06 08:30:46'), (1772714019, ST_SetSRID(ST_Point(116.37546646348063,
+    40.000414864266794), 3857), TIMESTAMP '2019-07-31 23:55:09'), (1080859784, ST_SetSRID(ST_Point(116.21042399063982,
+    39.82319494166638), 3857), TIMESTAMP '2019-07-13 06:14:31'), (1638644690, ST_SetSRID(ST_Point(116.3670213221089,
+    39.78796206660338), 3857), TIMESTAMP '2019-07-25 11:35:11')
+- name: insertSinglegeolifePoint
+  type: insert
+  sql: ''
+  params:
+  - 1555642705
+  - ST_SetSRID(ST_Point(116.30619750247808, 39.85098256719889), 3857)
+  - '2019-07-27 10:51:20'
+- name: updategeolifePoint
+  type: update
+  sql: ''
+  params:
+  - 1615772442
+  - ST_SetSRID(ST_Point(116.34201328640432, 39.84848133269803), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-22 19:29:43'' AND ''2019-07-23 06:28:33'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.98661139023148, 116.1745005628931,
+    39.92962809663373, 116.27809647043527), 4326), 3857)
+- name: insertSinglegeolifePoint
+  type: insert
+  sql: ''
+  params:
+  - 1305411047
+  - ST_SetSRID(ST_Point(116.50925856249106, 39.82922344520715), 3857)
+  - '2019-07-05 01:17:05'
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-10 12:16:46'' AND ''2019-07-12 13:05:00'''
+- name: updategeolifePoint
+  type: update
+  sql: ''
+  params:
+  - 1851736401
+  - ST_SetSRID(ST_Point(116.56000038659054, 39.828902695795215), 3857)
+- name: updategeolifePoint
+  type: update
+  sql: ''
+  params:
+  - 1449434737
+  - ST_SetSRID(ST_Point(116.34344613892024, 39.98244166640225), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.849157801800516, 116.40938162754783,
+    39.79217450820276, 116.51297753509), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.96100831232925, 116.44505661344459,
+    39.904025018731495, 116.54865252098676), 4326), 3857)
+  - '''2019-07-03 09:57:26'' AND ''2019-07-05 11:32:17'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.99896579537608, 116.28779103617696,
+    39.94198250177833, 116.39138694371913), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.94299190649872, 116.44392263366224,
+    39.886008612900966, 116.54751854120441), 4326), 3857)
+  - '''2019-07-11 08:58:24'' AND ''2019-07-14 11:01:37'''
+- name: updategeolifePoint
+  type: update
+  sql: ''
+  params:
+  - 1334830659
+  - ST_SetSRID(ST_Point(116.30483424475622, 39.98245260011001), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-09 17:34:12'' AND ''2019-07-11 05:18:45'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.94595176968923, 116.29059739516991,
+    39.88896847609148, 116.39419330271208), 4326), 3857)
+- name: deletegeolifePoint
+  type: delete
+  sql: ''
+  params:
+  - 1833975558
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-27 08:29:18'' AND ''2019-07-29 14:27:31'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-03 08:15:19'' AND ''2019-07-04 19:31:23'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.94338110039434, 116.34529032216254,
+    39.88639780679659, 116.44888622970471), 4326), 3857)
+- name: insertSinglegeolifePoint
+  type: insert
+  sql: ''
+  params:
+  - 1768286603
+  - ST_SetSRID(ST_Point(116.33714949580255, 39.99542579917294), 3857)
+  - '2019-07-12 08:09:56'
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(39.892836399301316, 116.38909964814991,
+    39.83585310570356, 116.49269555569208), 4326), 3857)
+  - '''2019-07-17 19:03:18'' AND ''2019-07-20 11:07:52'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(40.01670452084651, 116.4295070470798,
+    39.95972122724876, 116.53310295462197), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-01 22:22:22'' AND ''2019-07-05 12:47:15'''
+- name: bulkInsertgeolifePoints
+  type: bulk_insert
+  sql: ''
+  params:
+  - (1750825970, ST_SetSRID(ST_Point(116.44249577845534, 39.89023886544711), 3857),
+    TIMESTAMP '2019-07-17 00:41:23'), (1474754817, ST_SetSRID(ST_Point(116.45965059782722,
+    39.878690548494454), 3857), TIMESTAMP '2019-07-01 04:54:52'), (1463274837, ST_SetSRID(ST_Point(116.39422074289372,
+    40.02233826928667), 3857), TIMESTAMP '2019-07-27 06:16:39'), (1599477857, ST_SetSRID(ST_Point(116.48063124813555,
+    39.8860917879435), 3857), TIMESTAMP '2019-07-22 13:36:46'), (1756862057, ST_SetSRID(ST_Point(116.45457661767941,
+    40.03024364454978), 3857), TIMESTAMP '2019-07-10 04:14:24'), (1019066780, ST_SetSRID(ST_Point(116.41860306736447,
+    39.96442166877602), 3857), TIMESTAMP '2019-07-06 02:57:50'), (1691235367, ST_SetSRID(ST_Point(116.1891028239795,
+    39.808557536640336), 3857), TIMESTAMP '2019-07-20 15:09:43'), (1165445198, ST_SetSRID(ST_Point(116.31381941744887,
+    40.02491467333084), 3857), TIMESTAMP '2019-07-07 23:21:34'), (1117555117, ST_SetSRID(ST_Point(116.33999969739405,
+    39.98804675109217), 3857), TIMESTAMP '2019-07-10 17:29:02'), (1046807009, ST_SetSRID(ST_Point(116.49223329462048,
+    39.83335906852829), 3857), TIMESTAMP '2019-07-28 12:22:34')

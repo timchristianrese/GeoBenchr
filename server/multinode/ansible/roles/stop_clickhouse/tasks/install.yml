@@ -1,0 +1,10 @@
+- name: Stop any running ClickHouse services
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+  loop:
+    - clickhouse-server
+    - clickhouse-keeper
+  ignore_errors: yes
+

@@ -62,7 +62,7 @@ def initial_insert():
                 last_row = next(reader) # skip header row and get first row
                 for row in reader:
                     cursor = connection.cursor()
-                    query = f"INSERT INTO cycling_data(ride_id, rider_id, latitude, longitude, x, y, z, timestamp, point_geom, line_geom) VALUES ({row[0]},{row[1]},{row[2]},{row[3]},{row[4]},{row[5]},{row[6]},'{row[7]}', ST_SetSRID(ST_MakePoint({row[2]},{row[3]}), 4326), ST_MakeLine(ST_SetSRID(ST_MakePoint({last_row[2]},{last_row[3]}), 4326), ST_SetSRID(ST_MakePoint({row[2]},{row[3]}), 4326)));"
+                    query = f"INSERT INTO cycling_data(id, rider_id, latitude, longitude, x, y, z, timestamp, point_geom, line_geom) VALUES ({row[0]},{row[1]},{row[2]},{row[3]},{row[4]},{row[5]},{row[6]},'{row[7]}', ST_SetSRID(ST_MakePoint({row[2]},{row[3]}), 4326), ST_MakeLine(ST_SetSRID(ST_MakePoint({last_row[2]},{last_row[3]}), 4326), ST_SetSRID(ST_MakePoint({row[2]},{row[3]}), 4326)));"
                     last_row = row
                     cursor.execute(query)
                     connection.commit()
@@ -94,7 +94,7 @@ def initial_insert():
                 last_row = next(reader) # skip header row and get first row
                 for row in reader:
                     cursor = connection.cursor()
-                    query = f"INSERT INTO cycling_trips(ride_id, rider_id, trip) VALUES ({row[0]},{row[1]},{row[2]},{row[3]});"
+                    query = f"INSERT INTO cycling_trips(id, rider_id, trip) VALUES ({row[0]},{row[1]},{row[2]},{row[3]});"
                     last_row = row
                     cursor.execute(query)
                     connection.commit()
@@ -106,7 +106,7 @@ def initial_insert():
             connection.close()
             print("PostgreSQL connection is closed")
 
-def get_max_ride_id():
+def get_max_id():
     try:
         connection = psycopg2.connect(
             dbname="postgres",
@@ -116,7 +116,7 @@ def get_max_ride_id():
             port=portnum
         )
         cursor = connection.cursor()
-        cursor.execute("SELECT MAX(ride_id) FROM cycling_data;")
+        cursor.execute("SELECT MAX(id) FROM cycling_data;")
         records = cursor.fetchall()
         return records[0][0]
     except (Exception, psycopg2.Error) as error:
@@ -148,17 +148,17 @@ def execute_query(query="SELECT * FROM cycling_data " , query_type = "surroundin
                     cursor = connection.cursor()
                     
                     writes = limit
-                    ride_id = get_max_ride_id() + 1
-                    ride_id =1
+                    id = get_max_id() + 1
+                    id =1
                     rider_id = random.randint(1, 30)
                     latitude = random.uniform(52.338049, 52.675454)
                     longitude = random.uniform(13.088346, 13.761160)
                     multirow_insert = ""
                     for i in range(writes):
-                        multirow_insert += "(" + str(ride_id) + ", " + str(rider_id) + ", " + str(latitude) + ", " + str(longitude) + ", 1, 1, 1, '" + time.strftime('%Y-%m-%d %H:%M:%S') + "', ST_SetSRID(ST_MakePoint(" + str(longitude) + ", " + str(latitude) + "), 4326)),\n"
+                        multirow_insert += "(" + str(id) + ", " + str(rider_id) + ", " + str(latitude) + ", " + str(longitude) + ", 1, 1, 1, '" + time.strftime('%Y-%m-%d %H:%M:%S') + "', ST_SetSRID(ST_MakePoint(" + str(longitude) + ", " + str(latitude) + "), 4326)),\n"
                         
                     multirow_insert = multirow_insert[:-2]
-                    query = f"INSERT INTO cycling_data (ride_id, rider_id, latitude, longitude, x, y, z, timestamp, point_geom, line_geom) VALUES {multirow_insert};"
+                    query = f"INSERT INTO cycling_data (id, rider_id, latitude, longitude, x, y, z, timestamp, point_geom, line_geom) VALUES {multirow_insert};"
                     #run the query
                     start = time.time()
                     cursor.execute(query)
@@ -297,15 +297,15 @@ def execute_query(query="SELECT * FROM cycling_data " , query_type = "surroundin
                 case "insert":
                     cursor = connection.cursor()
                     writes = limit
-                    ride_id = get_max_ride_id() + 1
+                    id = get_max_id() + 1
                     rider_id = random.randint(1, 30)
                     latitude = random.uniform(52.338049, 52.675454)
                     longitude = random.uniform(13.088346, 13.761160)
                     multirow_insert = ""
                     for i in range(writes):
-                        multirow_insert += f"({ride_id}, {rider_id}, {latitude}, {longitude}, 1, 1, 1, '{time.strftime('%Y-%m-%d %H:%M:%S')}', ST_SetSRID(ST_MakePoint({longitude}, {latitude}), 4326), ST_MakeLine(ST_SetSRID(ST_MakePoint({longitude}, {latitude}), 4326), ST_SetSRID(ST_MakePoint({longitude}, {latitude}), 4326))),\n"
+                        multirow_insert += f"({id}, {rider_id}, {latitude}, {longitude}, 1, 1, 1, '{time.strftime('%Y-%m-%d %H:%M:%S')}', ST_SetSRID(ST_MakePoint({longitude}, {latitude}), 4326), ST_MakeLine(ST_SetSRID(ST_MakePoint({longitude}, {latitude}), 4326), ST_SetSRID(ST_MakePoint({longitude}, {latitude}), 4326))),\n"
                     multirow_insert = multirow_insert[:-2]
-                    query = f"INSERT INTO cycling_trips (ride_id, rider_id, trip) VALUES {multirow_insert};"
+                    query = f"INSERT INTO cycling_trips (id, rider_id, trip) VALUES {multirow_insert};"
                     #run the query
                     start = time.time()
                     cursor.execute(query)
@@ -339,8 +339,8 @@ def execute_query(query="SELECT * FROM cycling_data " , query_type = "surroundin
                     print(records)
                 case "ride_traffic":
                     cursor = connection.cursor()
-                    ride_id = random.randint(1, 596)   
-                    query_addition =f"SELECT a.ride_id AS trip_id_1, b.ride_id AS trip_id_2, a.trip && b.trip AS intersects FROM  {query_table} a JOIN  {query_table} b ON a.ride_id <> b.ride_id WHERE a.ride_id = {ride_id} AND a.trip && b.trip LIMIT {limit};"
+                    id = random.randint(1, 596)   
+                    query_addition =f"SELECT a.id AS trip_id_1, b.id AS trip_id_2, a.trip && b.trip AS intersects FROM  {query_table} a JOIN  {query_table} b ON a.id <> b.id WHERE a.id = {id} AND a.trip && b.trip LIMIT {limit};"
                     #again, remove default select all
                     query = query_addition
                     print(query)
@@ -362,7 +362,7 @@ def execute_query(query="SELECT * FROM cycling_data " , query_type = "surroundin
                     query_table = "cycling_trips_ref"
                     if deployment == "single":
                         query_table = "cycling_trips"
-                    query_addition =f"SELECT a.ride_id AS trip_id_1, b.ride_id AS trip_id_2, a.trip && b.trip AS intersects FROM {query_table} a JOIN {query_table} b ON a.ride_id <> b.ride_id  WHERE a.trip && b.trip LIMIT {limit};"
+                    query_addition =f"SELECT a.id AS trip_id_1, b.id AS trip_id_2, a.trip && b.trip AS intersects FROM {query_table} a JOIN {query_table} b ON a.id <> b.id  WHERE a.trip && b.trip LIMIT {limit};"
                     #exclude default select all
                     query = query_addition
                     print(query)
@@ -478,8 +478,8 @@ def execute_query(query="SELECT * FROM cycling_data " , query_type = "surroundin
                 case "get_trip":
                     cursor = connection.cursor()
                     # define start and end time for the query
-                    ride_id = random.randint(1, 400)
-                    query_addition = f" SELECT asText(trip) AS trip_geom  FROM cycling_trips WHERE ride_id = {ride_id};"
+                    id = random.randint(1, 400)
+                    query_addition = f" SELECT asText(trip) AS trip_geom  FROM cycling_trips WHERE id = {id};"
                     #dont use default select all
                     query = query_addition
                     print(query)
@@ -496,8 +496,8 @@ def execute_query(query="SELECT * FROM cycling_data " , query_type = "surroundin
                 case "get_trip_length":
                     cursor = connection.cursor()
                     # define start and end time for the query
-                    ride_id = random.randint(1, 400)
-                    query_addition = f" SELECT length(trip) FROM cycling_trips WHERE ride_id = {ride_id};"
+                    id = random.randint(1, 400)
+                    query_addition = f" SELECT length(trip) FROM cycling_trips WHERE id = {id};"
                     #dont use default select all
                     query = query_addition
                     print(query)
@@ -515,8 +515,8 @@ def execute_query(query="SELECT * FROM cycling_data " , query_type = "surroundin
                 case "get_trip_duration":
                     cursor = connection.cursor()
                     # define start and end time for the query
-                    ride_id = random.randint(1, 400)
-                    query_addition = f"SELECT duration(trip) FROM cycling_trips WHERE ride_id = {ride_id};"
+                    id = random.randint(1, 400)
+                    query_addition = f"SELECT duration(trip) FROM cycling_trips WHERE id = {id};"
                     #dont use default select all
                     query = query_addition
                     start = time.time()
@@ -532,8 +532,8 @@ def execute_query(query="SELECT * FROM cycling_data " , query_type = "surroundin
                 case "get_trip_speed":
                     cursor = connection.cursor()
                     # define start and end time for the query
-                    ride_id = random.randint(1, 400)
-                    query_addition = f"SELECT speed(trip) FROM cycling_trips WHERE ride_id = {ride_id};"
+                    id = random.randint(1, 400)
+                    query_addition = f"SELECT speed(trip) FROM cycling_trips WHERE id = {id};"
                     #dont use default select all
                     query = query_addition
                     start = time.time()

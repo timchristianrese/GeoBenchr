@@ -1,0 +1,8 @@
+- name: Load Data
+  #only on master
+  hosts: masters
+  become: true
+  roles:
+    #- postgis_aviation
+    #- aviation_spark
+    - clickhouse_aviation

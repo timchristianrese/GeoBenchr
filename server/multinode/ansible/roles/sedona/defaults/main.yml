@@ -3,10 +3,9 @@
 ansible_user: debian
 ansible_python_interpreter: /usr/bin/python3
 
-postgres_version: 17
-db_name: mobilitydb
-db_user: mobility
-db_password: mobilitypass
+db_name: postgres
+db_user: postgres
+db_password: postgres
 
 spark_home: /opt/spark
 
@@ -15,6 +14,7 @@ spark_version: 4.0
 scala_version: 2.13
 sedona_version: 1.8.1
 geotools_version: 33.1
+
 
 # sedona_jar: sedona-spark-shaded-{{spark_version}}_{{scala_version}}-{{sedona_version}}.jar
 # geotools_jar: geotools-wrapper-{{sedona_version}}-{{geotools_version}}.jar

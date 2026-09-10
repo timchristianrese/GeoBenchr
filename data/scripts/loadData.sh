@@ -56,11 +56,11 @@ if [ "$system" == "all" ]; then
         DROP TABLE IF EXISTS harbours;
         DROP TABLE IF EXISTS islands;
         CREATE TABLE crossings (
-            crossing_id integer, 
+            id integer, 
             trip tgeompoint
         );
         CREATE TABLE crossing_points (
-            crossing_id integer,
+            id integer,
             timestamp timestamp,
             vessel_id Text,
             geom Geometry(Point, 4326),
@@ -98,7 +98,7 @@ for file in /home/tim/data/ais/point*.csv; do
     psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
     DROP TABLE IF EXISTS temp_crossing_raw;
     CREATE TEMP TABLE temp_crossing_raw (
-        crossing_id integer,
+        id integer,
         timestamp TIMESTAMP,
         vessel_id TEXT,
         geom_txt TEXT, 
@@ -107,9 +107,9 @@ for file in /home/tim/data/ais/point*.csv; do
         course TEXT
     );
     \copy temp_crossing_raw FROM '$file' WITH (FORMAT csv, DELIMITER ',', HEADER True)
-    INSERT INTO crossing_points (crossing_id, timestamp, vessel_id, geom, heading, speed, course)
+    INSERT INTO crossing_points (id, timestamp, vessel_id, geom, heading, speed, course)
     SELECT
-        crossing_id,
+        id,
         timestamp,
         vessel_id,
         ST_GeomFromText(geom_txt, 4326),
@@ -122,10 +122,10 @@ done
     #delete all single row trips
     psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
     DELETE FROM crossing_points
-    WHERE crossing_id IN (
-        SELECT crossing_id
+    WHERE id IN (
+        SELECT id
         FROM crossing_points
-        GROUP BY crossing_id
+        GROUP BY id
         HAVING COUNT(*) = 1
     );
 EOF
@@ -135,9 +135,9 @@ if [ "$TARGET_POINTS" -gt 0 ]; then
     psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
     DROP TABLE IF EXISTS trip_sizes;
     CREATE TEMP TABLE trip_sizes AS
-    SELECT crossing_id AS trip_id, COUNT(*) AS n_points
+    SELECT id AS trip_id, COUNT(*) AS n_points
     FROM crossing_points
-    GROUP BY crossing_id;
+    GROUP BY id;
 
     WITH cumulative AS (
         SELECT trip_id, n_points,
@@ -149,7 +149,7 @@ if [ "$TARGET_POINTS" -gt 0 ]; then
     WHERE cum_sum <= $TARGET_POINTS;
 
     DELETE FROM crossing_points
-    WHERE crossing_id NOT IN (SELECT trip_id FROM sampled_trajectories);
+    WHERE id NOT IN (SELECT trip_id FROM sampled_trajectories);
 
     ANALYZE crossing_points;
 
@@ -157,8 +157,8 @@ if [ "$TARGET_POINTS" -gt 0 ]; then
     ALTER TABLE harbours ALTER COLUMN geom TYPE Geometry(Point, 3857) USING ST_Transform(geom, 3857);
     ALTER TABLE islands ALTER COLUMN geom TYPE Geometry(MultiPolygon, 3857) USING ST_Transform(geom, 3857);
 
-    CREATE INDEX IF NOT EXISTS idx_crossing_points_crossing_id_ts 
-    ON crossing_points (crossing_id, timestamp);
+    CREATE INDEX IF NOT EXISTS idx_crossing_points_id_ts 
+    ON crossing_points (id, timestamp);
    
         WITH params AS (
     SELECT 5000::int AS chunk_size
@@ -166,9 +166,9 @@ if [ "$TARGET_POINTS" -gt 0 ]; then
 
     -- Step 1: Identify all crossings larger than the chunk size
     large_crossings AS (
-    SELECT crossing_id
+    SELECT id
     FROM crossing_points, params
-    GROUP BY crossing_id
+    GROUP BY id
     HAVING COUNT(*) > (SELECT chunk_size FROM params)
     ),
 
@@ -176,26 +176,26 @@ if [ "$TARGET_POINTS" -gt 0 ]; then
     numbered AS (
     SELECT
         cp.ctid,
-        cp.crossing_id,
-        ROW_NUMBER() OVER (PARTITION BY cp.crossing_id ORDER BY cp.timestamp) AS rn,
+        cp.id,
+        ROW_NUMBER() OVER (PARTITION BY cp.id ORDER BY cp.timestamp) AS rn,
         p.chunk_size
     FROM crossing_points cp
-    JOIN large_crossings lc ON cp.crossing_id = lc.crossing_id
+    JOIN large_crossings lc ON cp.id = lc.id
     JOIN params p ON true
     ),
 
-    -- Step 3: Compute the new crossing_id
+    -- Step 3: Compute the new id
     to_update AS (
     SELECT
         n.ctid,
-        -- Ensure unique IDs by using a high offset based on original crossing_id
-        n.crossing_id * 10000 + FLOOR((n.rn - 1) / n.chunk_size)::int AS new_crossing_id
+        -- Ensure unique IDs by using a high offset based on original id
+        n.id * 10000 + FLOOR((n.rn - 1) / n.chunk_size)::int AS new_id
     FROM numbered n
     )
 
-    -- Step 4: Update crossing_ids
+    -- Step 4: Update ids
     UPDATE crossing_points AS cp
-    SET crossing_id = u.new_crossing_id
+    SET id = u.new_id
     FROM to_update AS u
     WHERE cp.ctid = u.ctid;
 
@@ -203,8 +203,8 @@ EOF
 fi
 psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
 WITH deduplicated_points AS (
-    SELECT DISTINCT ON (crossing_id, timestamp)
-        crossing_id,
+    SELECT DISTINCT ON (id, timestamp)
+        id,
         timestamp,
         vessel_id,
         geom,
@@ -212,17 +212,17 @@ WITH deduplicated_points AS (
         speed,
         course
     FROM crossing_points
-    ORDER BY crossing_id, timestamp
+    ORDER BY id, timestamp
 )
-INSERT INTO crossings (crossing_id, trip)
+INSERT INTO crossings (id, trip)
 SELECT 
-    crossing_id,
+    id,
     tgeompointseq(
         array_agg(tgeompoint(geom, timestamp) ORDER BY timestamp),
         'discrete'
     )
 FROM deduplicated_points
-GROUP BY crossing_id;
+GROUP BY id;
 
 -- time partitioning 
 DROP TABLE IF EXISTS crossings_AdaptTimeGrid;
@@ -257,8 +257,8 @@ FOR VALUES IN (3);
 CREATE TABLE crossings_AdaptTimeGrid_4 PARTITION OF crossings_AdaptTimeGrid
 FOR VALUES IN (4);
 
-INSERT INTO crossings_AdaptTimeGrid(crossing_id, trip, TileId)
-SELECT c.crossing_id, c.trip, ab.BinId
+INSERT INTO crossings_AdaptTimeGrid(id, trip, TileId)
+SELECT c.id, c.trip, ab.BinId
 FROM crossings c, AdaptiveBins ab
 WHERE atTime(c.trip, Period) IS NOT NULL;
 
@@ -323,14 +323,14 @@ CREATE TABLE crossings_AdaptGrid_4 PARTITION OF crossings_AdaptGrid
 FOR VALUES IN (4);
 
 
-INSERT INTO crossings_AdaptGrid(crossing_id, trip, TileId)
-SELECT c.crossing_id, c.trip, ag.TileId
+INSERT INTO crossings_AdaptGrid(id, trip, TileId)
+SELECT c.id, c.trip, ag.TileId
 FROM crossings c, AdaptiveGrid ag
 WHERE atStbox(c.trip, ag.Tile, false) IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS tsdb_crossing_points as 
 SELECT 
-    crossing_id,
+    id,
     timestamp,
     vessel_id,
     geom,
@@ -345,7 +345,7 @@ SELECT create_hypertable('tsdb_crossing_points', 'timestamp', chunk_time_interva
 
 CREATE TABLE IF NOT EXISTS crossing_trajectories AS
 SELECT 
-    crossing_id, 
+    id, 
     startValue(trip) AS origin_geom,
     endValue(trip) AS destination_geom,
     startTimestamp(trip) AS start_time,
@@ -354,7 +354,7 @@ FROM crossings;
 
 CREATE TABLE IF NOT EXISTS tsdb_crossing_trajectories AS
 SELECT 
-    crossing_id, 
+    id, 
     origin_geom,
     destination_geom,
     start_time,
@@ -611,7 +611,7 @@ if [ "$TARGET_POINTS" -gt 0 ]; then
     -- ==========================================
     ANALYZE flight_points;
     
-    CREATE INDEX IF NOT EXISTS idx_flight_points_flight_id_ts ON flight_points(flightid, timestamp);
+    CREATE INDEX IF NOT EXISTS idx_flight_points_id_ts ON flight_points(flightid, timestamp);
     -- Parameterized chunk size for easy tweaking
     WITH params AS (
     SELECT 5000::int AS chunk_size
@@ -917,13 +917,13 @@ EOF
         DROP TABLE IF EXISTS berlin_districts;
         DROP TABLE IF EXISTS universities;
         CREATE TABLE ride_points (
-            ride_id integer, 
+            id integer, 
             rider_id integer, 
             geom Geometry(Point, 4326),
             timestamp timestamp
         );
         CREATE TABLE rides (
-            ride_id integer,
+            id integer,
             rider_id integer, 
             trip tgeompoint
         );
@@ -969,16 +969,16 @@ EOF
             -- Use a temp table to parse and cast the input
             DROP TABLE IF EXISTS temp_ride_raw;
             CREATE TEMP TABLE temp_ride_raw (
-                ride_id integer,
+                id integer,
                 rider_id integer,
                 longitude TEXT,
                 latitude TEXT,
                 timestamp TIMESTAMP
             );
             \copy temp_ride_raw FROM '$file' WITH (FORMAT csv, DELIMITER ',', HEADER true)
-            INSERT INTO ride_points (ride_id, rider_id, geom, timestamp)
+            INSERT INTO ride_points (id, rider_id, geom, timestamp)
             SELECT
-                ride_id,
+                id,
                 rider_id,
                 
         ('POINT(' || latitude || ' ' || longitude || ')'),
@@ -991,10 +991,10 @@ EOF
     #delete all single row trips
     psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
     DELETE FROM ride_points
-    WHERE ride_id IN (
-        SELECT ride_id
+    WHERE id IN (
+        SELECT id
         FROM ride_points
-        GROUP BY ride_id
+        GROUP BY id
         HAVING COUNT(*) = 1
     );
 EOF
@@ -1009,9 +1009,9 @@ if [ "$TARGET_POINTS" -gt 0 ]; then
     psql -U "$DB_USER" -d "$DB_NAME" -h "$DB_HOST" <<EOF
     DROP TABLE IF EXISTS trip_sizes;
     CREATE TEMP TABLE trip_sizes AS
-    SELECT ride_id AS trip_id, COUNT(*) AS n_points
+    SELECT id AS trip_id, COUNT(*) AS n_points
     FROM ride_points
-    GROUP BY ride_id;
+    GROUP BY id;
 
     WITH cumulative AS (
         SELECT trip_id, n_points,
@@ -1023,14 +1023,14 @@ if [ "$TARGET_POINTS" -gt 0 ]; then
     WHERE cum_sum <= $TARGET_POINTS;
 
     DELETE FROM ride_points
-    WHERE ride_id NOT IN (SELECT trip_id FROM sampled_trajectories);
+    WHERE id NOT IN (SELECT trip_id FROM sampled_trajectories);
 
     ANALYZE ride_points;
 
     WITH ranked AS (
         SELECT
             ctid,
-            ROW_NUMBER() OVER (PARTITION BY ride_id, timestamp ORDER BY rider_id) AS rn
+            ROW_NUMBER() OVER (PARTITION BY id, timestamp ORDER BY rider_id) AS rn
         FROM ride_points
     )
     DELETE FROM ride_points
@@ -1054,45 +1054,45 @@ fi
         
         -- split large rides
         WITH large_rides AS (
-            SELECT ride_id
+            SELECT id
             FROM ride_points
-            GROUP BY ride_id
+            GROUP BY id
             HAVING COUNT(*) > 5000  -- only split rides with > 5000 points
         ),
 
         numbered AS (
             SELECT
                 rp.ctid,  -- must qualify with alias
-                rp.ride_id,
-                FLOOR((ROW_NUMBER() OVER (PARTITION BY rp.ride_id ORDER BY rp.timestamp) - 1) / 5000)::int AS chunk_id
+                rp.id,
+                FLOOR((ROW_NUMBER() OVER (PARTITION BY rp.id ORDER BY rp.timestamp) - 1) / 5000)::int AS chunk_id
             FROM ride_points rp
-            JOIN large_rides lr ON rp.ride_id = lr.ride_id
+            JOIN large_rides lr ON rp.id = lr.id
         )
         UPDATE ride_points AS rp
-        SET ride_id = n.ride_id * 1000 + n.chunk_id
+        SET id = n.id * 1000 + n.chunk_id
         FROM numbered AS n
         WHERE rp.ctid = n.ctid;
 
 
         WITH deduplicated_points AS (
-            SELECT DISTINCT ride_id, rider_id, geom, timestamp
+            SELECT DISTINCT id, rider_id, geom, timestamp
             FROM ride_points
         ),
         ordered_points AS (
             SELECT *
             FROM deduplicated_points
-            ORDER BY ride_id, timestamp
+            ORDER BY id, timestamp
         )
-        INSERT INTO rides (ride_id, rider_id, trip)
+        INSERT INTO rides (id, rider_id, trip)
         SELECT 
-            ride_id,
+            id,
             MIN(rider_id) AS rider_id,  -- keep one rider_id per ride (if multiple, pick any)
             tgeompointseq(
                 array_agg(tgeompoint(geom, timestamp AT TIME ZONE 'UTC') ORDER BY timestamp),
                 'discrete'
             )
         FROM ordered_points
-        GROUP BY ride_id;
+        GROUP BY id;
 
         -- time partitioning
         DROP TABLE IF EXISTS AdaptiveBins;
@@ -1127,8 +1127,8 @@ fi
         CREATE TABLE rides_AdaptTimeGrid_4 PARTITION OF rides_AdaptTimeGrid
         FOR VALUES IN (4);
 
-        INSERT INTO rides_AdaptTimeGrid(ride_id, rider_id, trip, BinId)
-        SELECT c.ride_id, c.rider_id, c.trip, ab.BinId
+        INSERT INTO rides_AdaptTimeGrid(id, rider_id, trip, BinId)
+        SELECT c.id, c.rider_id, c.trip, ab.BinId
         FROM rides c, AdaptiveBins ab
         WHERE atTime(Trip, Period) IS NOT NULL;
 
@@ -1194,14 +1194,14 @@ fi
         CREATE TABLE rides_AdaptGrid_4 PARTITION OF rides_AdaptGrid
         FOR VALUES IN (4);
 
-        INSERT INTO rides_AdaptGrid(ride_id, rider_id, trip, TileId)
-        SELECT c.ride_id, c.rider_id, c.trip, ag.TileId
+        INSERT INTO rides_AdaptGrid(id, rider_id, trip, TileId)
+        SELECT c.id, c.rider_id, c.trip, ag.TileId
         FROM rides c, AdaptiveGrid ag
         WHERE atStbox(c.trip, ag.Tile, false) IS NOT NULL;
 
         CREATE TABLE IF NOT EXISTS tsdb_ride_points AS
         SELECT
-            ride_id,
+            id,
             rider_id,
             geom,
             timestamp
@@ -1212,7 +1212,7 @@ fi
         -- Ride trajectories (PostGIS)
         CREATE TABLE ride_trajectories AS
         SELECT
-            ride_id,
+            id,
             rider_id,
             startValue(trip) as origin_geom,
             endValue(trip) as destination_geom,
@@ -1225,7 +1225,7 @@ fi
         -- Ride trajectories (TimescaleDB)
         CREATE TABLE tsdb_ride_trajectories AS
         SELECT
-            ride_id,
+            id,
             rider_id,
             origin_geom,
             destination_geom,

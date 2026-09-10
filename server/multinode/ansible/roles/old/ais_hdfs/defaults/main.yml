@@ -1,0 +1,4 @@
+# roles/ais_hdfs/defaults/main.yml
+hdfs_target_dir: /data/ais/raw
+local_data_path: /data/ais
+hadoop_home: /opt/hadoop

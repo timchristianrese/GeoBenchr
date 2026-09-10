@@ -1,1 +1,2 @@
-spark_version: 4.1.1
+spark_version: 4.1.2
+postgres_jdbc_jar: postgresql-42.7.9.jar

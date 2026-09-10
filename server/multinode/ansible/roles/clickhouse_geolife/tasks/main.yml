@@ -1,0 +1,98 @@
+# - name: Make sure HDFS is not running
+#   ansible.builtin.shell: | 
+#     {{ hadoop_home }}/sbin/stop-all.sh || true
+#   become_user: debian
+- name: Make sure Clickhouse is running
+  systemd:
+    name: clickhouse-server
+    state: started
+    enabled: yes
+    
+
+# FIX: nothing ever synced a parquet file onto the target machine -- "Find parquet files" always
+# found zero. data_generator_geolife/synthetic_output exists but is empty locally, so this syncs
+# a small dummy file matching the pipeline's expected schema instead of real data.
+- name: Sync sample geolife parquet file to target machine
+  ansible.posix.synchronize:
+    src: "{{ geolife_sample_parquet_file }}"
+    dest: "{{ geolife_data_dir }}/"
+  when: inventory_hostname in groups['masters']
+
+- name: Find parquet files
+  ansible.builtin.find:
+    paths: "{{ geolife_data_dir }}"
+    patterns: "*.parquet"
+  register: parquet_files
+  when: inventory_hostname in groups['masters']
+
+- name: Drop Clickhouse table if exists
+  ansible.builtin.shell: |
+    clickhouse-client --port {{ ch_port}}  --query "DROP TABLE IF EXISTS geolife_points ON CLUSTER cluster_1"
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+- name: Drop local Clickhouse table if exists
+  ansible.builtin.shell: |
+    clickhouse-client --port {{ ch_port}}  --query "DROP TABLE IF EXISTS geolife_points_local ON CLUSTER cluster_1"
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+# FIX: ORDER BY referenced "user_id", a column this table doesn't have (it's called "id", matching
+# postgis_geolife's own naming) -- CREATE TABLE would fail outright with an unknown identifier.
+- name: Create geolife_points table (optimized for geo queries)
+  shell: |
+    clickhouse-client --port {{ ch_port }} --query "
+    CREATE TABLE IF NOT EXISTS geolife_points_local ON CLUSTER cluster_1 (
+        id UInt64,
+        timestamp DateTime,
+        venue_id UInt64,
+        venue_type String,
+        lat Float64,
+        lon Float64,
+        Point Tuple(Float64, Float64) MATERIALIZED (lon, lat),
+        h3 UInt64 MATERIALIZED geoToH3(lat, lon, 9)
+    )
+    ENGINE = ReplicatedMergeTree()
+    PARTITION BY toYYYYMM(timestamp)
+    ORDER BY (h3, timestamp, id)
+    SETTINGS index_granularity = 8192;
+    "
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+- name: Create distributed geolife_points table
+  shell: |
+    clickhouse-client --port {{ ch_port }} --query "
+    CREATE TABLE IF NOT EXISTS geolife_points ON CLUSTER cluster_1 AS geolife_points_local
+    ENGINE = Distributed(cluster_1, default, geolife_points_local, rand());
+    "
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+
+# - name: Add skipping index on H3
+#   shell: |
+#     clickhouse-client --port {{ ch_port }} --query "
+#     ALTER TABLE geolife_points
+#     ADD INDEX idx_h3 h3 TYPE set(1000) GRANULARITY 4;
+#     "
+
+- name: Load parquet into ClickHouse directly
+  ansible.builtin.shell: |
+    clickhouse-client --port {{ ch_port}}  --query "
+    INSERT INTO geolife_points
+    SELECT
+        UserId,
+        CheckinTime,
+        VenueId,
+        VenueType,
+        Latitude, 
+        Longitude
+        
+    FROM file('{{ item.path }}', Parquet)
+    "
+  when: inventory_hostname in groups['masters']
+  loop: "{{ parquet_files.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  become_user: "{{ ansible_user }}"

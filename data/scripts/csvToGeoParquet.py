@@ -30,6 +30,6 @@ def convertCSV(directory_path,has_header,headers, delimiter =","):
         counter += 1
 
 #convertCSV("../processed/ais/point", True, "wkt")
-#convertCSV("../processed/cycling/point", False, ["ride_id", "rider_id", "wkt", "timestamp"], ",")
+#convertCSV("../processed/cycling/point", False, ["id", "rider_id", "wkt", "timestamp"], ",")
 convertCSV("../processed/aviation/point", False, ["flightid","aircraft_type","origin","destination","wkt","timestamp","altitude"], ";")
 

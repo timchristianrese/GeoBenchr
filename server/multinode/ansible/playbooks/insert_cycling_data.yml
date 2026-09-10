@@ -1,0 +1,6 @@
+- name: Load Data
+  hosts: masters
+  become: true
+  roles:
+    - postgis_cycling
+    #- clickhouse_cycling

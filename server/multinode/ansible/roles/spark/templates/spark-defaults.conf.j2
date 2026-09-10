@@ -7,15 +7,37 @@ spark.eventLog.dir               hdfs:///spark-logs
 spark.history.fs.logDirectory    hdfs:///spark-logs
 spark.history.fs.update.interval 10s
 
-spark.executor.memory            2g
-spark.executor.cores             2
-spark.driver.memory              1g
+# FIX: was a flat, hardcoded "2g"/"2" regardless of what the workers can actually run -- see
+# roles/common's "Compute Spark executor sizing" for how these (and the dynamic allocation bounds
+# below) are derived from each worker's real, gathered-fact capacity.
+spark.executor.memory            {{ spark_executor_memory_mb }}m
+spark.executor.cores             {{ spark_executor_cores }}
+
+# NEW: dynamic allocation -- scales the number of executors between the bounds below based on
+# actual pending-task backlog, instead of a single fixed spark.executor.instances count that's
+# either too small under real load or wastes cluster capacity sitting idle. Requires the external
+# shuffle service (deployed onto every NodeManager, see roles/spark's tasks/main.yml) to be
+# running first, or Spark refuses to enable this at all.
+spark.shuffle.service.enabled       true
+spark.dynamicAllocation.enabled     true
+spark.dynamicAllocation.minExecutors     {{ spark_dynamic_min_executors }}
+spark.dynamicAllocation.initialExecutors {{ spark_dynamic_initial_executors }}
+spark.dynamicAllocation.maxExecutors     {{ spark_dynamic_max_executors }}
 
 spark.driver.memory              10g
 spark.network.timeout            1000s
 spark.driver.maxResultSize       5g
 
-spark.yarn.appMasterEnv.JAVA_HOME=/opt/java/jdk-17.0.18+8
-spark.executorEnv.JAVA_HOME=/opt/java/jdk-17.0.18+8
+spark.yarn.appMasterEnv.JAVA_HOME=/opt/java/latest
+spark.executorEnv.JAVA_HOME=/opt/java/latest
 
 spark.yarn.submit.waitAppCompletion true
+
+spark.sql.extensions org.apache.sedona.sql.SedonaSqlExtensions
+spark.sql.catalogImplementation in-memory
+spark.serializer org.apache.spark.serializer.KryoSerializer
+spark.kryo.registrator org.apache.sedona.core.serde.SedonaKryoRegistrator
+
+spark.pyspark.python=/opt/venvs/sedona/bin/python
+spark.pyspark.driver.python=/opt/venvs/sedona/bin/python
+spark.executorEnv.PYSPARK_PYTHON=/opt/venvs/sedona/bin/python

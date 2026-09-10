@@ -1,0 +1,121 @@
+# DuckDB CLI + a "quack" server (https://github.com/gizmodata/quack) so the benchmark_client's
+# remote JDBC driver (com.gizmodata:quack-jdbc) can reach it, matching the setup this project's
+# postgis_ais/postgis_aviation/postgis_cycling/postgis_geolife roles already use inline for
+# DuckDB-as-an-ETL-tool -- this role consolidates that same install pattern and additionally runs
+# it as a persistent service so DuckDB is also usable as a benchmarked SUT (matching PostGIS,
+# MobilityDB, and ClickHouse elsewhere in this cluster). Meant to run on masters only, matching
+# every other SUT here.
+
+- name: Ensure prerequisites for DuckDB install
+  become: true
+  ansible.builtin.apt:
+    name:
+      - unzip
+      - curl
+    state: present
+    update_cache: true
+
+# FIX: this play sets `become: true` at the play level, which (absent a per-task override) also
+# applies to Ansible's implicit fact-gathering -- so ansible_env.HOME resolved to /root instead of
+# ansible_user's actual home, and "Install DuckDB CLI" (no become: override, so also root) really
+# did install it under /root/.duckdb. That left the systemd unit below (User={{ ansible_user }},
+# ExecStart under the same ansible_env.HOME) trying to exec a binary the debian user can't even
+# traverse into (/root is 0700), crash-looping with "203/EXEC". Pinning these to
+# /home/{{ ansible_user }} and become: false makes the install (and the path the unit execs)
+# consistently land in the connecting user's own home, matching how the unit actually runs.
+- name: Check whether DuckDB CLI is installed
+  become: false
+  ansible.builtin.stat:
+    path: "/home/{{ ansible_user }}/.duckdb/cli/latest/duckdb"
+  register: duckdb_installed
+
+- name: Install DuckDB CLI
+  become: false
+  ansible.builtin.shell: |
+    curl -fsSL https://install.duckdb.org | sh
+  args:
+    creates: "/home/{{ ansible_user }}/.duckdb/cli/latest/duckdb"
+  when: not duckdb_installed.stat.exists
+
+- name: Ensure duckdb is in PATH by checking if it already is, and if not, adding it to .bashrc
+  become: false
+  ansible.builtin.shell: |
+    if ! echo $PATH | grep -q "/home/{{ ansible_user }}/.duckdb/cli/latest"; then
+      echo 'export PATH="/home/{{ ansible_user }}/.duckdb/cli/latest:$PATH"' >> ~/.bashrc
+    fi
+  args:
+    executable: /bin/bash
+
+- name: Ensure DuckDB data directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ duckdb_data_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+
+# FIX: `INSTALL quack;` (previously run inline in duckdb-quack-start.sh.j2, at service start) hung
+# on the nst-cluster hardware -- DNS for extensions.duckdb.org there returns a working IPv4
+# address alongside an IPv6 one whose route is black-holed (SYNs vanish instead of being
+# rejected); `curl` recovers via its own Happy-Eyeballs fallback in under a second, but DuckDB's
+# installer doesn't retry over IPv4 the way curl does, so it just hangs/times out (~2 minutes)
+# instead. Rather than depend on the network path working at service-start time at all, fetch the
+# extension once here -- explicitly over IPv4, which is proven to work -- straight into the exact
+# cache path DuckDB's own INSTALL would have used, so the startup script's `LOAD quack;` finds it
+# locally and never touches the network. Harmless (and a no-op after the first run) anywhere this
+# network problem doesn't exist, e.g. inventory/local's test VMs.
+- name: Determine installed DuckDB CLI version (extension cache path is versioned by it)
+  become: false
+  ansible.builtin.command: "/home/{{ ansible_user }}/.duckdb/cli/latest/duckdb --version"
+  register: duckdb_cli_version_output
+  changed_when: false
+
+- name: Check whether the quack extension is already cached locally
+  become: false
+  ansible.builtin.stat:
+    path: "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/quack.duckdb_extension"
+  register: quack_extension_cached
+
+- name: Ensure the DuckDB extension cache directory exists
+  become: false
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64"
+    state: directory
+    mode: '0755'
+  when: not quack_extension_cached.stat.exists
+
+- name: Fetch the quack extension over IPv4 into the local DuckDB extension cache
+  become: false
+  ansible.builtin.shell: >-
+    curl -4 -fsSL "http://extensions.duckdb.org/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/quack.duckdb_extension.gz"
+    | gunzip > "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/quack.duckdb_extension"
+  when: not quack_extension_cached.stat.exists
+
+# FIX: quack_serve() needs allow_other_hostname=true to bind 0.0.0.0 (it refuses any non-localhost
+# bind by default), and -- since it starts its listener on a background thread and returns
+# immediately -- also needs the CLI kept alive past that CALL, which the wrapper script below does
+# by keeping the CLI's stdin pipe open with a trailing `sleep infinity` instead of using `-c`.
+- name: Deploy DuckDB Quack server startup script
+  become: true
+  ansible.builtin.template:
+    src: duckdb-quack-start.sh.j2
+    dest: /usr/local/bin/duckdb-quack-start.sh
+    mode: '0755'
+  notify: restart duckdb quack
+
+- name: Deploy DuckDB Quack server systemd unit
+  become: true
+  ansible.builtin.template:
+    src: duckdb-quack.service.j2
+    dest: /etc/systemd/system/duckdb-quack.service
+    mode: '0644'
+  notify: restart duckdb quack
+
+- name: Ensure DuckDB Quack server is enabled and started
+  become: true
+  ansible.builtin.systemd:
+    name: duckdb-quack
+    daemon_reload: true
+    enabled: true
+    state: started

@@ -1,0 +1,111 @@
+# - name: Make sure HDFS is not running
+#   ansible.builtin.shell: | 
+#     {{ hadoop_home }}/sbin/stop-all.sh || true
+#   become_user: debian
+- name: Make sure Clickhouse is running
+  systemd:
+    name: clickhouse-server
+    state: started
+    enabled: yes
+    
+
+# FIX: nothing here ever synced a parquet file onto the target machine -- "Find parquet files"
+# always found zero and every task below it silently no-op'd (the loop just had nothing to
+# iterate). Syncing one real file (aviation_sample_parquet_file) rather than the whole
+# data_generator_aviation/parquet_flights directory (~676 files, ~70GB) -- see that variable's
+# comment in group_vars/all/all.yml. Shares its destination directory with postgis_aviation
+# (clickhouse_aviation_data_dir == aviation_data_dir, both /var/lib/data/aviation), so whichever
+# of these two roles runs first does the actual sync; this is just a harmless no-op rsync check
+# if the file's already there.
+- name: Sync sample aviation parquet file to target machine
+  ansible.posix.synchronize:
+    src: "{{ aviation_sample_parquet_file }}"
+    dest: "{{ clickhouse_aviation_data_dir }}/"
+  when: inventory_hostname in groups['masters']
+
+- name: Find parquet files
+  ansible.builtin.find:
+    paths: "{{ clickhouse_aviation_data_dir }}"
+    patterns: "*.parquet"
+  register: parquet_files
+  when: inventory_hostname in groups['masters']
+
+# FIX: hardcoded to /root/data, which is neither where this role's own data lives
+# ({{ clickhouse_aviation_data_dir }}, /var/lib/data/aviation) nor a path anything else in this
+# project ever creates -- this would fail outright on a host where /root/data doesn't exist (no
+# state: directory to create it), or silently fix permissions on the wrong directory if it
+# happened to exist for an unrelated reason.
+- name: Fix data directory permissions recursively
+  ansible.builtin.file:
+    path: "{{ clickhouse_aviation_data_dir }}"
+    mode: "0777"
+    recurse: yes
+  when: inventory_hostname in groups['masters']
+
+- name: DROP Clickhouse table if exists
+  ansible.builtin.shell: |
+    clickhouse-client --port {{ ch_port}}  --query "DROP TABLE IF EXISTS flight_points"
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+- name: DROP local Clickhouse table if exists
+  ansible.builtin.shell: |
+    clickhouse-client --port {{ ch_port}}  --query "DROP TABLE IF EXISTS flight_points_local ON CLUSTER cluster_1"
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+- name: Create local flight_points table (optimized for geo queries)
+  shell: |
+    clickhouse-client --port {{ ch_port }} --query "
+    CREATE TABLE IF NOT EXISTS flight_points_local ON CLUSTER cluster_1 (
+        id UInt64,
+        timestamp DateTime,
+        lat Float64,
+        lon Float64,
+        altitude Float64,
+        Point Tuple(Float64, Float64) MATERIALIZED (lon, lat),
+        h3 UInt64 MATERIALIZED geoToH3(lat, lon, 9)
+    )
+    ENGINE = ReplicatedMergeTree()
+    PARTITION BY toYYYYMM(timestamp)
+    ORDER BY (h3, timestamp, id)
+    SETTINGS index_granularity = 8192;
+    "
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+- name: Create distributed flight_points table
+  shell: |
+    clickhouse-client --port {{ ch_port }} --query "
+    CREATE TABLE IF NOT EXISTS flight_points ON CLUSTER cluster_1 AS flight_points_local
+    ENGINE = Distributed(cluster_1, default, flight_points_local, rand());
+    "
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+# - name: Add skipping index on H3
+#   shell: |
+#     clickhouse-client --port {{ ch_port }} --query "
+#     ALTER TABLE flight_points
+#     ADD INDEX idx_h3 h3 TYPE set(1000) GRANULARITY 4;
+#     "
+
+# FIX: the real parquet files (data_generator_aviation/parquet_flights) name their flight-id
+# column "flight_id", not "id" -- this SELECT referenced a column that doesn't exist.
+- name: Load parquet into ClickHouse directly
+  ansible.builtin.shell: |
+    clickhouse-client --port {{ ch_port}}  --query "
+    INSERT INTO flight_points
+    SELECT
+        flight_id AS id,
+        timestamp,
+        lat,
+        lon,
+        altitude
+    FROM file('{{ item.path }}', Parquet)
+    "
+  when: inventory_hostname in groups['masters']
+  loop: "{{ parquet_files.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  become_user: "{{ ansible_user }}"

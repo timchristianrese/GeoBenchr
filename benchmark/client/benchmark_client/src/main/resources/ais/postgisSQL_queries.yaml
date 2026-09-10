@@ -1,2912 +1,1530 @@
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 2151)
-    WHERE h.name = 'RAFINA'
-      AND tsrange('2019-11-07 20:09:30', '2019-11-10 08:23:05') @> c.start_time::timestamp;
-  params:
-  - RAFINA
-  - - '2019-11-07 20:09:30'
-    - '2019-11-10 08:23:05'
-  - 2151
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-11-04 08:57:42', TIMESTAMP '2019-11-11 22:05:31');
-  params:
-  - - '2019-11-04 08:57:42'
-    - '2019-11-11 22:05:31'
 - name: HarbourActivityInPeriod
   type: spatiotemporal
   sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2110) WHERE tsrange('2019-09-18 23:34:15', '2019-09-30 08:28:38') @> c.timestamp AND h.name = 'PERAMA' GROUP BY h.name;
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1969) WHERE c.timestamp BETWEEN '2024-08-07 13:47:26' AND '2024-08-09 19:44:29' AND h.name = 'SIRI' AND c.id > 0 GROUP BY h.name;
   params:
-  - - '2019-09-18 23:34:15'
-    - '2019-09-30 08:28:38'
-  - 2110
-  - PERAMA
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
+  - - '2024-08-07 13:47:26'
+    - '2024-08-09 19:44:29'
+  - 1969
+  - SIRI
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 3 AND tsrange('2019-08-25 02:49:31', '2019-09-04 06:02:06') @> c.timestamp;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4816) WHERE c.timestamp BETWEEN '2025-06-17 07:24:08' AND '2025-06-20 00:33:47' AND i.id = 'Lagousa' AND c.id > 0;
   params:
-  - 3
-  - - '2019-08-25 02:49:31'
-    - '2019-09-04 06:02:06'
-- name: countActiveCrossingsInPeriod
-  type: temporal
+  - 4816
+  - Lagousa
+  - - '2025-06-17 07:24:08'
+    - '2025-06-20 00:33:47'
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-11-12 17:02:06', TIMESTAMP '2019-11-19 14:51:57');
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2915) WHERE c.timestamp BETWEEN '2025-06-14 00:47:54' AND '2025-06-24 21:25:15' AND h.name = 'FALIRO' AND c.id > 0 GROUP BY h.name;
   params:
-  - - '2019-11-12 17:02:06'
-    - '2019-11-19 14:51:57'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 9 AND tsrange('2019-11-24 17:26:10', '2019-12-01 20:57:11') @> c.timestamp;
-  params:
-  - 9
-  - - '2019-11-24 17:26:10'
-    - '2019-12-01 20:57:11'
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'FANEROMENI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4069) JOIN harbours h_end ON h_end.name = 'FALIRO' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4069);
-  params:
-  - FANEROMENI
+  - - '2025-06-14 00:47:54'
+    - '2025-06-24 21:25:15'
+  - 2915
   - FALIRO
-  - 4069
-- name: averageDurationCrossingStartAtHarbourInPeriod
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(1.3596956853656164, 54.50012601184977), 3857)
+    WHERE id = 1767363074;
+  params:
+  - 1767363074
+  - ST_SetSRID(ST_Point(1.3596956853656164, 54.50012601184977), 3857)
+- name: islandOrCoastLineCrossingsInPeriod
   type: spatiotemporal
   sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3788)
-    WHERE h.name = 'CORINTH CANAL'
-      AND tsrange('2019-09-23 18:05:51', '2019-10-02 01:37:53') @> c.start_time::timestamp;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1902) WHERE c.timestamp BETWEEN '2024-10-10 12:06:15' AND '2024-10-16 17:06:21' AND i.id = 'Daskalio' AND c.id > 0;
   params:
-  - CORINTH CANAL
-  - - '2019-09-23 18:05:51'
-    - '2019-10-02 01:37:53'
-  - 3788
+  - 1902
+  - Daskalio
+  - - '2024-10-10 12:06:15'
+    - '2024-10-16 17:06:21'
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1370881048, ST_SetSRID(ST_Point(11.736261502040009, 54.726740345732004), 3857), TIMESTAMP '2025-06-25 03:25:26'), (1017475735, ST_SetSRID(ST_Point(11.369778190555643, 55.26893730064702), 3857), TIMESTAMP '2024-02-06 04:25:46'), (1978709313, ST_SetSRID(ST_Point(8.885523651797865, 55.006287809425906), 3857), TIMESTAMP '2024-11-21 08:56:22'), (1447794529, ST_SetSRID(ST_Point(10.296248842940784, 56.139369433085584), 3857), TIMESTAMP '2024-01-03 18:39:49'), (1961467287, ST_SetSRID(ST_Point(15.939949006864094, 54.54788587224678), 3857), TIMESTAMP '2025-06-09 21:53:22'), (1565066038, ST_SetSRID(ST_Point(18.468076125104012, 53.18370937382572), 3857), TIMESTAMP '2024-10-07 03:19:00'), (1369149703, ST_SetSRID(ST_Point(11.10461635079967, 56.74148583975161), 3857), TIMESTAMP '2024-05-06 08:04:29'), (1423720775, ST_SetSRID(ST_Point(4.117499247181434, 59.70286836888238), 3857), TIMESTAMP '2025-06-12 09:14:36'), (1919278252, ST_SetSRID(ST_Point(10.456242725803342, 56.91816057621099), 3857), TIMESTAMP '2024-10-25 15:50:12'), (1228162398, ST_SetSRID(ST_Point(15.492811153385627, 56.047783108262884), 3857), TIMESTAMP '2025-01-17 10:33:52');
+  params:
+  - (1370881048, ST_SetSRID(ST_Point(11.736261502040009, 54.726740345732004), 3857),
+    TIMESTAMP '2025-06-25 03:25:26'), (1017475735, ST_SetSRID(ST_Point(11.369778190555643,
+    55.26893730064702), 3857), TIMESTAMP '2024-02-06 04:25:46'), (1978709313, ST_SetSRID(ST_Point(8.885523651797865,
+    55.006287809425906), 3857), TIMESTAMP '2024-11-21 08:56:22'), (1447794529, ST_SetSRID(ST_Point(10.296248842940784,
+    56.139369433085584), 3857), TIMESTAMP '2024-01-03 18:39:49'), (1961467287, ST_SetSRID(ST_Point(15.939949006864094,
+    54.54788587224678), 3857), TIMESTAMP '2025-06-09 21:53:22'), (1565066038, ST_SetSRID(ST_Point(18.468076125104012,
+    53.18370937382572), 3857), TIMESTAMP '2024-10-07 03:19:00'), (1369149703, ST_SetSRID(ST_Point(11.10461635079967,
+    56.74148583975161), 3857), TIMESTAMP '2024-05-06 08:04:29'), (1423720775, ST_SetSRID(ST_Point(4.117499247181434,
+    59.70286836888238), 3857), TIMESTAMP '2025-06-12 09:14:36'), (1919278252, ST_SetSRID(ST_Point(10.456242725803342,
+    56.91816057621099), 3857), TIMESTAMP '2024-10-25 15:50:12'), (1228162398, ST_SetSRID(ST_Point(15.492811153385627,
+    56.047783108262884), 3857), TIMESTAMP '2025-01-17 10:33:52')
 - name: HarbourActivityInPeriod
   type: spatiotemporal
   sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1347) WHERE tsrange('2019-05-05 00:41:17', '2019-05-07 19:40:54') @> c.timestamp AND h.name = 'SOUSAKI' GROUP BY h.name;
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4995) WHERE c.timestamp BETWEEN '2024-05-03 02:18:26' AND '2024-05-14 15:58:48' AND h.name = 'AEGINA' AND c.id > 0 GROUP BY h.name;
   params:
-  - - '2019-05-05 00:41:17'
-    - '2019-05-07 19:40:54'
-  - 1347
-  - SOUSAKI
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'FLISVOS' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4964) JOIN harbours h_end ON h_end.name = 'FLISVOS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4964);
-  params:
-  - FLISVOS
-  - FLISVOS
-  - 4964
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 2362)
-    WHERE h.name = 'AEGINA'
-      AND tsrange('2019-08-31 10:07:07', '2019-09-13 08:29:05') @> c.start_time::timestamp;
-  params:
+  - - '2024-05-03 02:18:26'
+    - '2024-05-14 15:58:48'
+  - 4995
   - AEGINA
-  - - '2019-08-31 10:07:07'
-    - '2019-09-13 08:29:05'
-  - 2362
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
+- name: deleteCrossingPoint
+  type: delete
   sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2415) WHERE tsrange('2019-09-07 02:34:30', '2019-09-13 19:04:00') @> c.timestamp AND h.name = 'AGIOI THEODORI' GROUP BY h.name;
+    DELETE FROM crossing_points
+    WHERE id = 1555642705;
   params:
-  - - '2019-09-07 02:34:30'
-    - '2019-09-13 19:04:00'
-  - 2415
-  - AGIOI THEODORI
-- name: countActiveCrossingsNearIsland
+  - 1555642705
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(16.27865886857627, 53.13989553172531), 3857)
+    WHERE id = 1939533345;
+  params:
+  - 1939533345
+  - ST_SetSRID(ST_Point(16.27865886857627, 53.13989553172531), 3857)
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1359620969, ST_SetSRID(ST_Point(5.337498945850471, 53.0710169737054), 3857), '2024-06-27 10:48:50');
+  params:
+  - 1359620969
+  - ST_SetSRID(ST_Point(5.337498945850471, 53.0710169737054), 3857)
+  - '2024-06-27 10:48:50'
+- name: crossingsAroundHarbour
   type: spatial
   sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1377) WHERE i.name = 'Vrachonisis Moladi' GROUP BY i.name;
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 4101) WHERE h.name = 'CORINTH CANAL' AND c.id > 0;
   params:
-  - Vrachonisis Moladi
-  - 1377
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-01-10 16:27:16', TIMESTAMP '2019-01-25 14:37:00');
-  params:
-  - - '2019-01-10 16:27:16'
-    - '2019-01-25 14:37:00'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 23 AND tsrange('2018-12-31 23:00:01', '2019-01-02 07:22:15') @> c.timestamp;
-  params:
-  - 23
-  - - '2018-12-31 23:00:01'
-    - '2019-01-02 07:22:15'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3679) WHERE i.name = 'Kasidis' GROUP BY i.name;
-  params:
-  - Kasidis
-  - 3679
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3384) WHERE i.name = 'Revithousa' GROUP BY i.name;
-  params:
-  - Revithousa
-  - 3384
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-06-10 16:49:34', TIMESTAMP '2019-06-16 20:23:54');
-  params:
-  - - '2019-06-10 16:49:34'
-    - '2019-06-16 20:23:54'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 23 AND tsrange('2019-03-02 17:06:05', '2019-03-05 22:05:16') @> c.timestamp;
-  params:
-  - 23
-  - - '2019-03-02 17:06:05'
-    - '2019-03-05 22:05:16'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2696) WHERE tsrange('2019-05-07 09:36:58', '2019-05-15 04:19:03') @> c.timestamp AND h.name = 'CORINTH CANAL' GROUP BY h.name;
-  params:
-  - - '2019-05-07 09:36:58'
-    - '2019-05-15 04:19:03'
-  - 2696
   - CORINTH CANAL
+  - 4101
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(14.545268182581665, 60.13087365284467), 3857)
+    WHERE id = 1425923484;
+  params:
+  - 1425923484
+  - ST_SetSRID(ST_Point(14.545268182581665, 60.13087365284467), 3857)
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1803817972, ST_SetSRID(ST_Point(14.71469501425752, 58.73928728235837), 3857), TIMESTAMP '2024-02-02 04:48:14'), (1977825393, ST_SetSRID(ST_Point(14.866418273360846, 60.391255667370395), 3857), TIMESTAMP '2025-06-27 16:12:44'), (1944103914, ST_SetSRID(ST_Point(2.3635218476234634, 58.186656579879916), 3857), TIMESTAMP '2025-05-31 10:37:46'), (1132142586, ST_SetSRID(ST_Point(6.94948728989814, 53.28052246262899), 3857), TIMESTAMP '2024-07-07 20:30:52'), (1111924750, ST_SetSRID(ST_Point(7.1145503561386585, 55.78238108051046), 3857), TIMESTAMP '2025-07-05 18:47:06'), (1173885530, ST_SetSRID(ST_Point(10.955961779736953, 60.292369614094184), 3857), TIMESTAMP '2024-08-23 05:23:07'), (1869362489, ST_SetSRID(ST_Point(4.467571000959513, 55.662564570592714), 3857), TIMESTAMP '2025-06-27 02:17:59'), (1563045112, ST_SetSRID(ST_Point(2.078281131673555, 56.16616189293223), 3857), TIMESTAMP '2025-07-03 00:46:15'), (1732552852, ST_SetSRID(ST_Point(8.343524639748567, 57.686890180350076), 3857), TIMESTAMP '2025-01-13 20:17:38'), (1492265403, ST_SetSRID(ST_Point(9.776373143584973, 59.00770391953672), 3857), TIMESTAMP '2025-03-26 13:06:27');
+  params:
+  - (1803817972, ST_SetSRID(ST_Point(14.71469501425752, 58.73928728235837), 3857),
+    TIMESTAMP '2024-02-02 04:48:14'), (1977825393, ST_SetSRID(ST_Point(14.866418273360846,
+    60.391255667370395), 3857), TIMESTAMP '2025-06-27 16:12:44'), (1944103914, ST_SetSRID(ST_Point(2.3635218476234634,
+    58.186656579879916), 3857), TIMESTAMP '2025-05-31 10:37:46'), (1132142586, ST_SetSRID(ST_Point(6.94948728989814,
+    53.28052246262899), 3857), TIMESTAMP '2024-07-07 20:30:52'), (1111924750, ST_SetSRID(ST_Point(7.1145503561386585,
+    55.78238108051046), 3857), TIMESTAMP '2025-07-05 18:47:06'), (1173885530, ST_SetSRID(ST_Point(10.955961779736953,
+    60.292369614094184), 3857), TIMESTAMP '2024-08-23 05:23:07'), (1869362489, ST_SetSRID(ST_Point(4.467571000959513,
+    55.662564570592714), 3857), TIMESTAMP '2025-06-27 02:17:59'), (1563045112, ST_SetSRID(ST_Point(2.078281131673555,
+    56.16616189293223), 3857), TIMESTAMP '2025-07-03 00:46:15'), (1732552852, ST_SetSRID(ST_Point(8.343524639748567,
+    57.686890180350076), 3857), TIMESTAMP '2025-01-13 20:17:38'), (1492265403, ST_SetSRID(ST_Point(9.776373143584973,
+    59.00770391953672), 3857), TIMESTAMP '2025-03-26 13:06:27')
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2367) WHERE i.id = 'Nisis Metopi' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Nisis Metopi
+  - 2367
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1924959383;
+  params:
+  - 1924959383
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2538) WHERE c.timestamp BETWEEN '2024-01-15 13:10:23' AND '2024-01-20 22:55:18' AND i.id = 'Nisida Kyra' AND c.id > 0;
+  params:
+  - 2538
+  - Nisida Kyra
+  - - '2024-01-15 13:10:23'
+    - '2024-01-20 22:55:18'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 3968) WHERE h.name = 'AGIOS KOSMAS' AND c.id > 0;
+  params:
+  - AGIOS KOSMAS
+  - 3968
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(1.9676403755967997, 59.19976328121274), 3857)
+    WHERE id = 1916008858;
+  params:
+  - 1916008858
+  - ST_SetSRID(ST_Point(1.9676403755967997, 59.19976328121274), 3857)
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1087185896, ST_SetSRID(ST_Point(15.947155646247692, 54.541952486873754), 3857), '2024-02-22 06:52:59');
+  params:
+  - 1087185896
+  - ST_SetSRID(ST_Point(15.947155646247692, 54.541952486873754), 3857)
+  - '2024-02-22 06:52:59'
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN '' AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
+  params:
+  - ''
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1004766142, ST_SetSRID(ST_Point(9.754215008422806, 55.052471780463016), 3857), '2024-09-03 11:22:56');
+  params:
+  - 1004766142
+  - ST_SetSRID(ST_Point(9.754215008422806, 55.052471780463016), 3857)
+  - '2024-09-03 11:22:56'
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3583) WHERE i.id = 'Agistri' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Agistri
+  - 3583
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 2566) WHERE h.name = 'FLISVOS' AND c.id > 0;
+  params:
+  - FLISVOS
+  - 2566
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(4.346385519259317, 58.17999423056411), 3857)
+    WHERE id = 1743604059;
+  params:
+  - 1743604059
+  - ST_SetSRID(ST_Point(4.346385519259317, 58.17999423056411), 3857)
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1228) WHERE c.timestamp BETWEEN '2024-09-01 10:40:24' AND '2024-09-09 20:14:30' AND h.name = 'FALIRO' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2024-09-01 10:40:24'
+    - '2024-09-09 20:14:30'
+  - 1228
+  - FALIRO
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1501489594, ST_SetSRID(ST_Point(12.20042242449671, 58.34606656242535), 3857), '2024-12-13 20:05:33');
+  params:
+  - 1501489594
+  - ST_SetSRID(ST_Point(12.20042242449671, 58.34606656242535), 3857)
+  - '2024-12-13 20:05:33'
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1894439355, ST_SetSRID(ST_Point(4.263230725295285, 54.34865735200643), 3857), '2024-03-29 01:27:03');
+  params:
+  - 1894439355
+  - ST_SetSRID(ST_Point(4.263230725295285, 54.34865735200643), 3857)
+  - '2024-03-29 01:27:03'
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN '' AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
+  params:
+  - ''
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1392790040;
+  params:
+  - 1392790040
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 4820) WHERE h.name = 'AGISTRI' AND c.id > 0;
+  params:
+  - AGISTRI
+  - 4820
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(3.861081124307333, 52.637906555954565), 3857)
+    WHERE id = 1726865509;
+  params:
+  - 1726865509
+  - ST_SetSRID(ST_Point(3.861081124307333, 52.637906555954565), 3857)
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4861) WHERE i.id = 'Nisis Metopi' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Nisis Metopi
+  - 4861
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN '' AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
+  params:
+  - ''
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1327116292;
+  params:
+  - 1327116292
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(6.74534448197497, 57.330396075410526), 3857)
+    WHERE id = 1474030391;
+  params:
+  - 1474030391
+  - ST_SetSRID(ST_Point(6.74534448197497, 57.330396075410526), 3857)
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1436320091, ST_SetSRID(ST_Point(16.305064939114423, 57.78663492899695), 3857), TIMESTAMP '2024-07-01 11:06:56'), (1696361716, ST_SetSRID(ST_Point(17.70506896919889, 58.840574469140776), 3857), TIMESTAMP '2024-03-23 13:41:51'), (1042077046, ST_SetSRID(ST_Point(9.432777331806264, 60.28144381870053), 3857), TIMESTAMP '2025-04-23 12:27:45'), (1951152363, ST_SetSRID(ST_Point(12.492482721216696, 54.65271485355042), 3857), TIMESTAMP '2025-06-07 05:21:51'), (1523589832, ST_SetSRID(ST_Point(5.822761457415488, 53.24699222211065), 3857), TIMESTAMP '2024-12-04 06:11:15'), (1700351704, ST_SetSRID(ST_Point(12.111888848760838, 59.01078655128752), 3857), TIMESTAMP '2025-02-12 03:35:12'), (1540782782, ST_SetSRID(ST_Point(2.2950312678735454, 52.93354261413784), 3857), TIMESTAMP '2024-10-25 04:58:51'), (1333387231, ST_SetSRID(ST_Point(8.819488786533439, 53.52202222222617), 3857), TIMESTAMP '2025-02-27 07:55:40'), (1104417744, ST_SetSRID(ST_Point(15.426171821595144, 58.83065287223226), 3857), TIMESTAMP '2024-05-13 08:43:59'), (1216216439, ST_SetSRID(ST_Point(15.813577121063366, 55.88302213601197), 3857), TIMESTAMP '2024-04-11 01:27:19');
+  params:
+  - (1436320091, ST_SetSRID(ST_Point(16.305064939114423, 57.78663492899695), 3857),
+    TIMESTAMP '2024-07-01 11:06:56'), (1696361716, ST_SetSRID(ST_Point(17.70506896919889,
+    58.840574469140776), 3857), TIMESTAMP '2024-03-23 13:41:51'), (1042077046, ST_SetSRID(ST_Point(9.432777331806264,
+    60.28144381870053), 3857), TIMESTAMP '2025-04-23 12:27:45'), (1951152363, ST_SetSRID(ST_Point(12.492482721216696,
+    54.65271485355042), 3857), TIMESTAMP '2025-06-07 05:21:51'), (1523589832, ST_SetSRID(ST_Point(5.822761457415488,
+    53.24699222211065), 3857), TIMESTAMP '2024-12-04 06:11:15'), (1700351704, ST_SetSRID(ST_Point(12.111888848760838,
+    59.01078655128752), 3857), TIMESTAMP '2025-02-12 03:35:12'), (1540782782, ST_SetSRID(ST_Point(2.2950312678735454,
+    52.93354261413784), 3857), TIMESTAMP '2024-10-25 04:58:51'), (1333387231, ST_SetSRID(ST_Point(8.819488786533439,
+    53.52202222222617), 3857), TIMESTAMP '2025-02-27 07:55:40'), (1104417744, ST_SetSRID(ST_Point(15.426171821595144,
+    58.83065287223226), 3857), TIMESTAMP '2024-05-13 08:43:59'), (1216216439, ST_SetSRID(ST_Point(15.813577121063366,
+    55.88302213601197), 3857), TIMESTAMP '2024-04-11 01:27:19')
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1508852761;
+  params:
+  - 1508852761
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3052) WHERE c.timestamp BETWEEN '2024-09-11 20:44:55' AND '2024-09-23 04:53:02' AND i.id = 'Daskalio' AND c.id > 0;
+  params:
+  - 3052
+  - Daskalio
+  - - '2024-09-11 20:44:55'
+    - '2024-09-23 04:53:02'
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1694256838;
+  params:
+  - 1694256838
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN '' AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
+  params:
+  - ''
 - name: CrossingsActiveAtGivenHourOfDay
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 4 AND tsrange('2019-03-05 11:53:43', '2019-03-09 18:05:11') @> c.timestamp;
+    SELECT COUNT(DISTINCT c.id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 15 AND c.timestamp BETWEEN '2024-06-29 07:32:18' AND '2024-07-05 00:51:45' AND c.id > 0;
+  params:
+  - 15
+  - - '2024-06-29 07:32:18'
+    - '2024-07-05 00:51:45'
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2427) WHERE c.timestamp BETWEEN '2024-08-26 08:41:40' AND '2024-09-08 19:51:24' AND i.id = 'Nisis Metopi' AND c.id > 0;
+  params:
+  - 2427
+  - Nisis Metopi
+  - - '2024-08-26 08:41:40'
+    - '2024-09-08 19:51:24'
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1217709710;
+  params:
+  - 1217709710
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN '' AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
+  params:
+  - ''
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4011) WHERE c.timestamp BETWEEN '2024-11-20 13:19:55' AND '2024-11-22 15:57:30' AND h.name = 'SOUSAKI' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2024-11-20 13:19:55'
+    - '2024-11-22 15:57:30'
+  - 4011
+  - SOUSAKI
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1560018247, ST_SetSRID(ST_Point(4.663392857718261, 53.87038529149699), 3857), TIMESTAMP '2024-04-13 13:15:02'), (1697701811, ST_SetSRID(ST_Point(12.014498673844578, 59.64305237685039), 3857), TIMESTAMP '2025-01-28 22:56:09'), (1164481576, ST_SetSRID(ST_Point(16.73388649648007, 57.50496252208656), 3857), TIMESTAMP '2024-07-09 00:40:55'), (1713224529, ST_SetSRID(ST_Point(2.635517667112503, 52.694681201231255), 3857), TIMESTAMP '2024-06-10 20:02:24'), (1137705841, ST_SetSRID(ST_Point(6.2390442195331275, 52.88926391480374), 3857), TIMESTAMP '2024-03-23 23:17:08'), (1800122228, ST_SetSRID(ST_Point(18.54415836712647, 56.405010745696195), 3857), TIMESTAMP '2025-06-07 05:38:03'), (1135368952, ST_SetSRID(ST_Point(11.499716742119443, 57.96500003754712), 3857), TIMESTAMP '2024-12-03 08:05:29'), (1687331589, ST_SetSRID(ST_Point(7.1147790365604076, 59.122903481460675), 3857), TIMESTAMP '2024-03-17 18:28:31'), (1221431258, ST_SetSRID(ST_Point(18.361278648883395, 55.48176980630676), 3857), TIMESTAMP '2024-04-30 18:10:35'), (1258559521, ST_SetSRID(ST_Point(11.696396830026632, 55.7225402227453), 3857), TIMESTAMP '2024-10-13 20:32:56');
+  params:
+  - (1560018247, ST_SetSRID(ST_Point(4.663392857718261, 53.87038529149699), 3857),
+    TIMESTAMP '2024-04-13 13:15:02'), (1697701811, ST_SetSRID(ST_Point(12.014498673844578,
+    59.64305237685039), 3857), TIMESTAMP '2025-01-28 22:56:09'), (1164481576, ST_SetSRID(ST_Point(16.73388649648007,
+    57.50496252208656), 3857), TIMESTAMP '2024-07-09 00:40:55'), (1713224529, ST_SetSRID(ST_Point(2.635517667112503,
+    52.694681201231255), 3857), TIMESTAMP '2024-06-10 20:02:24'), (1137705841, ST_SetSRID(ST_Point(6.2390442195331275,
+    52.88926391480374), 3857), TIMESTAMP '2024-03-23 23:17:08'), (1800122228, ST_SetSRID(ST_Point(18.54415836712647,
+    56.405010745696195), 3857), TIMESTAMP '2025-06-07 05:38:03'), (1135368952, ST_SetSRID(ST_Point(11.499716742119443,
+    57.96500003754712), 3857), TIMESTAMP '2024-12-03 08:05:29'), (1687331589, ST_SetSRID(ST_Point(7.1147790365604076,
+    59.122903481460675), 3857), TIMESTAMP '2024-03-17 18:28:31'), (1221431258, ST_SetSRID(ST_Point(18.361278648883395,
+    55.48176980630676), 3857), TIMESTAMP '2024-04-30 18:10:35'), (1258559521, ST_SetSRID(ST_Point(11.696396830026632,
+    55.7225402227453), 3857), TIMESTAMP '2024-10-13 20:32:56')
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 7 AND c.timestamp BETWEEN '2024-04-03 00:31:17' AND '2024-04-17 07:48:58' AND c.id > 0;
+  params:
+  - 7
+  - - '2024-04-03 00:31:17'
+    - '2024-04-17 07:48:58'
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1578600158, ST_SetSRID(ST_Point(13.90539339137009, 59.07318497587222), 3857), TIMESTAMP '2024-04-05 16:39:06'), (1772714019, ST_SetSRID(ST_Point(9.259171782143536, 59.277852150570965), 3857), TIMESTAMP '2025-07-07 22:33:46'), (1080859784, ST_SetSRID(ST_Point(3.0484212606561414, 53.63150439262161), 3857), TIMESTAMP '2024-08-07 02:23:37'), (1638644690, ST_SetSRID(ST_Point(8.941370762347313, 52.50896093250151), 3857), TIMESTAMP '2025-03-13 12:44:33'), (1031628078, ST_SetSRID(ST_Point(8.634463635384023, 54.85532693033648), 3857), TIMESTAMP '2025-05-21 00:48:50'), (1956682156, ST_SetSRID(ST_Point(8.655846014379405, 54.099367367709576), 3857), TIMESTAMP '2024-06-04 16:44:22'), (1304754233, ST_SetSRID(ST_Point(13.82010765284576, 55.12471672722921), 3857), TIMESTAMP '2024-09-28 17:25:51'), (1971477142, ST_SetSRID(ST_Point(14.708174304348718, 52.899093237946495), 3857), TIMESTAMP '2025-02-14 21:09:01'), (1644143455, ST_SetSRID(ST_Point(17.596569056683634, 59.122292134514296), 3857), TIMESTAMP '2025-05-02 01:38:37'), (1383028783, ST_SetSRID(ST_Point(6.752853063908431, 59.05857228182569), 3857), TIMESTAMP '2025-01-31 01:44:35');
+  params:
+  - (1578600158, ST_SetSRID(ST_Point(13.90539339137009, 59.07318497587222), 3857),
+    TIMESTAMP '2024-04-05 16:39:06'), (1772714019, ST_SetSRID(ST_Point(9.259171782143536,
+    59.277852150570965), 3857), TIMESTAMP '2025-07-07 22:33:46'), (1080859784, ST_SetSRID(ST_Point(3.0484212606561414,
+    53.63150439262161), 3857), TIMESTAMP '2024-08-07 02:23:37'), (1638644690, ST_SetSRID(ST_Point(8.941370762347313,
+    52.50896093250151), 3857), TIMESTAMP '2025-03-13 12:44:33'), (1031628078, ST_SetSRID(ST_Point(8.634463635384023,
+    54.85532693033648), 3857), TIMESTAMP '2025-05-21 00:48:50'), (1956682156, ST_SetSRID(ST_Point(8.655846014379405,
+    54.099367367709576), 3857), TIMESTAMP '2024-06-04 16:44:22'), (1304754233, ST_SetSRID(ST_Point(13.82010765284576,
+    55.12471672722921), 3857), TIMESTAMP '2024-09-28 17:25:51'), (1971477142, ST_SetSRID(ST_Point(14.708174304348718,
+    52.899093237946495), 3857), TIMESTAMP '2025-02-14 21:09:01'), (1644143455, ST_SetSRID(ST_Point(17.596569056683634,
+    59.122292134514296), 3857), TIMESTAMP '2025-05-02 01:38:37'), (1383028783, ST_SetSRID(ST_Point(6.752853063908431,
+    59.05857228182569), 3857), TIMESTAMP '2025-01-31 01:44:35')
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 4 AND c.timestamp BETWEEN '2024-11-05 07:49:41' AND '2024-11-08 02:43:36' AND c.id > 0;
   params:
   - 4
-  - - '2019-03-05 11:53:43'
-    - '2019-03-09 18:05:11'
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'RAFINA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4850) JOIN harbours h_end ON h_end.name = 'FANEROMENI' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4850);
-  params:
-  - RAFINA
-  - FANEROMENI
-  - 4850
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4321) WHERE tsrange('2019-07-23 10:42:47', '2019-07-27 19:13:55') @> c.timestamp AND h.name = 'AGIOS KOSMAS' GROUP BY h.name;
-  params:
-  - - '2019-07-23 10:42:47'
-    - '2019-07-27 19:13:55'
-  - 4321
-  - AGIOS KOSMAS
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'FANEROMENI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3393) JOIN harbours h_end ON h_end.name = 'ALIMOS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3393);
-  params:
-  - FANEROMENI
-  - ALIMOS
-  - 3393
+  - - '2024-11-05 07:49:41'
+    - '2024-11-08 02:43:36'
 - name: CrossingsActiveAtGivenHourOfDay
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 20 AND tsrange('2019-07-06 05:02:58', '2019-07-14 08:54:29') @> c.timestamp;
+    SELECT COUNT(DISTINCT c.id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 18 AND c.timestamp BETWEEN '2024-05-16 03:48:07' AND '2024-05-24 00:50:45' AND c.id > 0;
   params:
-  - 20
-  - - '2019-07-06 05:02:58'
-    - '2019-07-14 08:54:29'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
+  - 18
+  - - '2024-05-16 03:48:07'
+    - '2024-05-24 00:50:45'
+- name: updateCrossingPoint
+  type: update
   sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 4196)
-    WHERE h.name = 'RAFINA'
-      AND tsrange('2019-09-07 14:18:07', '2019-09-12 03:12:15') @> c.start_time::timestamp;
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(17.391649442346047, 58.14620756111823), 3857)
+    WHERE id = 1836015607;
   params:
-  - RAFINA
-  - - '2019-09-07 14:18:07'
-    - '2019-09-12 03:12:15'
-  - 4196
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'FALIRO' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4642) JOIN harbours h_end ON h_end.name = 'GLYFADA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4642);
-  params:
-  - FALIRO
-  - GLYFADA
-  - 4642
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1663) WHERE i.name = 'Nisis Metopi' GROUP BY i.name;
-  params:
-  - Nisis Metopi
-  - 1663
-- name: CrossingsActiveAtGivenHourOfDay
+  - 1836015607
+  - ST_SetSRID(ST_Point(17.391649442346047, 58.14620756111823), 3857)
+- name: busiestDayInWeekPeriod
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 14 AND tsrange('2019-11-21 13:04:34', '2019-11-25 10:37:17') @> c.timestamp;
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN '' AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
   params:
-  - 14
-  - - '2019-11-21 13:04:34'
-    - '2019-11-25 10:37:17'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 20 AND tsrange('2019-07-28 18:51:48', '2019-08-03 13:24:29') @> c.timestamp;
-  params:
-  - 20
-  - - '2019-07-28 18:51:48'
-    - '2019-08-03 13:24:29'
-- name: countActiveCrossingsNearIsland
+  - ''
+- name: crossingsAroundHarbour
   type: spatial
   sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3899) WHERE i.name = 'Trakhyli' GROUP BY i.name;
-  params:
-  - Trakhyli
-  - 3899
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'FALIRO' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 1304) JOIN harbours h_end ON h_end.name = 'PIRAEUS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 1304);
-  params:
-  - FALIRO
-  - PIRAEUS
-  - 1304
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 1212)
-    WHERE h.name = 'AGIOS KOSMAS'
-      AND tsrange('2019-10-27 02:07:39', '2019-10-30 18:04:01') @> c.start_time::timestamp;
-  params:
-  - AGIOS KOSMAS
-  - - '2019-10-27 02:07:39'
-    - '2019-10-30 18:04:01'
-  - 1212
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'LAVRIO' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 1024) JOIN harbours h_end ON h_end.name = 'AEGINA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 1024);
-  params:
-  - LAVRIO
-  - AEGINA
-  - 1024
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'AGIOI THEODORI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 2749) JOIN harbours h_end ON h_end.name = 'AEGINA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 2749);
-  params:
-  - AGIOI THEODORI
-  - AEGINA
-  - 2749
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'ALIMOS' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4140) JOIN harbours h_end ON h_end.name = 'FANEROMENI' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4140);
-  params:
-  - ALIMOS
-  - FANEROMENI
-  - 4140
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3158) WHERE i.name = 'Anagnostis' GROUP BY i.name;
-  params:
-  - Anagnostis
-  - 3158
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2525) WHERE tsrange('2019-03-27 03:39:09', '2019-04-09 13:31:56') @> c.timestamp AND h.name = 'AEGINA' GROUP BY h.name;
-  params:
-  - - '2019-03-27 03:39:09'
-    - '2019-04-09 13:31:56'
-  - 2525
-  - AEGINA
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4955) WHERE i.name = 'Nisis Pachaki' GROUP BY i.name;
-  params:
-  - Nisis Pachaki
-  - 4955
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3369) WHERE tsrange('2019-06-07 23:48:03', '2019-06-22 05:04:48') @> c.timestamp AND h.name = 'FLISVOS' GROUP BY h.name;
-  params:
-  - - '2019-06-07 23:48:03'
-    - '2019-06-22 05:04:48'
-  - 3369
-  - FLISVOS
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3500) WHERE i.name = 'Patroklos' GROUP BY i.name;
-  params:
-  - Patroklos
-  - 3500
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-11-10 07:45:37', TIMESTAMP '2019-11-17 21:40:39');
-  params:
-  - - '2019-11-10 07:45:37'
-    - '2019-11-17 21:40:39'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2512) WHERE i.name = 'Agios Ioannis' GROUP BY i.name;
-  params:
-  - Agios Ioannis
-  - 2512
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4176) WHERE i.name = 'Agistri' GROUP BY i.name;
-  params:
-  - Agistri
-  - 4176
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 2 AND tsrange('2019-04-20 01:52:10', '2019-04-23 20:17:48') @> c.timestamp;
-  params:
-  - 2
-  - - '2019-04-20 01:52:10'
-    - '2019-04-23 20:17:48'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3732)
-    WHERE h.name = 'FANEROMENI'
-      AND tsrange('2019-11-23 02:56:39', '2019-12-05 15:30:51') @> c.start_time::timestamp;
-  params:
-  - FANEROMENI
-  - - '2019-11-23 02:56:39'
-    - '2019-12-05 15:30:51'
-  - 3732
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4402) WHERE i.name = 'Salamina' GROUP BY i.name;
-  params:
-  - Salamina
-  - 4402
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 1365)
-    WHERE h.name = 'ELEFSIS'
-      AND tsrange('2019-09-20 00:16:10', '2019-10-01 11:22:58') @> c.start_time::timestamp;
-  params:
-  - ELEFSIS
-  - - '2019-09-20 00:16:10'
-    - '2019-10-01 11:22:58'
-  - 1365
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2183) WHERE i.name = 'Thorussa' GROUP BY i.name;
-  params:
-  - Thorussa
-  - 2183
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3829) WHERE i.name = 'Plateia' GROUP BY i.name;
-  params:
-  - Plateia
-  - 3829
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'FANEROMENI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4564) JOIN harbours h_end ON h_end.name = 'FLISVOS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4564);
-  params:
-  - FANEROMENI
-  - FLISVOS
-  - 4564
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-08-08 04:00:02', TIMESTAMP '2019-08-22 23:41:34');
-  params:
-  - - '2019-08-08 04:00:02'
-    - '2019-08-22 23:41:34'
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'GLYFADA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4936) JOIN harbours h_end ON h_end.name = 'CORINTH' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4936);
-  params:
-  - GLYFADA
-  - CORINTH
-  - 4936
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-05-23 16:23:29', TIMESTAMP '2019-05-28 10:41:50');
-  params:
-  - - '2019-05-23 16:23:29'
-    - '2019-05-28 10:41:50'
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'ERMIONI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3590) JOIN harbours h_end ON h_end.name = 'AGIOI THEODORI' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3590);
-  params:
-  - ERMIONI
-  - AGIOI THEODORI
-  - 3590
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 19 AND tsrange('2019-06-19 12:12:18', '2019-06-30 05:28:47') @> c.timestamp;
-  params:
-  - 19
-  - - '2019-06-19 12:12:18'
-    - '2019-06-30 05:28:47'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3276)
-    WHERE h.name = 'ZEA'
-      AND tsrange('2019-04-01 14:29:59', '2019-04-10 05:40:21') @> c.start_time::timestamp;
-  params:
-  - ZEA
-  - - '2019-04-01 14:29:59'
-    - '2019-04-10 05:40:21'
-  - 3276
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'RAFINA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4381) JOIN harbours h_end ON h_end.name = 'GLYFADA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4381);
-  params:
-  - RAFINA
-  - GLYFADA
-  - 4381
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 7 AND tsrange('2019-07-02 15:39:13', '2019-07-06 17:20:21') @> c.timestamp;
-  params:
-  - 7
-  - - '2019-07-02 15:39:13'
-    - '2019-07-06 17:20:21'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1335) WHERE i.name = 'Makronisos' GROUP BY i.name;
-  params:
-  - Makronisos
-  - 1335
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 1442)
-    WHERE h.name = 'PERAMA'
-      AND tsrange('2019-11-23 08:48:57', '2019-12-06 21:11:41') @> c.start_time::timestamp;
-  params:
-  - PERAMA
-  - - '2019-11-23 08:48:57'
-    - '2019-12-06 21:11:41'
-  - 1442
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-06-22 01:23:41', TIMESTAMP '2019-06-30 07:18:52');
-  params:
-  - - '2019-06-22 01:23:41'
-    - '2019-06-30 07:18:52'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4998) WHERE i.name = 'Nisida Kyra' GROUP BY i.name;
-  params:
-  - Nisida Kyra
-  - 4998
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2184) WHERE tsrange('2019-01-12 11:12:25', '2019-01-22 07:13:41') @> c.timestamp AND h.name = 'AGISTRI' GROUP BY h.name;
-  params:
-  - - '2019-01-12 11:12:25'
-    - '2019-01-22 07:13:41'
-  - 2184
-  - AGISTRI
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-02-10 04:21:48', TIMESTAMP '2019-02-22 14:03:34');
-  params:
-  - - '2019-02-10 04:21:48'
-    - '2019-02-22 14:03:34'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3081) WHERE tsrange('2019-04-14 21:34:49', '2019-04-17 16:21:19') @> c.timestamp AND h.name = 'AGIOI THEODORI' GROUP BY h.name;
-  params:
-  - - '2019-04-14 21:34:49'
-    - '2019-04-17 16:21:19'
-  - 3081
-  - AGIOI THEODORI
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1360) WHERE i.name = 'Nisis Metopi' GROUP BY i.name;
-  params:
-  - Nisis Metopi
-  - 1360
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1339) WHERE tsrange('2019-05-16 10:22:50', '2019-05-26 02:30:29') @> c.timestamp AND h.name = 'CORINTH' GROUP BY h.name;
-  params:
-  - - '2019-05-16 10:22:50'
-    - '2019-05-26 02:30:29'
-  - 1339
-  - CORINTH
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'FALIRO' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 2713) JOIN harbours h_end ON h_end.name = 'AEGINA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 2713);
-  params:
-  - FALIRO
-  - AEGINA
-  - 2713
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 2805)
-    WHERE h.name = 'PERAMA'
-      AND tsrange('2019-05-30 15:28:22', '2019-06-12 19:31:00') @> c.start_time::timestamp;
-  params:
-  - PERAMA
-  - - '2019-05-30 15:28:22'
-    - '2019-06-12 19:31:00'
-  - 2805
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1244) WHERE tsrange('2019-11-21 15:39:39', '2019-11-24 12:14:06') @> c.timestamp AND h.name = 'PERAMA' GROUP BY h.name;
-  params:
-  - - '2019-11-21 15:39:39'
-    - '2019-11-24 12:14:06'
-  - 1244
-  - PERAMA
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 4990)
-    WHERE h.name = 'AGIOI THEODORI'
-      AND tsrange('2019-02-13 04:06:51', '2019-02-23 14:27:28') @> c.start_time::timestamp;
-  params:
-  - AGIOI THEODORI
-  - - '2019-02-13 04:06:51'
-    - '2019-02-23 14:27:28'
-  - 4990
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3211)
-    WHERE h.name = 'FLISVOS'
-      AND tsrange('2019-11-03 03:04:53', '2019-11-07 12:47:40') @> c.start_time::timestamp;
-  params:
-  - FLISVOS
-  - - '2019-11-03 03:04:53'
-    - '2019-11-07 12:47:40'
-  - 3211
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2340) WHERE tsrange('2019-01-06 02:02:58', '2019-01-15 11:10:55') @> c.timestamp AND h.name = 'PERAMA' GROUP BY h.name;
-  params:
-  - - '2019-01-06 02:02:58'
-    - '2019-01-15 11:10:55'
-  - 2340
-  - PERAMA
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-11-25 12:38:50', TIMESTAMP '2019-12-07 00:48:36');
-  params:
-  - - '2019-11-25 12:38:50'
-    - '2019-12-07 00:48:36'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-11-24 09:16:01', TIMESTAMP '2019-12-06 05:29:18');
-  params:
-  - - '2019-11-24 09:16:01'
-    - '2019-12-06 05:29:18'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-08-18 15:49:33', TIMESTAMP '2019-08-31 11:55:57');
-  params:
-  - - '2019-08-18 15:49:33'
-    - '2019-08-31 11:55:57'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-08-02 02:21:51', TIMESTAMP '2019-08-09 01:43:32');
-  params:
-  - - '2019-08-02 02:21:51'
-    - '2019-08-09 01:43:32'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-10-05 15:40:42', TIMESTAMP '2019-10-19 18:42:24');
-  params:
-  - - '2019-10-05 15:40:42'
-    - '2019-10-19 18:42:24'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3559)
-    WHERE h.name = 'SIRI'
-      AND tsrange('2019-12-17 04:59:09', '2019-12-26 21:04:02') @> c.start_time::timestamp;
-  params:
-  - SIRI
-  - - '2019-12-17 04:59:09'
-    - '2019-12-26 21:04:02'
-  - 3559
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-03-21 05:22:51', TIMESTAMP '2019-03-29 21:02:38');
-  params:
-  - - '2019-03-21 05:22:51'
-    - '2019-03-29 21:02:38'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2873) WHERE tsrange('2019-01-13 16:22:56', '2019-01-23 09:27:35') @> c.timestamp AND h.name = 'ALIMOS' GROUP BY h.name;
-  params:
-  - - '2019-01-13 16:22:56'
-    - '2019-01-23 09:27:35'
-  - 2873
-  - ALIMOS
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3561) WHERE tsrange('2019-06-23 23:53:57', '2019-07-03 16:32:36') @> c.timestamp AND h.name = 'FLISVOS' GROUP BY h.name;
-  params:
-  - - '2019-06-23 23:53:57'
-    - '2019-07-03 16:32:36'
-  - 3561
-  - FLISVOS
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'AGIOS KOSMAS' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3557) JOIN harbours h_end ON h_end.name = 'ASPROPYRGOS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3557);
-  params:
-  - AGIOS KOSMAS
-  - ASPROPYRGOS
-  - 3557
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 4512)
-    WHERE h.name = 'PERAMA'
-      AND tsrange('2019-09-07 16:46:28', '2019-09-12 10:04:51') @> c.start_time::timestamp;
-  params:
-  - PERAMA
-  - - '2019-09-07 16:46:28'
-    - '2019-09-12 10:04:51'
-  - 4512
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'AEGINA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3947) JOIN harbours h_end ON h_end.name = 'ERMIONI' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3947);
-  params:
-  - AEGINA
-  - ERMIONI
-  - 3947
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 7 AND tsrange('2019-02-11 01:04:30', '2019-02-23 02:57:47') @> c.timestamp;
-  params:
-  - 7
-  - - '2019-02-11 01:04:30'
-    - '2019-02-23 02:57:47'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 6 AND tsrange('2019-04-09 13:49:30', '2019-04-24 00:01:19') @> c.timestamp;
-  params:
-  - 6
-  - - '2019-04-09 13:49:30'
-    - '2019-04-24 00:01:19'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 21 AND tsrange('2019-04-05 08:44:16', '2019-04-16 08:48:32') @> c.timestamp;
-  params:
-  - 21
-  - - '2019-04-05 08:44:16'
-    - '2019-04-16 08:48:32'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 2271)
-    WHERE h.name = 'LAVRIO'
-      AND tsrange('2019-07-01 05:30:14', '2019-07-05 06:42:44') @> c.start_time::timestamp;
-  params:
-  - LAVRIO
-  - - '2019-07-01 05:30:14'
-    - '2019-07-05 06:42:44'
-  - 2271
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 9 AND tsrange('2019-01-09 21:07:29', '2019-01-15 14:38:07') @> c.timestamp;
-  params:
-  - 9
-  - - '2019-01-09 21:07:29'
-    - '2019-01-15 14:38:07'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 1212)
-    WHERE h.name = 'PIRAEUS'
-      AND tsrange('2019-11-19 23:42:32', '2019-12-02 18:17:33') @> c.start_time::timestamp;
-  params:
-  - PIRAEUS
-  - - '2019-11-19 23:42:32'
-    - '2019-12-02 18:17:33'
-  - 1212
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 14 AND tsrange('2019-12-24 11:09:18', '2019-12-26 19:20:09') @> c.timestamp;
-  params:
-  - 14
-  - - '2019-12-24 11:09:18'
-    - '2019-12-26 19:20:09'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-03-21 22:20:14', TIMESTAMP '2019-04-02 12:00:36');
-  params:
-  - - '2019-03-21 22:20:14'
-    - '2019-04-02 12:00:36'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2398) WHERE i.name = 'Kourmouloudes' GROUP BY i.name;
-  params:
-  - Kourmouloudes
-  - 2398
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4113) WHERE tsrange('2019-02-13 02:03:00', '2019-02-24 15:58:15') @> c.timestamp AND h.name = 'AGIOI THEODORI' GROUP BY h.name;
-  params:
-  - - '2019-02-13 02:03:00'
-    - '2019-02-24 15:58:15'
-  - 4113
-  - AGIOI THEODORI
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'PIRAEUS' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3621) JOIN harbours h_end ON h_end.name = 'CORINTH' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3621);
-  params:
-  - PIRAEUS
-  - CORINTH
-  - 3621
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 0 AND tsrange('2019-05-30 11:41:17', '2019-06-05 16:58:30') @> c.timestamp;
-  params:
-  - 0
-  - - '2019-05-30 11:41:17'
-    - '2019-06-05 16:58:30'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3101)
-    WHERE h.name = 'SOUSAKI'
-      AND tsrange('2019-02-05 04:27:34', '2019-02-15 10:02:37') @> c.start_time::timestamp;
-  params:
-  - SOUSAKI
-  - - '2019-02-05 04:27:34'
-    - '2019-02-15 10:02:37'
-  - 3101
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3898) WHERE tsrange('2019-10-18 11:55:43', '2019-10-29 08:31:04') @> c.timestamp AND h.name = 'PIRAEUS' GROUP BY h.name;
-  params:
-  - - '2019-10-18 11:55:43'
-    - '2019-10-29 08:31:04'
-  - 3898
-  - PIRAEUS
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-09-19 03:27:35', TIMESTAMP '2019-09-22 13:45:15');
-  params:
-  - - '2019-09-19 03:27:35'
-    - '2019-09-22 13:45:15'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3621) WHERE i.name = 'Trakhyli' GROUP BY i.name;
-  params:
-  - Trakhyli
-  - 3621
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 4631)
-    WHERE h.name = 'ELEFSIS'
-      AND tsrange('2019-02-11 17:08:21', '2019-02-20 10:14:08') @> c.start_time::timestamp;
-  params:
-  - ELEFSIS
-  - - '2019-02-11 17:08:21'
-    - '2019-02-20 10:14:08'
-  - 4631
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3491) WHERE tsrange('2019-09-02 22:52:09', '2019-09-15 14:22:34') @> c.timestamp AND h.name = 'ELEFSIS' GROUP BY h.name;
-  params:
-  - - '2019-09-02 22:52:09'
-    - '2019-09-15 14:22:34'
-  - 3491
-  - ELEFSIS
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-12-20 00:57:58', TIMESTAMP '2019-12-24 12:43:59');
-  params:
-  - - '2019-12-20 00:57:58'
-    - '2019-12-24 12:43:59'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3117) WHERE i.name = 'Ovrios' GROUP BY i.name;
-  params:
-  - Ovrios
-  - 3117
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 16 AND tsrange('2019-05-30 19:19:21', '2019-06-05 20:36:55') @> c.timestamp;
-  params:
-  - 16
-  - - '2019-05-30 19:19:21'
-    - '2019-06-05 20:36:55'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3426)
-    WHERE h.name = 'FALIRO'
-      AND tsrange('2019-09-16 19:30:29', '2019-09-30 15:14:45') @> c.start_time::timestamp;
-  params:
-  - FALIRO
-  - - '2019-09-16 19:30:29'
-    - '2019-09-30 15:14:45'
-  - 3426
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'CORINTH CANAL' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3664) JOIN harbours h_end ON h_end.name = 'LAVRIO' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3664);
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 1451) WHERE h.name = 'CORINTH CANAL' AND c.id > 0;
   params:
   - CORINTH CANAL
-  - LAVRIO
-  - 3664
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-07-01 22:57:07', TIMESTAMP '2019-07-11 20:53:45');
-  params:
-  - - '2019-07-01 22:57:07'
-    - '2019-07-11 20:53:45'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-09-03 05:41:17', TIMESTAMP '2019-09-10 12:43:11');
-  params:
-  - - '2019-09-03 05:41:17'
-    - '2019-09-10 12:43:11'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 2075)
-    WHERE h.name = 'GLYFADA'
-      AND tsrange('2019-03-16 14:54:51', '2019-03-23 23:27:51') @> c.start_time::timestamp;
-  params:
-  - GLYFADA
-  - - '2019-03-16 14:54:51'
-    - '2019-03-23 23:27:51'
-  - 2075
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4592) WHERE tsrange('2019-12-20 23:13:21', '2019-12-26 14:24:20') @> c.timestamp AND h.name = 'AEGINA' GROUP BY h.name;
-  params:
-  - - '2019-12-20 23:13:21'
-    - '2019-12-26 14:24:20'
-  - 4592
-  - AEGINA
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-03-14 22:29:18', TIMESTAMP '2019-03-27 19:52:26');
-  params:
-  - - '2019-03-14 22:29:18'
-    - '2019-03-27 19:52:26'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2415) WHERE tsrange('2019-07-06 08:54:35', '2019-07-20 23:49:44') @> c.timestamp AND h.name = 'GLYFADA' GROUP BY h.name;
-  params:
-  - - '2019-07-06 08:54:35'
-    - '2019-07-20 23:49:44'
-  - 2415
-  - GLYFADA
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4379) WHERE tsrange('2019-09-18 18:07:46', '2019-09-30 22:44:47') @> c.timestamp AND h.name = 'ELEFSIS' GROUP BY h.name;
-  params:
-  - - '2019-09-18 18:07:46'
-    - '2019-09-30 22:44:47'
-  - 4379
-  - ELEFSIS
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-06-09 11:41:16', TIMESTAMP '2019-06-15 14:56:17');
-  params:
-  - - '2019-06-09 11:41:16'
-    - '2019-06-15 14:56:17'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 13 AND tsrange('2019-06-03 13:51:39', '2019-06-06 00:14:26') @> c.timestamp;
-  params:
-  - 13
-  - - '2019-06-03 13:51:39'
-    - '2019-06-06 00:14:26'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 7 AND tsrange('2019-06-01 23:54:06', '2019-06-12 23:16:59') @> c.timestamp;
-  params:
-  - 7
-  - - '2019-06-01 23:54:06'
-    - '2019-06-12 23:16:59'
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'ASPROPYRGOS' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3822) JOIN harbours h_end ON h_end.name = 'AGIOI THEODORI' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3822);
-  params:
-  - ASPROPYRGOS
-  - AGIOI THEODORI
-  - 3822
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'AGIOI THEODORI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4712) JOIN harbours h_end ON h_end.name = 'CORINTH' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4712);
-  params:
-  - AGIOI THEODORI
-  - CORINTH
-  - 4712
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3946) WHERE tsrange('2019-07-13 11:13:29', '2019-07-22 04:31:32') @> c.timestamp AND h.name = 'LAVRIO' GROUP BY h.name;
-  params:
-  - - '2019-07-13 11:13:29'
-    - '2019-07-22 04:31:32'
-  - 3946
-  - LAVRIO
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'ERMIONI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 1780) JOIN harbours h_end ON h_end.name = 'ELEFSIS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 1780);
-  params:
-  - ERMIONI
-  - ELEFSIS
-  - 1780
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'ERMIONI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4230) JOIN harbours h_end ON h_end.name = 'SOUSAKI' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4230);
-  params:
-  - ERMIONI
-  - SOUSAKI
-  - 4230
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 12 AND tsrange('2019-08-07 06:45:41', '2019-08-17 13:26:39') @> c.timestamp;
-  params:
-  - 12
-  - - '2019-08-07 06:45:41'
-    - '2019-08-17 13:26:39'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 14 AND tsrange('2019-04-12 14:00:05', '2019-04-22 12:35:49') @> c.timestamp;
-  params:
-  - 14
-  - - '2019-04-12 14:00:05'
-    - '2019-04-22 12:35:49'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1012) WHERE tsrange('2019-04-16 22:49:55', '2019-04-30 06:45:50') @> c.timestamp AND h.name = 'FLISVOS' GROUP BY h.name;
-  params:
-  - - '2019-04-16 22:49:55'
-    - '2019-04-30 06:45:50'
-  - 1012
-  - FLISVOS
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'FANEROMENI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 2993) JOIN harbours h_end ON h_end.name = 'PERAMA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 2993);
-  params:
-  - FANEROMENI
-  - PERAMA
-  - 2993
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-10-02 19:56:16', TIMESTAMP '2019-10-16 08:30:38');
-  params:
-  - - '2019-10-02 19:56:16'
-    - '2019-10-16 08:30:38'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1133) WHERE tsrange('2019-12-02 09:43:43', '2019-12-04 23:04:08') @> c.timestamp AND h.name = 'FALIRO' GROUP BY h.name;
-  params:
-  - - '2019-12-02 09:43:43'
-    - '2019-12-04 23:04:08'
-  - 1133
-  - FALIRO
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1389) WHERE tsrange('2019-06-02 15:44:56', '2019-06-07 09:38:05') @> c.timestamp AND h.name = 'RAFINA' GROUP BY h.name;
-  params:
-  - - '2019-06-02 15:44:56'
-    - '2019-06-07 09:38:05'
-  - 1389
-  - RAFINA
+  - 1451
 - name: countActiveCrossingsNearIsland
   type: spatial
   sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4465) WHERE i.name = 'Nisis Islet' GROUP BY i.name;
-  params:
-  - Nisis Islet
-  - 4465
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3196) WHERE tsrange('2019-08-17 00:52:51', '2019-08-19 22:50:18') @> c.timestamp AND h.name = 'RAFINA' GROUP BY h.name;
-  params:
-  - - '2019-08-17 00:52:51'
-    - '2019-08-19 22:50:18'
-  - 3196
-  - RAFINA
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 11 AND tsrange('2019-07-20 08:26:59', '2019-07-26 23:49:46') @> c.timestamp;
-  params:
-  - 11
-  - - '2019-07-20 08:26:59'
-    - '2019-07-26 23:49:46'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4943) WHERE tsrange('2019-01-16 15:09:42', '2019-01-24 18:29:29') @> c.timestamp AND h.name = 'LAVRIO' GROUP BY h.name;
-  params:
-  - - '2019-01-16 15:09:42'
-    - '2019-01-24 18:29:29'
-  - 4943
-  - LAVRIO
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 14 AND tsrange('2019-08-05 12:24:59', '2019-08-07 22:26:15') @> c.timestamp;
-  params:
-  - 14
-  - - '2019-08-05 12:24:59'
-    - '2019-08-07 22:26:15'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-03-02 09:24:42', TIMESTAMP '2019-03-16 16:42:23');
-  params:
-  - - '2019-03-02 09:24:42'
-    - '2019-03-16 16:42:23'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 1052)
-    WHERE h.name = 'ERMIONI'
-      AND tsrange('2019-01-05 04:53:24', '2019-01-14 14:54:15') @> c.start_time::timestamp;
-  params:
-  - ERMIONI
-  - - '2019-01-05 04:53:24'
-    - '2019-01-14 14:54:15'
-  - 1052
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'RAFINA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 1156) JOIN harbours h_end ON h_end.name = 'PIRAEUS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 1156);
-  params:
-  - RAFINA
-  - PIRAEUS
-  - 1156
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'AGISTRI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 1059) JOIN harbours h_end ON h_end.name = 'LAVRIO' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 1059);
-  params:
-  - AGISTRI
-  - LAVRIO
-  - 1059
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3626)
-    WHERE h.name = 'GLYFADA'
-      AND tsrange('2019-05-18 14:22:53', '2019-05-31 20:25:32') @> c.start_time::timestamp;
-  params:
-  - GLYFADA
-  - - '2019-05-18 14:22:53'
-    - '2019-05-31 20:25:32'
-  - 3626
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'SOUSAKI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 2733) JOIN harbours h_end ON h_end.name = 'PERAMA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 2733);
-  params:
-  - SOUSAKI
-  - PERAMA
-  - 2733
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 8 AND tsrange('2019-02-03 20:50:55', '2019-02-10 07:12:26') @> c.timestamp;
-  params:
-  - 8
-  - - '2019-02-03 20:50:55'
-    - '2019-02-10 07:12:26'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 4264)
-    WHERE h.name = 'AEGINA'
-      AND tsrange('2019-04-22 05:12:56', '2019-04-29 11:59:54') @> c.start_time::timestamp;
-  params:
-  - AEGINA
-  - - '2019-04-22 05:12:56'
-    - '2019-04-29 11:59:54'
-  - 4264
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'AEGINA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3912) JOIN harbours h_end ON h_end.name = 'SIRI' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3912);
-  params:
-  - AEGINA
-  - SIRI
-  - 3912
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3617)
-    WHERE h.name = 'ERMIONI'
-      AND tsrange('2019-04-04 03:04:45', '2019-04-17 16:42:21') @> c.start_time::timestamp;
-  params:
-  - ERMIONI
-  - - '2019-04-04 03:04:45'
-    - '2019-04-17 16:42:21'
-  - 3617
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 14 AND tsrange('2019-02-03 22:15:55', '2019-02-14 17:26:14') @> c.timestamp;
-  params:
-  - 14
-  - - '2019-02-03 22:15:55'
-    - '2019-02-14 17:26:14'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 16 AND tsrange('2019-03-22 09:18:12', '2019-04-01 14:19:34') @> c.timestamp;
-  params:
-  - 16
-  - - '2019-03-22 09:18:12'
-    - '2019-04-01 14:19:34'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3314)
-    WHERE h.name = 'AGIOI THEODORI'
-      AND tsrange('2019-10-17 05:57:28', '2019-10-20 06:04:57') @> c.start_time::timestamp;
-  params:
-  - AGIOI THEODORI
-  - - '2019-10-17 05:57:28'
-    - '2019-10-20 06:04:57'
-  - 3314
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1494) WHERE i.name = 'Nisis Stakhtorroyi' GROUP BY i.name;
-  params:
-  - Nisis Stakhtorroyi
-  - 1494
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-07-30 21:48:06', TIMESTAMP '2019-08-12 07:07:20');
-  params:
-  - - '2019-07-30 21:48:06'
-    - '2019-08-12 07:07:20'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 1848)
-    WHERE h.name = 'FLISVOS'
-      AND tsrange('2019-03-28 14:26:01', '2019-03-31 20:46:29') @> c.start_time::timestamp;
-  params:
-  - FLISVOS
-  - - '2019-03-28 14:26:01'
-    - '2019-03-31 20:46:29'
-  - 1848
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-01-28 11:53:17', TIMESTAMP '2019-02-05 21:22:18');
-  params:
-  - - '2019-01-28 11:53:17'
-    - '2019-02-05 21:22:18'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3147) WHERE i.name = 'Nisida Kyra' GROUP BY i.name;
-  params:
-  - Nisida Kyra
-  - 3147
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-12-04 00:49:39', TIMESTAMP '2019-12-12 19:10:19');
-  params:
-  - - '2019-12-04 00:49:39'
-    - '2019-12-12 19:10:19'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3699) WHERE tsrange('2019-12-24 16:10:39', '2019-12-26 21:04:02') @> c.timestamp AND h.name = 'ELEFSIS' GROUP BY h.name;
-  params:
-  - - '2019-12-24 16:10:39'
-    - '2019-12-26 21:04:02'
-  - 3699
-  - ELEFSIS
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3551) WHERE tsrange('2019-02-23 20:42:13', '2019-03-06 17:52:05') @> c.timestamp AND h.name = 'ELEFSIS' GROUP BY h.name;
-  params:
-  - - '2019-02-23 20:42:13'
-    - '2019-03-06 17:52:05'
-  - 3551
-  - ELEFSIS
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1450) WHERE tsrange('2019-02-24 14:29:59', '2019-03-04 08:31:37') @> c.timestamp AND h.name = 'CORINTH CANAL' GROUP BY h.name;
-  params:
-  - - '2019-02-24 14:29:59'
-    - '2019-03-04 08:31:37'
-  - 1450
-  - CORINTH CANAL
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'PIRAEUS' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3035) JOIN harbours h_end ON h_end.name = 'FLISVOS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3035);
-  params:
-  - PIRAEUS
-  - FLISVOS
-  - 3035
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 16 AND tsrange('2019-01-31 01:37:19', '2019-02-06 16:14:48') @> c.timestamp;
-  params:
-  - 16
-  - - '2019-01-31 01:37:19'
-    - '2019-02-06 16:14:48'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-05-06 09:20:03', TIMESTAMP '2019-05-14 07:09:27');
-  params:
-  - - '2019-05-06 09:20:03'
-    - '2019-05-14 07:09:27'
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'PERAMA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 2271) JOIN harbours h_end ON h_end.name = 'AEGINA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 2271);
-  params:
-  - PERAMA
-  - AEGINA
-  - 2271
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3684) WHERE i.name = 'Nisis Metopi' GROUP BY i.name;
-  params:
-  - Nisis Metopi
-  - 3684
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 13 AND tsrange('2019-10-23 20:30:18', '2019-10-29 08:10:37') @> c.timestamp;
-  params:
-  - 13
-  - - '2019-10-23 20:30:18'
-    - '2019-10-29 08:10:37'
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'CORINTH CANAL' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 1917) JOIN harbours h_end ON h_end.name = 'AEGINA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 1917);
-  params:
-  - CORINTH CANAL
-  - AEGINA
-  - 1917
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3004) WHERE i.name = 'Makronisos' GROUP BY i.name;
-  params:
-  - Makronisos
-  - 3004
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3204)
-    WHERE h.name = 'ZEA'
-      AND tsrange('2019-08-23 17:12:30', '2019-08-29 23:23:33') @> c.start_time::timestamp;
-  params:
-  - ZEA
-  - - '2019-08-23 17:12:30'
-    - '2019-08-29 23:23:33'
-  - 3204
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4996) WHERE i.name = 'Poros' GROUP BY i.name;
-  params:
-  - Poros
-  - 4996
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2351) WHERE i.name = 'Poros' GROUP BY i.name;
-  params:
-  - Poros
-  - 2351
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3792) WHERE i.name = 'Nisis Islet' GROUP BY i.name;
-  params:
-  - Nisis Islet
-  - 3792
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3492)
-    WHERE h.name = 'AGISTRI'
-      AND tsrange('2019-04-06 03:46:12', '2019-04-16 10:09:43') @> c.start_time::timestamp;
-  params:
-  - AGISTRI
-  - - '2019-04-06 03:46:12'
-    - '2019-04-16 10:09:43'
-  - 3492
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1721) WHERE i.name = 'Agios Thomas' GROUP BY i.name;
-  params:
-  - Agios Thomas
-  - 1721
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'CORINTH CANAL' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 1308) JOIN harbours h_end ON h_end.name = 'ELEFSIS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 1308);
-  params:
-  - CORINTH CANAL
-  - ELEFSIS
-  - 1308
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3443) WHERE tsrange('2019-09-13 05:17:55', '2019-09-25 18:43:06') @> c.timestamp AND h.name = 'ERMIONI' GROUP BY h.name;
-  params:
-  - - '2019-09-13 05:17:55'
-    - '2019-09-25 18:43:06'
-  - 3443
-  - ERMIONI
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-04-24 19:27:48', TIMESTAMP '2019-05-02 13:07:44');
-  params:
-  - - '2019-04-24 19:27:48'
-    - '2019-05-02 13:07:44'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1055) WHERE i.name = 'Aegina Moni' GROUP BY i.name;
-  params:
-  - Aegina Moni
-  - 1055
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 2237)
-    WHERE h.name = 'PIRAEUS'
-      AND tsrange('2019-06-12 04:33:01', '2019-06-17 12:09:40') @> c.start_time::timestamp;
-  params:
-  - PIRAEUS
-  - - '2019-06-12 04:33:01'
-    - '2019-06-17 12:09:40'
-  - 2237
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2981) WHERE i.name = 'Kasidis' GROUP BY i.name;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1890) WHERE i.id = 'Kasidis' AND c.id > 0 GROUP BY i.id;
   params:
   - Kasidis
-  - 2981
+  - 1890
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1334057444, ST_SetSRID(ST_Point(3.886149365211394, 56.12183112340598), 3857), '2024-04-07 19:10:10');
+  params:
+  - 1334057444
+  - ST_SetSRID(ST_Point(3.886149365211394, 56.12183112340598), 3857)
+  - '2024-04-07 19:10:10'
 - name: CrossingsActiveAtGivenHourOfDay
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 9 AND tsrange('2019-03-27 11:11:23', '2019-04-11 10:29:33') @> c.timestamp;
-  params:
-  - 9
-  - - '2019-03-27 11:11:23'
-    - '2019-04-11 10:29:33'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-05-01 03:02:11', TIMESTAMP '2019-05-15 22:34:37');
-  params:
-  - - '2019-05-01 03:02:11'
-    - '2019-05-15 22:34:37'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-01-17 16:20:17', TIMESTAMP '2019-01-22 18:13:48');
-  params:
-  - - '2019-01-17 16:20:17'
-    - '2019-01-22 18:13:48'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1308) WHERE i.name = 'Trakhyli' GROUP BY i.name;
-  params:
-  - Trakhyli
-  - 1308
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'LAVRIO' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 2833) JOIN harbours h_end ON h_end.name = 'FANEROMENI' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 2833);
-  params:
-  - LAVRIO
-  - FANEROMENI
-  - 2833
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3827) WHERE i.name = 'Agios Ioannis' GROUP BY i.name;
-  params:
-  - Agios Ioannis
-  - 3827
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'ELEFSIS' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4375) JOIN harbours h_end ON h_end.name = 'AGIOS KOSMAS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4375);
-  params:
-  - ELEFSIS
-  - AGIOS KOSMAS
-  - 4375
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 4469)
-    WHERE h.name = 'ZEA'
-      AND tsrange('2019-08-02 00:32:29', '2019-08-10 10:52:14') @> c.start_time::timestamp;
-  params:
-  - ZEA
-  - - '2019-08-02 00:32:29'
-    - '2019-08-10 10:52:14'
-  - 4469
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3823)
-    WHERE h.name = 'AGISTRI'
-      AND tsrange('2019-05-30 14:31:03', '2019-06-05 22:57:13') @> c.start_time::timestamp;
-  params:
-  - AGISTRI
-  - - '2019-05-30 14:31:03'
-    - '2019-06-05 22:57:13'
-  - 3823
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1197) WHERE i.name = 'Anagnostis' GROUP BY i.name;
-  params:
-  - Anagnostis
-  - 1197
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-01-31 21:53:27', TIMESTAMP '2019-02-07 16:33:46');
-  params:
-  - - '2019-01-31 21:53:27'
-    - '2019-02-07 16:33:46'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4548) WHERE tsrange('2019-12-17 20:20:07', '2019-12-20 22:53:33') @> c.timestamp AND h.name = 'ERMIONI' GROUP BY h.name;
-  params:
-  - - '2019-12-17 20:20:07'
-    - '2019-12-20 22:53:33'
-  - 4548
-  - ERMIONI
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 0 AND tsrange('2019-01-02 13:20:34', '2019-01-13 08:31:20') @> c.timestamp;
-  params:
-  - 0
-  - - '2019-01-02 13:20:34'
-    - '2019-01-13 08:31:20'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4316) WHERE i.name = 'Patroklos' GROUP BY i.name;
-  params:
-  - Patroklos
-  - 4316
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-01-03 01:22:42', TIMESTAMP '2019-01-09 20:35:45');
-  params:
-  - - '2019-01-03 01:22:42'
-    - '2019-01-09 20:35:45'
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'FANEROMENI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3928) JOIN harbours h_end ON h_end.name = 'CORINTH' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3928);
-  params:
-  - FANEROMENI
-  - CORINTH
-  - 3928
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'SOUSAKI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3963) JOIN harbours h_end ON h_end.name = 'PERAMA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3963);
-  params:
-  - SOUSAKI
-  - PERAMA
-  - 3963
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4801) WHERE tsrange('2019-08-13 05:12:25', '2019-08-25 07:31:17') @> c.timestamp AND h.name = 'ZEA' GROUP BY h.name;
-  params:
-  - - '2019-08-13 05:12:25'
-    - '2019-08-25 07:31:17'
-  - 4801
-  - ZEA
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3837)
-    WHERE h.name = 'ASPROPYRGOS'
-      AND tsrange('2019-06-07 06:43:03', '2019-06-14 12:32:10') @> c.start_time::timestamp;
-  params:
-  - ASPROPYRGOS
-  - - '2019-06-07 06:43:03'
-    - '2019-06-14 12:32:10'
-  - 3837
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 10 AND tsrange('2018-12-31 23:00:01', '2019-01-12 19:31:52') @> c.timestamp;
-  params:
-  - 10
-  - - '2018-12-31 23:00:01'
-    - '2019-01-12 19:31:52'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 5 AND tsrange('2019-05-01 09:39:28', '2019-05-10 11:00:25') @> c.timestamp;
-  params:
-  - 5
-  - - '2019-05-01 09:39:28'
-    - '2019-05-10 11:00:25'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 1549)
-    WHERE h.name = 'PERAMA'
-      AND tsrange('2019-09-23 13:39:36', '2019-10-05 00:57:14') @> c.start_time::timestamp;
-  params:
-  - PERAMA
-  - - '2019-09-23 13:39:36'
-    - '2019-10-05 00:57:14'
-  - 1549
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1660) WHERE i.name = 'Nisis Atalanti' GROUP BY i.name;
-  params:
-  - Nisis Atalanti
-  - 1660
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4364) WHERE i.name = 'Vrachonisis Petronisi' GROUP BY i.name;
-  params:
-  - Vrachonisis Petronisi
-  - 4364
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1020) WHERE tsrange('2019-06-16 18:38:24', '2019-06-28 14:42:58') @> c.timestamp AND h.name = 'ELEFSIS' GROUP BY h.name;
-  params:
-  - - '2019-06-16 18:38:24'
-    - '2019-06-28 14:42:58'
-  - 1020
-  - ELEFSIS
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 11 AND tsrange('2019-10-07 12:37:40', '2019-10-10 06:45:43') @> c.timestamp;
+    SELECT COUNT(DISTINCT c.id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 11 AND c.timestamp BETWEEN '2024-10-07 12:45:48' AND '2024-10-22 09:24:00' AND c.id > 0;
   params:
   - 11
-  - - '2019-10-07 12:37:40'
-    - '2019-10-10 06:45:43'
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'GLYFADA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3991) JOIN harbours h_end ON h_end.name = 'ERMIONI' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3991);
-  params:
-  - GLYFADA
-  - ERMIONI
-  - 3991
-- name: averageDurationCrossingStartAtHarbourInPeriod
+  - - '2024-10-07 12:45:48'
+    - '2024-10-22 09:24:00'
+- name: HarbourActivityInPeriod
   type: spatiotemporal
   sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 4017)
-    WHERE h.name = 'AEGINA'
-      AND tsrange('2019-02-17 21:35:19', '2019-02-27 22:20:22') @> c.start_time::timestamp;
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2092) WHERE c.timestamp BETWEEN '2024-12-21 18:23:59' AND '2024-12-26 16:08:22' AND h.name = 'AEGINA' AND c.id > 0 GROUP BY h.name;
   params:
+  - - '2024-12-21 18:23:59'
+    - '2024-12-26 16:08:22'
+  - 2092
   - AEGINA
-  - - '2019-02-17 21:35:19'
-    - '2019-02-27 22:20:22'
-  - 4017
-- name: countActiveCrossingsNearIsland
-  type: spatial
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
   sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4348) WHERE i.name = 'Aponissos' GROUP BY i.name;
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1186935877, ST_SetSRID(ST_Point(5.875291099639799, 53.00383139303), 3857), TIMESTAMP '2025-01-22 19:07:18'), (1909527740, ST_SetSRID(ST_Point(16.73257138342771, 58.55315954523635), 3857), TIMESTAMP '2025-02-08 13:11:01'), (1963688716, ST_SetSRID(ST_Point(11.186979753919879, 59.72946919671352), 3857), TIMESTAMP '2025-01-03 07:35:30'), (1874570297, ST_SetSRID(ST_Point(2.873859738364404, 58.771687028772035), 3857), TIMESTAMP '2024-01-29 16:58:52'), (1370038828, ST_SetSRID(ST_Point(15.146600989367451, 55.04210199577963), 3857), TIMESTAMP '2024-12-29 05:22:31'), (1541566092, ST_SetSRID(ST_Point(12.026967214666064, 54.71499963552254), 3857), TIMESTAMP '2024-01-04 10:13:40'), (1222741166, ST_SetSRID(ST_Point(14.291374275699253, 56.391473041642534), 3857), TIMESTAMP '2025-02-24 19:26:51'), (1399169189, ST_SetSRID(ST_Point(14.814778528856793, 58.57856954875197), 3857), TIMESTAMP '2025-01-09 16:43:25'), (1335820949, ST_SetSRID(ST_Point(5.921022256408131, 56.03017537645363), 3857), TIMESTAMP '2024-05-21 08:38:22'), (1737546203, ST_SetSRID(ST_Point(6.607666513934484, 59.72827737704365), 3857), TIMESTAMP '2025-03-24 11:22:02');
   params:
-  - Aponissos
-  - 4348
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'PERAMA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 2964) JOIN harbours h_end ON h_end.name = 'CORINTH CANAL' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 2964);
-  params:
-  - PERAMA
-  - CORINTH CANAL
-  - 2964
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'ASPROPYRGOS' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 1441) JOIN harbours h_end ON h_end.name = 'RAFINA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 1441);
-  params:
-  - ASPROPYRGOS
-  - RAFINA
-  - 1441
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-03-24 07:05:49', TIMESTAMP '2019-03-27 19:59:21');
-  params:
-  - - '2019-03-24 07:05:49'
-    - '2019-03-27 19:59:21'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2493) WHERE tsrange('2019-03-08 16:36:54', '2019-03-18 03:01:48') @> c.timestamp AND h.name = 'SIRI' GROUP BY h.name;
-  params:
-  - - '2019-03-08 16:36:54'
-    - '2019-03-18 03:01:48'
-  - 2493
-  - SIRI
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-09-21 23:21:07', TIMESTAMP '2019-09-25 09:46:32');
-  params:
-  - - '2019-09-21 23:21:07'
-    - '2019-09-25 09:46:32'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2098) WHERE tsrange('2019-01-01 11:56:43', '2019-01-12 17:38:41') @> c.timestamp AND h.name = 'PIRAEUS' GROUP BY h.name;
-  params:
-  - - '2019-01-01 11:56:43'
-    - '2019-01-12 17:38:41'
-  - 2098
-  - PIRAEUS
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 1804)
-    WHERE h.name = 'ZEA'
-      AND tsrange('2019-02-20 15:53:57', '2019-03-04 07:39:12') @> c.start_time::timestamp;
-  params:
-  - ZEA
-  - - '2019-02-20 15:53:57'
-    - '2019-03-04 07:39:12'
-  - 1804
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3685)
-    WHERE h.name = 'SIRI'
-      AND tsrange('2019-10-09 12:31:45', '2019-10-21 02:46:00') @> c.start_time::timestamp;
-  params:
-  - SIRI
-  - - '2019-10-09 12:31:45'
-    - '2019-10-21 02:46:00'
-  - 3685
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 4354)
-    WHERE h.name = 'FANEROMENI'
-      AND tsrange('2019-07-01 00:01:14', '2019-07-10 01:23:58') @> c.start_time::timestamp;
-  params:
-  - FANEROMENI
-  - - '2019-07-01 00:01:14'
-    - '2019-07-10 01:23:58'
-  - 4354
+  - (1186935877, ST_SetSRID(ST_Point(5.875291099639799, 53.00383139303), 3857), TIMESTAMP
+    '2025-01-22 19:07:18'), (1909527740, ST_SetSRID(ST_Point(16.73257138342771, 58.55315954523635),
+    3857), TIMESTAMP '2025-02-08 13:11:01'), (1963688716, ST_SetSRID(ST_Point(11.186979753919879,
+    59.72946919671352), 3857), TIMESTAMP '2025-01-03 07:35:30'), (1874570297, ST_SetSRID(ST_Point(2.873859738364404,
+    58.771687028772035), 3857), TIMESTAMP '2024-01-29 16:58:52'), (1370038828, ST_SetSRID(ST_Point(15.146600989367451,
+    55.04210199577963), 3857), TIMESTAMP '2024-12-29 05:22:31'), (1541566092, ST_SetSRID(ST_Point(12.026967214666064,
+    54.71499963552254), 3857), TIMESTAMP '2024-01-04 10:13:40'), (1222741166, ST_SetSRID(ST_Point(14.291374275699253,
+    56.391473041642534), 3857), TIMESTAMP '2025-02-24 19:26:51'), (1399169189, ST_SetSRID(ST_Point(14.814778528856793,
+    58.57856954875197), 3857), TIMESTAMP '2025-01-09 16:43:25'), (1335820949, ST_SetSRID(ST_Point(5.921022256408131,
+    56.03017537645363), 3857), TIMESTAMP '2024-05-21 08:38:22'), (1737546203, ST_SetSRID(ST_Point(6.607666513934484,
+    59.72827737704365), 3857), TIMESTAMP '2025-03-24 11:22:02')
 - name: CrossingsActiveAtGivenHourOfDay
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 8 AND tsrange('2019-05-08 01:48:46', '2019-05-22 22:02:36') @> c.timestamp;
+    SELECT COUNT(DISTINCT c.id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 10 AND c.timestamp BETWEEN '2024-02-07 07:38:26' AND '2024-02-14 03:50:12' AND c.id > 0;
   params:
-  - 8
-  - - '2019-05-08 01:48:46'
-    - '2019-05-22 22:02:36'
+  - 10
+  - - '2024-02-07 07:38:26'
+    - '2024-02-14 03:50:12'
 - name: CrossingsActiveAtGivenHourOfDay
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 20 AND tsrange('2019-01-16 10:02:22', '2019-01-24 22:18:54') @> c.timestamp;
+    SELECT COUNT(DISTINCT c.id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 4 AND c.timestamp BETWEEN '2025-04-29 07:16:49' AND '2025-05-06 02:15:33' AND c.id > 0;
   params:
-  - 20
-  - - '2019-01-16 10:02:22'
-    - '2019-01-24 22:18:54'
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'CORINTH' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3383) JOIN harbours h_end ON h_end.name = 'ZEA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3383);
-  params:
-  - CORINTH
-  - ZEA
-  - 3383
+  - 4
+  - - '2025-04-29 07:16:49'
+    - '2025-05-06 02:15:33'
 - name: CrossingsActiveAtGivenHourOfDay
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 3 AND tsrange('2019-06-13 11:48:06', '2019-06-25 08:05:58') @> c.timestamp;
+    SELECT COUNT(DISTINCT c.id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 3 AND c.timestamp BETWEEN '2024-06-02 11:48:18' AND '2024-06-05 11:40:33' AND c.id > 0;
   params:
   - 3
-  - - '2019-06-13 11:48:06'
-    - '2019-06-25 08:05:58'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4573) WHERE tsrange('2019-11-14 22:43:42', '2019-11-17 23:32:40') @> c.timestamp AND h.name = 'FALIRO' GROUP BY h.name;
-  params:
-  - - '2019-11-14 22:43:42'
-    - '2019-11-17 23:32:40'
-  - 4573
-  - FALIRO
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4358) WHERE i.name = 'Agistri' GROUP BY i.name;
-  params:
-  - Agistri
-  - 4358
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2925) WHERE i.name = 'Vrachonisis Tragonisi' GROUP BY i.name;
-  params:
-  - Vrachonisis Tragonisi
-  - 2925
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1459) WHERE i.name = 'Anagnostis' GROUP BY i.name;
-  params:
-  - Anagnostis
-  - 1459
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2739) WHERE i.name = 'Nisis Bisti' GROUP BY i.name;
-  params:
-  - Nisis Bisti
-  - 2739
+  - - '2024-06-02 11:48:18'
+    - '2024-06-05 11:40:33'
 - name: CrossingsActiveAtGivenHourOfDay
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 5 AND tsrange('2019-02-15 00:02:40', '2019-02-28 23:16:48') @> c.timestamp;
-  params:
-  - 5
-  - - '2019-02-15 00:02:40'
-    - '2019-02-28 23:16:48'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-08-24 06:04:03', TIMESTAMP '2019-08-29 23:41:21');
-  params:
-  - - '2019-08-24 06:04:03'
-    - '2019-08-29 23:41:21'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2877) WHERE i.name = 'Nisida Kyra' GROUP BY i.name;
-  params:
-  - Nisida Kyra
-  - 2877
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3195)
-    WHERE h.name = 'FLISVOS'
-      AND tsrange('2019-06-08 02:59:10', '2019-06-11 18:41:41') @> c.start_time::timestamp;
-  params:
-  - FLISVOS
-  - - '2019-06-08 02:59:10'
-    - '2019-06-11 18:41:41'
-  - 3195
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3971)
-    WHERE h.name = 'RAFINA'
-      AND tsrange('2019-03-05 01:04:49', '2019-03-09 22:18:13') @> c.start_time::timestamp;
-  params:
-  - RAFINA
-  - - '2019-03-05 01:04:49'
-    - '2019-03-09 22:18:13'
-  - 3971
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 20 AND tsrange('2019-07-16 01:38:14', '2019-07-26 08:46:58') @> c.timestamp;
-  params:
-  - 20
-  - - '2019-07-16 01:38:14'
-    - '2019-07-26 08:46:58'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 4767)
-    WHERE h.name = 'AGISTRI'
-      AND tsrange('2019-04-30 19:02:06', '2019-05-14 01:46:52') @> c.start_time::timestamp;
-  params:
-  - AGISTRI
-  - - '2019-04-30 19:02:06'
-    - '2019-05-14 01:46:52'
-  - 4767
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'SIRI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 1713) JOIN harbours h_end ON h_end.name = 'PERAMA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 1713);
-  params:
-  - SIRI
-  - PERAMA
-  - 1713
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-10-28 11:01:11', TIMESTAMP '2019-11-11 03:16:27');
-  params:
-  - - '2019-10-28 11:01:11'
-    - '2019-11-11 03:16:27'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 2285)
-    WHERE h.name = 'GLYFADA'
-      AND tsrange('2019-03-18 22:01:20', '2019-03-22 22:05:46') @> c.start_time::timestamp;
-  params:
-  - GLYFADA
-  - - '2019-03-18 22:01:20'
-    - '2019-03-22 22:05:46'
-  - 2285
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'SIRI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 1131) JOIN harbours h_end ON h_end.name = 'PIRAEUS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 1131);
-  params:
-  - SIRI
-  - PIRAEUS
-  - 1131
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 18 AND tsrange('2019-06-21 05:50:23', '2019-07-01 07:40:43') @> c.timestamp;
-  params:
-  - 18
-  - - '2019-06-21 05:50:23'
-    - '2019-07-01 07:40:43'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 5 AND tsrange('2019-01-13 23:24:12', '2019-01-24 15:14:05') @> c.timestamp;
-  params:
-  - 5
-  - - '2019-01-13 23:24:12'
-    - '2019-01-24 15:14:05'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1682) WHERE i.name = 'Vrachonisis Tragonisi' GROUP BY i.name;
-  params:
-  - Vrachonisis Tragonisi
-  - 1682
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'FLISVOS' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4649) JOIN harbours h_end ON h_end.name = 'CORINTH CANAL' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4649);
-  params:
-  - FLISVOS
-  - CORINTH CANAL
-  - 4649
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1969) WHERE i.name = 'Phleva Island' GROUP BY i.name;
-  params:
-  - Phleva Island
-  - 1969
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3258) WHERE i.name = 'Agios Thomas' GROUP BY i.name;
-  params:
-  - Agios Thomas
-  - 3258
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-03-13 01:40:47', TIMESTAMP '2019-03-27 04:24:19');
-  params:
-  - - '2019-03-13 01:40:47'
-    - '2019-03-27 04:24:19'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-03-16 16:01:14', TIMESTAMP '2019-03-22 09:49:14');
-  params:
-  - - '2019-03-16 16:01:14'
-    - '2019-03-22 09:49:14'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-11-25 10:49:10', TIMESTAMP '2019-12-08 04:28:44');
-  params:
-  - - '2019-11-25 10:49:10'
-    - '2019-12-08 04:28:44'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 1221)
-    WHERE h.name = 'FLISVOS'
-      AND tsrange('2019-12-03 17:35:27', '2019-12-14 13:21:24') @> c.start_time::timestamp;
-  params:
-  - FLISVOS
-  - - '2019-12-03 17:35:27'
-    - '2019-12-14 13:21:24'
-  - 1221
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 6 AND tsrange('2019-10-29 08:32:02', '2019-11-07 11:34:33') @> c.timestamp;
-  params:
-  - 6
-  - - '2019-10-29 08:32:02'
-    - '2019-11-07 11:34:33'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 10 AND tsrange('2019-03-24 11:03:45', '2019-03-27 13:58:58') @> c.timestamp;
+    SELECT COUNT(DISTINCT c.id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 10 AND c.timestamp BETWEEN '2024-07-16 12:11:48' AND '2024-07-22 14:46:59' AND c.id > 0;
   params:
   - 10
-  - - '2019-03-24 11:03:45'
-    - '2019-03-27 13:58:58'
-- name: countActiveCrossingsNearIsland
+  - - '2024-07-16 12:11:48'
+    - '2024-07-22 14:46:59'
+- name: crossingsAroundHarbour
   type: spatial
   sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1737) WHERE i.name = 'Kasidis' GROUP BY i.name;
-  params:
-  - Kasidis
-  - 1737
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3091)
-    WHERE h.name = 'FALIRO'
-      AND tsrange('2018-12-31 23:00:01', '2019-01-01 01:14:39') @> c.start_time::timestamp;
-  params:
-  - FALIRO
-  - - '2018-12-31 23:00:01'
-    - '2019-01-01 01:14:39'
-  - 3091
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 8 AND tsrange('2019-10-27 06:27:33', '2019-10-30 16:39:37') @> c.timestamp;
-  params:
-  - 8
-  - - '2019-10-27 06:27:33'
-    - '2019-10-30 16:39:37'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1439) WHERE i.name = 'Lagousa' GROUP BY i.name;
-  params:
-  - Lagousa
-  - 1439
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4213) WHERE tsrange('2019-06-24 03:49:00', '2019-06-30 04:26:33') @> c.timestamp AND h.name = 'ZEA' GROUP BY h.name;
-  params:
-  - - '2019-06-24 03:49:00'
-    - '2019-06-30 04:26:33'
-  - 4213
-  - ZEA
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3887)
-    WHERE h.name = 'AEGINA'
-      AND tsrange('2019-04-28 18:59:33', '2019-05-01 22:50:08') @> c.start_time::timestamp;
-  params:
-  - AEGINA
-  - - '2019-04-28 18:59:33'
-    - '2019-05-01 22:50:08'
-  - 3887
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-01-03 19:38:55', TIMESTAMP '2019-01-10 10:32:07');
-  params:
-  - - '2019-01-03 19:38:55'
-    - '2019-01-10 10:32:07'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-04-05 06:18:29', TIMESTAMP '2019-04-19 01:49:29');
-  params:
-  - - '2019-04-05 06:18:29'
-    - '2019-04-19 01:49:29'
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'GLYFADA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3470) JOIN harbours h_end ON h_end.name = 'FLISVOS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3470);
-  params:
-  - GLYFADA
-  - FLISVOS
-  - 3470
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-01-18 14:56:29', TIMESTAMP '2019-01-22 05:19:20');
-  params:
-  - - '2019-01-18 14:56:29'
-    - '2019-01-22 05:19:20'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2172) WHERE tsrange('2019-01-08 04:32:19', '2019-01-15 05:53:36') @> c.timestamp AND h.name = 'CORINTH CANAL' GROUP BY h.name;
-  params:
-  - - '2019-01-08 04:32:19'
-    - '2019-01-15 05:53:36'
-  - 2172
-  - CORINTH CANAL
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 13 AND tsrange('2019-06-12 20:52:39', '2019-06-16 14:49:47') @> c.timestamp;
-  params:
-  - 13
-  - - '2019-06-12 20:52:39'
-    - '2019-06-16 14:49:47'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3602)
-    WHERE h.name = 'PIRAEUS'
-      AND tsrange('2019-04-08 05:23:00', '2019-04-16 16:27:42') @> c.start_time::timestamp;
-  params:
-  - PIRAEUS
-  - - '2019-04-08 05:23:00'
-    - '2019-04-16 16:27:42'
-  - 3602
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-06-17 19:58:57', TIMESTAMP '2019-06-24 05:54:06');
-  params:
-  - - '2019-06-17 19:58:57'
-    - '2019-06-24 05:54:06'
-- name: countActiveCrossingsNearIsland
-  type: spatial
-  sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2533) WHERE i.name = 'Vrachonisis Moladi' GROUP BY i.name;
-  params:
-  - Vrachonisis Moladi
-  - 2533
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'ERMIONI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3290) JOIN harbours h_end ON h_end.name = 'LAVRIO' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3290);
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 1762) WHERE h.name = 'ERMIONI' AND c.id > 0;
   params:
   - ERMIONI
-  - LAVRIO
-  - 3290
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'ZEA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 1828) JOIN harbours h_end ON h_end.name = 'AEGINA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 1828);
-  params:
-  - ZEA
-  - AEGINA
-  - 1828
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 16 AND tsrange('2019-10-14 09:50:08', '2019-10-18 02:40:07') @> c.timestamp;
-  params:
-  - 16
-  - - '2019-10-14 09:50:08'
-    - '2019-10-18 02:40:07'
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'AGIOI THEODORI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 2718) JOIN harbours h_end ON h_end.name = 'ZEA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 2718);
-  params:
-  - AGIOI THEODORI
-  - ZEA
-  - 2718
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 21 AND tsrange('2019-08-21 05:35:49', '2019-08-29 16:02:46') @> c.timestamp;
-  params:
-  - 21
-  - - '2019-08-21 05:35:49'
-    - '2019-08-29 16:02:46'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-12-10 20:08:17', TIMESTAMP '2019-12-18 01:03:48');
-  params:
-  - - '2019-12-10 20:08:17'
-    - '2019-12-18 01:03:48'
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2811) WHERE tsrange('2019-03-31 07:54:06', '2019-04-09 10:04:08') @> c.timestamp AND h.name = 'SOUSAKI' GROUP BY h.name;
-  params:
-  - - '2019-03-31 07:54:06'
-    - '2019-04-09 10:04:08'
-  - 2811
-  - SOUSAKI
+  - 1762
 - name: countActiveCrossingsNearIsland
   type: spatial
   sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4918) WHERE i.name = 'Kourmouloudes' GROUP BY i.name;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3995) WHERE i.id = 'Phlevopoula' AND c.id > 0 GROUP BY i.id;
   params:
-  - Kourmouloudes
-  - 4918
-- name: countActiveCrossingsInPeriod
+  - Phlevopoula
+  - 3995
+- name: busiestDayInWeekPeriod
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-07-30 01:47:31', TIMESTAMP '2019-08-01 04:25:06');
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN '' AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
   params:
-  - - '2019-07-30 01:47:31'
-    - '2019-08-01 04:25:06'
-- name: crossingsConnectTwoGivenHarbours
+  - ''
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1726744286, ST_SetSRID(ST_Point(14.101147012548733, 56.22833056903542), 3857), '2025-05-24 03:33:26');
+  params:
+  - 1726744286
+  - ST_SetSRID(ST_Point(14.101147012548733, 56.22833056903542), 3857)
+  - '2025-05-24 03:33:26'
+- name: crossingsAroundHarbour
   type: spatial
   sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'PERAMA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3136) JOIN harbours h_end ON h_end.name = 'ZEA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3136);
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 4718) WHERE h.name = 'AEGINA' AND c.id > 0;
   params:
-  - PERAMA
-  - ZEA
-  - 3136
+  - AEGINA
+  - 4718
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN '' AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
+  params:
+  - ''
 - name: HarbourActivityInPeriod
   type: spatiotemporal
   sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3560) WHERE tsrange('2019-03-25 21:04:22', '2019-04-04 23:33:55') @> c.timestamp AND h.name = 'PERAMA' GROUP BY h.name;
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3017) WHERE c.timestamp BETWEEN '2024-03-18 22:38:54' AND '2024-03-25 21:31:21' AND h.name = 'AEGINA' AND c.id > 0 GROUP BY h.name;
   params:
-  - - '2019-03-25 21:04:22'
-    - '2019-04-04 23:33:55'
-  - 3560
-  - PERAMA
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
+  - - '2024-03-18 22:38:54'
+    - '2024-03-25 21:31:21'
+  - 3017
+  - AEGINA
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
   sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'PERAMA' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 2448) JOIN harbours h_end ON h_end.name = 'GLYFADA' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 2448);
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3307) WHERE c.timestamp BETWEEN '2024-08-18 15:21:29' AND '2024-08-25 18:56:00' AND h.name = 'AGIOS KOSMAS' AND c.id > 0 GROUP BY h.name;
   params:
-  - PERAMA
-  - GLYFADA
-  - 2448
-- name: countActiveCrossingsInPeriod
+  - - '2024-08-18 15:21:29'
+    - '2024-08-25 18:56:00'
+  - 3307
+  - AGIOS KOSMAS
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4273) WHERE c.timestamp BETWEEN '2025-06-30 16:05:09' AND '2025-07-04 16:38:44' AND i.id = 'Nisis Metopi' AND c.id > 0;
+  params:
+  - 4273
+  - Nisis Metopi
+  - - '2025-06-30 16:05:09'
+    - '2025-07-04 16:38:44'
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3953) WHERE c.timestamp BETWEEN '2025-06-02 20:07:51' AND '2025-06-11 14:28:31' AND i.id = 'Vrachonisis Tragonisi' AND c.id > 0;
+  params:
+  - 3953
+  - Vrachonisis Tragonisi
+  - - '2025-06-02 20:07:51'
+    - '2025-06-11 14:28:31'
+- name: busiestDayInWeekPeriod
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-05-12 18:48:00', TIMESTAMP '2019-05-15 00:01:28');
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN '' AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
   params:
-  - - '2019-05-12 18:48:00'
-    - '2019-05-15 00:01:28'
+  - ''
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1653460585, ST_SetSRID(ST_Point(9.75281362579179, 55.087514482330974), 3857), '2024-10-27 16:52:57');
+  params:
+  - 1653460585
+  - ST_SetSRID(ST_Point(9.75281362579179, 55.087514482330974), 3857)
+  - '2024-10-27 16:52:57'
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1741340284, ST_SetSRID(ST_Point(2.7684828350362696, 59.71128259428808), 3857), TIMESTAMP '2025-06-19 14:47:38'), (1308392898, ST_SetSRID(ST_Point(4.976022986440073, 59.25591116634865), 3857), TIMESTAMP '2024-06-01 13:49:15'), (1664669986, ST_SetSRID(ST_Point(3.446257021549286, 53.722565365636875), 3857), TIMESTAMP '2024-07-26 10:50:18'), (1522701347, ST_SetSRID(ST_Point(5.247967114463571, 54.46424280193847), 3857), TIMESTAMP '2024-06-06 22:41:20'), (1891558120, ST_SetSRID(ST_Point(3.0006135713641235, 60.002180906110176), 3857), TIMESTAMP '2025-01-24 03:27:36'), (1884991623, ST_SetSRID(ST_Point(9.446198262532294, 53.24752052467972), 3857), TIMESTAMP '2024-07-17 08:45:49'), (1020825397, ST_SetSRID(ST_Point(7.197660650715719, 59.59025135810153), 3857), TIMESTAMP '2025-03-13 09:36:25'), (1561751611, ST_SetSRID(ST_Point(12.21218357122045, 58.97387235923503), 3857), TIMESTAMP '2024-08-07 19:20:58'), (1327237005, ST_SetSRID(ST_Point(5.066249337261472, 58.76863737528755), 3857), TIMESTAMP '2024-09-20 21:25:54'), (1111144581, ST_SetSRID(ST_Point(3.9271234987444332, 55.5047996503625), 3857), TIMESTAMP '2024-05-02 17:18:25');
+  params:
+  - (1741340284, ST_SetSRID(ST_Point(2.7684828350362696, 59.71128259428808), 3857),
+    TIMESTAMP '2025-06-19 14:47:38'), (1308392898, ST_SetSRID(ST_Point(4.976022986440073,
+    59.25591116634865), 3857), TIMESTAMP '2024-06-01 13:49:15'), (1664669986, ST_SetSRID(ST_Point(3.446257021549286,
+    53.722565365636875), 3857), TIMESTAMP '2024-07-26 10:50:18'), (1522701347, ST_SetSRID(ST_Point(5.247967114463571,
+    54.46424280193847), 3857), TIMESTAMP '2024-06-06 22:41:20'), (1891558120, ST_SetSRID(ST_Point(3.0006135713641235,
+    60.002180906110176), 3857), TIMESTAMP '2025-01-24 03:27:36'), (1884991623, ST_SetSRID(ST_Point(9.446198262532294,
+    53.24752052467972), 3857), TIMESTAMP '2024-07-17 08:45:49'), (1020825397, ST_SetSRID(ST_Point(7.197660650715719,
+    59.59025135810153), 3857), TIMESTAMP '2025-03-13 09:36:25'), (1561751611, ST_SetSRID(ST_Point(12.21218357122045,
+    58.97387235923503), 3857), TIMESTAMP '2024-08-07 19:20:58'), (1327237005, ST_SetSRID(ST_Point(5.066249337261472,
+    58.76863737528755), 3857), TIMESTAMP '2024-09-20 21:25:54'), (1111144581, ST_SetSRID(ST_Point(3.9271234987444332,
+    55.5047996503625), 3857), TIMESTAMP '2024-05-02 17:18:25')
 - name: CrossingsActiveAtGivenHourOfDay
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 18 AND tsrange('2019-03-17 00:43:25', '2019-03-29 14:10:02') @> c.timestamp;
+    SELECT COUNT(DISTINCT c.id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 9 AND c.timestamp BETWEEN '2024-01-24 21:12:37' AND '2024-02-01 07:02:29' AND c.id > 0;
   params:
-  - 18
-  - - '2019-03-17 00:43:25'
-    - '2019-03-29 14:10:02'
+  - 9
+  - - '2024-01-24 21:12:37'
+    - '2024-02-01 07:02:29'
 - name: HarbourActivityInPeriod
   type: spatiotemporal
   sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3508) WHERE tsrange('2019-08-10 08:41:55', '2019-08-20 19:57:16') @> c.timestamp AND h.name = 'FANEROMENI' GROUP BY h.name;
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3412) WHERE c.timestamp BETWEEN '2024-03-01 21:27:56' AND '2024-03-06 12:55:07' AND h.name = 'ASPROPYRGOS' AND c.id > 0 GROUP BY h.name;
   params:
-  - - '2019-08-10 08:41:55'
-    - '2019-08-20 19:57:16'
-  - 3508
-  - FANEROMENI
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1415) WHERE tsrange('2019-02-03 05:04:01', '2019-02-13 10:00:40') @> c.timestamp AND h.name = 'ASPROPYRGOS' GROUP BY h.name;
-  params:
-  - - '2019-02-03 05:04:01'
-    - '2019-02-13 10:00:40'
-  - 1415
+  - - '2024-03-01 21:27:56'
+    - '2024-03-06 12:55:07'
+  - 3412
   - ASPROPYRGOS
 - name: countActiveCrossingsNearIsland
   type: spatial
   sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1147) WHERE i.name = 'Nisida Kyra' GROUP BY i.name;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4344) WHERE i.id = 'Phlevopoula' AND c.id > 0 GROUP BY i.id;
   params:
-  - Nisida Kyra
-  - 1147
-- name: averageDurationCrossingStartAtHarbourInPeriod
+  - Phlevopoula
+  - 4344
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1283849060;
+  params:
+  - 1283849060
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1071513640, ST_SetSRID(ST_Point(4.648963149184726, 55.62284682972627), 3857), '2025-05-02 18:19:17');
+  params:
+  - 1071513640
+  - ST_SetSRID(ST_Point(4.648963149184726, 55.62284682972627), 3857)
+  - '2025-05-02 18:19:17'
+- name: HarbourActivityInPeriod
   type: spatiotemporal
   sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 1994)
-    WHERE h.name = 'ZEA'
-      AND tsrange('2019-01-31 12:20:19', '2019-02-14 11:07:20') @> c.start_time::timestamp;
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2295) WHERE c.timestamp BETWEEN '2025-03-22 13:52:52' AND '2025-03-29 15:21:31' AND h.name = 'SIRI' AND c.id > 0 GROUP BY h.name;
+  params:
+  - - '2025-03-22 13:52:52'
+    - '2025-03-29 15:21:31'
+  - 2295
+  - SIRI
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2576) WHERE c.timestamp BETWEEN '2024-01-07 21:33:21' AND '2024-01-14 16:46:24' AND i.id = 'Agistri' AND c.id > 0;
+  params:
+  - 2576
+  - Agistri
+  - - '2024-01-07 21:33:21'
+    - '2024-01-14 16:46:24'
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(12.5647606968559, 56.881480061371924), 3857)
+    WHERE id = 1117702452;
+  params:
+  - 1117702452
+  - ST_SetSRID(ST_Point(12.5647606968559, 56.881480061371924), 3857)
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1115209488, ST_SetSRID(ST_Point(5.555118402367854, 53.3646372476732), 3857), TIMESTAMP '2025-03-06 04:21:03'), (1555132041, ST_SetSRID(ST_Point(7.33512911170829, 52.7789958199909), 3857), TIMESTAMP '2025-05-08 01:28:30'), (1566741777, ST_SetSRID(ST_Point(14.507464165158853, 57.32640401733051), 3857), TIMESTAMP '2024-03-08 00:14:38'), (1092610221, ST_SetSRID(ST_Point(7.091792894192082, 52.48132184832351), 3857), TIMESTAMP '2024-04-07 15:02:03'), (1941227693, ST_SetSRID(ST_Point(9.537892984934722, 52.45564093785927), 3857), TIMESTAMP '2024-11-21 05:54:48'), (1533011446, ST_SetSRID(ST_Point(2.3023411375484746, 52.77140147885817), 3857), TIMESTAMP '2024-06-04 03:42:56'), (1234127740, ST_SetSRID(ST_Point(9.87329473564508, 53.085840261352864), 3857), TIMESTAMP '2025-05-20 11:11:08'), (1737269724, ST_SetSRID(ST_Point(7.294110124345809, 54.29419686925785), 3857), TIMESTAMP '2024-08-02 22:50:54'), (1310284210, ST_SetSRID(ST_Point(12.746415147377544, 52.76234893163782), 3857), TIMESTAMP '2025-01-12 15:33:38'), (1439677598, ST_SetSRID(ST_Point(3.731063067568063, 60.20451690104772), 3857), TIMESTAMP '2024-12-29 02:06:16');
+  params:
+  - (1115209488, ST_SetSRID(ST_Point(5.555118402367854, 53.3646372476732), 3857),
+    TIMESTAMP '2025-03-06 04:21:03'), (1555132041, ST_SetSRID(ST_Point(7.33512911170829,
+    52.7789958199909), 3857), TIMESTAMP '2025-05-08 01:28:30'), (1566741777, ST_SetSRID(ST_Point(14.507464165158853,
+    57.32640401733051), 3857), TIMESTAMP '2024-03-08 00:14:38'), (1092610221, ST_SetSRID(ST_Point(7.091792894192082,
+    52.48132184832351), 3857), TIMESTAMP '2024-04-07 15:02:03'), (1941227693, ST_SetSRID(ST_Point(9.537892984934722,
+    52.45564093785927), 3857), TIMESTAMP '2024-11-21 05:54:48'), (1533011446, ST_SetSRID(ST_Point(2.3023411375484746,
+    52.77140147885817), 3857), TIMESTAMP '2024-06-04 03:42:56'), (1234127740, ST_SetSRID(ST_Point(9.87329473564508,
+    53.085840261352864), 3857), TIMESTAMP '2025-05-20 11:11:08'), (1737269724, ST_SetSRID(ST_Point(7.294110124345809,
+    54.29419686925785), 3857), TIMESTAMP '2024-08-02 22:50:54'), (1310284210, ST_SetSRID(ST_Point(12.746415147377544,
+    52.76234893163782), 3857), TIMESTAMP '2025-01-12 15:33:38'), (1439677598, ST_SetSRID(ST_Point(3.731063067568063,
+    60.20451690104772), 3857), TIMESTAMP '2024-12-29 02:06:16')
+- name: updateCrossingPoint
+  type: update
+  sql: |
+    UPDATE crossing_points
+    SET geom = ST_SetSRID(ST_Point(11.948244142662093, 52.631246923564035), 3857)
+    WHERE id = 1482083871;
+  params:
+  - 1482083871
+  - ST_SetSRID(ST_Point(11.948244142662093, 52.631246923564035), 3857)
+- name: insertSingleCrossingPoint
+  type: insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1186496777, ST_SetSRID(ST_Point(6.649635086123043, 55.671101454863766), 3857), '2024-04-11 20:52:43');
+  params:
+  - 1186496777
+  - ST_SetSRID(ST_Point(6.649635086123043, 55.671101454863766), 3857)
+  - '2024-04-11 20:52:43'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 1885) WHERE h.name = 'AGIOS KOSMAS' AND c.id > 0;
+  params:
+  - AGIOS KOSMAS
+  - 1885
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1288) WHERE i.id = 'Nisis Ipsili' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Nisis Ipsili
+  - 1288
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 3504) WHERE h.name = 'ASPROPYRGOS' AND c.id > 0;
+  params:
+  - ASPROPYRGOS
+  - 3504
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1110) WHERE i.id = 'Anagnostis' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Anagnostis
+  - 1110
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 4004) WHERE h.name = 'ZEA' AND c.id > 0;
   params:
   - ZEA
-  - - '2019-01-31 12:20:19'
-    - '2019-02-14 11:07:20'
-  - 1994
+  - 4004
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1778444228;
+  params:
+  - 1778444228
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1907264209, ST_SetSRID(ST_Point(5.958705195450995, 54.06556626176997), 3857), TIMESTAMP '2025-02-01 09:21:49'), (1996755148, ST_SetSRID(ST_Point(15.761142813308194, 57.10764831957558), 3857), TIMESTAMP '2024-02-02 13:21:29'), (1588637286, ST_SetSRID(ST_Point(12.401062408300177, 55.5989182530188), 3857), TIMESTAMP '2025-04-22 23:15:07'), (1872220994, ST_SetSRID(ST_Point(15.580567209947294, 53.39987242731177), 3857), TIMESTAMP '2024-04-25 13:16:22'), (1308048419, ST_SetSRID(ST_Point(6.0995072543244175, 55.090354592768215), 3857), TIMESTAMP '2024-01-23 13:14:54'), (1824365957, ST_SetSRID(ST_Point(11.120344832222495, 52.48997694041445), 3857), TIMESTAMP '2024-12-09 13:57:04'), (1324743903, ST_SetSRID(ST_Point(15.211362295174041, 57.79316628084977), 3857), TIMESTAMP '2024-09-06 16:19:45'), (1052751799, ST_SetSRID(ST_Point(17.06064809606988, 59.25443527039448), 3857), TIMESTAMP '2024-06-03 15:50:56'), (1278320084, ST_SetSRID(ST_Point(4.475590913370315, 54.83204921164317), 3857), TIMESTAMP '2024-03-16 08:03:12'), (1678242160, ST_SetSRID(ST_Point(4.4464270278358935, 55.27367697533882), 3857), TIMESTAMP '2024-08-17 03:11:19');
+  params:
+  - (1907264209, ST_SetSRID(ST_Point(5.958705195450995, 54.06556626176997), 3857),
+    TIMESTAMP '2025-02-01 09:21:49'), (1996755148, ST_SetSRID(ST_Point(15.761142813308194,
+    57.10764831957558), 3857), TIMESTAMP '2024-02-02 13:21:29'), (1588637286, ST_SetSRID(ST_Point(12.401062408300177,
+    55.5989182530188), 3857), TIMESTAMP '2025-04-22 23:15:07'), (1872220994, ST_SetSRID(ST_Point(15.580567209947294,
+    53.39987242731177), 3857), TIMESTAMP '2024-04-25 13:16:22'), (1308048419, ST_SetSRID(ST_Point(6.0995072543244175,
+    55.090354592768215), 3857), TIMESTAMP '2024-01-23 13:14:54'), (1824365957, ST_SetSRID(ST_Point(11.120344832222495,
+    52.48997694041445), 3857), TIMESTAMP '2024-12-09 13:57:04'), (1324743903, ST_SetSRID(ST_Point(15.211362295174041,
+    57.79316628084977), 3857), TIMESTAMP '2024-09-06 16:19:45'), (1052751799, ST_SetSRID(ST_Point(17.06064809606988,
+    59.25443527039448), 3857), TIMESTAMP '2024-06-03 15:50:56'), (1278320084, ST_SetSRID(ST_Point(4.475590913370315,
+    54.83204921164317), 3857), TIMESTAMP '2024-03-16 08:03:12'), (1678242160, ST_SetSRID(ST_Point(4.4464270278358935,
+    55.27367697533882), 3857), TIMESTAMP '2024-08-17 03:11:19')
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN '' AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
+  params:
+  - ''
 - name: countActiveCrossingsNearIsland
   type: spatial
   sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3694) WHERE i.name = 'Salamina' GROUP BY i.name;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1345) WHERE i.id = 'Nisis Ledou' AND c.id > 0 GROUP BY i.id;
   params:
-  - Salamina
-  - 3694
-- name: HarbourActivityInPeriod
+  - Nisis Ledou
+  - 1345
+- name: islandOrCoastLineCrossingsInPeriod
   type: spatiotemporal
   sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3095) WHERE tsrange('2019-01-03 22:29:06', '2019-01-10 12:31:09') @> c.timestamp AND h.name = 'FANEROMENI' GROUP BY h.name;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1241) WHERE c.timestamp BETWEEN '2024-02-26 14:22:06' AND '2024-03-09 03:36:36' AND i.id = 'Vrachonisis Petronisi' AND c.id > 0;
   params:
-  - - '2019-01-03 22:29:06'
-    - '2019-01-10 12:31:09'
-  - 3095
-  - FANEROMENI
-- name: averageDurationCrossingStartAtHarbourInPeriod
+  - 1241
+  - Vrachonisis Petronisi
+  - - '2024-02-26 14:22:06'
+    - '2024-03-09 03:36:36'
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2568) WHERE i.id = 'Kasidis' AND c.id > 0 GROUP BY i.id;
+  params:
+  - Kasidis
+  - 2568
+- name: deleteCrossingPoint
+  type: delete
+  sql: |
+    DELETE FROM crossing_points
+    WHERE id = 1892452671;
+  params:
+  - 1892452671
+- name: bulkInsertCrossingPoints
+  type: bulk_insert
+  sql: |
+    INSERT INTO crossing_points (id, geom, timestamp)
+    VALUES (1678049964, ST_SetSRID(ST_Point(16.217857386690863, 55.227670067976106), 3857), TIMESTAMP '2024-05-03 19:11:12'), (1017544893, ST_SetSRID(ST_Point(16.80281108810564, 54.679881731995636), 3857), TIMESTAMP '2024-01-03 01:49:33'), (1035721115, ST_SetSRID(ST_Point(3.6208079409925826, 53.59859463406407), 3857), TIMESTAMP '2024-08-24 10:56:19'), (1028154287, ST_SetSRID(ST_Point(17.78167042142681, 60.3641171579722), 3857), TIMESTAMP '2025-07-04 06:51:34'), (1904153748, ST_SetSRID(ST_Point(6.513068778014712, 54.527302381710385), 3857), TIMESTAMP '2024-07-11 08:09:54'), (1190816741, ST_SetSRID(ST_Point(13.031645724329508, 53.64416884522575), 3857), TIMESTAMP '2025-04-17 06:28:09'), (1615772442, ST_SetSRID(ST_Point(10.362285935288044, 53.259597456052084), 3857), TIMESTAMP '2024-03-07 19:16:39'), (1225453840, ST_SetSRID(ST_Point(8.00028773008196, 54.43714607902564), 3857), TIMESTAMP '2024-08-16 05:13:16'), (1683762732, ST_SetSRID(ST_Point(3.685378366376166, 55.768941460434846), 3857), TIMESTAMP '2024-12-17 20:55:01'), (1323956777, ST_SetSRID(ST_Point(3.6148977415910855, 56.570717012496395), 3857), TIMESTAMP '2024-10-11 00:13:47');
+  params:
+  - (1678049964, ST_SetSRID(ST_Point(16.217857386690863, 55.227670067976106), 3857),
+    TIMESTAMP '2024-05-03 19:11:12'), (1017544893, ST_SetSRID(ST_Point(16.80281108810564,
+    54.679881731995636), 3857), TIMESTAMP '2024-01-03 01:49:33'), (1035721115, ST_SetSRID(ST_Point(3.6208079409925826,
+    53.59859463406407), 3857), TIMESTAMP '2024-08-24 10:56:19'), (1028154287, ST_SetSRID(ST_Point(17.78167042142681,
+    60.3641171579722), 3857), TIMESTAMP '2025-07-04 06:51:34'), (1904153748, ST_SetSRID(ST_Point(6.513068778014712,
+    54.527302381710385), 3857), TIMESTAMP '2024-07-11 08:09:54'), (1190816741, ST_SetSRID(ST_Point(13.031645724329508,
+    53.64416884522575), 3857), TIMESTAMP '2025-04-17 06:28:09'), (1615772442, ST_SetSRID(ST_Point(10.362285935288044,
+    53.259597456052084), 3857), TIMESTAMP '2024-03-07 19:16:39'), (1225453840, ST_SetSRID(ST_Point(8.00028773008196,
+    54.43714607902564), 3857), TIMESTAMP '2024-08-16 05:13:16'), (1683762732, ST_SetSRID(ST_Point(3.685378366376166,
+    55.768941460434846), 3857), TIMESTAMP '2024-12-17 20:55:01'), (1323956777, ST_SetSRID(ST_Point(3.6148977415910855,
+    56.570717012496395), 3857), TIMESTAMP '2024-10-11 00:13:47')
+- name: islandOrCoastLineCrossingsInPeriod
   type: spatiotemporal
   sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3305)
-    WHERE h.name = 'CORINTH CANAL'
-      AND tsrange('2019-04-02 13:28:38', '2019-04-05 00:09:40') @> c.start_time::timestamp;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4584) WHERE c.timestamp BETWEEN '2024-07-24 00:44:21' AND '2024-08-07 22:42:16' AND i.id = 'Aegina Moni' AND c.id > 0;
   params:
-  - CORINTH CANAL
-  - - '2019-04-02 13:28:38'
-    - '2019-04-05 00:09:40'
-  - 3305
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
+  - 4584
+  - Aegina Moni
+  - - '2024-07-24 00:44:21'
+    - '2024-08-07 22:42:16'
+- name: timeAggregation
+  type: temporal
+  sql: "SELECT date_trunc('hour', timestamp) AS hour,\n   id,\n   COUNT(*) AS cnt\n\
+    FROM crossing_points\nWHERE timestamp between '2024-08-29 06:13:52' AND '2024-09-03\
+    \ 19:11:28' \nGROUP BY hour, id\nORDER BY hour;\n"
+  params:
+  - '''2024-08-29 06:13:52'' AND ''2024-09-03 19:11:28'''
+- name: SpatialBBox
+  type: spatial
   sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4321) WHERE tsrange('2019-07-23 08:34:58', '2019-07-31 23:12:45') @> c.timestamp AND h.name = 'ELEFSIS' GROUP BY h.name;
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(53.79480689383117, 8.434393749315504, 52.982878693831175, 10.177829549315504), 4326), 3857));
   params:
-  - - '2019-07-23 08:34:58'
-    - '2019-07-31 23:12:45'
-  - 4321
-  - ELEFSIS
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3208) WHERE tsrange('2019-05-01 00:24:34', '2019-05-07 07:42:01') @> c.timestamp AND h.name = 'CORINTH CANAL' GROUP BY h.name;
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(53.79480689383117, 8.434393749315504,
+    52.982878693831175, 10.177829549315504), 4326), 3857)
+- name: timeAggregation
+  type: temporal
+  sql: "SELECT date_trunc('hour', timestamp) AS hour,\n   id,\n   COUNT(*) AS cnt\n\
+    FROM crossing_points\nWHERE timestamp between '2024-05-26 05:42:28' AND '2024-05-31\
+    \ 18:40:04' \nGROUP BY hour, id\nORDER BY hour;\n"
   params:
-  - - '2019-05-01 00:24:34'
-    - '2019-05-07 07:42:01'
-  - 3208
-  - CORINTH CANAL
-- name: CrossingsActiveAtGivenHourOfDay
+  - '''2024-05-26 05:42:28'' AND ''2024-05-31 18:40:04'''
+- name: timeInterval
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 10 AND tsrange('2019-11-07 10:01:28', '2019-11-12 10:02:08') @> c.timestamp;
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-09-05 17:25:20' AND '2024-09-11 06:22:56';
   params:
+  - '''2024-09-05 17:25:20'' AND ''2024-09-11 06:22:56'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2025-02-17 21:00:57' AND '2025-02-23 09:58:33'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(56.18098003665337, 8.678188487912527, 55.36905183665337, 10.421624287912527), 4326), 3857));
+  params:
+  - '''2025-02-17 21:00:57'' AND ''2025-02-23 09:58:33'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(56.18098003665337, 8.678188487912527,
+    55.36905183665337, 10.421624287912527), 4326), 3857)
+- name: timeAggregation
+  type: temporal
+  sql: "SELECT date_trunc('hour', timestamp) AS hour,\n   id,\n   COUNT(*) AS cnt\n\
+    FROM crossing_points\nWHERE timestamp between '2024-04-30 11:13:54' AND '2024-05-06\
+    \ 00:11:30' \nGROUP BY hour, id\nORDER BY hour;\n"
+  params:
+  - '''2024-04-30 11:13:54'' AND ''2024-05-06 00:11:30'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-11-29 21:35:04' AND '2024-12-05 10:32:40';
+  params:
+  - '''2024-11-29 21:35:04'' AND ''2024-12-05 10:32:40'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(54.55219060846709, 12.808005043254571), 4326), 3857), 41691.13408349307)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(54.55219060846709, 12.808005043254571), 4326), 3857)
+    LIMIT 5;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(54.55219060846709, 12.808005043254571), 4326),
+    3857)
+  - 5
+  - 41691.13408349307
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.11287742277471, 6.657185564694573, 57.30094922277471, 8.400621364694572), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.11287742277471, 6.657185564694573,
+    57.30094922277471, 8.400621364694572), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE timestamp BETWEEN '2024-08-27 22:15:13' AND '2024-09-02 11:12:49'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(56.968331052897724, 3.1964639240070136, 56.15640285289773, 4.939899724007014), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(56.45357530896727, 9.571852205139457, 55.64164710896727, 11.315288005139458), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(56.968331052897724, 3.1964639240070136,
+    56.15640285289773, 4.939899724007014), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(56.45357530896727, 9.571852205139457,
+    55.64164710896727, 11.315288005139458), 4326), 3857)
+  - '''2024-08-27 22:15:13'' AND ''2024-09-02 11:12:49'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(52.39427463252055, 4.538488506883034), 4326), 3857), 41876.087413873705)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(52.39427463252055, 4.538488506883034), 4326), 3857)
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(52.39427463252055, 4.538488506883034), 4326),
+    3857)
+  - 1
+  - 41876.087413873705
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(58.31354930376619, 12.972988585292601), 4326), 3857), 35276.61735381326)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(58.31354930376619, 12.972988585292601), 4326), 3857)
+    LIMIT 7;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(58.31354930376619, 12.972988585292601), 4326),
+    3857)
+  - 7
+  - 35276.61735381326
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE timestamp BETWEEN '2025-04-07 02:26:16' AND '2025-04-12 15:23:52'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.75943996662482, 9.857060782554045, 57.94751176662482, 11.600496582554046), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(56.779157071076405, 15.962102917909773, 55.96722887107641, 17.70553871790977), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.75943996662482, 9.857060782554045,
+    57.94751176662482, 11.600496582554046), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(56.779157071076405, 15.962102917909773,
+    55.96722887107641, 17.70553871790977), 4326), 3857)
+  - '''2025-04-07 02:26:16'' AND ''2025-04-12 15:23:52'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(52.95502602529685, 6.9763646560706505), 4326), 3857), 16398.690845524565)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(52.95502602529685, 6.9763646560706505), 4326), 3857)
+    LIMIT 3;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(52.95502602529685, 6.9763646560706505), 4326),
+    3857)
+  - 3
+  - 16398.690845524565
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(53.56187449023438, 13.389060441518643, 52.749946290234384, 15.132496241518643), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(53.56187449023438, 13.389060441518643,
+    52.749946290234384, 15.132496241518643), 4326), 3857)
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2025-06-25 14:38:55' AND '2025-07-01 03:36:31'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.12757546815754, 5.3752979360324415, 53.31564726815754, 7.118733736032442), 4326), 3857));
+  params:
+  - '''2025-06-25 14:38:55'' AND ''2025-07-01 03:36:31'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.12757546815754, 5.3752979360324415,
+    53.31564726815754, 7.118733736032442), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE timestamp BETWEEN '2024-12-16 13:03:32' AND '2024-12-22 02:01:08'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.88043118133507, 3.632097840785703, 58.06850298133507, 5.3755336407857035), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.124189581106044, 9.370788715943094, 57.31226138110605, 11.114224515943095), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.88043118133507, 3.632097840785703,
+    58.06850298133507, 5.3755336407857035), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.124189581106044, 9.370788715943094,
+    57.31226138110605, 11.114224515943095), 4326), 3857)
+  - '''2024-12-16 13:03:32'' AND ''2024-12-22 02:01:08'''
+- name: timeAggregation
+  type: temporal
+  sql: "SELECT date_trunc('hour', timestamp) AS hour,\n   id,\n   COUNT(*) AS cnt\n\
+    FROM crossing_points\nWHERE timestamp between '2024-07-27 23:12:26' AND '2024-08-02\
+    \ 12:10:02' \nGROUP BY hour, id\nORDER BY hour;\n"
+  params:
+  - '''2024-07-27 23:12:26'' AND ''2024-08-02 12:10:02'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-03-01 12:17:53' AND '2024-03-07 01:15:29';
+  params:
+  - '''2024-03-01 12:17:53'' AND ''2024-03-07 01:15:29'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.93066926620818, 5.68845029367857, 59.11874106620818, 7.43188609367857), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.93066926620818, 5.68845029367857, 59.11874106620818,
+    7.43188609367857), 4326), 3857)
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-07-26 03:11:17' AND '2024-07-31 16:08:53'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.546763845256834, 8.229481996815045, 58.73483564525684, 9.972917796815045), 4326), 3857));
+  params:
+  - '''2024-07-26 03:11:17'' AND ''2024-07-31 16:08:53'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.546763845256834, 8.229481996815045,
+    58.73483564525684, 9.972917796815045), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.16927170429958, 11.755245322779539, 58.357343504299585, 13.498681122779539), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.16927170429958, 11.755245322779539,
+    58.357343504299585, 13.498681122779539), 4326), 3857)
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-01-05 14:48:28' AND '2024-01-11 03:46:04'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.870429347731765, 10.187555732121371, 59.05850114773177, 11.930991532121372), 4326), 3857));
+  params:
+  - '''2024-01-05 14:48:28'' AND ''2024-01-11 03:46:04'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.870429347731765, 10.187555732121371,
+    59.05850114773177, 11.930991532121372), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(52.74835616616689, 10.333041205262678), 4326), 3857), 22064.58989066252)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(52.74835616616689, 10.333041205262678), 4326), 3857)
+    LIMIT 6;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(52.74835616616689, 10.333041205262678), 4326),
+    3857)
+  - 6
+  - 22064.58989066252
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-04-27 15:49:58' AND '2024-05-03 04:47:34'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(53.36173635063256, 10.901472105345059, 52.549808150632565, 12.64490790534506), 4326), 3857));
+  params:
+  - '''2024-04-27 15:49:58'' AND ''2024-05-03 04:47:34'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(53.36173635063256, 10.901472105345059,
+    52.549808150632565, 12.64490790534506), 4326), 3857)
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-11-05 00:34:00' AND '2024-11-10 13:31:36'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.692846665243145, 10.065145535043513, 57.88091846524315, 11.808581335043513), 4326), 3857));
+  params:
+  - '''2024-11-05 00:34:00'' AND ''2024-11-10 13:31:36'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.692846665243145, 10.065145535043513,
+    57.88091846524315, 11.808581335043513), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE timestamp BETWEEN '2024-05-05 11:15:25' AND '2024-05-11 00:13:01'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(56.82821802823024, 9.241457693505783, 56.01628982823024, 10.984893493505783), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(55.24027405440295, 8.880777483341197, 54.428345854402956, 10.624213283341197), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(56.82821802823024, 9.241457693505783,
+    56.01628982823024, 10.984893493505783), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(55.24027405440295, 8.880777483341197,
+    54.428345854402956, 10.624213283341197), 4326), 3857)
+  - '''2024-05-05 11:15:25'' AND ''2024-05-11 00:13:01'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-02-02 22:55:04' AND '2024-02-08 11:52:40'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.07912396283069, 8.704317305418494, 53.267195762830696, 10.447753105418494), 4326), 3857));
+  params:
+  - '''2024-02-02 22:55:04'' AND ''2024-02-08 11:52:40'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.07912396283069, 8.704317305418494,
+    53.267195762830696, 10.447753105418494), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.55984879996387, 6.210478767991959, 53.74792059996388, 7.953914567991959), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.55984879996387, 6.210478767991959,
+    53.74792059996388, 7.953914567991959), 4326), 3857)
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-10-20 02:16:55' AND '2024-10-25 15:14:31';
+  params:
+  - '''2024-10-20 02:16:55'' AND ''2024-10-25 15:14:31'''
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE timestamp BETWEEN '2025-02-06 23:31:27' AND '2025-02-12 12:29:03'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(55.67914507613068, 9.505636079894638, 54.86721687613068, 11.249071879894638), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.59083042901496, 2.268097523280054, 58.77890222901496, 4.011533323280054), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(55.67914507613068, 9.505636079894638,
+    54.86721687613068, 11.249071879894638), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.59083042901496, 2.268097523280054,
+    58.77890222901496, 4.011533323280054), 4326), 3857)
+  - '''2025-02-06 23:31:27'' AND ''2025-02-12 12:29:03'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-12-18 20:35:18' AND '2024-12-24 09:32:54';
+  params:
+  - '''2024-12-18 20:35:18'' AND ''2024-12-24 09:32:54'''
+- name: timeAggregation
+  type: temporal
+  sql: "SELECT date_trunc('hour', timestamp) AS hour,\n   id,\n   COUNT(*) AS cnt\n\
+    FROM crossing_points\nWHERE timestamp between '2024-12-29 13:02:50' AND '2025-01-04\
+    \ 02:00:26' \nGROUP BY hour, id\nORDER BY hour;\n"
+  params:
+  - '''2024-12-29 13:02:50'' AND ''2025-01-04 02:00:26'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(60.35378796109555, 14.920645325168683), 4326), 3857), 40589.72543000499)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(60.35378796109555, 14.920645325168683), 4326), 3857)
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(60.35378796109555, 14.920645325168683), 4326),
+    3857)
+  - 1
+  - 40589.72543000499
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.01213111266363, 13.32434555368455, 53.200202912663634, 15.06778135368455), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.01213111266363, 13.32434555368455,
+    53.200202912663634, 15.06778135368455), 4326), 3857)
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2025-06-08 02:56:07' AND '2025-06-13 15:53:43';
+  params:
+  - '''2025-06-08 02:56:07'' AND ''2025-06-13 15:53:43'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.77796650607464, 14.299152883479648, 53.966038306074644, 16.042588683479647), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.77796650607464, 14.299152883479648,
+    53.966038306074644, 16.042588683479647), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.45892431863467, 7.123552384768583, 58.646996118634675, 8.866988184768584), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.45892431863467, 7.123552384768583,
+    58.646996118634675, 8.866988184768584), 4326), 3857)
+- name: timeAggregation
+  type: temporal
+  sql: "SELECT date_trunc('hour', timestamp) AS hour,\n   id,\n   COUNT(*) AS cnt\n\
+    FROM crossing_points\nWHERE timestamp between '2024-11-30 00:55:38' AND '2024-12-05\
+    \ 13:53:14' \nGROUP BY hour, id\nORDER BY hour;\n"
+  params:
+  - '''2024-11-30 00:55:38'' AND ''2024-12-05 13:53:14'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(55.052473764788466, 13.767463179805207), 4326), 3857), 16002.650136164642)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(55.052473764788466, 13.767463179805207), 4326), 3857)
+    LIMIT 10;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(55.052473764788466, 13.767463179805207), 4326),
+    3857)
   - 10
-  - - '2019-11-07 10:01:28'
-    - '2019-11-12 10:02:08'
-- name: HarbourActivityInPeriod
+  - 16002.650136164642
+- name: IDsInsideRegion1Andsecond_region
   type: spatiotemporal
   sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1713) WHERE tsrange('2019-09-24 04:34:02', '2019-09-28 03:19:51') @> c.timestamp AND h.name = 'PERAMA' GROUP BY h.name;
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE timestamp BETWEEN '2025-05-19 01:21:42' AND '2025-05-24 14:19:18'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.35021973088071, 8.444188566028885, 53.53829153088071, 10.187624366028885), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(57.017666087868115, 12.825142811293858, 56.20573788786812, 14.568578611293859), 4326), 3857)))
+    ) AS matching_ids;
   params:
-  - - '2019-09-24 04:34:02'
-    - '2019-09-28 03:19:51'
-  - 1713
-  - PERAMA
-- name: countActiveCrossingsInPeriod
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.35021973088071, 8.444188566028885,
+    53.53829153088071, 10.187624366028885), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(57.017666087868115, 12.825142811293858,
+    56.20573788786812, 14.568578611293859), 4326), 3857)
+  - '''2025-05-19 01:21:42'' AND ''2025-05-24 14:19:18'''
+- name: timeInterval
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-11-25 10:11:28', TIMESTAMP '2019-11-29 00:59:53');
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-05-29 02:46:04' AND '2024-06-03 15:43:40';
   params:
-  - - '2019-11-25 10:11:28'
-    - '2019-11-29 00:59:53'
-- name: crossingsConnectTwoGivenHarbours
+  - '''2024-05-29 02:46:04'' AND ''2024-06-03 15:43:40'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-06-22 11:50:21' AND '2024-06-28 00:47:57'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(56.89301849704957, 8.264504416404437, 56.08109029704957, 10.007940216404437), 4326), 3857));
+  params:
+  - '''2024-06-22 11:50:21'' AND ''2024-06-28 00:47:57'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(56.89301849704957, 8.264504416404437,
+    56.08109029704957, 10.007940216404437), 4326), 3857)
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-08-23 09:51:51' AND '2024-08-28 22:49:27'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.35265536421606, 7.555881725277736, 53.540727164216065, 9.299317525277736), 4326), 3857));
+  params:
+  - '''2024-08-23 09:51:51'' AND ''2024-08-28 22:49:27'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.35265536421606, 7.555881725277736,
+    53.540727164216065, 9.299317525277736), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE timestamp BETWEEN '2025-02-12 09:39:30' AND '2025-02-17 22:37:06'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.65040290748326, 10.537609652196117, 53.838474707483265, 12.281045452196118), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.08035611977878, 14.61909848179241, 57.26842791977878, 16.36253428179241), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.65040290748326, 10.537609652196117,
+    53.838474707483265, 12.281045452196118), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.08035611977878, 14.61909848179241,
+    57.26842791977878, 16.36253428179241), 4326), 3857)
+  - '''2025-02-12 09:39:30'' AND ''2025-02-17 22:37:06'''
+- name: timeAggregation
+  type: temporal
+  sql: "SELECT date_trunc('hour', timestamp) AS hour,\n   id,\n   COUNT(*) AS cnt\n\
+    FROM crossing_points\nWHERE timestamp between '2025-02-25 09:06:30' AND '2025-03-02\
+    \ 22:04:06' \nGROUP BY hour, id\nORDER BY hour;\n"
+  params:
+  - '''2025-02-25 09:06:30'' AND ''2025-03-02 22:04:06'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2025-02-27 03:54:33' AND '2025-03-04 16:52:09';
+  params:
+  - '''2025-02-27 03:54:33'' AND ''2025-03-04 16:52:09'''
+- name: timeAggregation
+  type: temporal
+  sql: "SELECT date_trunc('hour', timestamp) AS hour,\n   id,\n   COUNT(*) AS cnt\n\
+    FROM crossing_points\nWHERE timestamp between '2024-03-25 01:08:50' AND '2024-03-30\
+    \ 14:06:26' \nGROUP BY hour, id\nORDER BY hour;\n"
+  params:
+  - '''2024-03-25 01:08:50'' AND ''2024-03-30 14:06:26'''
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE timestamp BETWEEN '2025-05-28 15:36:35' AND '2025-06-03 04:34:11'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.25371530932104, 8.03641423810285, 58.44178710932104, 9.77985003810285), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(55.21989206763668, 4.637425164310274, 54.40796386763668, 6.3808609643102745), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.25371530932104, 8.03641423810285, 58.44178710932104,
+    9.77985003810285), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(55.21989206763668, 4.637425164310274,
+    54.40796386763668, 6.3808609643102745), 4326), 3857)
+  - '''2025-05-28 15:36:35'' AND ''2025-06-03 04:34:11'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2025-02-06 07:35:31' AND '2025-02-11 20:33:07';
+  params:
+  - '''2025-02-06 07:35:31'' AND ''2025-02-11 20:33:07'''
+- name: kNN
   type: spatial
   sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'PIRAEUS' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 2433) JOIN harbours h_end ON h_end.name = 'FALIRO' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 2433);
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(56.86361322805673, 13.21143972813389), 4326), 3857), 24481.502488206228)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(56.86361322805673, 13.21143972813389), 4326), 3857)
+    LIMIT 6;
   params:
-  - PIRAEUS
-  - FALIRO
-  - 2433
-- name: averageDurationCrossingStartAtHarbourInPeriod
+  - ST_Transform(ST_SetSRID(ST_Point(56.86361322805673, 13.21143972813389), 4326),
+    3857)
+  - 6
+  - 24481.502488206228
+- name: timeAggregation
+  type: temporal
+  sql: "SELECT date_trunc('hour', timestamp) AS hour,\n   id,\n   COUNT(*) AS cnt\n\
+    FROM crossing_points\nWHERE timestamp between '2025-05-26 14:15:17' AND '2025-06-01\
+    \ 03:12:53' \nGROUP BY hour, id\nORDER BY hour;\n"
+  params:
+  - '''2025-05-26 14:15:17'' AND ''2025-06-01 03:12:53'''
+- name: timeAggregation
+  type: temporal
+  sql: "SELECT date_trunc('hour', timestamp) AS hour,\n   id,\n   COUNT(*) AS cnt\n\
+    FROM crossing_points\nWHERE timestamp between '2025-06-24 21:18:14' AND '2025-06-30\
+    \ 10:15:50' \nGROUP BY hour, id\nORDER BY hour;\n"
+  params:
+  - '''2025-06-24 21:18:14'' AND ''2025-06-30 10:15:50'''
+- name: spatioTemporalRange
   type: spatiotemporal
   sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 1880)
-    WHERE h.name = 'LAVRIO'
-      AND tsrange('2019-01-28 10:54:30', '2019-02-08 20:35:20') @> c.start_time::timestamp;
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-08-07 14:30:14' AND '2024-08-13 03:27:50'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(53.965366657359226, 1.640369139173885, 53.15343845735923, 3.383804939173885), 4326), 3857));
   params:
-  - LAVRIO
-  - - '2019-01-28 10:54:30'
-    - '2019-02-08 20:35:20'
-  - 1880
-- name: averageDurationCrossingStartAtHarbourInPeriod
+  - '''2024-08-07 14:30:14'' AND ''2024-08-13 03:27:50'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(53.965366657359226, 1.640369139173885,
+    53.15343845735923, 3.383804939173885), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
   type: spatiotemporal
   sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 3286)
-    WHERE h.name = 'CORINTH'
-      AND tsrange('2019-09-03 02:53:08', '2019-09-10 08:20:56') @> c.start_time::timestamp;
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE timestamp BETWEEN '2025-01-04 21:14:19' AND '2025-01-10 10:11:55'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.66563101743168, 6.5386757549105345, 53.85370281743168, 8.282111554910534), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.89640202924554, 6.970935683492564, 59.084473829245546, 8.714371483492563), 4326), 3857)))
+    ) AS matching_ids;
   params:
-  - CORINTH
-  - - '2019-09-03 02:53:08'
-    - '2019-09-10 08:20:56'
-  - 3286
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3063) WHERE tsrange('2019-11-21 04:29:51', '2019-11-25 00:36:37') @> c.timestamp AND h.name = 'CORINTH' GROUP BY h.name;
-  params:
-  - - '2019-11-21 04:29:51'
-    - '2019-11-25 00:36:37'
-  - 3063
-  - CORINTH
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 1542) WHERE tsrange('2019-09-10 05:53:16', '2019-09-12 06:32:46') @> c.timestamp AND h.name = 'FALIRO' GROUP BY h.name;
-  params:
-  - - '2019-09-10 05:53:16'
-    - '2019-09-12 06:32:46'
-  - 1542
-  - FALIRO
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3829) WHERE tsrange('2019-08-01 20:59:57', '2019-08-09 06:31:50') @> c.timestamp AND h.name = 'LAVRIO' GROUP BY h.name;
-  params:
-  - - '2019-08-01 20:59:57'
-    - '2019-08-09 06:31:50'
-  - 3829
-  - LAVRIO
-- name: crossingsConnectTwoGivenHarbours
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.66563101743168, 6.5386757549105345,
+    53.85370281743168, 8.282111554910534), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(59.89640202924554, 6.970935683492564,
+    59.084473829245546, 8.714371483492563), 4326), 3857)
+  - '''2025-01-04 21:14:19'' AND ''2025-01-10 10:11:55'''
+- name: SpatialBBox
   type: spatial
   sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'SIRI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 4705) JOIN harbours h_end ON h_end.name = 'FANEROMENI' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 4705);
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.58989667887548, 9.060004732145233, 57.777968478875486, 10.803440532145233), 4326), 3857));
   params:
-  - SIRI
-  - FANEROMENI
-  - 4705
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-03-19 04:23:58', TIMESTAMP '2019-03-30 20:16:10');
-  params:
-  - - '2019-03-19 04:23:58'
-    - '2019-03-30 20:16:10'
-- name: countActiveCrossingsNearIsland
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.58989667887548, 9.060004732145233,
+    57.777968478875486, 10.803440532145233), 4326), 3857)
+- name: kNN
   type: spatial
   sql: |
-    SELECT COUNT(DISTINCT crossing_id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3062) WHERE i.name = 'Daskalio' GROUP BY i.name;
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(57.14361744976742, 1.7228366556543229), 4326), 3857), 39647.90704792977)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(57.14361744976742, 1.7228366556543229), 4326), 3857)
+    LIMIT 4;
   params:
-  - Daskalio
-  - 3062
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 3640) WHERE tsrange('2019-10-18 22:50:18', '2019-10-22 09:40:57') @> c.timestamp AND h.name = 'AGIOS KOSMAS' GROUP BY h.name;
-  params:
-  - - '2019-10-18 22:50:18'
-    - '2019-10-22 09:40:57'
-  - 3640
-  - AGIOS KOSMAS
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2835) WHERE tsrange('2019-09-11 03:30:18', '2019-09-16 22:24:01') @> c.timestamp AND h.name = 'AGIOS KOSMAS' GROUP BY h.name;
-  params:
-  - - '2019-09-11 03:30:18'
-    - '2019-09-16 22:24:01'
-  - 2835
-  - AGIOS KOSMAS
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 4755)
-    WHERE h.name = 'CORINTH'
-      AND tsrange('2019-11-26 14:49:51', '2019-12-08 23:02:06') @> c.start_time::timestamp;
-  params:
-  - CORINTH
-  - - '2019-11-26 14:49:51'
-    - '2019-12-08 23:02:06'
-  - 4755
-- name: countActiveCrossingsInPeriod
+  - ST_Transform(ST_SetSRID(ST_Point(57.14361744976742, 1.7228366556543229), 4326),
+    3857)
+  - 4
+  - 39647.90704792977
+- name: timeInterval
   type: temporal
   sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-04-02 09:34:41', TIMESTAMP '2019-04-12 08:10:27');
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE timestamp BETWEEN '2024-10-19 10:39:08' AND '2024-10-24 23:36:44';
   params:
-  - - '2019-04-02 09:34:41'
-    - '2019-04-12 08:10:27'
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 22 AND tsrange('2019-05-14 15:41:22', '2019-05-27 11:00:42') @> c.timestamp;
-  params:
-  - 22
-  - - '2019-05-14 15:41:22'
-    - '2019-05-27 11:00:42'
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-12-22 02:46:50', TIMESTAMP '2019-12-26 03:20:25');
-  params:
-  - - '2019-12-22 02:46:50'
-    - '2019-12-26 03:20:25'
-- name: crossingsConnectTwoGivenHarbours
+  - '''2024-10-19 10:39:08'' AND ''2024-10-24 23:36:44'''
+- name: kNN
   type: spatial
   sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'CORINTH' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 3120) JOIN harbours h_end ON h_end.name = 'ERMIONI' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 3120);
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(54.29201493344393, 12.371586634369528), 4326), 3857), 41789.703019279325)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(54.29201493344393, 12.371586634369528), 4326), 3857)
+    LIMIT 10;
   params:
-  - CORINTH
-  - ERMIONI
-  - 3120
-- name: countActiveCrossingsInPeriod
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS (TIMESTAMP '2019-04-22 15:39:25', TIMESTAMP '2019-05-05 04:50:38');
-  params:
-  - - '2019-04-22 15:39:25'
-    - '2019-05-05 04:50:38'
-- name: averageDurationCrossingStartAtHarbourInPeriod
+  - ST_Transform(ST_SetSRID(ST_Point(54.29201493344393, 12.371586634369528), 4326),
+    3857)
+  - 10
+  - 41789.703019279325
+- name: IDsInsideRegion1Andsecond_region
   type: spatiotemporal
   sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 2073)
-    WHERE h.name = 'FALIRO'
-      AND tsrange('2019-08-03 18:11:26', '2019-08-08 22:05:29') @> c.start_time::timestamp;
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE timestamp BETWEEN '2025-04-24 22:51:11' AND '2025-04-30 11:48:47'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.48474218779464, 7.380246871141514, 57.67281398779464, 9.123682671141514), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.53883728590117, 6.6149941659096445, 53.72690908590117, 8.358429965909645), 4326), 3857)))
+    ) AS matching_ids;
   params:
-  - FALIRO
-  - - '2019-08-03 18:11:26'
-    - '2019-08-08 22:05:29'
-  - 2073
-- name: crossingsConnectTwoGivenHarbours
-  type: spatial
-  sql: |
-    SELECT DISTINCT c.crossing_id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = 'FANEROMENI' AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, 2581) JOIN harbours h_end ON h_end.name = 'PIRAEUS' AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, 2581);
-  params:
-  - FANEROMENI
-  - PIRAEUS
-  - 2581
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 20 AND tsrange('2019-11-27 17:43:49', '2019-12-10 13:37:48') @> c.timestamp;
-  params:
-  - 20
-  - - '2019-11-27 17:43:49'
-    - '2019-12-10 13:37:48'
-- name: averageDurationCrossingStartAtHarbourInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT
-      AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
-    JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, 1708)
-    WHERE h.name = 'FALIRO'
-      AND tsrange('2019-11-14 15:45:45', '2019-11-23 01:51:02') @> c.start_time::timestamp;
-  params:
-  - FALIRO
-  - - '2019-11-14 15:45:45'
-    - '2019-11-23 01:51:02'
-  - 1708
-- name: HarbourActivityInPeriod
-  type: spatiotemporal
-  sql: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2754) WHERE tsrange('2019-06-19 20:29:55', '2019-06-23 06:04:26') @> c.timestamp AND h.name = 'ELEFSIS' GROUP BY h.name;
-  params:
-  - - '2019-06-19 20:29:55'
-    - '2019-06-23 06:04:26'
-  - 2754
-  - ELEFSIS
-- name: CrossingsActiveAtGivenHourOfDay
-  type: temporal
-  sql: |
-    SELECT COUNT(DISTINCT c.crossing_id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = 0 AND tsrange('2019-02-23 10:33:48', '2019-03-03 20:37:00') @> c.timestamp;
-  params:
-  - 0
-  - - '2019-02-23 10:33:48'
-    - '2019-03-03 20:37:00'
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(58.48474218779464, 7.380246871141514,
+    57.67281398779464, 9.123682671141514), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(54.53883728590117, 6.6149941659096445,
+    53.72690908590117, 8.358429965909645), 4326), 3857)
+  - '''2025-04-24 22:51:11'' AND ''2025-04-30 11:48:47'''

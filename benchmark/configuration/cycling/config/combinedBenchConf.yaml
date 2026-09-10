@@ -1,47 +1,457 @@
 benchmark:
-  sut: MobilityDB
+  sut:
+    mobilitydb: true
+    postgis: true
+    sedona: true
+    spacetime: true
+    clickhouse: true
   mixed: false
   nodes:
   - ''
   threads: 16
   test: false
   random_seed: 1500
+
+# DuckDB dialect notes (added when a "duckdb:" query block was introduced below -- see the fuller
+# version of this note in crossings_benchmark.yaml for the full research write-up; summarized here):
+#   - "Distributed DuckDB" means DuckLake (Postgres-backed catalog + Parquet on shared object
+#     storage) attached by multiple independent DuckDB engines. ATTACH is a one-time setup step,
+#     not part of each query -- duckdb: blocks below are plain DuckDB SQL. This is shared storage
+#     queried by independent single-node engines, not shared-nothing parallel query execution
+#     (no cross-node shuffle/parallel join, unlike Sedona/Spark).
+#   - GEOMETRY is a core DuckDB type (since 1.5.0); the "spatial" extension supplies
+#     ST_Distance/ST_DWithin/ST_Buffer/ST_Intersects/ST_Contains etc. generically over geometry
+#     type, including point-to-polygon distance -- no CrateDB-style gap here.
+#   - EXTRACT/date_trunc/INTERVAL/CTEs/GROUP BY-HAVING/COUNT(DISTINCT ...)/BOOL_AND()/BOOL_OR()/
+#     standard DML all supported with Postgres-compatible syntax.
+#   - The SQL:1999 OVERLAPS predicate has no confirmed DuckDB documentation -- queries elsewhere
+#     using OVERLAPS are rewritten below as explicit start/end comparisons instead of assuming it
+#     works, flagged inline.
+#   - Write consistency for the DuckLake configuration above is snapshot-isolated with a
+#     documented (but still-maturing) retry-on-conflict mechanism for concurrent writers --
+#     different from a single Postgres instance's immediate read-after-write.
+
 queryConfigs:
-- name: SortRidesByHourInPeriod
+
+#USE
+- name: RidesDuringRushHourInPeriod #temporal
   use: true
-  description: "Sorts ride points by hour of day within a specified time period and counts the number of points for each hour. Only the points within the given time period are considered."
+  description: "Find rides that occur during rush hours (7-10 AM and 4-7 PM) within a specified time period."
   type: temporal
   mobilitydb: |
-    SELECT EXTRACT(HOUR FROM unnest(timestamps(atTime(r.trip, :period_medium)))) AS hour_of_day, COUNT(*) AS num_points FROM rides r WHERE r.trip && :period_medium GROUP BY hour_of_day ORDER BY hour_of_day;
+    -- BEST-EFFORT FILL: was blank. Mirrors CrossingsActiveAtGivenHourOfDay's proven
+    -- unnest(timestamps(atTime(...))) pattern from the crossings benchmark file, applied
+    -- to the "rides" trajectory table (rides.trip is used elsewhere in this file, e.g.
+    -- CountRidesFullyInDistrictRadius / countRideInDistrict). Not verified live.
+    WITH ts_table AS (
+      SELECT r.id, unnest(timestamps(atTime(r.trip, :period_short))) AS ts
+      FROM rides r
+      WHERE r.trip && :period_short
+    )
+    SELECT COUNT(DISTINCT id) AS ride_count
+    FROM ts_table
+    WHERE EXTRACT(HOUR FROM ts) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM ts) BETWEEN 16 AND 18;
   postgis: |
-    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
-       COUNT(*) AS num_points
+    SELECT COUNT(DISTINCT r.id) AS ride_count
     FROM ride_points r
-    WHERE :period_medium @> r.timestamp
-    GROUP BY hour_of_day
-    ORDER BY hour_of_day;
+    WHERE r.timestamp BETWEEN :period_short
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  sample_postgis: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-01 08:00:00' AND '2026-06-01 10:00:00'
+    AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
   sedona: |
-    SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
-       COUNT(*) AS num_points
+    SELECT COUNT(DISTINCT r.id) AS ride_count
     FROM ride_points r
-    WHERE r.timestamp BETWEEN :period_medium
-    GROUP BY hour_of_day
-    ORDER BY hour_of_day;
+    WHERE r.timestamp BETWEEN :period_short
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
   spacetime: |
-    SELECT hour(t) AS hour_of_day, COUNT(*) AS num_points
-    FROM ride_points
-    WHERE t <@ EPOCHRANGE :period_medium
-    GROUP BY hour_of_day
-    ORDER BY hour_of_day;
-  repetition: 52 
+    -- NOT IMPLEMENTED: left blank, no confident analogous template elsewhere in this file.
+  clickhouse: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN :period_short
+      AND (toHour(r.timestamp) BETWEEN 7 AND 9 OR toHour(r.timestamp) BETWEEN 16 AND 18);
+  duckdb: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN :period_short
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+
+  repetition: 10
   parameters:
-  - period_medium
-- name: averageRideDurationDuringDay
+    - period_short
+
+- name: RidesAcrossMultipleHours #temporal
   use: true
+  description: "Find rides that span across multiple hours within a specified time period, i.e have ride points in more than one hour of the day."
+  type: temporal
+  mobilitydb: |
+    -- BEST-EFFORT FILL: was blank. Same unnest(timestamps(atTime(...))) pattern as
+    -- RidesDuringRushHourInPeriod above, grouped by ride id. Not verified live.
+    WITH ts_table AS (
+      SELECT r.id, unnest(timestamps(atTime(r.trip, :period_short))) AS ts
+      FROM rides r
+      WHERE r.trip && :period_short
+    )
+    SELECT id
+    FROM ts_table
+    GROUP BY id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM ts)) > 1;
+  postgis: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN :period_short
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  sample_postgis: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-01 08:00:00' AND '2026-06-01 10:00:00'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  sedona: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN :period_short
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  spacetime: |
+    -- NOT IMPLEMENTED: left blank, no confident analogous template elsewhere in this file.
+  clickhouse: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN :period_short
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT toHour(r.timestamp)) > 1;
+  duckdb: |
+    SELECT r.id
+    FROM ride_points r
+    WHERE r.timestamp BETWEEN :period_short
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  repetition: 10
+  parameters:
+    - period_short
+
+- name: CountRidesFullyInDistrictRadius #spatial
+  use: true
+  description: "Find rides that are fully contained within a specified distance of the district's geometry."
+  type: spatial
+  # EQUIVALENCE NOTE: clickhouse cannot express "every point of the trajectory stays within
+  # :radius of the district" at all (left unimplemented below) -- it has no BOOL_AND-style
+  # per-group aggregate over a spatial predicate and no trajectory/containment type. Every other
+  # dialect here (mobilitydb via containment against a buffered polygon, postgis/sedona/duckdb via
+  # BOOL_AND(ST_DWithin(...))) can express it. Not 1-1 across all systems -- this is a genuine
+  # capability gap for clickhouse, not a translation oversight.
+  # FIX: edwithin() is MobilityDB's "ever within distance" (existential) predicate -- it only
+  # requires SOME point of the trip to be near the district, not the whole ride, so it did not
+  # match "fully contained" from the description, nor the BOOL_AND-over-every-point ("always")
+  # semantics postgis/sedona actually implement below. Rewritten using the containment operator
+  # against a buffered district polygon, which correctly requires the entire trajectory to stay
+  # within :radius of the district the whole time.
+  mobilitydb: |
+    SELECT r.id
+    FROM rides r
+    JOIN berlin_districts d ON d.name = :district
+    WHERE r.trip <@ ST_Buffer(d.geom, :radius);
+  postgis: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = :district
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, :radius));
+  sample_postgis: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Reinickendorf'
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 500));
+  sedona: |
+    SELECT r.id
+    FROM ride_points r
+    JOIN berlin_districts d
+      ON d.name = :district
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, :radius));
+  spacetime: |
+    -- NOT IMPLEMENTED: left blank, no confident analogous template elsewhere in this file.
+  clickhouse: |
+    -- as of now, no direct translation to ClickHouse for this query (left unimplemented)
+
+  duckdb: |
+    -- BOOL_AND(...) over a per-group spatial predicate is supported directly, so this mirrors
+    -- the postgis/sedona translation -- one of the queries clickhouse cannot express at all
+    -- (see the equivalence note above).
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = :district
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, :radius));
+
+  repetition: 10
+  parameters:
+  - district
+  - radius
+
+- name: countRideInDistrict #spatial
+  use: true
+  description: "Counts the number of rides within a specified district."
+  type: spatial
+  mobilitydb: |
+    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides r ON eintersects(r.trip, d.geom) WHERE d.name = :district GROUP BY d.name;
+  postgis: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = :district GROUP BY d.name;
+  sample_postgis: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Reinickendorf' GROUP BY d.name;
+  sedona: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = :district GROUP BY d.name;
+  spacetime: |
+    -- FIX: derived table needs an alias ("FROM (...) " with nothing after it is invalid SQL).
+    SELECT COUNT(*) FROM ( SELECT DISTINCT trip_id FROM berlin_districts d JOIN ride_points p ON ST_Contains(ST_ToGeom(d.geom::gpolygon), ST_Point(p.x, p.y)) WHERE d.name = :district ) AS sub;
+  clickhouse: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count
+    FROM berlin_districts d
+    JOIN ride_points r ON pointInPolygon((r.lon, r.lat), d.polygon)
+    WHERE d.name = :district
+    GROUP BY d.name;
+  duckdb: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = :district GROUP BY d.name;
+  repetition: 10
+  parameters:
+  - district
+
+
+- name: AverageUpdatesPerRideInDistrictInPeriod #spatiotemporal
+  use: true
+  description: "Calculates the average number of updates (ride points) within a specified district and time period. Only the points within the district are counted, and only the rides that have at least one point in the district during the specified time period are considered."
+  type: spatiotemporal
+  mobilitydb: |
+    -- NOT IMPLEMENTED: left blank. Would need a per-point, per-district count over the "rides"
+    -- trajectory table (unnest + spatial join) -- too speculative to fill in with confidence
+    -- without seeing the real schema.
+  postgis: |
+    SELECT :district AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = :district
+        AND r.timestamp BETWEEN :period_short
+      GROUP BY r.id
+    ) AS ri;
+  sample_postgis: |
+    SELECT 'Reinickendorf', AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE r.timestamp BETWEEN '2026-06-01 08:00:00' AND '2026-06-01 10:00:00'
+        AND
+       d.name = 'Reinickendorf'
+      GROUP BY r.id
+    ) AS ri;
+  sedona: |
+    -- NOT IMPLEMENTED: left blank in the source file.
+  spacetime: |
+    -- NOT IMPLEMENTED: left blank in the source file.
+  clickhouse: |
+    SELECT :district AS name, AVG(num_updates) AS avg_updates
+    FROM (
+        SELECT r.id, COUNT(*) AS num_updates
+        FROM ride_points r
+        JOIN berlin_districts d ON pointInPolygon((r.lon, r.lat), d.polygon)
+        WHERE d.name = :district
+          AND r.timestamp BETWEEN :period_short
+        GROUP BY r.id
+    ) AS ri;
+  duckdb: |
+    SELECT :district AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = :district
+        AND r.timestamp BETWEEN :period_short
+      GROUP BY r.id
+    ) AS ri;
+
+  repetition: 10
+  parameters:
+    - district
+    - period_short
+
+- name: RidesPastOrToUniversityInPeriod #spatiotemporal
+  use: true
+  description: "Find rides that pass by or go to a specified university within a certain distance and time period. Different to the RidesPastOrToUniversity query, this one also considers the time period and intermittent points instead of just the start and end points of the ride."
+  type: spatiotemporal
+  # EQUIVALENCE NOTE: clickhouse's greatCircleDistance is a true great-circle metric, while
+  # mobilitydb/postgis/sedona/duckdb's ST_DWithin/edwithin here is planar (EPSG:3857) -- same
+  # :distance value means different real-world radii, so clickhouse's result set will likely
+  # diverge from the others (already flagged inline on the clickhouse block below).
+  # BEST-EFFORT FILL: was blank. Mirrors islandOrCoastLineCrossingsInPeriod's proven
+  # edwithin(attime(trip, period), geom, distance) pattern from the crossings benchmark file.
+  mobilitydb: |
+    SELECT DISTINCT r.id
+    FROM rides r
+    JOIN universities u ON edwithin(attime(r.trip, :period_short), u.geom, :distance)
+    WHERE u.name = :university AND r.trip && :period_short;
+  postgis: |
+    -- FIX: was "AND :period_short @> r.timestamp::timestamp" -- inconsistent with the BETWEEN-
+    -- shaped :period_short substitution used everywhere else in this file (sedona below already
+    -- uses BETWEEN for this same query); standardized to match.
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, :distance)
+    WHERE u.name = :university
+      AND r.timestamp BETWEEN :period_short;
+  sample_postgis: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 200)
+    WHERE u.name = 'Humboldt-Universität-zu-Berlin'
+      AND r.timestamp BETWEEN '2026-06-01 08:00:00' AND '2026-06-01 10:00:00';
+  sedona: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, :distance)
+    WHERE u.name = :university
+      AND r.timestamp BETWEEN :period_short;
+  spacetime: |
+    -- NOT IMPLEMENTED: left blank in the source file.
+  clickhouse: |
+    -- also semantically not the same, will likely be excluded from results
+    SELECT DISTINCT r.id
+    FROM ride_points r
+    JOIN universities u ON u.name = :university
+    WHERE greatCircleDistance(r.lon, r.lat, u.lon, u.lat) <= :distance
+      AND r.timestamp BETWEEN :period_short;
+  duckdb: |
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, :distance)
+    WHERE u.name = :university
+      AND r.timestamp BETWEEN :period_short;
+
+
+  repetition: 10
+  parameters:
+    - university
+    - distance
+    - period_short
+
+# Trip Summary Table
+- name: averageRideDurationToGoAtUniversityInPeriod #spatialtemporal
+  use: false
+  description: "Calculates the average duration of rides that go to a specified university within a certain distance (of the university) and time period (ride overlaps with the time period is enough as the criteria)"
+  type: spatiotemporal
+  # EQUIVALENCE NOTE: mobilitydb/postgis/sedona use the OVERLAPS predicate against the packed
+  # :period_short parameter; clickhouse has no OVERLAPS operator and additionally has the
+  # great-circle-vs-planar distance mismatch (both flagged inline on the clickhouse block below,
+  # left unfixed -- needs decomposed period_short_start/period_short_end parameters the shared
+  # parameter list doesn't provide); duckdb's OVERLAPS support is unconfirmed (see header note)
+  # on top of the same missing-decomposed-parameters problem. Not 1-1 across all systems without
+  # a harness change.
+  # FIX: original compared a period to a bare row constructor with the containment operator
+  # ("@> (startTimestamp, endTimestamp)"), which isn't valid -- @> needs a range/timestamp on
+  # the right, not an arbitrary two-tuple. The description also says overlap is the intended
+  # criterion (not full containment), so switched to OVERLAPS to match sedona's existing
+  # semantics for this query. NOTE: this still assumes :period_short can substitute into the
+  # OVERLAPS right-hand side as "(start, end)" -- unverified, same open question noted on the
+  # clickhouse block below.
+  mobilitydb: |
+    SELECT AVG(endTimestamp(r.trip) - startTimestamp(r.trip)) AS avg_duration FROM rides r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, :distance) WHERE (startTimestamp(r.trip), endTimestamp(r.trip)) OVERLAPS :period_short AND u.name = :university;
+  postgis: |
+    -- FIX: same "@> (row)" type-mismatch as mobilitydb above; switched to OVERLAPS to match
+    -- sedona's existing query for this same benchmark and the "overlap is enough" description.
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, :distance)
+    WHERE
+      (r.start_time, r.end_time) OVERLAPS :period_short
+      AND u.name = :university;
+  sedona: |
+    SELECT
+      AVG(re.end_time - rs.start_time) AS avg_duration
+    FROM ride_trajectories_start rs JOIN ride_trajectories_end re ON re.id = rs.id
+    JOIN universities u
+      ON ST_DWithin(re.destination_geom, u.geom, :distance)
+    WHERE
+      (rs.start_time, re.end_time) OVERLAPS :period_short
+      AND u.name = :university;
+  spacetime: |
+    SELECT AVG(@t)
+    FROM berlin_universities u
+    JOIN rides r ON ST_DWithin(ST_Point(r.x1, r.y1), ST_ToGeom(u.geom::gmpolygon), :distance)
+    WHERE t[1] <@ EPOCHRANGE :period_short AND u.name = :university
+  clickhouse: |
+    -- NOTE (unfixed): ClickHouse has no OVERLAPS operator, regardless of how :period_short
+    -- is formatted -- this query will not run as written. Rewriting it correctly needs
+    -- the period's two bounds as separate scalars, which the current single
+    -- :period_short parameter can't supply without a harness change, so left as the
+    -- original author's own comment already flagged (plus the OVERLAPS problem, which
+    -- is separate from and in addition to the distance-metric issue they noted).
+    SELECT AVG(r.end_time - r.start_time) AS avg_duration
+    FROM ride_trajectories r
+    JOIN universities u ON u.name = :university
+    WHERE greatCircleDistance(r.end_lon, r.end_lat, u.lon, u.lat) <= :distance
+      AND (r.start_time, r.end_time) OVERLAPS (:period_short);
+  duckdb: |
+    -- NOTE (unfixed, same problem as clickhouse above): DuckDB's OVERLAPS support is unconfirmed
+    -- (see header note) and a correct rewrite needs the period's two bounds as separate scalars,
+    -- which the current single :period_short parameter can't supply without a harness change.
+    -- Left in the OVERLAPS shape (matching postgis/sedona) rather than guessing a parameter
+    -- contract; treat this block as unverified until DuckDB's OVERLAPS support is confirmed.
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM ride_trajectories r
+    JOIN universities u
+      ON ST_DWithin(r.destination_geom, u.geom, :distance)
+    WHERE
+      (r.start_time, r.end_time) OVERLAPS :period_short
+      AND u.name = :university;
+  repetition: 10
+  parameters:
+  - period_short
+  - university
+  - distance
+
+- name: averageRideDurationDuringDay #temporal
+  use: false
   description: "Calculates the average duration of rides that occur (at least partially) during a specific day."
   type: temporal
+  # EQUIVALENCE NOTE: mobilitydb/postgis/sedona/spacetime use OVERLAPS-shaped comparisons where
+  # :day is substituted as an explicit literal scalar twice (not an opaque packed parameter), so
+  # -- unlike averageRideDurationToGoAtUniversityInPeriod above -- this one CAN be rewritten
+  # without a harness change. clickhouse was already fixed below to an explicit interval
+  # comparison; duckdb is translated the same way rather than relying on unconfirmed OVERLAPS
+  # support.
+  # FIX: unqualified "trip" (should be r.trip, matching the WHERE clause's alias) and the
+  # second DATE expression was missing the "::timestamp" cast the first one has.
   mobilitydb: |
-    SELECT AVG(endTimestamp(trip)-startTimestamp(trip)) AS avg_duration FROM rides r WHERE r.trip && span(DATE :day::timestamp, DATE :day + INTERVAL '1 day' - INTERVAL '1 second');
+    SELECT AVG(endTimestamp(r.trip)-startTimestamp(r.trip)) AS avg_duration FROM rides r WHERE r.trip && span(DATE :day::timestamp, DATE :day::timestamp + INTERVAL '1 day' - INTERVAL '1 second');
   postgis: |
     SELECT
       AVG(r.end_time - r.start_time) AS avg_duration
@@ -49,128 +459,285 @@ queryConfigs:
     WHERE (r.start_time, r.end_time)
           OVERLAPS (:day::timestamp, :day::timestamp + INTERVAL '1 day');
   sedona: |
-    SELECT AVG(re.end_time - rs.start_time) AS avg_duration FROM ride_trajectories_start rs JOIN ride_trajectories_end re ON re.ride_id = rs.ride_id WHERE (rs.start_time, re.end_time) OVERLAPS (:day::timestamp, :day::timestamp + INTERVAL '1 day');
+    SELECT AVG(re.end_time - rs.start_time) AS avg_duration FROM ride_trajectories_start rs JOIN ride_trajectories_end re ON re.id = rs.id WHERE (rs.start_time, re.end_time) OVERLAPS (:day::timestamp, :day::timestamp + INTERVAL '1 day');
   spacetime: |
     SELECT AVG(@t) FROM rides WHERE t <@ RANGE(EPOCH :day, (EPOCH :day) + tp '1d')
-  repetition: 52 
+  clickhouse: |
+    -- FIX: ClickHouse has no OVERLAPS operator, so the original would fail outright. Unlike the
+    -- queries above, :day is used twice as an explicit scalar (not an opaque packed parameter),
+    -- so this can be rewritten correctly without changing the parameter contract: interval
+    -- [day, day+1) overlaps [start, end) iff start < day+1 AND end >= day.
+    SELECT AVG(r.end_time - r.start_time) AS avg_duration
+    FROM ride_trajectories r
+    WHERE r.start_time < :day::timestamp + INTERVAL '1 day'
+      AND r.end_time >= :day::timestamp;
+  duckdb: |
+    -- Same rewrite as clickhouse above, used instead of relying on unconfirmed OVERLAPS support
+    -- (see header note): interval [day, day+1) overlaps [start, end) iff start < day+1 AND end >= day.
+    SELECT AVG(r.end_time - r.start_time) AS avg_duration
+    FROM ride_trajectories r
+    WHERE r.start_time < :day::timestamp + INTERVAL '1 day'
+      AND r.end_time >= :day::timestamp;
+  repetition: 10
   parameters:
   - day
-- name: countActiveRideInDistrict
-  use: true
-  description: "Counts the number of active rides within a specified district."
-  type: spatial
-  mobilitydb: |
-    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides r ON eintersects(r.trip, d.geom) WHERE d.name = :district GROUP BY d.name;
-  postgis: |
-    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = :district GROUP BY d.name;
-  sedona: |
-    SELECT d.name, COUNT(DISTINCT r.ride_id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = :district GROUP BY d.name;
-  spacetime: |
-   SELECT COUNT(*) FROM ( SELECT DISTINCT trip_id FROM berlin_districts d JOIN ride_points p ON ST_Contains(ST_ToGeom(d.geom::gpolygon), ST_Point(p.x, p.y)) WHERE d.name = :district);
-  repetition: 52 
-  parameters:
-  - district
-- name: RidesPastOrToUniversity
-  use: true
-  description: "Finds rides that pass by or go to a specified university within a certain distance."
-  type: spatial
-  mobilitydb: |
-    SELECT DISTINCT r.ride_id
-    from rides r
-    JOIN universities u
-      ON r.trip && stbox(u.geom)
-      AND edwithin(r.trip, u.geom, :distance)
-    WHERE u.name = :university;
-  postgis: |
-    SELECT DISTINCT r.ride_id
-    from ride_points r
-    JOIN universities u
-      ON ST_DWithin(r.geom, u.geom, :distance)
-    WHERE u.name = :university;
-  sedona: |
-    SELECT DISTINCT r.ride_id
-    from ride_points r
-    JOIN universities u
-      ON ST_DWithin(r.geom, u.geom, :distance)
-    WHERE u.name = :university;
-  spacetime: |
-    SELECT DISTINCT r.trip_id
-    FROM ride_points r
-    JOIN berlin_universities u ON ST_DWithin(ST_Point(r.x, r.y), ST_ToGeom(u.geom::gmpolygon), :distance)
-    WHERE u.name = :university;
-  repetition: 52 
-  parameters:
-  - university
-  - distance
-- name: averageRideDurationToGoAtUniversityInPeriod
-  use: true
-  description: "Calculates the average duration of rides that go to a specified university within a certain distance (of the university) and time period (ride overlaps with the time period is enough as the criteria)"
-  type: spatiotemporal
-  mobilitydb: |
-    SELECT AVG(endTimestamp(r.trip) - startTimestamp(r.trip)) AS avg_duration FROM rides r JOIN universities u ON ST_DWithin(endValue(r.trip), u.geom::geometry, :distance) WHERE r.trip && :period_medium AND u.name = :university;
-  postgis: |
-    SELECT
-      AVG(r.end_time - r.start_time) AS avg_duration
-    FROM ride_trajectories r
-    JOIN universities u
-      ON ST_DWithin(r.destination_geom, u.geom, :distance)
-    WHERE
-      :period_medium @> r.start_time::timestamp
-      AND u.name = :university;
-  sedona: |
-    SELECT
-      AVG(re.end_time - rs.start_time) AS avg_duration
-    FROM ride_trajectories_start rs JOIN ride_trajectories_end re ON re.ride_id = rs.ride_id
-    JOIN universities u
-      ON ST_DWithin(re.destination_geom, u.geom, :distance)
-    WHERE
-      rs.start_time BETWEEN :period_medium
-      AND u.name = :university;
-  spacetime: |
-    SELECT AVG(@t)
-    FROM berlin_universities u
-    JOIN rides r ON ST_DWithin(ST_Point(r.x1, r.y1), ST_ToGeom(u.geom::gmpolygon), :distance)
-    WHERE t[1] <@ EPOCHRANGE :period_medium AND u.name = :university
-  repetition: 52 
-  parameters:
-  - period_medium
-  - university
-  - distance
-- name: rideCrossSeveralDistrictsInPeriod
-  use: true
-  description: "Finds rides that cross several districts within a specified time period."
-  type: spatiotemporal
-  mobilitydb: |
-    SELECT r.ride_id
-    FROM rides r
-    JOIN berlin_districts d
-      ON eintersects(atTime(r.trip, :period_medium), d.geom)
-    WHERE r.trip && :period_medium
-    GROUP BY r.ride_id
-    HAVING COUNT(DISTINCT d.name) > 1
-    ORDER BY r.ride_id;
-  postgis: |
-    SELECT DISTINCT r.ride_id
-    FROM ride_points r
-    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE :period_medium @> r.timestamp
-    GROUP BY r.ride_id
-    HAVING COUNT(DISTINCT d.name) > 1;
-  sedona: |
-    SELECT DISTINCT r.ride_id
-    FROM ride_points r
-    JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
-    WHERE r.timestamp BETWEEN :period_medium
-    GROUP BY r.ride_id
-    HAVING COUNT(DISTINCT d.name) > 1;
-  spacetime: |
-    SELECT DISTINCT r.trip_id
-    FROM ride_points r
-    JOIN berlin_districts d ON ST_Intersects(ST_ToGeom(d.geom::gpolygon), ST_Point(r.x, r.y))
-    WHERE r.t <@ EPOCHRANGE :period_medium
-    GROUP BY r.trip_id
-    HAVING COUNT(*) > 1;
-  repetition: 52 
-  parameters:
-  - period_medium
 
+
+# Write Operations
+
+
+- name: insertSingleridePoint
+  use: true
+  description: "Insert a single ride point"
+  type: insert
+  mobilitydb: |
+    -- FIX: was blank. ride_points has the same id/geom/timestamp shape as crossing_points
+    -- (see postgis/clickhouse below), and MobilityDB is a Postgres extension, so plain
+    -- point-table inserts work the same way as postgis.
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (:id, :point, :instant);
+  postgis: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (:id, :point, :instant);
+  sedona: |
+  spacetime: |
+
+  clickhouse: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (:id, :point, :instant);
+  duckdb: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES (:id, :point, :instant);
+
+  repetition: 10
+  parameters:
+  - id
+  - point
+  - instant
+
+- name: updateridePoint
+  use: true
+  description: "Update location of a ride point"
+  type: update
+  # EQUIVALENCE NOTE: write immediacy differs by system -- see the same note on
+  # updateCrossingPoint in crossings_benchmark.yaml (clickhouse's UPDATE is an async mutation;
+  # duckdb's write goes through DuckLake's snapshot-commit-with-possible-retry path; sedona
+  # doesn't support live updates).
+  # FIX: was blank -- filled in analogous to postgis below.
+  mobilitydb: |
+    UPDATE ride_points
+    SET geom = :point
+    WHERE id = :id;
+  postgis: |
+    UPDATE ride_points
+    SET geom = :point
+    WHERE id = :id;
+  sedona: |
+  spacetime: |
+  clickhouse: |
+    -- FIX: ClickHouse has no standalone UPDATE statement; needs the ALTER TABLE mutation form.
+    ALTER TABLE ride_points UPDATE geom = :point WHERE id = :id;
+  duckdb: |
+    UPDATE ride_points
+    SET geom = :point
+    WHERE id = :id;
+  repetition: 10
+  parameters:
+  - id
+  - point
+
+- name: deleteridePoint
+  use: true
+  description: "Delete a ride point"
+  type: delete
+  mobilitydb: |
+    -- FIX: was blank -- filled in analogous to postgis below.
+    DELETE FROM ride_points
+    WHERE id = :id;
+  postgis: |
+    DELETE FROM ride_points
+    WHERE id = :id;
+  sedona: |
+  spacetime: |
+  clickhouse: |
+    -- FIX: this block was completely empty for an active (use: true) query -- it would
+    -- have been a no-op or an error at benchmark time. NOTE: this is ClickHouse's
+    -- "lightweight delete", valid on >=23.3 (or older versions with
+    -- allow_experimental_lightweight_delete=1); otherwise use
+    -- "ALTER TABLE ride_points DELETE WHERE id = :id;".
+    DELETE FROM ride_points
+    WHERE id = :id;
+  duckdb: |
+    DELETE FROM ride_points
+    WHERE id = :id;
+  repetition: 10
+  parameters:
+  - id
+
+- name: bulkInsertridePoints
+  use: true
+  description: "Insert multiple points in one statement"
+  type: bulk_insert
+  mobilitydb: |
+    -- FIX: was blank -- filled in analogous to postgis below.
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES :bulk_values;
+  postgis: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES :bulk_values;
+  sedona: |
+  spacetime: |
+  clickhouse: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES :bulk_values;
+  duckdb: |
+    INSERT INTO ride_points (id, geom, timestamp)
+    VALUES :bulk_values;
+  repetition: 10
+  parameters:
+  - bulk_values
+
+
+#BACKUP
+
+# - name: SortRidesByHourInPeriod #temporal
+#   use: false
+#   description: "Sorts ride points by hour of day within a specified time period and counts the number of points for each hour. Only the points within the given time period are considered."
+#   type: temporal
+#   mobilitydb: |
+#     SELECT EXTRACT(HOUR FROM unnest(timestamps(atTime(r.trip, :period_short)))) AS hour_of_day, COUNT(*) AS num_points FROM rides r WHERE r.trip && :period_short GROUP BY hour_of_day ORDER BY hour_of_day;
+#   postgis: |
+#     SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+#        COUNT(*) AS num_points
+#     FROM ride_points r
+#     WHERE :period_short @> r.timestamp
+#     GROUP BY hour_of_day
+#     ORDER BY hour_of_day;
+#   sedona: |
+#     SELECT EXTRACT(HOUR FROM r.timestamp) AS hour_of_day,
+#        COUNT(*) AS num_points
+#     FROM ride_points r
+#     WHERE r.timestamp BETWEEN :period_short
+#     GROUP BY hour_of_day
+#     ORDER BY hour_of_day;
+#   spacetime: |
+#     SELECT hour(t) AS hour_of_day, COUNT(*) AS num_points
+#     FROM ride_points
+#     WHERE t <@ EPOCHRANGE :period_short
+#     GROUP BY hour_of_day
+#     ORDER BY hour_of_day;
+#   repetition: 1
+#   parameters:
+#   - period_short
+
+
+# - name: rideIDsWithinRadius #spatial
+#   use: false
+#   description: "Find the rides that are within a certain radius of a given point, and return the ride IDs."
+#   mobilitydb: |
+
+#   postgis: |
+#     SELECT DISTINCT r.id
+#     FROM ride_points r
+#     WHERE ST_DWithin(r.geom, :point, :radius);
+#   sedona: |
+
+#   spacetime: |
+
+#   clickhouse: |
+
+#   repetition: 1
+#   parameters:
+#     - point
+#     - radius
+# - name: RidesPastOrToUniversity #spatial
+#   use: false
+#   description: "Finds rides that pass by or go to a specified university within a certain distance."
+#   type: spatial
+#   mobilitydb: |
+#     SELECT DISTINCT r.id
+#     from rides r
+#     JOIN universities u
+#       ON r.trip && stbox(u.geom)
+#       AND edwithin(r.trip, u.geom, :distance)
+#     WHERE u.name = :university;
+#   postgis: |
+#     SELECT DISTINCT r.id
+#     from ride_points r
+#     JOIN universities u
+#       ON ST_DWithin(r.geom, u.geom, :distance)
+#     WHERE u.name = :university;
+#   sedona: |
+#     SELECT DISTINCT r.id
+#     from ride_points r
+#     JOIN universities u
+#       ON ST_DWithin(r.geom, u.geom, :distance)
+#     WHERE u.name = :university;
+#   spacetime: |
+#     SELECT DISTINCT r.trip_id
+#     FROM ride_points r
+#     JOIN berlin_universities u ON ST_DWithin(ST_Point(r.x, r.y), ST_ToGeom(u.geom::gmpolygon), :distance)
+#     WHERE u.name = :university;
+#   repetition: 1
+#   parameters:
+#   - university
+#   - distance
+
+# - name: rideCrossSeveralDistrictsInPeriod #spatiotemporal
+#   use: false
+#   description: "Finds rides that cross several districts within a specified time period."
+#   type: spatiotemporal
+#   mobilitydb: |
+#     SELECT r.id
+#     FROM rides r
+#     JOIN berlin_districts d
+#       ON eintersects(atTime(r.trip, :period_short), d.geom)
+#     WHERE r.trip && :period_short
+#     GROUP BY r.id
+#     HAVING COUNT(DISTINCT d.name) > 1
+#     ORDER BY r.id;
+#   postgis: |
+#     SELECT DISTINCT r.id
+#     FROM ride_points r
+#     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+#     WHERE :period_short @> r.timestamp::timestamp
+#     GROUP BY r.id
+#     HAVING COUNT(DISTINCT d.name) > 1;
+#   sedona: |
+#     SELECT DISTINCT r.id
+#     FROM ride_points r
+#     JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+#     WHERE r.timestamp BETWEEN :period_short
+#     GROUP BY r.id
+#     HAVING COUNT(DISTINCT d.name) > 1;
+#   spacetime: |
+#     SELECT DISTINCT r.trip_id
+#     FROM ride_points r
+#     JOIN berlin_districts d ON ST_Intersects(ST_ToGeom(d.geom::gpolygon), ST_Point(r.x, r.y))
+#     WHERE r.t <@ EPOCHRANGE :period_short
+#     GROUP BY r.trip_id
+#     HAVING COUNT(*) > 1;
+#   repetition: 1
+#   parameters:
+#   - period_short
+
+
+
+
+## Template
+# - name:
+#   use: true
+#   description: ""
+#   type:
+#   mobilitydb: |
+
+#   postgis: |
+
+#   sedona: |
+
+#   spacetime: |
+
+#   clickhouse: |
+
+#   repetition: 1
+#   parameters:

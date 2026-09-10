@@ -1,0 +1,6 @@
+# PostGIS release tag used to fetch the handful of internal liblwgeom headers
+# DistributedMobilityDB needs but never vendors itself (see tasks/main.yml's
+# "postgis-lwgeom vendoring" tasks) -- keep this in sync with whatever
+# postgresql-{{ postgres_version }}-postgis-3 actually installs (`dpkg -s
+# postgresql-{{ postgres_version }}-postgis-3` on a target host).
+postgis_version: "3.6.4"

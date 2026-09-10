@@ -1,0 +1,82 @@
+# group_vars/all.yml for the nst-cluster (production) inventory.
+#
+# This project has no shared/common vars layer between inventories (Ansible's own group_vars
+# precedence rules make a "shared defaults + per-env override" split fragile -- see the review
+# notes that added this file), so everything below is a full copy of
+# ../../local/group_vars/all/all.yml with only the environment-specific bits changed
+# (ansible_user, purge_conflicting_installs). If you change a *shared* variable (anything other
+# than those two), change it in both files.
+
+ansible_user: tim
+# No ProxyJump needed -- nst-1..nst-5 each have their own public IP (see ../hosts.yml), unlike
+# inventory/local's single floating IP + per-node ansible_port.
+ansible_python_interpreter: /usr/bin/python3
+
+# FIX: nst-1..nst-5 are partner-owned hardware that already runs a live, proprietary SpaceTime
+# installation we were told not to touch (see ../../../client/benchmark_client/docs/
+# spacetime-cluster-access.md). postgres/tasks/main.yml and clickhouse/tasks/install.yml both
+# start by purging *any* existing postgresql-*/clickhouse-* packages and deleting their data
+# directories -- harmless on inventory/local's disposable VMs (the only environment this
+# repo targeted before), but not a risk worth taking on someone else's production machines on the
+# strength of "SpaceTime probably doesn't use Postgres/ClickHouse itself". Setting this to false
+# skips that purge here; it only matters if one of our own previous installs needs a clean re-run,
+# in which case override it back to true for that run.
+purge_conflicting_installs: false
+
+postgres_version: 17
+mbdb_db_name: postgres
+mbdb_db_user: postgres
+mbdb_db_password: postgres
+citus_version: 14.1
+
+spark_home: /opt/spark
+
+sedona_jar: sedona-spark-shaded-4.0_2.13-1.8.1.jar
+geotools_jar: geotools-wrapper-1.8.1-33.1.jar
+
+postgres_host: "{{ groups['masters'][0] }}"
+db_name: postgres
+db_user: postgres
+db_password: postgres
+
+postgres_jdbc_jar: postgresql-42.7.9.jar
+
+pg_hba_conf_path: /etc/postgresql/{{ postgres_version }}/main/pg_hba.conf
+
+cycling_data_dir: "{{ ansible_env.HOME }}/data/cycling"
+aviation_data_dir: "/var/lib/data/aviation"
+ais_data_dir: "/var/lib/data/ais"
+
+geolife_data_dir: /var/lib/data/geolife
+
+clickhouse_data_dir: /var/lib/data
+clickhouse_cycling_data_dir: /var/lib/data/cycling
+clickhouse_aviation_data_dir: /var/lib/data/aviation
+
+local_parquet_dir: "{{ playbook_dir }}/../../../../data_generator_cycling/output/parquet"
+venv_dir: "/var/lib/data/venv"
+
+aviation_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generator_aviation/parquet_flights/flights_000000.parquet"
+
+ais_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generator_ais/output_data/crossing_points/dummy_sample.parquet"
+cycling_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generator_cycling/output/parquet/dummy_sample.parquet"
+geolife_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generator_geolife/synthetic_output/dummy_sample.parquet"
+
+db_host: "127.0.0.1"
+db_port: 5433
+ch_host: "127.0.0.1"
+ch_port: 9500
+ch_keeper_port: 9444
+ch_user: "default"
+ch_password: "default"
+
+hdfs_target_dir: /data/ais/raw
+local_data_path: /data/ais
+hadoop_home: /opt/hadoop
+local_supporting_dataset_path: "{{ playbook_dir }}/../../supporting_datasets"
+supporting_dataset_path: /var/lib/data/supporting_datasets/
+
+duckdb_data_dir: /var/lib/duckdb
+duckdb_db_file: "{{ duckdb_data_dir }}/geobenchr.duckdb"
+duckdb_quack_port: 9494
+duckdb_quack_token: my-secret-token

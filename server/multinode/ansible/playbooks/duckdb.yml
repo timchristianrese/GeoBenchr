@@ -1,0 +1,9 @@
+# Installs DuckDB (CLI + a persistent Quack server) as a benchmarked SUT, on the master node only
+# -- matching how benchmark_client's DialectRegistry.java only ever connects to a single DuckDB
+# host ("jdbc:quack://<SUT_HOST>:9494/").
+- name: Setup DuckDB
+  hosts: masters
+  become: true
+  roles:
+    - common
+    - duckdb

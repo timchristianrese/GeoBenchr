@@ -22,7 +22,25 @@
         <artifactId>postgresql</artifactId>
         <version>42.7.2</version>
     </dependency>
-
+    <!-- DuckDB JDBC-->
+    <dependency>
+      <groupId>org.duckdb</groupId>
+      <artifactId>duckdb_jdbc</artifactId>
+      <version>1.5.4.0</version>
+    </dependency>
+    <!-- DuckDB Quack-->
+    <dependency>
+      <groupId>com.gizmodata</groupId>
+      <artifactId>quack-jdbc</artifactId>
+      <version>0.1.0-alpha.1</version>
+    </dependency>
+    <!-- ClickHouse JDBC ("all" classifier bundles the HTTP client, no separate dependency needed) -->
+    <dependency>
+      <groupId>com.clickhouse</groupId>
+      <artifactId>clickhouse-jdbc</artifactId>
+      <version>0.9.8</version>
+      <classifier>all</classifier>
+    </dependency>
     <!-- SnakeYAML -->
     <dependency>
         <groupId>org.yaml</groupId>
@@ -35,30 +53,45 @@
       <artifactId>slf4j-simple</artifactId>
       <version>1.7.36</version>
     </dependency>
-    <!-- Spark 3.3.1 (match Sedona build target) -->
+    <!-- FIX: was Spark 3.5.6 / Scala 2.12 / Sedona 1.7.2, which didn't match what's actually
+         installed on the cluster (server/multinode/ansible/roles/spark's spark_version: 4.1.2 and
+         roles/sedona's spark_version: 4.0 / scala_version: 2.13 / sedona_version: 1.8.1, the exact
+         jars roles/sedona downloads onto the SUTs' own Spark classpath). A YARN client submission
+         needs matching Spark/Scala versions between the submitting driver and the cluster it is
+         submitting to, so these are now pinned to match. -->
     <dependency>
         <groupId>org.apache.spark</groupId>
-        <artifactId>spark-core_2.12</artifactId>
-        <version>3.5.6</version>
+        <artifactId>spark-core_2.13</artifactId>
+        <version>4.1.2</version>
     </dependency>
     <dependency>
         <groupId>org.apache.spark</groupId>
-        <artifactId>spark-sql_2.12</artifactId>
-        <version>3.5.6</version>
+        <artifactId>spark-sql_2.13</artifactId>
+        <version>4.1.2</version>
+    </dependency>
+    <!-- spark-core alone doesn't know how to resolve "yarn" as a master URL; that's implemented
+         in this separate module, normally pulled onto the classpath automatically by the
+         spark-submit launcher script. Constructing a SparkSession directly (as SedonaExecutor
+         does) needs it added explicitly, or master("yarn") fails with
+         "SparkException: Could not parse Master URL: 'yarn'". -->
+    <dependency>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-yarn_2.13</artifactId>
+        <version>4.1.2</version>
     </dependency>
 
-    <!-- Apache Sedona -->
+    <!-- Apache Sedona (version/classifier matches roles/sedona's sedona_jar exactly) -->
     <dependency>
         <groupId>org.apache.sedona</groupId>
-        <artifactId>sedona-spark-shaded-3.5_2.12</artifactId>
-        <version>1.7.2</version>
+        <artifactId>sedona-spark-shaded-4.0_2.13</artifactId>
+        <version>1.8.1</version>
     </dependency>
 
-    <!-- GeoTools Wrapper -->
+    <!-- GeoTools Wrapper (version matches roles/sedona's geotools_jar exactly) -->
     <dependency>
         <groupId>org.datasyslab</groupId>
         <artifactId>geotools-wrapper</artifactId>
-        <version>1.7.2-28.5</version>
+        <version>1.8.1-33.1</version>
     </dependency>
 </dependencies>
     <build>
@@ -73,6 +106,27 @@
           <jvmArgs>
             <jvmArg>--add-exports=java.base/sun.nio.ch=ALL-UNNAMED</jvmArg>
             <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
+            <!-- FIX: needed only once Sedona actually ran a job on Java 17. Kryo (Spark's
+                 broadcast/task serializer) reflectively pokes at private JDK fields (e.g.
+                 java.nio.ByteBuffer.hb), which the module system blocks by default
+                 ("InaccessibleObjectException: ... does not opens java.nio to unnamed module").
+                 spark-submit's own launcher script adds this exact flag set automatically for
+                 Java 17+ (visible on the cluster's own Hadoop/YARN daemons' command lines); a
+                 plain `java -cp` / `mvn exec:java` invocation, how this project actually runs,
+                 gets none of that for free. -->
+            <jvmArg>--add-opens=java.base/java.lang=ALL-UNNAMED</jvmArg>
+            <jvmArg>--add-opens=java.base/java.lang.invoke=ALL-UNNAMED</jvmArg>
+            <jvmArg>--add-opens=java.base/java.lang.reflect=ALL-UNNAMED</jvmArg>
+            <jvmArg>--add-opens=java.base/java.io=ALL-UNNAMED</jvmArg>
+            <jvmArg>--add-opens=java.base/java.net=ALL-UNNAMED</jvmArg>
+            <jvmArg>--add-opens=java.base/java.nio=ALL-UNNAMED</jvmArg>
+            <jvmArg>--add-opens=java.base/java.util=ALL-UNNAMED</jvmArg>
+            <jvmArg>--add-opens=java.base/java.util.concurrent=ALL-UNNAMED</jvmArg>
+            <jvmArg>--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED</jvmArg>
+            <jvmArg>--add-opens=java.base/sun.nio.ch=ALL-UNNAMED</jvmArg>
+            <jvmArg>--add-opens=java.base/sun.nio.cs=ALL-UNNAMED</jvmArg>
+            <jvmArg>--add-opens=java.base/sun.security.action=ALL-UNNAMED</jvmArg>
+            <jvmArg>--add-opens=java.base/sun.util.calendar=ALL-UNNAMED</jvmArg>
           </jvmArgs>
         </configuration>
       </plugin>

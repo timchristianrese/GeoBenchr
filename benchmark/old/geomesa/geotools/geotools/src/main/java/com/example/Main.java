@@ -162,7 +162,7 @@ class Task implements Runnable {
                         // case "single_insert":
                         //     try {
                         //         featureType = dataStore.getSchema(featureTypeName);
-                        //         featureBuilder.set("ride_id", (int) Math.floor(Math.random() * 300));
+                        //         featureBuilder.set("id", (int) Math.floor(Math.random() * 300));
                         //         featureBuilder.set("rider_id", (int) Math.floor(Math.random() * 30));
                         //         featureBuilder.set("latitude", startLat);
                         //         featureBuilder.set("longitude", startLon);
@@ -206,7 +206,7 @@ class Task implements Runnable {
                                     //replace ride_data with trip_data when wanting to write trip data
                                     featureBuilder = new SimpleFeatureBuilder(featureType);
                                     featureBuilder.set("rider_id", (int) Math.floor(Math.random() * 30));
-                                    featureBuilder.set("ride_id", (int) Math.floor(Math.random() * 300));
+                                    featureBuilder.set("id", (int) Math.floor(Math.random() * 300));
                                     featureBuilder.set("latitude", startLat);
                                     featureBuilder.set("longitude", startLon);
                                     point = new GeometryFactory().createPoint(new Coordinate(startLon, startLat));
@@ -260,9 +260,9 @@ class Task implements Runnable {
                         case "ride_traffic":
                             //requires multiple queries
                             //generate random number between 0 and 300
-                            Integer ride_id = (int) Math.floor(Math.random() * 300);
+                            Integer id = (int) Math.floor(Math.random() * 300);
                             try {
-                                filter= CQL.toFilter("ride_id = "+ride_id);
+                                filter= CQL.toFilter("id = "+id);
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
@@ -325,7 +325,7 @@ class Task implements Runnable {
                         // //spatiotemporal
                         case "get_trip":
                             try {
-                                filter= CQL.toFilter("ride_id = "+(int) Math.floor(Math.random() * 300));
+                                filter= CQL.toFilter("id = "+(int) Math.floor(Math.random() * 300));
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
@@ -388,7 +388,7 @@ class Task implements Runnable {
                                     //replace ride_data with trip_data when wanting to write trip data
                                     featureBuilder = new SimpleFeatureBuilder(featureType);
                                     featureBuilder.set("rider_id", (int) Math.floor(Math.random() * 30));
-                                    featureBuilder.set("ride_id", (int) Math.floor(Math.random() * 300));
+                                    featureBuilder.set("id", (int) Math.floor(Math.random() * 300));
                                     featureBuilder.set("latitude", startLat);
                                     featureBuilder.set("longitude", startLon);
                                     point = new GeometryFactory().createPoint(new Coordinate(startLon, startLat));
@@ -442,9 +442,9 @@ class Task implements Runnable {
                         case "ride_traffic":
                             //requires multiple queries
                             //generate random number between 0 and 300
-                            Integer ride_id = (int) Math.floor(Math.random() * 300);
+                            Integer id = (int) Math.floor(Math.random() * 300);
                             try {
-                                filter= CQL.toFilter("ride_id = "+ride_id);
+                                filter= CQL.toFilter("id = "+id);
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
@@ -521,7 +521,7 @@ class Task implements Runnable {
                         case "get_trip":
 
                             try {
-                                filter= CQL.toFilter("ride_id = "+(int) Math.floor(Math.random() * 300));
+                                filter= CQL.toFilter("id = "+(int) Math.floor(Math.random() * 300));
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
@@ -536,10 +536,10 @@ class Task implements Runnable {
                             break;
                         //get first point of trip and last point of trip, calculate time difference
                         case "get_trip_duration":
-                            ride_id = (int) Math.floor(Math.random() * 300);
+                            id = (int) Math.floor(Math.random() * 300);
                             String columnName = "timestamp";
                             try {
-                                filter= CQL.toFilter("ride_id = "+ride_id);
+                                filter= CQL.toFilter("id = "+id);
                             }catch(Exception e){
                                 System.out.println("Failed to set filter");
                             }
@@ -568,7 +568,7 @@ class Task implements Runnable {
                                     Object lastTimestamp = feature.getAttribute("ARRAY_LAST(" + columnName + ")");
                                     
                                     // Output the results
-                                    System.out.println("Ride ID: "+ride_id);
+                                    System.out.println("Ride ID: "+id);
                                     System.out.println("First timestamp: " + firstTimestamp);
                                     System.out.println("Last timestamp: " + lastTimestamp);  
                                     System.out.println("Request Duration: " + (duration) + "ms");  

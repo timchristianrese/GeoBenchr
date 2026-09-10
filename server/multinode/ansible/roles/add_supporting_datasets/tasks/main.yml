@@ -1,0 +1,397 @@
+# - name: Create the target directory for supporting datasets on the target node
+#   ansible.builtin.file:
+#     path: "{{ supporting_dataset_path }}"
+#     state: directory
+#     mode: '0777'
+#   when: inventory_hostname in groups['masters']
+
+- name: Synchronize supporting datasets to the target node, found in supporting_dataset_path
+  ansible.builtin.synchronize:
+    src: "{{ local_supporting_dataset_path }}/"
+    dest: "{{ supporting_dataset_path }}"
+    recursive: yes
+    delete: no
+  when: inventory_hostname in groups['masters']
+
+# FIX: this role assumed venv_dir already existed -- it's only ever created by postgis_aviation/
+# postgis_cycling's "Create Python virtual environment" task. Running this role on its own (e.g.
+# via playbooks/sync_supporting_datasets.yml without first running one of those) had no venv to
+# activate, so "source {{ venv_dir }}/bin/activate" failed with "No such file or directory".
+- name: Ensure python venv package is installed (Debian/Ubuntu)
+  become: true
+  ansible.builtin.apt:
+    name: "python3-venv"
+    state: present
+    update_cache: true
+  when: inventory_hostname in groups['masters']
+
+- name: Create Python virtual environment
+  ansible.builtin.command: "python3 -m venv {{ venv_dir }}"
+  args:
+    creates: "{{ venv_dir }}/bin/activate"
+  when: inventory_hostname in groups['masters']
+
+- name: Install deps with bash
+  ansible.builtin.shell: |
+    source {{ venv_dir }}/bin/activate
+    pip install pandas pyarrow psycopg2
+  args:
+    executable: /bin/bash
+  when: inventory_hostname in groups['masters']
+
+- name: Switch Ansible to venv Python
+  ansible.builtin.set_fact:
+    ansible_python_interpreter: "{{ venv_dir }}/bin/python"
+  when: inventory_hostname in groups['masters']
+
+- name: Create supporting dataset tables in Postgres
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      DROP TABLE IF EXISTS universities_staging;
+      DROP TABLE IF EXISTS berlin_districts_staging;
+      DROP TABLE IF EXISTS counties_staging;
+      DROP TABLE IF EXISTS islands_staging;
+
+      DROP TABLE IF EXISTS universities CASCADE;
+      DROP TABLE IF EXISTS berlin_districts;
+      DROP TABLE IF EXISTS counties;
+      DROP TABLE IF EXISTS cities;
+      DROP TABLE IF EXISTS harbours;
+      DROP TABLE IF EXISTS islands;
+      
+      CREATE TABLE IF NOT EXISTS universities_staging (
+        name TEXT,
+        geom TEXT
+      );
+      CREATE TABLE IF NOT EXISTS berlin_districts_staging (
+        name TEXT,
+        geom TEXT
+      );
+      CREATE TABLE IF NOT EXISTS counties_staging (
+        name TEXT,
+        geom TEXT
+      );
+
+
+      CREATE TABLE IF NOT EXISTS islands_staging (
+        id INT,
+        name TEXT,
+        geom geometry(Geometry, 4326)
+      );
+
+      CREATE TABLE IF NOT EXISTS universities (
+        name TEXT,
+        geom Geometry(MultiPolygon, 3857)
+      );
+      CREATE TABLE IF NOT EXISTS berlin_districts (
+        name TEXT,
+        geom Geometry(Polygon, 3857)
+      );
+      CREATE TABLE IF NOT EXISTS counties (
+        name TEXT,
+        geom Geometry(Polygon, 3857)
+      );
+      CREATE TABLE IF NOT EXISTS cities (
+          area DOUBLE PRECISION,
+          lat DOUBLE PRECISION,
+          lon DOUBLE PRECISION,
+          geom geometry(Point, 3857)
+              GENERATED ALWAYS AS (
+                  ST_Transform(ST_SetSRID(ST_MakePoint(lon, lat), 4326), 3857)
+              ) STORED,
+          district TEXT,
+          name TEXT,
+          population INTEGER
+      );
+      CREATE TABLE IF NOT EXISTS harbours (
+        country TEXT,
+        location TEXT,
+        name TEXT,
+        lat DOUBLE PRECISION,
+        lon DOUBLE PRECISION,
+        geom geometry(Point, 3857)
+            GENERATED ALWAYS AS (
+                ST_Transform(ST_SetSRID(ST_MakePoint(lon, lat), 4326), 3857)
+            ) STORED
+      );
+      CREATE TABLE islands (
+          id INT,
+          name TEXT,
+          geom Geometry(Geometry, 3857)
+      );
+
+      SELECT create_reference_table('universities');
+      SELECT create_reference_table('berlin_districts');
+      SELECT create_reference_table('counties');
+      SELECT create_reference_table('cities');
+      SELECT create_reference_table('harbours');
+      SELECT create_reference_table('islands');
+  
+  when: inventory_hostname in groups['masters']
+
+- name: Load supporting datasets into Postgres
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      COPY universities_staging(name, geom)
+      FROM '{{ supporting_dataset_path }}/universities-wkt-simplified.csv'
+      DELIMITER ';'
+      CSV HEADER; 
+
+      COPY berlin_districts_staging(name, geom)
+      FROM '{{ supporting_dataset_path }}/berlin-districts-wkt-simplified.csv'
+      DELIMITER ';'
+      CSV HEADER;
+
+      COPY counties_staging(name, geom)
+      FROM '{{ supporting_dataset_path }}/counties-wkt-simplified.csv'
+      DELIMITER ';'
+      CSV HEADER;
+
+      INSERT INTO universities(name, geom)
+      SELECT name, ST_Transform(ST_SetSRID(ST_GeomFromText(geom), 4326), 3857) FROM universities_staging;
+
+      INSERT INTO berlin_districts(name, geom)
+      SELECT name, ST_Transform(ST_SetSRID(ST_GeomFromText(geom), 4326), 3857) FROM berlin_districts_staging;
+
+      INSERT INTO counties(name, geom)
+      SELECT name, ST_Transform(ST_SetSRID(ST_GeomFromText(geom), 4326), 3857) FROM counties_staging;
+
+      COPY cities(area, lat, lon, district, name, population)
+      FROM '{{ supporting_dataset_path }}/cities.csv'
+      DELIMITER ','
+      CSV HEADER;
+
+      COPY harbours(country, location, name, lat, lon)
+      FROM '{{ supporting_dataset_path }}/filtered_ports.csv'
+      DELIMITER ','
+      CSV HEADER;
+  when: inventory_hostname in groups['masters']
+
+- name: Load combined parquet into Postgres using DuckDB
+  ansible.builtin.include_tasks: process_parquet.yml
+  when: inventory_hostname in groups['masters']
+
+- name: Add geom indexes to Postgres supporting dataset tables
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: "CREATE INDEX IF NOT EXISTS {{ item.name }}_geom_idx ON {{ item.table }} USING GIST (geom);"
+  loop:
+    - { table: universities, name: universities }
+    - { table: berlin_districts, name: berlin_districts }
+    - { table: counties, name: counties }
+    - { table: cities, name: cities }
+    - { table: harbours, name: harbours }
+    - { table: islands, name: islands }
+  when: inventory_hostname in groups['masters']
+
+
+- name: Swap python interpreter back to system Python
+  ansible.builtin.set_fact:
+    ansible_python_interpreter: /usr/bin/python3
+  when: inventory_hostname in groups['masters']
+
+- name: Drop local and distributed tables in ClickHouse if they exist
+  shell: >
+    clickhouse-client --port {{ ch_port }} --query 'DROP TABLE IF EXISTS universities_local ON CLUSTER cluster_1'
+
+    clickhouse-client --port {{ ch_port }} --query 'DROP TABLE IF EXISTS berlin_districts_local ON CLUSTER cluster_1'
+
+    clickhouse-client --port {{ ch_port }} --query 'DROP TABLE IF EXISTS counties_local ON CLUSTER cluster_1'
+
+    clickhouse-client --port {{ ch_port }} --query 'DROP TABLE IF EXISTS cities_local ON CLUSTER cluster_1'
+
+    clickhouse-client --port {{ ch_port }} --query 'DROP TABLE IF EXISTS harbours_local ON CLUSTER cluster_1'
+
+    clickhouse-client --port {{ ch_port }} --query 'DROP TABLE IF EXISTS islands_local ON CLUSTER cluster_1'
+
+    clickhouse-client --port {{ ch_port }} --query 'DROP TABLE IF EXISTS universities ON CLUSTER cluster_1'
+
+    clickhouse-client --port {{ ch_port }} --query 'DROP TABLE IF EXISTS berlin_districts ON CLUSTER cluster_1'
+
+    clickhouse-client --port {{ ch_port }} --query 'DROP TABLE IF EXISTS counties ON CLUSTER cluster_1'
+
+    clickhouse-client --port {{ ch_port }} --query 'DROP TABLE IF EXISTS cities ON CLUSTER cluster_1'
+
+    clickhouse-client --port {{ ch_port }} --query 'DROP TABLE IF EXISTS harbours ON CLUSTER cluster_1'
+
+    clickhouse-client --port {{ ch_port }} --query 'DROP TABLE IF EXISTS islands ON CLUSTER cluster_1'
+    
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+
+- name: Create local tables in ClickHouse
+  command:
+    argv:
+      - clickhouse-client
+      - --port
+      - "{{ ch_port }}"
+      - --query
+      - "{{ item }}"
+  loop:
+    - |
+      CREATE TABLE IF NOT EXISTS universities_local ON CLUSTER cluster_1 (
+          name String,
+          geom Geometry
+      )
+      ENGINE = MergeTree()
+      PARTITION BY tuple()
+      ORDER BY name;
+    - |
+      CREATE TABLE IF NOT EXISTS berlin_districts_local ON CLUSTER cluster_1 (
+          name String,
+          geom Geometry
+      )
+      ENGINE = MergeTree()
+      PARTITION BY tuple()
+      ORDER BY name;
+    - |
+      CREATE TABLE IF NOT EXISTS counties_local ON CLUSTER cluster_1 (
+          name String,
+          geom Geometry
+      )
+      ENGINE = MergeTree()
+      PARTITION BY tuple()
+      ORDER BY name;
+    - |
+      CREATE TABLE IF NOT EXISTS cities_local ON CLUSTER cluster_1 (
+          area Float64,
+          lat Float64,
+          lon Float64,
+          geom Point MATERIALIZED (lon, lat),
+          district String,
+          name String,
+          population UInt64
+      )
+      ENGINE = MergeTree()
+      PARTITION BY tuple()
+      ORDER BY name;
+    - |
+      CREATE TABLE IF NOT EXISTS harbours_local ON CLUSTER cluster_1 (
+          country String,
+          location String,
+          name String,
+          lat Float64,
+          lon Float64,
+          geom Point MATERIALIZED (lon, lat)
+      )
+      ENGINE = MergeTree()
+      PARTITION BY tuple()
+      ORDER BY name;
+    - |
+      CREATE TABLE IF NOT EXISTS islands_local ON CLUSTER cluster_1 (
+          id Int32,
+          name String,
+          geom Geometry
+      )
+      ENGINE = MergeTree()
+      PARTITION BY tuple()
+      ORDER BY name;
+
+  when: inventory_hostname in groups['masters']
+
+
+- name: Create the distributed tables in ClickHouse
+  shell: >
+    clickhouse-client --port {{ ch_port }} --query '
+    CREATE TABLE IF NOT EXISTS universities ON CLUSTER cluster_1 AS universities_local
+    ENGINE = Distributed(cluster_1, default, universities_local, rand());
+    '
+
+    clickhouse-client --port {{ ch_port }} --query '
+    CREATE TABLE IF NOT EXISTS berlin_districts ON CLUSTER cluster_1 as berlin_districts_local
+    ENGINE = Distributed(cluster_1, default, berlin_districts_local, rand());
+    '
+
+    clickhouse-client --port {{ ch_port }} --query '
+    CREATE TABLE IF NOT EXISTS counties ON CLUSTER cluster_1 AS counties_local
+    ENGINE = Distributed(cluster_1, default, counties_local, rand());
+    '
+
+    clickhouse-client --port {{ ch_port }} --query '
+    CREATE TABLE IF NOT EXISTS cities ON CLUSTER cluster_1 AS cities_local
+    ENGINE = Distributed(cluster_1, default, cities_local, rand());
+    '
+
+    clickhouse-client --port {{ ch_port }} --query '
+    CREATE TABLE IF NOT EXISTS harbours ON CLUSTER cluster_1 AS harbours_local
+    ENGINE = Distributed(cluster_1, default, harbours_local, rand());
+    '
+
+    clickhouse-client --port {{ ch_port }} --query '
+    CREATE TABLE IF NOT EXISTS islands ON CLUSTER cluster_1 AS islands_local
+    ENGINE = Distributed(cluster_1, default, islands_local, rand());
+    '
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"
+
+- name: Load supporting datasets into ClickHouse using clickhouse-client CSV import
+  shell: 
+    clickhouse-client --input_format_csv_skip_first_lines 1 --format-csv-delimiter=',' --port {{ ch_port }} --query "
+    INSERT INTO cities 
+    FROM INFILE '{{ supporting_dataset_path }}/cities.csv'
+    FORMAT CSV
+    "
+
+    clickhouse-client --input_format_csv_skip_first_lines 1 --format-csv-delimiter=',' --port {{ ch_port }} --query "
+    INSERT INTO harbours 
+    FROM INFILE '{{ supporting_dataset_path }}/filtered_ports.csv'
+    FORMAT CSV
+    "
+
+    clickhouse-client --port {{ ch_port }} --query "
+    INSERT INTO islands 
+    SELECT 
+      id as id,
+      featurecla as name,
+      geometry as geom
+    FROM file('{{ supporting_dataset_path }}/islands_coastlines.parquet', Parquet)
+    "
+
+    clickhouse-client --port {{ ch_port }} --query "
+    INSERT INTO berlin_districts
+    SELECT 
+      name,
+      geometry as geom
+    FROM file('{{ supporting_dataset_path }}/berlin_districts.parquet', Parquet)
+    "
+
+    clickhouse-client --port {{ ch_port }} --query "
+    INSERT INTO counties
+    SELECT 
+      name,
+      geometry as geom
+    FROM file('{{ supporting_dataset_path }}/counties.parquet', Parquet)
+    "
+
+    clickhouse-client --port {{ ch_port }} --query "
+    INSERT INTO universities
+    SELECT 
+      name,
+      geometry as geom
+    FROM file('{{ supporting_dataset_path }}/universities.parquet', Parquet)
+    "
+
+
+    
+    # clickhouse-client --input_format_csv_skip_first_lines 1 --format-csv-delimiter=';' --port {{ ch_port }} --query "
+    # INSERT INTO universities 
+    # FROM INFILE '{{ supporting_dataset_path }}/universities-wkt-simplified.csv'
+    # FORMAT CSV
+    # "
+  when: inventory_hostname in groups['masters']
+  become_user: "{{ ansible_user }}"

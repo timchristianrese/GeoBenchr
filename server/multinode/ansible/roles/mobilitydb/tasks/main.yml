@@ -1,17 +1,46 @@
+- name: Delete any previous MobilityDB installation
+  ansible.builtin.file:
+    path: /tmp/MobilityDB
+    state: absent
+
+- name: Clone MobilityDB version 1.1.2
+  get_url:
+    url: "https://github.com/MobilityDB/MobilityDB/archive/refs/tags/v1.1.2.zip"
+    dest: "/tmp/MobilityDB-1.1.2.zip"
+    mode: '0644'
+
+- name: Unzip MobilityDB
+  unarchive:
+    src: "/tmp/MobilityDB-1.1.2.zip"
+    dest: "/tmp/"
+    remote_src: yes
+    creates: /tmp/MobilityDB
+
 - name: Build MobilityDB
   shell: |
+    mv /tmp/MobilityDB-1.1.2 /tmp/MobilityDB
     cd /tmp/MobilityDB
     mkdir -p build
     cd build
     cmake ..
-    make -j$(nproc)
+    make
     make install
   args:
     creates: /usr/local/lib/mobilitydb
+  environment:
+    # postgresql-server-dev-all (pulled in transitively elsewhere in this role chain) installs a
+    # pg_config for every PG version 10-18 and makes the unversioned /usr/bin/pg_config default
+    # to whichever is newest -- not necessarily postgres_version. cmake's plain
+    # find_program(pg_config) then silently configures the build against the wrong server:
+    # cmake and make both report success, but the .so lands under that other version's
+    # pkglibdir and "CREATE EXTENSION mobilitydb" fails later with "could not access file
+    # ... No such file or directory". Pin PATH to the pg_config that actually matches
+    # postgres_version so this can't happen regardless of what else is installed on the host.
+    PATH: "/usr/lib/postgresql/{{ postgres_version }}/bin:{{ ansible_env.PATH }}"
 
-- name: Preload PostGIS together with Citus
-  ansible.builtin.command: "sudo pg_conftool 17 main set shared_preload_libraries 'citus,postgis-3'"
-  become: true
+# - name: Preload PostGIS together with Citus
+#   ansible.builtin.command: "sudo pg_conftool 14 main set shared_preload_libraries 'citus,postgis-3'"
+#   become: true
 
 - name: Restart PostgreSQL to apply changes
   ansible.builtin.service:
@@ -24,24 +53,141 @@
   ansible.builtin.shell: |
     sudo -u postgres psql -c "CREATE EXTENSION IF NOT EXISTS {{ item }};"
   loop:
-    - citus
-    - postgis
+    # - citus
+    # - postgis
     - mobilitydb
-  
+  when: #only on master node
+    - inventory_hostname in groups['masters']
+
 
 - name: Clone DistributedMobilityDB
   git:
     repo: https://github.com/mbakli/DistributedMobilityDB.git
     dest: /tmp/DistributedMobilityDB
+    # The rename task below (ansible.builtin.replace) leaves tracked files modified in this
+    # checkout, which the git module's default force=no then refuses to clone over on the next
+    # run ("Local modifications exist in the destination"). /tmp/DistributedMobilityDB is
+    # disposable build scratch space, so discarding those modifications on each re-run (and
+    # reapplying the rename fresh below) is correct here.
+    force: true
+
+# DistributedMobilityDB links against two classes of header that Citus/PostGIS treat as private
+# and don't ship in their .deb packages -- upstream expects a full source checkout of each
+# alongside the system install. Vendor just the handful of files actually needed instead of
+# requiring that (see each block below for what's missing and why).
+
+- name: "Citus compat headers: fetch pg_version_compat.h / pg_version_constants.h"
+  # Citus's packaged distributed/listutils.h (installed by postgresql-{{ postgres_version
+  # }}-citus-{{ citus_version }}) #includes "pg_version_compat.h" -- a header Citus itself uses to
+  # write PG-version-agnostic code, but which the .deb package never ships, since Citus considers
+  # it a private build-time header. Upstream keeps both files in src/include/, a sibling of
+  # src/include/distributed/ (verified against the citusdata/citus GitHub tree at tag v{{
+  # citus_version }}.0). Fetch them there, matching upstream's own layout.
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/citusdata/citus/v{{ citus_version }}.0/src/include/{{ item }}"
+    dest: "/usr/include/postgresql/{{ postgres_version }}/server/{{ item }}"
+    mode: '0644'
+  loop:
+    - pg_version_compat.h
+    - pg_version_constants.h
+  become: true
+
+- name: "Citus compat headers: also place a copy next to listutils.h"
+  # listutils.h's #include "pg_version_compat.h" is an unqualified quoted include, so the C
+  # preprocessor's search order checks the *including file's own directory* (.../server/
+  # distributed/, where listutils.h itself lives) before it ever falls through to the -I search
+  # path that resolves .../server/ (verified locally: placing the headers only in distributed/
+  # was independently sufficient on its own -- cmake/make got past this exact error and the
+  # build/extension worked end-to-end). Since either location independently satisfies some
+  # compiler's resolution order, and there's no cost to being sure, keep both in sync rather than
+  # relitigate which one a given toolchain needs.
+  ansible.builtin.copy:
+    src: "/usr/include/postgresql/{{ postgres_version }}/server/{{ item }}"
+    dest: "/usr/include/postgresql/{{ postgres_version }}/server/distributed/{{ item }}"
+    mode: '0644'
+    remote_src: true
+  loop:
+    - pg_version_compat.h
+    - pg_version_constants.h
+  become: true
+
+- name: "postgis-lwgeom vendoring: create the third_party layout DistributedMobilityDB's CMakeLists.txt expects"
+  ansible.builtin.file:
+    path: /tmp/DistributedMobilityDB/third_party/postgis-lwgeom/liblwgeom
+    state: directory
+
+- name: "postgis-lwgeom vendoring: fetch liblwgeom.h.in / lwinline.h / postgis_config.h.in"
+  # liblwgeom.h (used for the GBOX type) is PostGIS' own internal header and isn't shipped by any
+  # postgresql-*-postgis-3 package either. DistributedMobilityDB's CMakeLists.txt already points
+  # at third_party/postgis-lwgeom/liblwgeom for it (see the "Fixed memory issues" commit
+  # upstream), but that directory was never actually committed to the repo. Fetch the three
+  # source files it needs directly from the matching PostGIS release tag instead of requiring a
+  # full PostGIS source checkout on every node.
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/postgis/postgis/{{ postgis_version }}/{{ item.src }}"
+    dest: "/tmp/{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { src: "liblwgeom/liblwgeom.h.in", dest: "liblwgeom.h.in" }
+    - { src: "liblwgeom/lwinline.h", dest: "DistributedMobilityDB/third_party/postgis-lwgeom/liblwgeom/lwinline.h" }
+    - { src: "postgis_config.h.in", dest: "postgis_config.h.in" }
+
+- name: "postgis-lwgeom vendoring: resolve liblwgeom.h.in's autoconf placeholders"
+  # These six are the only @FOO@ substitutions liblwgeom.h.in needs (the rest of the file's "@"
+  # signs are just doxygen @param/@brief tags). SRID_MAX/SRID_USR_MAX are PostGIS's own
+  # configure.ac defaults (999999 / 998999) and don't vary by version; the other four are just
+  # version-string macros DistributedMobilityDB never reads -- it only uses the GBOX struct.
+  ansible.builtin.shell: |
+    sed -e "s/@POSTGIS_LIB_VERSION@/{{ postgis_version }}/g" \
+        -e "s/@POSTGIS_MAJOR_VERSION@/{{ postgis_version.split('.')[0] }}/g" \
+        -e "s/@POSTGIS_MINOR_VERSION@/{{ postgis_version.split('.')[1] }}/g" \
+        -e "s/@POSTGIS_GEOS_VERSION@/3.12/g" \
+        -e "s/@SRID_MAX@/999999/g" \
+        -e "s/@SRID_USR_MAX@/998999/g" \
+        /tmp/liblwgeom.h.in > /tmp/DistributedMobilityDB/third_party/postgis-lwgeom/liblwgeom/liblwgeom.h
+    cp /tmp/postgis_config.h.in /tmp/DistributedMobilityDB/third_party/postgis-lwgeom/postgis_config.h
+  args:
+    creates: /tmp/DistributedMobilityDB/third_party/postgis-lwgeom/liblwgeom/liblwgeom.h
+
+- name: "postgis-lwgeom vendoring: stub out postgis_revision.h"
+  # postgis_config.h #includes "postgis_revision.h", which PostGIS's own build generates from
+  # `git describe` at configure time -- it's only used for a version string here, so a stub is
+  # enough.
+  ansible.builtin.copy:
+    dest: /tmp/DistributedMobilityDB/third_party/postgis-lwgeom/postgis_revision.h
+    content: |
+      #define POSTGIS_REVISION "vendored"
+
+- name: "Rename DistributedMobilityDB's own ExplainQueryParameters (collides with PostgreSQL core)"
+  # PostgreSQL {{ postgres_version }}'s own commands/explain.h now declares a core
+  # ExplainQueryParameters(ExplainState*, ParamListInfo, int) -- unrelated to, but same-named
+  # as, DistributedMobilityDB's own ExplainQueryParameters(DistributedSpatiotemporalQueryPlan*,
+  # ExplainState*, int), which predates that PG addition. The conflicting redeclaration is a
+  # hard compile error. Rename DistributedMobilityDB's copy (its own function, not PostgreSQL's)
+  # rather than patching PostgreSQL core.
+  ansible.builtin.replace:
+    path: "/tmp/DistributedMobilityDB/{{ item }}"
+    regexp: '\bExplainQueryParameters\b'
+    replace: 'DistMobilityDBExplainQueryParameters'
+  loop:
+    - include/planner/distributed_mobilitydb_explain.h
+    - src/planner/distributed_mobilitydb_explain.c
+    - src/planner/query_parameters.c
 
 - name: Build DistributedMobilityDB
   shell: |
     cd /tmp/DistributedMobilityDB
     mkdir -p build
     cd build
-    sudo cmake  ..
+    cmake ..
     make
-    sudo make install
+    make install
+  environment:
+    # Same pg_config ambiguity as the "Build MobilityDB" task above -- see that task's comment.
+    # (The play already runs as root via become: true, so no inline sudo is needed here; an
+    # inline `sudo cmake`/`sudo make install` would additionally reset PATH via sudo's
+    # secure_path and silently undo this override.)
+    PATH: "/usr/lib/postgresql/{{ postgres_version }}/bin:{{ ansible_env.PATH }}"
 
 - name: Restart PostgreSQL after installing DistributedMobilityDB
   ansible.builtin.service:
@@ -52,6 +198,6 @@
 - name: Ensure DistributedMobilityDB extension is installed
   become: true
   ansible.builtin.shell: |
-    sudo -u postgres psql -c "CREATE EXTENSION distributed_mobilitydb;"
-  
-
+    sudo -u postgres psql -c "CREATE EXTENSION IF NOT EXISTS distributed_mobilitydb CASCADE;"
+  when: #only on master node
+    - inventory_hostname in groups['masters']

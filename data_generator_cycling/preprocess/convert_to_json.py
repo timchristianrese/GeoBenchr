@@ -3,7 +3,7 @@ import json
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 #input_folder = os.path.join(base_dir, "../..", "data_files", "Berlin", "Rides", "2024", "02")
-input_folder = "/Users/3s/GeoBench/GeoBenchr/data_files/Berlin_08_2023_03_2024/Berlin/Rides/2024/all"
+input_folder = "/Users/gov/Prog/git/GeoBenchr/data_generator_cycling/data/all"
 output_folder = os.path.join(base_dir, "..", "data", "raw_trips", "human")
 os.makedirs(output_folder, exist_ok=True)
 

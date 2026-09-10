@@ -1,23 +1,167 @@
+# These four tasks purge *any* existing PostgreSQL install/data on the target, regardless of
+# whether we put it there. Gated on purge_conflicting_installs (default true; set to false in
+# inventory/nst-cluster's group_vars, since those are partner-owned production machines running a
+# live SpaceTime installation we were told not to touch) so this cleanup only runs where we know
+# it's safe to assume ownership of the box.
 - name: Remove any conflicting PostgreSQL versions
   apt:
     name: "postgresql-*"
     state: absent
     purge: yes
+  become: true
+  when: purge_conflicting_installs | default(true)
+
+- name: Stop PostgreSQL service if present
+  ansible.builtin.service:
+    name: postgresql
+    state: stopped
+  ignore_errors: yes
+  become: yes
+  when: purge_conflicting_installs | default(true)
+
+- name: Remove old libpq-dev if it exists
+  apt:
+    name: libpq-dev
+    state: absent
+    purge: yes
+  become: true
+  when: purge_conflicting_installs | default(true)
+
+- name: Clean PostgreSQL data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /var/lib/postgresql
+    - /etc/postgresql
+    - /usr/include/postgresql
+    - /usr/lib/postgresql
+  become: yes
+  when: purge_conflicting_installs | default(true)
+
+- name: Ensure no PostgreSQL 14 headers remain
+  file:
+    path: /usr/include/postgresql/14
+    state: absent
+
+- name: Install PostgreSQL common if not already present
+  ansible.builtin.apt:
+    name: postgresql-common
+    state: present
   become: true
 
-- name: Remove any conflicting PostgreSQL versions
-  apt:
-    name: "postgresql-*"
-    state: absent
-    purge: yes
+- name: Add PGDG key
+  ansible.builtin.get_url:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    dest: /usr/share/keyrings/postgresql.asc
   become: true
-- name: Install PostgreSQL
-  apt:
-    name: postgresql-17
+
+# FIX: the repo entry didn't reference the key file above via signed-by=, so apt had no way to
+# know that key applied to this repo -- it just downloaded to disk unused, and apt update failed
+# with "NO_PUBKEY"/"is not signed" on any apt new enough to refuse unsigned PGDG repos (legacy
+# apt-key add is deprecated/removed on current Debian/Ubuntu).
+#
+# FIX: suite was hardcoded to "trixie-pgdg" (Debian 13) regardless of what the target actually
+# runs -- on Debian 12 "bookworm" nodes this pulled postgresql-17 built against newer
+# libc6/libicu76/etc. that bookworm doesn't have, failing with "you have held broken packages".
+# Deriving the suite from the target's own release codename makes this work on whichever Debian
+# release the inventory's nodes actually are.
+#
+# FIX: apt_repository's `filename:` dedups by matching the exact repo line, not by filename -- so
+# re-running this role after the suite above changes (e.g. re-targeting nodes on a different
+# Debian release) appended a second line to the same pgdg.list instead of replacing the first,
+# leaving both suites enabled at equal apt priority. apt then happily picked whichever had the
+# higher version *string* (trixie's "pgdg13" sorts above bookworm's "pgdg12") regardless of which
+# one the target could actually satisfy. Removing the file first guarantees exactly one suite is
+# ever enabled.
+- name: Remove any previously-configured PGDG repo file (avoid stacking suites across re-runs)
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/pgdg.list
+    state: absent
+  become: true
+
+- name: Add PGDG repo
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/postgresql.asc] http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
     state: present
+    filename: pgdg
+  become: true
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: true
+
+- name: Install PostgreSQL
+  ansible.builtin.apt:
+    name: "postgresql-{{ postgres_version }}"
+    state: present
+  become: true
+
+#turn the below into a ansible task
+
+# - name: Install PostgreSQL
+#   apt:
+#     name: postgresql-{{ postgres_version }}
+#     state: present
 
 - name: Ensure PostgreSQL is running
   service:
     name: postgresql
     state: started
     enabled: yes
+
+- name: Set listen_addresses to '*' in postgresql.conf using pgconftool
+  ansible.builtin.command: "sudo pg_conftool {{ postgres_version }} main set listen_addresses '*'"
+  become: true
+
+- name: Remove conflicting localhost auth rules (scram/md5)
+  become: true
+  ansible.builtin.lineinfile:
+    path: "{{ pg_hba_conf_path }}"
+    regexp: "^host\\s+all\\s+all\\s+(127\\.0\\.0\\.1/32|::1/128)\\s+.*"
+    state: absent
+
+# FIX: was a single hardcoded "10.0.0.0/24" CIDR that doesn't match this cluster's actual private
+# network (10.122.0.0/24 per every "ip:" in inventory/local/hosts.yml) or any future cluster's
+# subnet either. Citus's citus_add_node() (roles/citus/tasks/main.yml) connects workers by hostname, but
+# pg_hba.conf filters on the connecting peer's actual source IP -- so instead of guessing a CIDR,
+# derive one /32 trust rule per cluster node directly from its inventory "ip:" value. Works
+# regardless of what subnet this run's inventory.yml nodes happen to be on.
+#
+# FIX: `insertafter: BOF` doesn't mean "beginning of file" -- that special value only exists for
+# `insertbefore`. `insertafter`'s only special value is `EOF`, so this was silently landing the
+# block at the end of pg_hba.conf instead of the top the task name/comment both promise (harmless
+# so far only because nothing earlier in the default pg_hba.conf happens to match these specific
+# IPs; found while fixing the identical mistake in roles/common's /etc/hosts task, where the same
+# pattern caused a real failure). `insertbefore: BOF` is what actually means "top of file".
+- name: Ensure Citus trust rules are at the top of pg_hba.conf
+  become: true
+  ansible.builtin.blockinfile:
+    path: "{{ pg_hba_conf_path }}"
+    marker: "# {mark} CITUS TRUST RULES"
+    insertbefore: BOF
+    block: |
+      host all all 127.0.0.1/32 trust
+      host all all ::1/128 trust
+      {% for host in groups['all'] %}
+      host all all {{ hostvars[host].ip }}/32 trust
+      {% endfor %}
+
+- name: Set PostgreSQL port to 5433
+  lineinfile:
+    path: /etc/postgresql/{{ postgres_version }}/main/postgresql.conf
+    regexp: '^#?\s*port\s*='
+    line: "port = 5433"
+    state: present
+
+# FIX: was `state: reloaded` -- a reload only re-reads context=sighup settings like pg_hba.conf.
+# `port` is context=postmaster, which only ever takes effect on a full restart, so the server kept
+# listening on the default 5432 and nothing (Citus, postgis's `CREATE EXTENSION`, benchmark_client)
+# could reach it on the 5433 every other role/group_var assumes.
+- name: Restart PostgreSQL to apply port and pg_hba changes
+  become: true
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted

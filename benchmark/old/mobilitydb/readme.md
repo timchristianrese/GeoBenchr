@@ -20,7 +20,7 @@ Gets data points surrounding a generated data point
 - "ride_traffic"
 gets intersections of rides
 - "intersections"
-Gets intersections of a specific ride_id
+Gets intersections of a specific id
 - "insert_ride"
 Inserts rides into the table
 - "bulk_insert_rides"

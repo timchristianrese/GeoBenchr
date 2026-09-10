@@ -1,8 +1,7 @@
 - name: Install PostGIS dependencies
   apt:
     name:
-      - postgresql-server-dev-17
-      - libpq-dev
+      - postgresql-server-dev-{{ postgres_version }}
       - libproj-dev
       - libgeos-dev
       - libgdal-dev
@@ -18,9 +17,28 @@
 
 - name: Install PostGIS
   apt:
-    name: postgresql-17-postgis-3
+    name: postgresql-{{ postgres_version }}-postgis-3
     state: present
-- name: Clone MobilityDB
-  git:
-    repo: https://github.com/MobilityDB/MobilityDB.git
-    dest: /tmp/MobilityDB
+
+# FIX: `CREATE EXTENSION IF NOT EXISTS postgis` used to run unconditionally every time. That's
+# fine the first time this role runs (before roles/citus has registered any worker), but once
+# citus_add_node() has registered a node as a Citus worker, Citus intercepts CREATE EXTENSION DDL
+# on that node and rejects it outright -- "ERROR: operation is not allowed on this node HINT:
+# Connect to the coordinator and run it again" -- even though the extension already exists and
+# the statement would otherwise be a harmless no-op (confirmed: a second run of
+# playbooks/postgis_cluster.yml/mobilitydb_cluster.yml failed on every worker, only nst-1/the
+# coordinator was unaffected). Checking pg_extension directly and skipping when it's already
+# there avoids ever re-issuing the DDL against an already-registered worker.
+- name: Check whether the postgis extension is already installed
+  become: true
+  ansible.builtin.shell: |
+    sudo -u postgres psql -tAc "SELECT 1 FROM pg_extension WHERE extname = 'postgis';"
+  register: postgis_extension_check
+  changed_when: false
+
+- name: Create POSTGIS extension in the database
+  become: true
+  ansible.builtin.shell: |
+    sudo -u postgres psql -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+  when: postgis_extension_check.stdout | trim != '1'
+

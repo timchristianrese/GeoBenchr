@@ -1,0 +1,6 @@
+- name: restart duckdb quack
+  become: true
+  ansible.builtin.systemd:
+    name: duckdb-quack
+    state: restarted
+    daemon_reload: true

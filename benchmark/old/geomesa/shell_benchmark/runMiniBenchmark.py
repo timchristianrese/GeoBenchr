@@ -25,12 +25,12 @@ def clear_table(table):
         print("Done")
 
 
-def get_max_ride_id():
+def get_max_id():
     try:
         #get max ride ID from GeoMesa
 
         # cursor = 
-        # cursor.execute("SELECT MAX(ride_id) FROM cycling_data;")
+        # cursor.execute("SELECT MAX(id) FROM cycling_data;")
         records = ""
         return records[0][0]
     except (Exception) as error:
@@ -89,7 +89,7 @@ def execute_query(query_type, limit):
 
             #get intersections of a specific ride    
             case "ride_traffic":
-                ride_id = random.randint(1, 596)
+                id = random.randint(1, 596)
                 #create a random multilinestring through berlin, for now make it diagonal in 0.001 steps
 
                 #static berlin route for testing
@@ -145,7 +145,7 @@ def execute_query(query_type, limit):
                 path_length = 0
                 
                 random_rider_id = random.randint(1, 30)
-                ride_id = get_max_ride_id() + 1
+                id = get_max_id() + 1
                 random_latitude = random.uniform(52.338049, 52.675454)
                 random_longitude = random.uniform(13.088346, 13.761160)
                 ride_date = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -166,13 +166,13 @@ def execute_query(query_type, limit):
                 end = time.strftime('%Y-%m-%d %H:%M:%S.%f')[:3]
                 with open("durations.csv", "a") as file:
                     file.write(f"{query_type},1,{initial_start},{end},{duration}\n")
-                print(f"Ride {ride_id} of length {path_length} inserted successfully into cycling_data table")
+                print(f"Ride {id} of length {path_length} inserted successfully into cycling_data table")
                 
             #bulk insert ride_data
 
             case "bulk_insert_rides":
                 rides_inserted = 0
-                ride_id = get_max_ride_id() + 1
+                id = get_max_id() + 1
                 while rides_inserted < limit:
                     path_length = 0
                     random_rider_id = random.randint(1, 30)
@@ -195,10 +195,10 @@ def execute_query(query_type, limit):
                         path_length += 1
                     end = time.strftime('%Y-%m-%d %H:%M:%S.%f')[:3]
                     rides_inserted += 1
-                    ride_id += 1
+                    id += 1
                 with open("durations.csv", "a") as file:
                     file.write(f"{query_type},1,{initial_start},{end},{duration}\n")
-                print(f"Ride {ride_id} of length {path_length} inserted successfully into cycling_data table")
+                print(f"Ride {id} of length {path_length} inserted successfully into cycling_data table")
             #same as polygonal area for now?
             case "bounding_box":
                 poslong, poslat = generate_random_position_in_Berlin()
@@ -269,8 +269,8 @@ def execute_query(query_type, limit):
             #MobilityDB feature test
             case "get_trip":
                 # define start and end time for the query
-                ride_id = random.randint(1, 400)
-                query = f"ride_id = {ride_id}"
+                id = random.randint(1, 400)
+                query = f"id = {id}"
                 final_query = ssh_trip.replace("-q \"\"", f"-q \"{query}\"")
                 if(limit == -1):
                     final_query = final_query.replace("-m", "")
@@ -288,7 +288,7 @@ def execute_query(query_type, limit):
                 print(result)
             case "get_trip_length":
                 # define start and end time for the query
-                ride_id = random.randint(1, 400)
+                id = random.randint(1, 400)
                 
                 print(query)
                 start = time.time()
@@ -303,7 +303,7 @@ def execute_query(query_type, limit):
             #MobiilityDB temporal support test
             case "get_trip_duration":
                 # define start and end time for the query
-                ride_id = random.randint(1, 400)
+                id = random.randint(1, 400)
                
                 start = time.time()
                 # get time after executing query
@@ -316,7 +316,7 @@ def execute_query(query_type, limit):
                 print(records)
             case "get_trip_speed":
                 # define start and end time for the query
-                ride_id = random.randint(1, 400)
+                id = random.randint(1, 400)
                 
                 start = time.time()
                 # get time after executing query

@@ -7,14 +7,14 @@ import random
 import sys
 csv.field_size_limit(sys.maxsize)
 
-ride_id = 0
+id = 0
 def merge_files(directory_path):
     merged_data = []
     #find all files starting with "VM" in the directory and all subdirectories
     files = glob.glob("../raw/"+directory_path + '/*', recursive=True)
     file_count = 0
     merge_count = 0
-    ride_id = 0
+    id = 0
     for filename in files:
         if filename.__contains__("Profiles"):
             continue
@@ -55,15 +55,15 @@ def merge_files(directory_path):
             for i in range(0, len(data)):
                 if not data[i][0] and not data[i][1]:
                     data [i] = ""
-                #shift all data in list 2 spaces to right and fill first two spaces with data from ride_id and rider_id
+                #shift all data in list 2 spaces to right and fill first two spaces with data from id and rider_id
                 else:
-                    data[i] = [ride_id, rider_id] + data[i][0:2] + [data[i][5]]
+                    data[i] = [id, rider_id] + data[i][0:2] + [data[i][5]]
 
             
             # Append the data to the merged_data list
             merged_data.extend(data)
             #write to global variable
-            ride_id +=1
+            id +=1
 
             if file_count < 200:
                 file_count += 1
@@ -119,7 +119,7 @@ def createPointData(directory_path):
         #for each line in the file
         for line in open(filename, 'r'):
             line = line.split(",")
-            ride_id = line[0]
+            id = line[0]
             rider_id = line[1]
             latitude = line[2]
             longitude = line[3]

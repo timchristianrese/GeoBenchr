@@ -111,7 +111,7 @@ OVERLAPS (
 ### Cyc.Q3 — Cycling Trips in Districts
 ```sql
 SELECT d.name,
-       COUNT(DISTINCT r.ride_id) AS ride_count
+       COUNT(DISTINCT r.id) AS ride_count
 FROM berlin_districts d
 JOIN ride_points r
 ON ST_Intersects(r.geom, d.geom)
@@ -121,7 +121,7 @@ GROUP BY d.name;
 
 ### Cyc.Q4 — Rides Close to University
 ```sql
-SELECT DISTINCT r.ride_id
+SELECT DISTINCT r.id
 FROM ride_points r
 JOIN universities u
 ON ST_DWithin(r.geom, u.geom, :distance)
@@ -140,12 +140,12 @@ AND u.name = :university;
 
 ### Cyc.Q6 — Rides Through Multiple Districts
 ```sql
-SELECT DISTINCT r.ride_id
+SELECT DISTINCT r.id
 FROM ride_points r
 JOIN berlin_districts d
 ON ST_Intersects(r.geom, d.geom)
 WHERE :period_medium @> r.timestamp
-GROUP BY r.ride_id
+GROUP BY r.id
 HAVING COUNT(DISTINCT d.name) > 1;
 ```
 
@@ -153,7 +153,7 @@ HAVING COUNT(DISTINCT d.name) > 1;
 
 ### AIS.Q1 — Count Active Vessels
 ```sql
-SELECT COUNT(DISTINCT c.crossing_id)
+SELECT COUNT(DISTINCT c.id)
 FROM crossing_trajectories c
 WHERE (c.start_time, c.end_time)
 OVERLAPS :period_medium;
@@ -161,7 +161,7 @@ OVERLAPS :period_medium;
 
 ### AIS.Q2 — Crossings Active by Hour
 ```sql
-SELECT COUNT(DISTINCT c.crossing_id)
+SELECT COUNT(DISTINCT c.id)
 FROM crossing_points c
 WHERE EXTRACT(HOUR FROM c.timestamp) = :hour
 AND :period_medium @> c.timestamp;
@@ -169,7 +169,7 @@ AND :period_medium @> c.timestamp;
 
 ### AIS.Q3 — Active Crossings Near Island
 ```sql
-SELECT COUNT(DISTINCT crossing_id)
+SELECT COUNT(DISTINCT id)
 FROM crossing_points c
 JOIN islands i
 ON ST_DWithin(c.geom, i.geom, :distance)
@@ -179,7 +179,7 @@ GROUP BY i.name;
 
 ### AIS.Q4 — Crossings Between Harbors
 ```sql
-SELECT DISTINCT c.crossing_id
+SELECT DISTINCT c.id
 FROM crossing_trajectories c
 JOIN harbors h_start
 ON h_start.name = :harbor
@@ -214,7 +214,7 @@ AND :period_medium @> c.start_time::timestamp;
 ### AIS.Q6 — Harbor Activity
 ```sql
 SELECT h.name AS harbor_name,
-       COUNT(DISTINCT c.crossing_id)
+       COUNT(DISTINCT c.id)
        AS unique_crossings_near_harbor
 FROM harbors h
 JOIN crossing_points c

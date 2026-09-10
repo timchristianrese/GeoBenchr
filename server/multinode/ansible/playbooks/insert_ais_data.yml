@@ -1,0 +1,7 @@
+- name: Load Data
+  hosts: masters
+  become: true
+  roles:
+    - postgis_ais
+    # - clickhouse_ais
+    # - ais_spark 

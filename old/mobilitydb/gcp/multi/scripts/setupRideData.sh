@@ -7,7 +7,7 @@ done
 
 sudo -i -u postgres psql -c "SET citus.max_intermediate_result_size to -1;"
 sudo -i -u postgres psql -c "CREATE TABLE cycling_data (
-    ride_id float,
+    id float,
     rider_id float,
     latitude float,
     longitude float,
@@ -37,11 +37,11 @@ sudo -i -u postgres psql -c "CREATE INDEX idx_cycling_data_latitude ON cycling_d
 sudo -i -u postgres psql -c "CREATE INDEX idx_cycling_data_longitude ON cycling_data (longitude);"
 
 sudo -i -u postgres psql -c "CREATE TABLE cycling_trips (
-  ride_id float,
+  id float,
   rider_id float,
   trip tgeogpoint
 );"
-sudo -i -u postgres psql -c "SELECT create_distributed_table('cycling_trips','ride_id');"
+sudo -i -u postgres psql -c "SELECT create_distributed_table('cycling_trips','id');"
 sudo -i -u postgres psql -c "COPY cycling_trips FROM '/tmp/trips_merged00.csv' DELIMITER ';' CSV HEADER;"
 sudo -i -u postgres psql -c "COPY cycling_trips FROM '/tmp/trips_merged01.csv' DELIMITER ';' CSV HEADER;"
 sudo -i -u postgres psql -c "COPY cycling_trips FROM '/tmp/trips_merged02.csv' DELIMITER ';' CSV HEADER;"
@@ -52,7 +52,7 @@ sudo -i -u postgres psql -c "COPY cycling_trips FROM '/tmp/trips_merged06.csv' D
 sudo -i -u postgres psql -c "COPY cycling_trips FROM '/tmp/trips_merged07.csv' DELIMITER ';' CSV HEADER;"
 
 sudo -i -u postgres psql -c "CREATE TABLE cycling_trips_ref (
-    ride_id float PRIMARY KEY,
+    id float PRIMARY KEY,
     rider_id float,
     trip tgeogpoint 
 );"
@@ -60,7 +60,7 @@ sudo -i -u postgres psql -c "CREATE TABLE cycling_trips_ref (
 sudo -i -u postgres psql -c "SELECT create_reference_table('cycling_trips_ref');"
 sudo -i -u postgres psql -c "INSERT INTO cycling_trips_ref SELECT * FROM cycling_trips;"
 
-sudo -i -u postgres psql -c "SELECT ride_id, rider_id FROM cycling_trips_ref ORDER BY ride_id LIMIT 50;"
+sudo -i -u postgres psql -c "SELECT id, rider_id FROM cycling_trips_ref ORDER BY id LIMIT 50;"
 
 sudo -i -u postgres psql -c "SELECT * FROM cycling_data LIMIT 10;"
 sudo -i -u postgres psql -c "SELECT * FROM cycling_trips LIMIT 10;"

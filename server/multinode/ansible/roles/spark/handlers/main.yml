@@ -1,0 +1,19 @@
+# Bounces YARN's NodeManagers to pick up the spark_shuffle aux-service just registered in
+# yarn-site.xml -- aux-services are only loaded at NodeManager startup, so a config-only change
+# never takes effect on already-running daemons. Reuses the exact same PDSH_RCMD_TYPE=ssh (pdsh's
+# default rcmd module fails with "Permission denied" otherwise) and setsid (the local
+# ResourceManager gets SIGHUP'd and dies if left in the same session as the SSH connection this
+# task runs over) fixes roles/hadoop's own YARN start/stop tasks needed, for the same reasons.
+# delegate_to + run_once: this task may be notified once per host in the play (the shuffle-jar
+# copy above runs on every node), but stop-yarn.sh/start-yarn.sh only ever need to run once, from
+# the master.
+- name: restart yarn nodemanagers
+  become: true
+  become_user: "{{ ansible_user }}"
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  environment:
+    PDSH_RCMD_TYPE: ssh
+  ansible.builtin.shell: |
+    {{ hadoop_home }}/sbin/stop-yarn.sh
+    setsid {{ hadoop_home }}/sbin/start-yarn.sh > /tmp/start-yarn.log 2>&1 < /dev/null &

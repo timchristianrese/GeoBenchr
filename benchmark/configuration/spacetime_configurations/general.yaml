@@ -1,0 +1,227 @@
+benchmark:
+  sut: MobilityDB
+  mixed: false
+  nodes:
+  - ''
+  threads: 16
+  test: false
+  random_seed: 1500
+
+queryConfigs:
+- name: SpatialBBox
+  use: true
+  description: "Application-Agnostic Spatial Range Query, covering 1-5% of the dataset bounding box"
+  type: spatial
+  mobilitydb: |
+  postgis: |
+    SELECT COUNT(*) AS update_count
+    FROM :dataset
+    WHERE ST_Intersects(geom, :region);
+  sample_postgis: |
+    SELECT COUNT(*) AS update_count
+    FROM geolife_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
+                116.38087376650985,
+                39.84297123506521,
+                116.48446967405202,
+                39.89995452866296,
+                4326
+            ), 3857));
+  sedona: |
+    SELECT COUNT(*) AS update_count
+    FROM :dataset
+    WHERE ST_Intersects(geom, :region);
+  spacetime: |
+  clickhouse: |
+   SELECT COUNT(*) AS update_count
+    FROM :dataset
+    WHERE pointInPolygon(geom, :region);
+  repetition: 1 
+  parameters:
+  - region
+- name: kNN
+  use: true
+  description: "Application-Agnostic kNN Query, finding the k nearest neighbors to a given point" 
+  type: spatial
+  mobilitydb: |
+  postgis: |
+    SELECT id, geom, timestamp
+    FROM :dataset
+    WHERE ST_DWithin(geom, :point, :radius)
+    ORDER BY geom <-> :point
+    LIMIT :k;
+  sample_postgis: |
+    SELECT id, geom, timestamp
+    FROM geolife_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_MakePoint(116.391, 39.907), 4326), 3857), 1000)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_MakePoint(116.391, 39.907), 4326), 3857)
+    LIMIT 10;
+  sedona: |
+    SELECT id, geom, timestamp
+    FROM :dataset
+    WHERE ST_Distance(geom, :point) <= :radius
+    ORDER BY ST_Distance(geom, :point)
+    LIMIT :k;
+  spacetime: |
+  clickhouse: |
+    SELECT id, geom, timestamp
+    FROM :dataset
+    WHERE greatCircleDistance(geom, :point) <= :radius
+    ORDER BY greatCircleDistance(geom, :point)
+    LIMIT :k;
+  repetition: 1 
+  parameters:
+  - point
+  - k
+  - radius
+- name: timeInterval
+  use: true
+  description: "Collect all ids within a specified time interval."
+  type: temporal
+  mobilitydb: |
+  postgis: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :dataset
+    WHERE timestamp BETWEEN :period;
+  sample_postgis: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM geolife_points
+    WHERE timestamp between '2019-07-02 03:48:22' and '2019-07-03 04:20:27';
+  sedona: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :dataset
+    WHERE timestamp BETWEEN :period;
+  spacetime: |
+  clickhouse: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :dataset
+    WHERE timestamp BETWEEN :period;
+  repetition: 1 
+  parameters:
+  - period
+- name: timeAggregation
+  use: true
+  description: "Aggregate the number of points per id within a specified time interval, grouped by hour."
+  type: temporal
+  mobilitydb: |
+  postgis: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM :dataset
+    WHERE timestamp between :period 
+    GROUP BY hour, id
+    ORDER BY hour;
+  
+  sample_postgis: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM geolife_points
+    WHERE timestamp between '2019-07-02 03:48:22' and '2019-07-02 04:20:27'
+    GROUP BY hour, id
+    ORDER BY hour;
+  sedona: |
+    
+  spacetime: |
+  clickhouse: |
+    SELECT toStartOfHour(timestamp) AS hour,
+       id,
+       COUNT(*) AS cnt
+    FROM :dataset
+    WHERE timestamp between :period
+    GROUP BY hour, id
+    ORDER BY hour;
+  repetition: 1 
+  parameters:
+  - period
+- name: spatioTemporalRange
+  use: true
+  description: "Get all ids within a specified time interval and spatial region."
+  type: spatiotemporal
+  mobilitydb: |
+  postgis: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :dataset
+    WHERE timestamp BETWEEN :period
+      AND ST_Intersects(geom, :region);
+  sample_postgis: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM geolife_points
+    WHERE timestamp BETWEEN '2019-07-02 03:48:22' AND '2019-07-03 04:20:27'
+      AND ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
+                116.38087376650985,
+                39.84297123506521,
+                116.48446967405202,
+                39.89995452866296,
+                4326
+            ), 3857));
+  sedona: |
+    
+  spacetime: |
+  clickhouse: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :dataset
+    WHERE timestamp BETWEEN :period
+      AND pointInPolygon(geom, :region);
+  repetition: 1 
+  parameters:
+  - period
+  - region
+- name: IDsInsideRegion1Andsecond_region
+  use: true
+  description: "Find users who have activities in two specified regions during a given time period."
+  type: spatiotemporal
+  mobilitydb: |
+  postgis: |
+   SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM :dataset
+        WHERE timestamp BETWEEN :period
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, :region)) AND BOOL_OR(ST_Intersects(geom, :second_region))
+    ) AS matching_ids;
+  sample_postgis: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM geolife_points
+    WHERE timestamp BETWEEN '2019-07-02 03:48:22' AND '2019-07-03 04:20:27'
+    GROUP BY id
+    HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
+                116.38087376650985,
+                39.84297123506521,
+                116.48446967405202,
+                39.89995452866296,
+                4326
+            ), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_MakeEnvelope(
+                116.391,
+                39.907,
+                116.392,
+                39.908,
+                4326
+            ), 3857)));
+  sedona: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM :dataset
+        WHERE timestamp BETWEEN :period
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, :region)) AND BOOL_OR(ST_Intersects(geom, :second_region))
+    ) AS matching_ids;
+  spacetime: |
+  clickhouse: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM :dataset
+        WHERE timestamp BETWEEN :period
+        GROUP BY id
+        HAVING countIf(pointInPolygon((lon, lat), :region)) > 0
+          AND countIf(pointInPolygon((lon, lat), :second_region)) > 0
+    );
+  repetition: 1
+  parameters:
+  - region
+  - second_region
+  - period

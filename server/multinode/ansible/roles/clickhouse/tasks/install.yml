@@ -1,0 +1,107 @@
+# Gated on purge_conflicting_installs (see roles/postgres/tasks/main.yml for the full rationale):
+# default true for disposable test VMs, false for inventory/nst-cluster's partner-owned production
+# machines so we don't stop/uninstall/delete anything on the strength of "SpaceTime probably
+# doesn't use ClickHouse either".
+- name: Stop any running ClickHouse services
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+  loop:
+    - clickhouse-server
+    - clickhouse-keeper
+  ignore_errors: yes
+  when: purge_conflicting_installs | default(true)
+
+- name: Make sure HDFS is not running
+  ansible.builtin.shell: |
+    {{ hadoop_home }}/sbin/stop-all.sh || true
+  ignore_errors: yes
+  become_user: "{{ ansible_user }}"
+
+- name: Ensure data directory exists with correct permissions
+  file:
+    path: "{{ clickhouse_data_dir }}"
+    state: directory
+    mode: '0777'
+
+- name: Uninstall clickhouse if already installed
+  apt:
+    name:
+      - clickhouse-server
+      - clickhouse-client
+      - clickhouse-keeper
+    state: absent
+    purge: yes
+    update_cache: yes
+  when: purge_conflicting_installs | default(true)
+
+- name: Make sure old Clickhouse directories are removed (even if not empty)
+  ansible.builtin.file:
+    state: absent
+    path: "{{ item }}"
+  loop:
+    - /etc/clickhouse-server/
+    - /etc/clickhouse-keeper/
+    - /var/lib/clickhouse/
+    - /var/log/clickhouse-server/
+    - /var/log/clickhouse-keeper/
+  when: purge_conflicting_installs | default(true)
+
+- name: Install prerequisite packages
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+    update_cache: yes
+
+- name: Ensure keyring directory exists
+  file:
+    path: /usr/share/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Download ClickHouse GPG key
+  get_url:
+    url: https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key
+    dest: /tmp/clickhouse.key
+    mode: '0644'
+
+- name: Convert GPG key to keyring format
+  command: >
+    gpg --dearmor -o /usr/share/keyrings/clickhouse-keyring.gpg /tmp/clickhouse.key
+  args:
+    creates: /usr/share/keyrings/clickhouse-keyring.gpg
+
+- name: Get system architecture
+  command: dpkg --print-architecture
+  register: arch_result
+  changed_when: false
+
+- name: Add ClickHouse repository
+  copy:
+    dest: /etc/apt/sources.list.d/clickhouse.list
+    content: |
+      deb [signed-by=/usr/share/keyrings/clickhouse-keyring.gpg arch={{ arch_result.stdout }}] https://packages.clickhouse.com/deb stable main
+    mode: '0644'
+
+- name: Update apt package lists
+  apt:
+    update_cache: yes
+
+- name: Install ClickHouse
+  apt:
+    name:
+      - clickhouse-server
+      - clickhouse-client
+    state: present
+    update_cache: yes
+# - name: Install keeper (master only)
+#   apt:
+#     name: clickhouse-keeper
+#     state: present
+#     update_cache: yes
+#   when: inventory_hostname in groups['masters']

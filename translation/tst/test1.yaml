@@ -1,24 +1,24 @@
 #equality filter + two-field sort
 - name: test1
 
-  source: utilisateurs
+  source: users
 
   select:
     - id
-    - nom
-    - prenom
+    - firstname
+    - lastname
     - age
-    - pays
-    - date_inscription
+    - country
+    - date
 
   filter:
-    - field: pays
+    - field: country
       operator: eq
       value: France
       type: str
 
   order_by:
-    - field: nom
+    - field: lastname
       direction: asc
-    - field: prenom
+    - field: firstname
       direction: asc

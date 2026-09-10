@@ -10,7 +10,7 @@ The Python script requires the setup of a venv
 
 ```
 You then need to train the model on the data provided by the DFS, which requires the data to be in a specific format, that being
-Flight_ID, airplane, origin, destination, Point (WKT Format), Timestamp, Altitude.  
+id, airplane, origin, destination, Point (WKT Format), Timestamp, Altitude.  
 Example:  
 ```
 69187756;B738;LLBG;EHAM;POINT(8.739094938110629 51.17534355710495);2023-01-02 18:17:18;11581.7
@@ -21,12 +21,10 @@ cd process_data
 python process_data.py <link/to/flight.csv>
 python preprocess_to_tensor.py
 ```
-Then you can generate trajectories using parallel workers as such
-
- ```
- python generate_parallele_traj.py --workers <number of workers>
- ```
- Example:
-  ```
- python generate_parallele_traj.py --workers 4
- ```
+Then you can generate trajectories as such (batch size, trajectory count, etc. are configured via
+the constants at the top of the script rather than CLI flags; output goes to `generated_parquet/`)
+```
+python generate_parallele_traj_new.py
+```
+(`generate_parallele_traj.py`, the older `--workers <N>`-based version this replaced, has moved to
+`old/` -- its documented `generated/` output directory no longer exists in this project.)

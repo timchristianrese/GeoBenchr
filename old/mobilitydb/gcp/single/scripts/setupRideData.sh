@@ -1,5 +1,5 @@
 sudo -i -u postgres psql -c "CREATE TABLE cycling_data (
-    ride_id float,
+    id float,
     rider_id float,
     latitude float,
     longitude float,
@@ -27,7 +27,7 @@ sudo -i -u postgres psql -c "CREATE INDEX idx_cycling_data_latitude ON cycling_d
 sudo -i -u postgres psql -c "CREATE INDEX idx_cycling_data_longitude ON cycling_data (longitude);"
 
 sudo -i -u postgres psql -c "CREATE TABLE cycling_trips (
-  ride_id float,
+  id float,
   rider_id float,
   trip tgeogpoint
 );"

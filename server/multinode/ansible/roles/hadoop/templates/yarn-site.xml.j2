@@ -3,7 +3,25 @@
     <name>yarn.resourcemanager.hostname</name>
     <value>{{ groups['masters'][0] }}</value>
   </property>
-
+  <!-- FIX: was hardcoded to 12288 (12GB) regardless of what the workers actually have. See
+       roles/common's "Compute each worker's real usable YARN NodeManager capacity" for why.
+       yarn_nm_memory_mb/yarn_nm_vcores are that same computed, real capacity. -->
+  <property>
+    <name>yarn.scheduler.maximum-allocation-mb</name>
+    <value>{{ yarn_nm_memory_mb }}</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.maximum-allocation-vcores</name>
+    <value>{{ yarn_nm_vcores }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.memory-mb</name>
+    <value>{{ yarn_nm_memory_mb }}</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.resource.cpu-vcores</name>
+    <value>{{ yarn_nm_vcores }}</value>
+  </property>
   <property>
     <name>yarn.nodemanager.aux-services</name>
     <value>mapreduce_shuffle</value>

@@ -10,6 +10,7 @@
       - wget
       - gnupg
       - lsb-release
+      - unzip
     state: present
 
 - name: Install prerequisites
@@ -28,9 +29,115 @@
   file:
     path: "{{ item }}"
     state: directory
-    owner: debian
-    group: debian
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
     mode: '0755'
   loop:
     - /opt/hadoop
     - /opt/spark
+
+# FIX: cross-node config elsewhere in this project (Citus's citus_add_node(), Hadoop's
+# core-site.xml/yarn-site.xml/workers, ClickHouse's remote_servers/keeper raft_configuration)
+# all reference cluster nodes by their bare inventory hostname (e.g. "geobenchr-sut-3"), not by
+# IP -- but nothing previously configured actual name resolution for those hostnames anywhere.
+# That only worked before because the specific cloud environment happened to resolve them via
+# DNS; nothing here guaranteed it, so it silently breaks on fresh servers without that DNS setup.
+# Deriving /etc/hosts entries straight from the inventory's own "ip:" values (rather than
+# hardcoding a hosts file, or assuming DNS) makes this work regardless of which specific
+# hostnames/IPs this run's inventory.yml lists.
+#
+# FIX: this block used to land wherever blockinfile's default (end of file) puts it. On
+# nst-cluster's Hetzner-provisioned hardware, /etc/hosts already has a provider-written line
+# mapping each node's own hostname to its *public* IP (e.g. "5.9.87.117 nst-1", installed before
+# this role ever runs) -- glibc's IPv4 hostname resolution returns the *first* matching line in
+# the file, so appending our private-VLAN mapping after it left that pre-existing public-IP entry
+# in charge. Confirmed on-target: Hadoop's NameNode ended up bound to the public IP instead of
+# the private one every other node actually reaches it on, and every worker's HDFS check failed
+# with "Connection refused" (the public interface was reachable but nothing was listening there
+# on that port).
+#
+# FIX: `insertafter: BOF` (which roles/postgres also has, for the same underlying reason -- fixed
+# alongside this) is not a real special value; "BOF" only means "beginning of file" for
+# `insertbefore`. `insertafter`'s only special value is `EOF`, and "BOF" isn't a regex any line
+# matches, so `insertafter: BOF` silently fell through to blockinfile's documented
+# no-match-found behavior for insertafter, which is EOF -- reproducing the exact bug this was
+# meant to fix (confirmed on-target: the block still landed at the end of /etc/hosts after this
+# "fix", still losing to Hetzner's pre-existing public-IP line). `insertbefore: BOF` is the
+# parameter/value pair that actually means what both of these comments intended.
+- name: Add cluster hosts to /etc/hosts for private-network name resolution
+  ansible.builtin.blockinfile:
+    path: /etc/hosts
+    marker: "# {mark} ANSIBLE MANAGED CLUSTER HOSTS"
+    insertbefore: BOF
+    block: |
+      {% for host in groups['all'] %}
+      {{ hostvars[host].ip }} {{ host }}
+      {% endfor %}
+
+# FIX: roles/hadoop's yarn-site.xml hardcoded yarn.nodemanager.resource.memory-mb to 12288 (12GB)
+# regardless of what the workers actually have -- on this project's own test VMs (2 vCPU / ~3.9GB
+# each) that's 3x more memory than physically exists, so YARN would happily schedule containers
+# the OS then OOM-kills. It also never set cpu-vcores at all, silently falling back to Hadoop's
+# built-in default (8) rather than these nodes' real 2. Computing both from gathered facts (the
+# *minimum* across every worker, so a run against heterogeneous hardware doesn't overcommit
+# whichever node is smallest) fixes both, and does so automatically for whatever the inventory's
+# actual node sizes are -- nothing to hand-tune per environment.
+#
+# This also answers "how many Spark executors should the cluster run" (roles/spark's dynamic
+# allocation setup): with executor size derived the same way, max useful executors is just
+# (how many fit on one worker) * (how many workers) -- computed here once so both roles agree,
+# since common runs first in every playbook (hadoop.yml and spark.yml can each be run standalone,
+# so this can't just be a spark-role-only fact: whichever role runs, it needs to already exist).
+#
+# FIX: this used to run unconditionally, but it reads every worker's hostvars directly (rather
+# than being scoped to `hosts: workers`/`all`), which only actually have facts gathered when the
+# *current* play's `hosts:` includes them. playbooks/duckdb.yml runs common on `hosts: masters`
+# only (duckdb itself never needs Hadoop/Spark sizing) -- against a real inventory (as opposed to
+# a fact cache already warmed by an earlier play in the same run, e.g. playbooks/all.yml running
+# this after its own `hosts: all` Hadoop/Spark play), that failed outright with "object of type
+# 'HostVarsVars' has no attribute 'ansible_memtotal_mb'" for every worker. Skipping when the first
+# worker's facts aren't there yet fixes standalone duckdb.yml (which doesn't need these facts at
+# all) while still computing normally for hadoop.yml/spark.yml/sedona.yml/mobilitydb_cluster.yml/
+# postgis_cluster.yml (all `hosts: all`) and clickhouse_cluster.yml (`hosts: clickhouse`, which is
+# every node per inventory/*/hosts.yml's `clickhouse` group) -- and for duckdb.yml specifically
+# when it runs as part of all.yml, since that play's earlier `hosts: all` plays already gathered
+# every worker's facts by the time this one runs.
+- name: Compute each worker's real usable YARN NodeManager capacity
+  ansible.builtin.set_fact:
+    yarn_nm_memory_mb: >-
+      {{ [(groups['workers'] | map('extract', hostvars, 'ansible_memtotal_mb') | map('int') | list | min) - 1024, 1024] | max }}
+    yarn_nm_vcores: >-
+      {{ [groups['workers'] | map('extract', hostvars, 'ansible_processor_vcpus') | map('int') | list | min, 1] | max }}
+  when: hostvars[groups['workers'][0]].ansible_memtotal_mb is defined
+
+# Cores per executor: keep this project's existing default of 2 as an upper bound (a well-known
+# reasonable middle ground -- enough parallelism per executor without the HDFS-client-throughput
+# problems very wide executors run into) but never request more cores than a single worker
+# actually has, or the request could never be satisfied.
+# Memory per executor: same idea against the existing 2g default, with a 10% margin held back for
+# Spark's own executorMemoryOverhead (its default add-on above spark.executor.memory) so the real
+# YARN container request -- executor memory plus that overhead -- still fits on the node.
+- name: Compute Spark executor sizing from that same capacity
+  ansible.builtin.set_fact:
+    spark_executor_cores: "{{ [yarn_nm_vcores | int, 2] | min }}"
+    spark_executor_memory_mb: "{{ [((yarn_nm_memory_mb | int) / 1.1) | int, 2048] | min }}"
+  when: yarn_nm_vcores is defined
+
+# Optimal (== maximum useful) executor count for dynamic allocation: how many executors of that
+# size fit on one worker -- bounded by whichever of vcores/memory runs out first -- times how many
+# workers there are. minExecutors: 0 so an idle cluster scales all the way back down; initial: 1
+# so the first job doesn't wait a full scheduler-backlog cycle before anything starts.
+- name: Compute cluster-wide executor count bounds for Spark dynamic allocation
+  ansible.builtin.set_fact:
+    spark_executors_per_node: >-
+      {{ [ [ (yarn_nm_vcores | int) // (spark_executor_cores | int),
+             (yarn_nm_memory_mb | int) // (spark_executor_memory_mb | int) ] | min,
+           1 ] | max }}
+  when: spark_executor_cores is defined
+
+- name: Compute cluster-wide max/min/initial executors
+  ansible.builtin.set_fact:
+    spark_dynamic_max_executors: "{{ (spark_executors_per_node | int) * (groups['workers'] | length) }}"
+    spark_dynamic_min_executors: 0
+    spark_dynamic_initial_executors: "{{ [(spark_executors_per_node | int) * (groups['workers'] | length), 1] | min }}"
+  when: spark_executors_per_node is defined
