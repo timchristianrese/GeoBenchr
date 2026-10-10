@@ -23,23 +23,23 @@ gitignored) so client overhead doesn't compete with the systems under test for C
 | `flight_points` (aviation) | 2,703,631,682 | 2,703,631,682 | 2,703,631,682 | 2,703,631,682 (124 partitions, ~450MB each) | not independently re-verified this session (config declares 500,000,000 as a capacity/planner stat, not a live count) |
 | `ride_points` (cycling) | 1,178,625,381 | 1,178,625,381 | 1,178,625,381 | exported, 256 partitions | not independently re-verified (config: 1,000,000,000, likely a stat) |
 | `geolife_points` | 3,960,126,695 | 3,960,126,695 | 3,960,126,695 | exported, 128 partitions | not independently re-verified |
-| `crossing_points` (ais) | 3,817,218,804 | 3,817,292,082 (0.0019% gap, accepted — see COORDINATION.md) | 3,817,218,804 | exported, 256 partitions | not independently re-verified (config: 10,000,000,000, likely a stat) |
+| `crossing_points` (ais) | 3,817,218,804 | 3,817,292,082 (0.0019% gap, accepted) | 3,817,218,804 | exported, 256 partitions | not independently re-verified (config: 10,000,000,000, likely a stat) |
 
 All 4 point tables carry `id bigint`/`UInt64` (crossing_points was migrated from a broken `varchar`
 id this session), a `geom` column (`geometry(Point,3857)` in Postgres/DuckDB, WKB bytes in the
 Sedona Parquet export, `lat`/`lon` scalars + materialized `Point`/`h3` in ClickHouse), and a
 `timestamp`/`t` column. `flight_points`/`ride_points`/`crossing_points` additionally carry a
 `line_geom` (connects consecutive points of the same trip; NULL across month-partition boundaries
-for `crossing_points`, see COORDINATION.md) — `geolife_points` has no `line_geom` at all.
+for `crossing_points`) — `geolife_points` has no `line_geom` at all.
 
 ## Trip-summary tables (one row per trip)
 
 Distinct from the MobilityDB-native `flights`/`rides`/`crossings` tgeompoint tables below — these
 are generic, engine-portable tables: `id, start_time, end_time, num_points, start_location,
 end_location` (+`min_altitude`/`max_altitude` for flights, +`rider_id` for rides). Rebuilt
-2026-09-22 from current point-table data (previous copies were stale — see COORDINATION.md for the
-rebuild methodology, including a ClickHouse Distributed-table `INSERT...SELECT` fan-out bug hit and
-fixed along the way).
+2026-09-22 from current point-table data (previous copies were stale; the ClickHouse rebuild aggregates into a
+single-node `MergeTree` staging table first, because `INSERT...SELECT` from one Distributed table into
+another ran the aggregation once per shard).
 
 | Table | Postgres | ClickHouse | DuckDB | Sedona/HDFS |
 |---|---|---|---|---|
@@ -83,7 +83,7 @@ geoToH3(lat, lon, 9)` column — an H3-cell-then-time-then-id clustering, not a 
 
 **DuckDB**: RTREE spatial indexing on the 4 billion-row point tables has failed 5 separate times
 (2 tables, 13.9GB–55GB memory limits) with a hard OOM — confirmed a real architectural ceiling for
-tables this large, **not attempted further, on hold per user decision** (see COORDINATION.md).
+tables this large, **not attempted further, on hold per user decision**.
 The 3 `_summary` tables are 1–3 orders of magnitude smaller (2M–50M rows) and their RTREE indexes
 on `start_location`/`end_location` **built successfully in under 16 seconds total** — direct
 confirmation the OOM is about raw table size, not RTREE itself.
@@ -104,7 +104,7 @@ e.g. `flight_points`: `kdtree(flight_id, t, x, y)`; `flights`: `kdtree(flight_id
   `SpaceTimeExecutor`) before relying on them.
 - `crossing_points` has a persistent small ClickHouse-vs-Postgres row-count gap (~0.0019–0.0009%
   across the raw table and its summary), accepted as within the same class of cross-file-duplicate
-  noise documented elsewhere in COORDINATION.md — not chased further.
+  noise — not chased further.
 - The Sedona summary-table verification run logged one non-fatal
   `NoClassDefFoundError: org/apache/spark/sql/catalyst/expressions/FoldableUnevaluable` (an
   internal Spark/AQE optimizer path) — the query still returned correct, fully-matching results,

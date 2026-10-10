@@ -223,8 +223,8 @@ queryConfigs:
     -- type, so "every point of the trajectory stays within :radius of the district" cannot be
     -- expressed here at all -- see the EQUIVALENCE NOTE above. This is a genuine capability
     -- gap, not a translation left undone; do not re-open without a real ClickHouse feature that
-    -- changes this (matching the precedent set for the islands/universities distance gap in
-    -- COORDINATION.md's item 2, before that one *was* resolved by finding
+    -- changes this (matching the precedent set for the islands/universities distance gap,
+    -- before that one *was* resolved by finding
     -- polygonsDistanceSpherical -- if a similar function is ever found for per-group spatial
     -- BOOL_AND, this should be revisited the same way).
 
@@ -510,7 +510,7 @@ queryConfigs:
     -- metric as ST_DWithin/edwithin for the comparison to be meaningful. geom is stored raw in
     -- WGS84 degrees, so polygonsDistanceCartesian on it directly gives degree-space distance,
     -- not meters -- both operands are reprojected into Web Mercator (EPSG:3857) via the
-    -- webMercatorX/webMercatorY UDFs (created ON CLUSTER cluster_1 -- see COORDINATION.md)
+    -- webMercatorX/webMercatorY UDFs (created ON CLUSTER cluster_1 -- see scripts/clickhouse_functions.sql)
     -- before the distance call, matching the metric PostGIS/Sedona's ST_DWithin uses under
     -- ST_Transform(...,3857). universities.geom is always MultiPolygon here (confirmed live,
     -- all 8 rows) -- unlike islands, no variantType dispatch is needed, so geom.MultiPolygon is
@@ -538,7 +538,7 @@ queryConfigs:
     -- metric as ST_DWithin/edwithin for the comparison to be meaningful. geom is stored raw in
     -- WGS84 degrees, so polygonsDistanceCartesian on it directly gives degree-space distance,
     -- not meters -- both operands are reprojected into Web Mercator (EPSG:3857) via the
-    -- webMercatorX/webMercatorY UDFs (created ON CLUSTER cluster_1 -- see COORDINATION.md)
+    -- webMercatorX/webMercatorY UDFs (created ON CLUSTER cluster_1 -- see scripts/clickhouse_functions.sql)
     -- before the distance call, matching the metric PostGIS/Sedona's ST_DWithin uses under
     -- ST_Transform(...,3857). universities.geom is always MultiPolygon here (confirmed live,
     -- all 8 rows) -- unlike islands, no variantType dispatch is needed, so geom.MultiPolygon is

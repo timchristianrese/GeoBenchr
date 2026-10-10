@@ -239,7 +239,7 @@ queryConfigs:
     -- below -- the harness needs to supply them for ClickHouse specifically (same treatment as
     -- ClosestRestaurantToPoint in geolife_benchmark.yaml).
     -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance, a SQL UDF
-    -- (created ON CLUSTER cluster_1 -- see COORDINATION.md) that projects both points into Web
+    -- (created ON CLUSTER cluster_1 -- see scripts/clickhouse_functions.sql) that projects both points into Web
     -- Mercator (EPSG:3857) and takes the planar Euclidean distance, matching ST_DWithin/<->'s
     -- metric exactly rather than approximately -- see ais/config/combinedBenchConf.yaml's
     -- crossingsAroundHarbour clickhouse block for the formula derivation and live verification
@@ -258,7 +258,7 @@ queryConfigs:
     -- below -- the harness needs to supply them for ClickHouse specifically (same treatment as
     -- ClosestRestaurantToPoint in geolife_benchmark.yaml).
     -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance, a SQL UDF
-    -- (created ON CLUSTER cluster_1 -- see COORDINATION.md) that projects both points into Web
+    -- (created ON CLUSTER cluster_1 -- see scripts/clickhouse_functions.sql) that projects both points into Web
     -- Mercator (EPSG:3857) and takes the planar Euclidean distance, matching ST_DWithin/<->'s
     -- metric exactly rather than approximately -- see ais/config/combinedBenchConf.yaml's
     -- crossingsAroundHarbour clickhouse block for the formula derivation and live verification

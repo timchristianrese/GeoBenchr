@@ -212,7 +212,7 @@ queryConfigs:
     -- which are NOT currently in this query's shared `parameters:` list below --
     -- the harness needs to supply them for ClickHouse specifically.
     -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance, a SQL UDF
-    -- (created ON CLUSTER cluster_1 -- see COORDINATION.md) that projects both points into Web
+    -- (created ON CLUSTER cluster_1 -- see scripts/clickhouse_functions.sql) that projects both points into Web
     -- Mercator (EPSG:3857) and takes the planar Euclidean distance, matching ST_DWithin/
     -- ST_Distance's metric exactly even at Beijing's latitude -- see
     -- ais/config/combinedBenchConf.yaml's crossingsAroundHarbour clickhouse block for the
@@ -231,7 +231,7 @@ queryConfigs:
     -- which are NOT currently in this query's shared `parameters:` list below --
     -- the harness needs to supply them for ClickHouse specifically.
     -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance, a SQL UDF
-    -- (created ON CLUSTER cluster_1 -- see COORDINATION.md) that projects both points into Web
+    -- (created ON CLUSTER cluster_1 -- see scripts/clickhouse_functions.sql) that projects both points into Web
     -- Mercator (EPSG:3857) and takes the planar Euclidean distance, matching ST_DWithin/
     -- ST_Distance's metric exactly even at Beijing's latitude -- see
     -- ais/config/combinedBenchConf.yaml's crossingsAroundHarbour clickhouse block for the

@@ -106,8 +106,7 @@
 -- DuckDB: has its own materialized copy of these tables (see roles/duckdb's "Materialize
 -- GeoBenchr tables" task) -- also very likely has the same varchar id, not independently verified
 -- here. Deliberately not touched by this investigation -- the Quack server / DuckDB CLI file was
--- flagged busy by another session (geolife_points RTREE index work) at the time this was written;
--- check current status in COORDINATION.md before touching it.
+-- flagged busy by another session (geolife_points RTREE index work) at the time this was written.
 --
 -- SpaceTime: does NOT use a uniform "id" column at all -- its own schema keys per scenario
 -- (crossing_id, flight_id, etc. -- see purge_scratch_writes.sql's note on this), which appears to

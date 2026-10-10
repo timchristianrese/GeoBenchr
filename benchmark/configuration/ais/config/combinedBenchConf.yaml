@@ -270,7 +270,7 @@ queryConfigs:
     -- variantType(geom); the final multiIf branch is unreachable for islands' actual data (no
     -- other shape exists here) and only exists so the expression type-checks.
     -- webMercatorX/webMercatorY/webMercatorDistance are SQL UDFs created ON CLUSTER cluster_1
-    -- (see COORDINATION.md) -- same projection used by crossingsAroundHarbour's point-to-point
+    -- (see scripts/clickhouse_functions.sql) -- same projection used by crossingsAroundHarbour's point-to-point
     -- fix, reused here for the point operand and inlined into the polygon reprojection.
     -- Written as array(array(tuple(...))) rather than the equivalent [[(...)]] literal syntax on
     -- purpose: this file's own process_file() (generateParameterVariations.py) does a blanket
@@ -315,7 +315,7 @@ queryConfigs:
     -- variantType(geom); the final multiIf branch is unreachable for islands' actual data (no
     -- other shape exists here) and only exists so the expression type-checks.
     -- webMercatorX/webMercatorY/webMercatorDistance are SQL UDFs created ON CLUSTER cluster_1
-    -- (see COORDINATION.md) -- same projection used by crossingsAroundHarbour's point-to-point
+    -- (see scripts/clickhouse_functions.sql) -- same projection used by crossingsAroundHarbour's point-to-point
     -- fix, reused here for the point operand and inlined into the polygon reprojection.
     -- Written as array(array(tuple(...))) rather than the equivalent [[(...)]] literal syntax on
     -- purpose: this file's own process_file() (generateParameterVariations.py) does a blanket
@@ -385,7 +385,7 @@ queryConfigs:
     -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
     -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
     -- FIX (2026-09-30, metric parity): replaced greatCircleDistance (true great-circle metric)
-    -- with webMercatorDistance, a SQL UDF (created ON CLUSTER cluster_1 -- see COORDINATION.md)
+    -- with webMercatorDistance, a SQL UDF (created ON CLUSTER cluster_1 -- see scripts/clickhouse_functions.sql)
     -- that projects both points into Web Mercator (EPSG:3857) and takes the planar Euclidean
     -- distance -- the same metric ST_DWithin/edwithin use, not just the same units. Verified
     -- live against real data: harbour='Tjerkwerd', radius=20000 returns the exact same 299-row
@@ -407,7 +407,7 @@ queryConfigs:
       AND c.id > 0 AND c.id < 1000000000000;
   clickhouse_scan: |
     -- FIX (2026-09-30, metric parity): replaced greatCircleDistance (true great-circle metric)
-    -- with webMercatorDistance, a SQL UDF (created ON CLUSTER cluster_1 -- see COORDINATION.md)
+    -- with webMercatorDistance, a SQL UDF (created ON CLUSTER cluster_1 -- see scripts/clickhouse_functions.sql)
     -- that projects both points into Web Mercator (EPSG:3857) and takes the planar Euclidean
     -- distance -- the same metric ST_DWithin/edwithin use, not just the same units. Verified
     -- live against real data: harbour='Tjerkwerd', radius=20000 returns the exact same 299-row

@@ -200,7 +200,7 @@ linestrings; `universities`: campus MultiPolygons) — they belong in the same c
 `berlin_districts`/`counties`, not `harbours`/`cities`.
 
 This was researched and formally closed as permanently unfixed on 2026-09-18
-(`COORDINATION.md` item 2) — that research checked `system.functions` for anything
+— that research checked `system.functions` for anything
 `ST_%`/`%geo%`/`%centroid%` and concluded ClickHouse has no point-to-geometry distance
 function at all, only polygon-to-polygon (`polygonsDistanceSpherical`/`Cartesian`), and
 that a materialized-centroid workaround (matching `cities`/`harbours`) isn't sound for

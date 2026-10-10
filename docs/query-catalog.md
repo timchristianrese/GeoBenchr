@@ -8,11 +8,10 @@ per-dialect, per-parameter-set YAMLs actually consumed by `benchmark_client`
 the generated files directly.
 
 **"Dialects" below** lists which dialect blocks exist in the source config for that query, not
-whether the query is confirmed working on that dialect — see `COORDINATION.md` for known per-query,
-per-dialect bugs and fixes (ClickHouse Distributed-JOIN denial, PostGIS-only functions used in
-ClickHouse blocks, malformed `BETWEEN` quoting, the `crossing_points.id` type migration, the
-`region_*` lat/lon parameter bug, and others — all found and fixed this session unless noted
-otherwise). `sample_postgis` is a lightweight PostGIS variant used for the general/write-heavy
+whether the query is confirmed working on that dialect. Per-query, per-dialect bugs found and
+fixed by 2026-09-22 include ClickHouse Distributed-JOIN denial, PostGIS-only functions used in
+ClickHouse blocks, malformed `BETWEEN` quoting, the `crossing_points.id` type migration and the
+`region_*` lat/lon parameter bug. `sample_postgis` is a lightweight PostGIS variant used for the general/write-heavy
 query set's sampling comparison, not a 7th engine.
 
 **60 query definitions total** across 5 scenarios: 6 general + 13 aviation + 14 cycling +
