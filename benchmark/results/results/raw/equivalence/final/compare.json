@@ -1,0 +1,434 @@
+[
+ {
+  "key": "ais/CrossingsActiveAtGivenHourOfDay",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "ais/HarbourActivityInPeriod",
+  "postgis": "0 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME (zero-count row)",
+  "sedona": "SAME"
+ },
+ {
+  "key": "ais/IDsInsideRegion1Andsecond_region",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "ais/SpatialBBox",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "ais/busiestDayInWeekPeriod",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "ais/countActiveCrossingsNearIsland",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "ais/crossingsAroundHarbour",
+  "postgis": "0 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "ais/islandOrCoastLineCrossingsInPeriod",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "ais/kNN",
+  "postgis": "4 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "KNN (geometry format / ties at equal distance)",
+  "duckdb": "KNN (geometry format / ties at equal distance)",
+  "spacetime": "KNN (geometry format / ties at equal distance)",
+  "sedona": "KNN (geometry format / ties at equal distance)"
+ },
+ {
+  "key": "ais/spatioTemporalRange",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "ais/timeAggregation",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "ais/timeInterval",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "aviation/CityActivityAtInstant",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "aviation/FlightsAtLowAltitudeInPeriod",
+  "postgis": "155942 rows",
+  "mobilitydb": "SAME COUNT",
+  "clickhouse": "SAME COUNT",
+  "duckdb": "SAME COUNT",
+  "spacetime": "CLOSE COUNT 155941 vs 155942 (0.001 %)",
+  "sedona": "SAME COUNT"
+ },
+ {
+  "key": "aviation/FlightsAtNightInPeriod",
+  "postgis": "102179 rows",
+  "mobilitydb": "SAME COUNT",
+  "clickhouse": "SAME COUNT",
+  "duckdb": "SAME COUNT",
+  "spacetime": "SAME COUNT",
+  "sedona": "SAME COUNT"
+ },
+ {
+  "key": "aviation/IDsInsideRegion1Andsecond_region",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "aviation/SpatialBBox",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "aviation/countFlightsInCounties",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "CLOSE (max 0.000 %)",
+  "duckdb": "SAME",
+  "spacetime": "CLOSE (max 0.000 %)",
+  "sedona": "SAME"
+ },
+ {
+  "key": "aviation/flightClosestToPoint",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "CLOSE (max 0.378 %)",
+  "sedona": "SAME"
+ },
+ {
+  "key": "aviation/flightsInCountyInPeriod",
+  "postgis": "22506 rows",
+  "mobilitydb": "SAME COUNT",
+  "clickhouse": "SAME COUNT",
+  "duckdb": "SAME COUNT",
+  "spacetime": "SAME COUNT",
+  "sedona": "SAME COUNT"
+ },
+ {
+  "key": "aviation/kNN",
+  "postgis": "5 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "KNN (geometry format / ties at equal distance)",
+  "duckdb": "KNN (geometry format / ties at equal distance)",
+  "spacetime": "KNN (geometry format / ties at equal distance)",
+  "sedona": "KNN (geometry format / ties at equal distance)"
+ },
+ {
+  "key": "aviation/spatioTemporalRange",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "aviation/timeAggregation",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "CLOSE (max 0.000 %)",
+  "sedona": "SAME"
+ },
+ {
+  "key": "aviation/timeInterval",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "CLOSE (max 0.001 %)",
+  "sedona": "SAME"
+ },
+ {
+  "key": "cycling/AverageUpdatesPerRideInDistrictInPeriod",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "CLOSE (max 0.006 %)",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "cycling/CountRidesFullyInDistrictRadius",
+  "postgis": "414206 rows",
+  "mobilitydb": "SAME COUNT",
+  "clickhouse": "n/a",
+  "duckdb": "SAME COUNT",
+  "spacetime": "CLOSE COUNT 414216 vs 414206 (0.002 %)",
+  "sedona": "SAME COUNT"
+ },
+ {
+  "key": "cycling/IDsInsideRegion1Andsecond_region",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "cycling/RidesAcrossMultipleHours",
+  "postgis": "3628 rows",
+  "mobilitydb": "SAME COUNT",
+  "clickhouse": "SAME COUNT",
+  "duckdb": "SAME COUNT",
+  "spacetime": "SAME COUNT",
+  "sedona": "SAME COUNT"
+ },
+ {
+  "key": "cycling/RidesDuringRushHourInPeriod",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "cycling/RidesPastOrToUniversityInPeriod",
+  "postgis": "14610 rows",
+  "mobilitydb": "SAME COUNT",
+  "clickhouse": "CLOSE COUNT 14614 vs 14610 (0.027 %)",
+  "duckdb": "SAME COUNT",
+  "spacetime": "SAME COUNT",
+  "sedona": "SAME COUNT"
+ },
+ {
+  "key": "cycling/SpatialBBox",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "cycling/countRideInDistrict",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "CLOSE (max 0.000 %)",
+  "duckdb": "SAME",
+  "spacetime": "CLOSE (max 0.082 %)",
+  "sedona": "SAME"
+ },
+ {
+  "key": "cycling/kNN",
+  "postgis": "0 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "cycling/spatioTemporalRange",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "cycling/timeAggregation",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "CLOSE (max 0.044 %)",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "cycling/timeInterval",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "geolife/AverageDailyActivityPerUserInPeriod",
+  "postgis": "77300 rows",
+  "mobilitydb": "n/a",
+  "clickhouse": "SAME COUNT",
+  "duckdb": "SAME COUNT",
+  "spacetime": "SAME COUNT",
+  "sedona": "SAME COUNT"
+ },
+ {
+  "key": "geolife/ClosestRestaurantToPoint",
+  "postgis": "1 rows",
+  "mobilitydb": "n/a",
+  "clickhouse": "KNN (geometry format / ties at equal distance)",
+  "duckdb": "KNN (geometry format / ties at equal distance)",
+  "spacetime": "KNN (geometry format / ties at equal distance)",
+  "sedona": "KNN (geometry format / ties at equal distance)"
+ },
+ {
+  "key": "geolife/CountPOIsByTypeInRegion",
+  "postgis": "4 rows",
+  "mobilitydb": "n/a",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ },
+ {
+  "key": "geolife/FirstAndLastActivityInPeriod",
+  "postgis": "77300 rows",
+  "mobilitydb": "n/a",
+  "clickhouse": "SAME COUNT",
+  "duckdb": "SAME COUNT",
+  "spacetime": "SAME COUNT",
+  "sedona": "SAME COUNT"
+ },
+ {
+  "key": "geolife/IDsInsideRegion1Andsecond_region",
+  "postgis": "1 rows",
+  "mobilitydb": "n/a",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "CLOSE (max 0.033 %)",
+  "sedona": "SAME"
+ },
+ {
+  "key": "geolife/SlidingWindowActivityInRegionPerMinuteWithNonZeroID",
+  "postgis": "699 rows",
+  "mobilitydb": "n/a",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "VALUE DIFF 695/699 rows, e.g. pg=('2019-07-21 10:16:00', '6655') spacetime=('2019-07-21 10:16:00', '6665')",
+  "sedona": "SAME"
+ },
+ {
+  "key": "geolife/SpatialBBox",
+  "postgis": "1 rows",
+  "mobilitydb": "SAME",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "VALUE DIFF 1/1 rows, e.g. pg=('2.60908e+06',) spacetime=('2.64235e+06',)",
+  "sedona": "CLOSE (max 0.265 %)"
+ },
+ {
+  "key": "geolife/UniqueUsersPerHourInRegionInPeriod",
+  "postgis": "51 rows",
+  "mobilitydb": "n/a",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "CLOSE (max 0.486 %)",
+  "sedona": "SAME"
+ },
+ {
+  "key": "geolife/kNN",
+  "postgis": "5 rows",
+  "mobilitydb": "KNN (geometry format / ties at equal distance)",
+  "clickhouse": "KNN (geometry format / ties at equal distance)",
+  "duckdb": "KNN (geometry format / ties at equal distance)",
+  "spacetime": "KNN (geometry format / ties at equal distance)",
+  "sedona": "KNN (geometry format / ties at equal distance)"
+ },
+ {
+  "key": "geolife/spatioTemporalRange",
+  "postgis": "1 rows",
+  "mobilitydb": "n/a",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "CLOSE (max 0.314 %)",
+  "sedona": "SAME"
+ },
+ {
+  "key": "geolife/timeAggregation",
+  "postgis": "1 rows",
+  "mobilitydb": "n/a",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "VALUE DIFF 1/1 rows, e.g. pg=('695667', '3.96047e+07', '296') spacetime=('695653', '4.00004e+07', '309')",
+  "sedona": "SAME"
+ },
+ {
+  "key": "geolife/timeInterval",
+  "postgis": "1 rows",
+  "mobilitydb": "n/a",
+  "clickhouse": "SAME",
+  "duckdb": "SAME",
+  "spacetime": "SAME",
+  "sedona": "SAME"
+ }
+]

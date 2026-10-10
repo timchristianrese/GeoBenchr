@@ -52,23 +52,90 @@ queryConfigs:
   description: "Counts the number of active crossings at a given hour of the day within a time period"
   type: temporal
   mobilitydb: |
-    -- FIX: added "AND c.id > 0" so this dialect excludes the same placeholder/id=0 rows
-    -- that postgis/sedona/clickhouse already exclude for this query (was missing before).
-    WITH ts_table AS (SELECT c.id,unnest(timestamps(atTime(trip,:period_medium))) AS ts FROM crossings c WHERE c.trip && :period_medium) SELECT COUNT(DISTINCT id) FROM ts_table WHERE EXTRACT(HOUR FROM ts) = :hour and ts BETWEEN :period_medium AND c.id > 0;
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT COUNT(*) FROM (
+      SELECT GREATEST(s.start_time, TIMESTAMP :period_medium_start) AS lo,
+             LEAST(s.end_time, TIMESTAMP :period_medium_end) AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= TIMESTAMP :period_medium_end AND s.end_time >= TIMESTAMP :period_medium_start
+    ) w
+    WHERE hi - lo >= INTERVAL '24 hours'
+       OR (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (:hour + 1) AND hi - date_trunc('day', hi) >= INTERVAL '1 hour' * :hour)
+       OR (date_trunc('day', lo) <> date_trunc('day', hi)
+           AND (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (:hour + 1) OR hi - date_trunc('day', hi) >= INTERVAL '1 hour' * :hour));
   postgis: |
-    SELECT COUNT(DISTINCT c.id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = :hour AND c.timestamp BETWEEN :period_medium AND c.id > 0;
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT COUNT(*) FROM (
+      SELECT GREATEST(s.start_time, TIMESTAMP :period_medium_start) AS lo,
+             LEAST(s.end_time, TIMESTAMP :period_medium_end) AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= TIMESTAMP :period_medium_end AND s.end_time >= TIMESTAMP :period_medium_start
+    ) w
+    WHERE hi - lo >= INTERVAL '24 hours'
+       OR (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (:hour + 1) AND hi - date_trunc('day', hi) >= INTERVAL '1 hour' * :hour)
+       OR (date_trunc('day', lo) <> date_trunc('day', hi)
+           AND (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (:hour + 1) OR hi - date_trunc('day', hi) >= INTERVAL '1 hour' * :hour));
   sedona: |
-    SELECT COUNT(DISTINCT c.id) from crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = :hour AND c.timestamp BETWEEN :period_medium AND c.id > 0;
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT COUNT(*) FROM (
+      SELECT greatest(s.start_time, to_timestamp(:period_medium_start)) AS lo,
+             least(s.end_time, to_timestamp(:period_medium_end)) AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= to_timestamp(:period_medium_end) AND s.end_time >= to_timestamp(:period_medium_start)
+    ) w
+    WHERE unix_timestamp(hi) - unix_timestamp(lo) >= 86400
+       OR (unix_timestamp(lo) - unix_timestamp(date_trunc('DAY', lo)) < 3600 * (:hour + 1) AND unix_timestamp(hi) - unix_timestamp(date_trunc('DAY', hi)) >= 3600 * :hour)
+       OR (date_trunc('DAY', lo) <> date_trunc('DAY', hi)
+           AND (unix_timestamp(lo) - unix_timestamp(date_trunc('DAY', lo)) < 3600 * (:hour + 1) OR unix_timestamp(hi) - unix_timestamp(date_trunc('DAY', hi)) >= 3600 * :hour));
   spacetime: |
-    -- FIX: original was "... WHERE ...) AND c.id > 0;" -- a dangling AND after the closing
-    -- paren with no alias on the derived table (invalid syntax). Moved the filter inside the
-    -- subquery's WHERE and added the missing alias.
-    SELECT COUNT(*) FROM ( SELECT DISTINCT id FROM crossing_points c WHERE HOUR(c.t) = :hour AND c.t && EPOCHRANGE :period_medium AND c.id > 0 ) AS sub;
+    SELECT COUNT(*) FROM (
+      SELECT
+        GREATEST(c.t[0], (EPOCHRANGE :period_medium)[0]) AS lo,
+        LEAST   (c.t[1], (EPOCHRANGE :period_medium)[1]) AS hi
+      FROM crossings c
+      WHERE c.t && EPOCHRANGE :period_medium
+    ) w
+    WHERE hi - lo >= TP '24h'
+      OR ( TS_TIMEOFDAY(lo) <  TP '1h' * (:hour + 1)
+        AND TS_TIMEOFDAY(hi) >= TP '1h' *  :hour )
+      OR ( TS_DAYSTART(lo) <> TS_DAYSTART(hi)
+        AND ( TS_TIMEOFDAY(lo) <  TP '1h' * (:hour + 1)
+              OR TS_TIMEOFDAY(hi) >= TP '1h' *  :hour ));
   clickhouse: |
-    SELECT COUNT(DISTINCT id) FROM crossing_points c WHERE toHour(c.timestamp) = :hour AND c.timestamp BETWEEN :period_medium AND c.id > 0;
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT count() FROM (
+      SELECT greatest(s.start_time, toDateTime(:period_medium_start, 'UTC')) AS lo,
+             least(s.end_time, toDateTime(:period_medium_end, 'UTC')) AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= toDateTime(:period_medium_end, 'UTC') AND s.end_time >= toDateTime(:period_medium_start, 'UTC')
+    ) w
+    WHERE dateDiff('second', lo, hi) >= 86400
+       OR (dateDiff('second', toStartOfDay(lo), lo) < 3600 * (:hour + 1) AND dateDiff('second', toStartOfDay(hi), hi) >= 3600 * :hour)
+       OR (toStartOfDay(lo) != toStartOfDay(hi)
+           AND (dateDiff('second', toStartOfDay(lo), lo) < 3600 * (:hour + 1) OR dateDiff('second', toStartOfDay(hi), hi) >= 3600 * :hour));
   duckdb: |
-    SELECT COUNT(DISTINCT c.id) FROM crossing_points c WHERE EXTRACT(HOUR FROM c.timestamp) = :hour AND c.timestamp BETWEEN :period_medium AND c.id > 0;
-  repetition: 10
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT COUNT(*) FROM (
+      SELECT GREATEST(s.start_time, TIMESTAMP :period_medium_start) AS lo,
+             LEAST(s.end_time, TIMESTAMP :period_medium_end) AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= TIMESTAMP :period_medium_end AND s.end_time >= TIMESTAMP :period_medium_start
+    ) w
+    WHERE hi - lo >= INTERVAL '24 hours'
+       OR (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (:hour + 1) AND hi - date_trunc('day', hi) >= INTERVAL '1 hour' * :hour)
+       OR (date_trunc('day', lo) <> date_trunc('day', hi)
+           AND (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (:hour + 1) OR hi - date_trunc('day', hi) >= INTERVAL '1 hour' * :hour));
+  repetition: 50
   parameters:
   - hour
   - period_medium
@@ -78,33 +145,82 @@ queryConfigs:
   description: "Find the day with the highest number of unique crossings within a specified week period."
   type: temporal
   mobilitydb: |
-    -- NOT IMPLEMENTED: left blank in the source file; no fix attempted (would need a
-    -- day-bucketed unnest of the crossings trajectory table, unverified against your schema).
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT d.day::date AS day, COUNT(*) AS unique_crossings
+    FROM generate_series(date_trunc('day', TIMESTAMP :period_week_start), TIMESTAMP :period_week_end, INTERVAL '1 day') AS d(day)
+    JOIN crossings_summary s ON s.start_time < d.day + INTERVAL '1 day' AND s.end_time >= d.day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= TIMESTAMP :period_week_end AND s.end_time >= TIMESTAMP :period_week_start
+    GROUP BY d.day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
   postgis: |
-    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN :period_week AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT d.day::date AS day, COUNT(*) AS unique_crossings
+    FROM generate_series(date_trunc('day', TIMESTAMP :period_week_start), TIMESTAMP :period_week_end, INTERVAL '1 day') AS d(day)
+    JOIN crossings_summary s ON s.start_time < d.day + INTERVAL '1 day' AND s.end_time >= d.day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= TIMESTAMP :period_week_end AND s.end_time >= TIMESTAMP :period_week_start
+    GROUP BY d.day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
   sample_postgis: |
-    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN '2023-01-01' AND '2023-01-07' AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
+    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN '2023-01-01' AND '2023-01-07' AND c.id < 1000000000000 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
   sedona: |
-    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings FROM crossing_points c WHERE c.timestamp BETWEEN :period_week AND c.id > 0 GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT to_date(d.day) AS day, COUNT(*) AS unique_crossings
+    FROM (SELECT explode(sequence(date_trunc('DAY', to_timestamp(:period_week_start)), to_timestamp(:period_week_end), interval 1 day)) AS day) d
+    JOIN crossings_summary s ON s.start_time < d.day + interval 1 day AND s.end_time >= d.day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= to_timestamp(:period_week_end) AND s.end_time >= to_timestamp(:period_week_start)
+    GROUP BY d.day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
   spacetime: |
-    -- FIX: derived table needs an alias ("FROM (...) GROUP BY day" is not valid SQL).
-    SELECT day, COUNT(*) AS unique_crossings FROM ( SELECT DISTINCT id, DATE_TRUNC('day', c.t) AS day FROM crossing_points c WHERE c.t && EPOCHRANGE :period_week AND c.id > 0 ) AS sub GROUP BY day ORDER BY unique_crossings DESC LIMIT 1;
+    WITH p AS (SELECT EPOCHRANGE :period_week AS r)
+    SELECT TO_CHAR(d.day::ts, '%Y-%m-%d') AS day, COUNT(*) AS unique_crossings
+    FROM crossings c
+    STRAIGHT JOIN (
+      SELECT
+        (TS_DAYSTART(p.r[0]) + TP '1d' *  s.num)      ::epoch AS day,
+        (TS_DAYSTART(p.r[0]) + TP '1d' * (s.num + 1)) ::epoch AS next_day
+    FROM p, const.sequence(0, 9) s
+    WHERE (TS_DAYSTART(p.r[0]) + TP '1d' *  s.num)      ::epoch < p.r[1]
+      AND (TS_DAYSTART(p.r[0]) + TP '1d' * (s.num + 1)) ::epoch > p.r[0]
+    ) d ON c.t && RANGE(d.day, d.next_day)
+    WHERE c.t && EPOCHRANGE :period_week
+    GROUP BY d.day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
   clickhouse: |
-    SELECT toStartOfDay(c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings
-    FROM crossing_points c
-    WHERE c.timestamp BETWEEN :period_week AND c.id > 0
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT toDate(day) AS day, count() AS unique_crossings
+    FROM crossings_summary s
+    ARRAY JOIN arrayMap(i -> toStartOfDay(toDateTime(:period_week_start, 'UTC')) + toIntervalDay(i),
+                        range(toUInt32(dateDiff('day', toStartOfDay(toDateTime(:period_week_start, 'UTC')), toDateTime(:period_week_end, 'UTC')) + 1))) AS day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= toDateTime(:period_week_end, 'UTC') AND s.end_time >= toDateTime(:period_week_start, 'UTC')
+      AND s.start_time < day + toIntervalDay(1) AND s.end_time >= day
     GROUP BY day
     ORDER BY unique_crossings DESC
     LIMIT 1;
   duckdb: |
-    SELECT date_trunc('day', c.timestamp) AS day, COUNT(DISTINCT c.id) AS unique_crossings
-    FROM crossing_points c
-    WHERE c.timestamp BETWEEN :period_week AND c.id > 0
-    GROUP BY day
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT d.day::date AS day, COUNT(*) AS unique_crossings
+    FROM generate_series(date_trunc('day', TIMESTAMP :period_week_start), TIMESTAMP :period_week_end, INTERVAL '1 day') AS d(day)
+    JOIN crossings_summary s ON s.start_time < d.day + INTERVAL '1 day' AND s.end_time >= d.day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= TIMESTAMP :period_week_end AND s.end_time >= TIMESTAMP :period_week_start
+    GROUP BY d.day
     ORDER BY unique_crossings DESC
     LIMIT 1;
 
-  repetition: 10
+  repetition: 50
   parameters:
   - period_week
 
@@ -112,42 +228,136 @@ queryConfigs:
   use: true
   description: "Counts the number of active crossings near a given island within a certain distance."
   type: spatial
-  # EQUIVALENCE NOTE: clickhouse computes true great-circle distance (greatCircleDistance) while
-  # mobilitydb/postgis/sedona/duckdb compute planar ST_DWithin/edwithin distance in EPSG:3857 (a
-  # latitude-distorted "meter") -- the same :distance value is not the same real-world radius
-  # across these two families of dialects, so results are not 1-1 comparable as-is.
-  # FIX: added "AND c.id > 0" -- crossingsAroundHarbour's mobilitydb query in this same file
+  # FIX (2026-09-30): previously noted here -- clickhouse computed true great-circle distance
+  # while mobilitydb/postgis/sedona/duckdb compute planar ST_DWithin/edwithin distance in
+  # EPSG:3857 (a latitude-distorted "meter"), so the same :distance meant different real-world
+  # radii. Fixed via polygonsDistanceCartesian + Web Mercator reprojection (webMercatorX/Y UDFs)
+  # in the clickhouse block below -- same metric as the other dialects now, verified to
+  # sub-millimeter precision against real islands rows. See that block's own comment.
+  # FIX: added "AND c.id < 1000000000000" -- crossingsAroundHarbour's mobilitydb query in this same file
   # applies this filter on the same "crossings" table, this one was missing it.
   mobilitydb: |
-    SELECT COUNT(DISTINCT c.id) FROM crossings c JOIN islands i ON edwithin(c.trip, i.geom, :distance) WHERE i.id = :island AND c.id > 0;
+    SELECT COUNT(DISTINCT c.id) FROM crossings c JOIN islands i ON edwithin(c.trip, i.geom, :distance) WHERE i.id = :island AND c.id < 1000000000000;
   postgis: |
-    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE i.id = :island AND c.id > 0 GROUP BY i.id;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE i.id = :island AND c.id < 1000000000000 GROUP BY i.id;
   sedona: |
-    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE i.id = :island AND c.id > 0 GROUP BY i.id;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE i.id = :island AND c.id > 0 AND c.id < 1000000000000 GROUP BY i.id;
   spacetime: |
-    -- FIX: added missing alias on the derived table.
-    SELECT COUNT(*) FROM (
-      SELECT DISTINCT id
-      FROM crossing_points c
-      JOIN islands i ON ST_DWithin(ST_Point(c.x, c.y), ST_ToGeom(i.geom::gmpolygon), :distance)
-      WHERE i.id = :island AND c.id > 0
-    ) AS sub;
+    -- (2026-10-02) radius in EPSG:3857 units like every other dialect, converted to SpaceTime's
+    -- local meters by :st_scale = cos(lat) * 0.99842 (see scripts/spacetime_units.py)
+    SELECT COUNT(DISTINCT c.crossing_id)
+    FROM crossing_points c
+    JOIN islands i ON ST_DWithin(ST_Point(c.x, c.y), ST_ToGeom(i.geom::gpolygon), :distance * :st_scale)
+    WHERE i.id = :island and c.crossing_id > 0
+      AND c.t && CCRANGE(EPOCH '2024-01-01', EPOCH '2025-07-07 23:59:59');
   clickhouse: |
-    -- NOTE: distance here is a true great-circle distance, while postgis/sedona compute
-    -- ST_DWithin in EPSG:3857 (a planar, latitude-distorted "meter"). Same :distance
-    -- value means different real-world radii between these dialects -- flagging per
-    -- the original author's note elsewhere in this file, not something SQL syntax can fix.
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
+    -- FIX (2026-09-30, metric parity): previously used polygonsDistanceSpherical (a true
+    -- great-circle metric), which still had the same EQUIVALENCE NOTE mismatch as every
+    -- greatCircleDistance query -- now fixed the same way crossingsAroundHarbour's
+    -- greatCircleDistance was: project both operands into Web Mercator (EPSG:3857) and use
+    -- polygonsDistanceCartesian, so the metric genuinely matches postgis/sedona/duckdb's
+    -- ST_DWithin now, not just approximately. Verified live against real islands rows: matches
+    -- postgis's ST_Distance(EPSG:3857) to sub-millimeter precision for both a Minor-island
+    -- Polygon (id=33: 1,161,979.0793 vs postgis's 1,161,979.0803) and a Coastline LineString
+    -- (id=43: 929,323.9104 vs postgis's 929,323.9120).
+    -- islands.geom mixes real Polygon and LineString shapes under one Geometry (Variant) column
+    -- -- arrayMap can't operate on the bare Variant, so each shape needs its own subcolumn
+    -- extraction (geom.Polygon / geom.LineString, dot-notation), dispatched via
+    -- variantType(geom); the final multiIf branch is unreachable for islands' actual data (no
+    -- other shape exists here) and only exists so the expression type-checks.
+    -- webMercatorX/webMercatorY/webMercatorDistance are SQL UDFs created ON CLUSTER cluster_1
+    -- (see COORDINATION.md) -- same projection used by crossingsAroundHarbour's point-to-point
+    -- fix, reused here for the point operand and inlined into the polygon reprojection.
+    -- Written as array(array(tuple(...))) rather than the equivalent [[(...)]] literal syntax on
+    -- purpose: this file's own process_file() (generateParameterVariations.py) does a blanket
+    -- line.replace("[", "tsrange(").replace("]", ")") meant to mop up leftover Postgres-style
+    -- bracketed date-list literals -- it doesn't distinguish those from a genuine ClickHouse
+    -- array literal, so [[(...)]]  here would come out the other side as mangled
+    -- "tsrange(tsrange((...)))" garbage (confirmed live). The function-call form has no square
+    -- brackets, so it passes through untouched.
+    -- FIX: crossing_points and islands are both ClickHouse Distributed tables -- added GLOBAL
+    -- (crossing_points already the FROM/left table, no swap needed).
+    -- id/crossing_id migration is done -- see CrossingsActiveAtGivenHourOfDay's clickhouse block
+    -- for the full note; id=0 placeholders are remapped to >= 1,000,000,000,000 on load, so
+    -- "c.id > 0" below is the "real trip" filter.
     SELECT COUNT(DISTINCT c.id) AS crossing_count
     FROM crossing_points c
-    JOIN islands i ON i.id = :island
-    WHERE greatCircleDistance(c.lon, c.lat, i.lon, i.lat) <= :distance AND c.id > 0;
+    GLOBAL JOIN islands i ON i.id = :island
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), :distance)) FROM islands WHERE id = :island AND variantType(geom) = 'Polygon' UNION ALL SELECT arrayJoin(h3CoverLine(geom.LineString, :distance)) FROM islands WHERE id = :island AND variantType(geom) = 'LineString')
+      AND if(variantType(i.geom) = 'LineString',
+             -- (2026-10-08) coastline: minimum distance to the line's segments. Wrapping the line into a
+             -- polygon for polygonsDistanceCartesian closed it into an area, so points inside that area
+             -- counted as distance 0 (one crossing too many vs PostGIS on coastline 45).
+             arrayMin(arrayMap((a, b) -> sqrt(pow(c.x - (a.1 + (b.1 - a.1) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)
+                                            + pow(c.y - (a.2 + (b.2 - a.2) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)),
+                               arrayPopBack(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)), arrayPopFront(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)))),
+             polygonsDistanceCartesian(array(array(tuple(c.x, c.y))),
+               arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon))
+         ) <= :distance
+      AND c.id > 0 AND c.id < 1000000000000;
+  clickhouse_scan: |
+    -- FIX (2026-09-30, metric parity): previously used polygonsDistanceSpherical (a true
+    -- great-circle metric), which still had the same EQUIVALENCE NOTE mismatch as every
+    -- greatCircleDistance query -- now fixed the same way crossingsAroundHarbour's
+    -- greatCircleDistance was: project both operands into Web Mercator (EPSG:3857) and use
+    -- polygonsDistanceCartesian, so the metric genuinely matches postgis/sedona/duckdb's
+    -- ST_DWithin now, not just approximately. Verified live against real islands rows: matches
+    -- postgis's ST_Distance(EPSG:3857) to sub-millimeter precision for both a Minor-island
+    -- Polygon (id=33: 1,161,979.0793 vs postgis's 1,161,979.0803) and a Coastline LineString
+    -- (id=43: 929,323.9104 vs postgis's 929,323.9120).
+    -- islands.geom mixes real Polygon and LineString shapes under one Geometry (Variant) column
+    -- -- arrayMap can't operate on the bare Variant, so each shape needs its own subcolumn
+    -- extraction (geom.Polygon / geom.LineString, dot-notation), dispatched via
+    -- variantType(geom); the final multiIf branch is unreachable for islands' actual data (no
+    -- other shape exists here) and only exists so the expression type-checks.
+    -- webMercatorX/webMercatorY/webMercatorDistance are SQL UDFs created ON CLUSTER cluster_1
+    -- (see COORDINATION.md) -- same projection used by crossingsAroundHarbour's point-to-point
+    -- fix, reused here for the point operand and inlined into the polygon reprojection.
+    -- Written as array(array(tuple(...))) rather than the equivalent [[(...)]] literal syntax on
+    -- purpose: this file's own process_file() (generateParameterVariations.py) does a blanket
+    -- line.replace("[", "tsrange(").replace("]", ")") meant to mop up leftover Postgres-style
+    -- bracketed date-list literals -- it doesn't distinguish those from a genuine ClickHouse
+    -- array literal, so [[(...)]]  here would come out the other side as mangled
+    -- "tsrange(tsrange((...)))" garbage (confirmed live). The function-call form has no square
+    -- brackets, so it passes through untouched.
+    -- FIX: crossing_points and islands are both ClickHouse Distributed tables -- added GLOBAL
+    -- (crossing_points already the FROM/left table, no swap needed).
+    -- id/crossing_id migration is done -- see CrossingsActiveAtGivenHourOfDay's clickhouse block
+    -- for the full note; id=0 placeholders are remapped to >= 1,000,000,000,000 on load, so
+    -- "c.id > 0" below is the "real trip" filter.
+    SELECT COUNT(DISTINCT c.id) AS crossing_count
+    FROM crossing_points c
+    GLOBAL JOIN islands i ON i.id = :island
+    WHERE polygonsDistanceCartesian(
+            array(array(tuple(c.x, c.y))),
+            multiIf(
+              variantType(i.geom) = 'Polygon',
+                arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon),
+              variantType(i.geom) = 'LineString',
+                array(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)),
+              array(array(tuple(0.0, 0.0)))
+            )
+          ) <= :distance
+      AND c.id > 0 AND c.id < 1000000000000;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
     -- Point-to-polygon ST_DWithin works directly here (unlike CrateDB's point-only distance()) --
     -- see the header note above. Mirrors the postgis/sedona translation, planar EPSG:3857 metric.
-    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE i.id = :island AND c.id > 0 GROUP BY i.id;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE i.id = :island AND ST_Intersects_Extent(c.geom, (SELECT ST_MakeEnvelope(ST_XMin(geom) - :distance, ST_YMin(geom) - :distance, ST_XMax(geom) + :distance, ST_YMax(geom) + :distance) FROM islands WHERE id = :island)) AND c.id > 0 AND c.id < 1000000000000 GROUP BY i.id;
+  duckdb_scan: |
+    -- Point-to-polygon ST_DWithin works directly here (unlike CrateDB's point-only distance()) --
+    -- see the header note above. Mirrors the postgis/sedona translation, planar EPSG:3857 metric.
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE i.id = :island AND c.id > 0 AND c.id < 1000000000000 GROUP BY i.id;
 
 
-  repetition: 10
+  repetition: 50
   parameters:
   - island
   - distance
@@ -156,28 +366,76 @@ queryConfigs:
   use: true
   description: "Finds the crossings that are within a certain distance of a specified harbour."
   type: spatial
-  # EQUIVALENCE NOTE: same great-circle-vs-planar distance mismatch as countActiveCrossingsNearIsland
-  # above -- clickhouse's greatCircleDistance is not the same metric as the planar ST_DWithin/edwithin
-  # distance mobilitydb/postgis/sedona/duckdb use, so the same :radius means different real-world
-  # radii between these two families of dialects.
+  # FIX (2026-09-30): the great-circle-vs-planar distance mismatch previously flagged here is
+  # fixed below via webMercatorDistance (see that clickhouse block's comment for the derivation
+  # and live verification: exact id-set match against postgis/mobilitydb/sedona).
   mobilitydb: |
-    SELECT DISTINCT c.id FROM crossings c JOIN harbours h ON edwithin(c.trip, h.geom, :radius) WHERE h.name = :harbour AND c.id > 0;
+    SELECT DISTINCT c.id FROM crossings c JOIN harbours h ON edwithin(c.trip, h.geom, :radius) WHERE h.name = :harbour AND c.id < 1000000000000;
   postgis: |
-    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, :radius) WHERE h.name = :harbour AND c.id > 0;
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, :radius) WHERE h.name = :harbour AND c.id < 1000000000000;
   sedona: |
-    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, :radius) WHERE h.name = :harbour AND c.id > 0;
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, :radius) WHERE h.name = :harbour AND c.id > 0 AND c.id < 1000000000000;
   spacetime: |
-    SELECT DISTINCT id FROM crossing_points c JOIN harbours h ON ST_DWithin(ST_Point(c.x, c.y), ST_ToGeom(h.geom::gpoint), :radius) WHERE h.name = :harbour AND c.id > 0;
+    -- (2026-10-02) radius in EPSG:3857 units like every other dialect, converted to SpaceTime's
+    -- local meters by :st_scale = cos(lat) * 0.99842 (see scripts/spacetime_units.py)
+    SELECT DISTINCT c.crossing_id AS id FROM crossing_points c JOIN harbours h ON ST_DWithin(ST_Point(c.x, c.y), ST_ToGeom(h.geom::gpoint), :radius * :st_scale) WHERE crossing_id > 0 AND h.name = :harbour AND c.t && CCRANGE(EPOCH '2024-01-01', EPOCH '2025-07-07 23:59:59');
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
+    -- FIX (2026-09-30, metric parity): replaced greatCircleDistance (true great-circle metric)
+    -- with webMercatorDistance, a SQL UDF (created ON CLUSTER cluster_1 -- see COORDINATION.md)
+    -- that projects both points into Web Mercator (EPSG:3857) and takes the planar Euclidean
+    -- distance -- the same metric ST_DWithin/edwithin use, not just the same units. Verified
+    -- live against real data: harbour='Tjerkwerd', radius=20000 returns the exact same 299-row
+    -- id set as postgis/mobilitydb/sedona (row-for-row diff, not just a matching count); radius=
+    -- 50000 also matches exactly (2049). Formula: webMercatorDistance(lon1,lat1,lon2,lat2) =
+    -- sqrt((6378137*radians(lon1) - 6378137*radians(lon2))^2 +
+    --      (6378137*ln(tan(pi/4+radians(lat1)/2)) - 6378137*ln(tan(pi/4+radians(lat2)/2)))^2),
+    -- the standard spherical-Mercator forward projection PostGIS/Sedona's ST_Transform(...,3857)
+    -- also uses.
+    -- FIX: added GLOBAL (Distributed-JOIN denial, same as elsewhere in this file).
+    -- id/crossing_id migration is done -- see CrossingsActiveAtGivenHourOfDay's clickhouse block
+    -- for the full note. No id remap needed here either (rand()-sharded, not id-sharded), so
+    -- "c.id > 0" stays as-is, unlike postgis/mobilitydb's "c.id < 1000000000000".
     SELECT DISTINCT c.id
     FROM crossing_points c
-    JOIN harbours h ON h.name = :harbour
-    WHERE greatCircleDistance(c.lon, c.lat, h.lon, h.lat) <= :radius
-      AND c.id > 0;
+    GLOBAL JOIN harbours h ON h.name = :harbour
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, :radius)) FROM harbours WHERE name = :harbour)
+      AND sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= :radius
+      AND c.id > 0 AND c.id < 1000000000000;
+  clickhouse_scan: |
+    -- FIX (2026-09-30, metric parity): replaced greatCircleDistance (true great-circle metric)
+    -- with webMercatorDistance, a SQL UDF (created ON CLUSTER cluster_1 -- see COORDINATION.md)
+    -- that projects both points into Web Mercator (EPSG:3857) and takes the planar Euclidean
+    -- distance -- the same metric ST_DWithin/edwithin use, not just the same units. Verified
+    -- live against real data: harbour='Tjerkwerd', radius=20000 returns the exact same 299-row
+    -- id set as postgis/mobilitydb/sedona (row-for-row diff, not just a matching count); radius=
+    -- 50000 also matches exactly (2049). Formula: webMercatorDistance(lon1,lat1,lon2,lat2) =
+    -- sqrt((6378137*radians(lon1) - 6378137*radians(lon2))^2 +
+    --      (6378137*ln(tan(pi/4+radians(lat1)/2)) - 6378137*ln(tan(pi/4+radians(lat2)/2)))^2),
+    -- the standard spherical-Mercator forward projection PostGIS/Sedona's ST_Transform(...,3857)
+    -- also uses.
+    -- FIX: added GLOBAL (Distributed-JOIN denial, same as elsewhere in this file).
+    -- id/crossing_id migration is done -- see CrossingsActiveAtGivenHourOfDay's clickhouse block
+    -- for the full note. No id remap needed here either (rand()-sharded, not id-sharded), so
+    -- "c.id > 0" stays as-is, unlike postgis/mobilitydb's "c.id < 1000000000000".
+    SELECT DISTINCT c.id
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = :harbour
+    WHERE sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= :radius
+      AND c.id > 0 AND c.id < 1000000000000;
   duckdb: |
-    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, :radius) WHERE h.name = :harbour AND c.id > 0;
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, :radius) WHERE h.name = :harbour AND ST_Intersects_Extent(c.geom, (SELECT ST_MakeEnvelope(ST_XMin(geom) - :radius, ST_YMin(geom) - :radius, ST_XMax(geom) + :radius, ST_YMax(geom) + :radius) FROM harbours WHERE name = :harbour)) AND c.id > 0 AND c.id < 1000000000000;
+  duckdb_scan: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, :radius) WHERE h.name = :harbour AND c.id > 0 AND c.id < 1000000000000;
 
-  repetition: 10
+  repetition: 50
   parameters:
   - harbour
   - radius
@@ -186,30 +444,71 @@ queryConfigs:
   use: true
   description: "Finds the number of crossings near a specified harbour within a certain distance during a given time period."
   type: spatiotemporal
-  # EQUIVALENCE NOTE: same great-circle-vs-planar distance mismatch as countActiveCrossingsNearIsland
-  # above -- clickhouse's greatCircleDistance is not the same metric as the planar ST_DWithin/edwithin
-  # distance the other dialects use here.
+  # FIX (2026-09-30): the great-circle-vs-planar distance mismatch previously flagged here is
+  # fixed below via webMercatorDistance -- see crossingsAroundHarbour's clickhouse block for the
+  # full verification.
   mobilitydb: |
-    SELECT h.name as harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossings c ON c.trip && :period_medium AND edwithin(attime(c.trip,:period_medium), h.geom, :radius) WHERE h.name = :harbour AND c.id > 0 GROUP BY h.name;
+    SELECT h.name as harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossings c ON c.trip && :period_medium AND edwithin(attime(c.trip,:period_medium), h.geom, :radius) WHERE h.name = :harbour AND c.id < 1000000000000 GROUP BY h.name;
   postgis: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, :radius) WHERE c.timestamp BETWEEN :period_medium AND h.name = :harbour AND c.id > 0 GROUP BY h.name;
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, :radius) WHERE c.timestamp BETWEEN :period_medium AND h.name = :harbour AND c.id < 1000000000000 GROUP BY h.name;
   sedona: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, :radius) WHERE c.timestamp BETWEEN :period_medium AND h.name = :harbour AND c.id > 0 GROUP BY h.name;
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, :radius) WHERE c.timestamp BETWEEN :period_medium AND h.name = :harbour AND c.id > 0 AND c.id < 1000000000000 GROUP BY h.name;
   spacetime: |
-    -- FIX: was COUNT(*) with no c.id > 0 filter -- COUNT(*) counts every matching point row,
-    -- not unique crossings (a crossing with several points near the harbour was overcounted),
-    -- and it silently included id=0 rows every other dialect excludes for this query.
-    SELECT h.name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour from harbours h JOIN crossing_points c ON ST_DWithin(ST_Point(c.x, c.y), ST_ToGeom(h.geom::gpoint), :radius) WHERE c.t && EPOCHRANGE :period_medium AND h.name = :harbour AND c.id > 0 GROUP BY h.name;
+    -- (2026-10-02) radius in EPSG:3857 units like every other dialect, converted to SpaceTime's
+    -- local meters by :st_scale = cos(lat) * 0.99842 (see scripts/spacetime_units.py)
+    SELECT :harbour AS harbour_name, COUNT(DISTINCT c.crossing_id) AS unique_crossings_near_harbour
+    FROM crossing_points c
+    JOIN harbours h ON ST_DWithin(ST_Point(c.x, c.y), ST_ToGeom(h.geom::gpoint), :radius * :st_scale)
+    WHERE h.name = :harbour and c.crossing_id > 0
+      AND c.t && EPOCHRANGE :period_medium;
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
+    -- FIX (2026-09-30, metric parity): same greatCircleDistance -> webMercatorDistance swap as
+    -- crossingsAroundHarbour's clickhouse block above -- see its FIX comment for the full
+    -- verification (UDFs created ON CLUSTER cluster_1, formula derivation, exact id-set match).
+    -- FIX: swapped FROM/JOIN so the huge crossing_points fact table is FROM/left and the small
+    -- harbours table (614 rows) is the GLOBAL/broadcast side, not the other way around (Distributed-
+    -- JOIN denial otherwise).
+    -- id/crossing_id migration is done -- see CrossingsActiveAtGivenHourOfDay's clickhouse block
+    -- for the full note. No id remap needed here either (rand()-sharded, not id-sharded), so
+    -- "c.id > 0" stays as-is, unlike postgis/mobilitydb's "c.id < 1000000000000".
     SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour
-    FROM harbours h
-    JOIN crossing_points c ON h.name = :harbour
-    WHERE greatCircleDistance(c.lon, c.lat, h.lon, h.lat) <= :radius
-      AND c.timestamp BETWEEN :period_medium AND c.id > 0
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = :harbour
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, :radius)) FROM harbours WHERE name = :harbour)
+      AND sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= :radius
+      AND c.timestamp BETWEEN :period_medium
+      AND c.id > 0 AND c.id < 1000000000000
+    GROUP BY h.name;
+  clickhouse_scan: |
+    -- FIX (2026-09-30, metric parity): same greatCircleDistance -> webMercatorDistance swap as
+    -- crossingsAroundHarbour's clickhouse block above -- see its FIX comment for the full
+    -- verification (UDFs created ON CLUSTER cluster_1, formula derivation, exact id-set match).
+    -- FIX: swapped FROM/JOIN so the huge crossing_points fact table is FROM/left and the small
+    -- harbours table (614 rows) is the GLOBAL/broadcast side, not the other way around (Distributed-
+    -- JOIN denial otherwise).
+    -- id/crossing_id migration is done -- see CrossingsActiveAtGivenHourOfDay's clickhouse block
+    -- for the full note. No id remap needed here either (rand()-sharded, not id-sharded), so
+    -- "c.id > 0" stays as-is, unlike postgis/mobilitydb's "c.id < 1000000000000".
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = :harbour
+    WHERE sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= :radius
+      AND c.timestamp BETWEEN :period_medium
+      AND c.id > 0 AND c.id < 1000000000000
     GROUP BY h.name;
   duckdb: |
-    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, :radius) WHERE c.timestamp BETWEEN :period_medium AND h.name = :harbour AND c.id > 0 GROUP BY h.name;
-  repetition: 10
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, :radius) WHERE c.timestamp BETWEEN :period_medium AND h.name = :harbour AND ST_Intersects_Extent(c.geom, (SELECT ST_MakeEnvelope(ST_XMin(geom) - :radius, ST_YMin(geom) - :radius, ST_XMax(geom) + :radius, ST_YMax(geom) + :radius) FROM harbours WHERE name = :harbour)) AND c.id > 0 AND c.id < 1000000000000 GROUP BY h.name;
+  duckdb_scan: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, :radius) WHERE c.timestamp BETWEEN :period_medium AND h.name = :harbour AND c.id > 0 AND c.id < 1000000000000 GROUP BY h.name;
+  repetition: 50
   parameters:
   - period_medium
   - radius
@@ -219,36 +518,88 @@ queryConfigs:
   use: true
   description: "For an island, find the number of crossings that are within a certain distance of the island during a specified time period."
   type: spatiotemporal
-  # EQUIVALENCE NOTE: same great-circle-vs-planar distance mismatch flagged on
-  # countActiveCrossingsNearIsland above -- applies here too via clickhouse's greatCircleDistance.
+  # FIX (2026-09-30): the great-circle-vs-planar distance mismatch previously flagged here is
+  # fixed below (greatCircleDistance -> webMercatorDistance / polygonsDistanceCartesian, matching
+  # the planar EPSG:3857 metric the other dialects use) -- see crossingsAroundHarbour's clickhouse
+  # block for the full verification.
   mobilitydb: |
-    SELECT COUNT(DISTINCT c.id) FROM crossings c JOIN islands i ON edwithin(attime(c.trip,:period_medium), i.geom, :distance) WHERE c.trip && :period_medium AND i.id = :island AND c.id > 0;
+    SELECT COUNT(DISTINCT c.id) FROM crossings c JOIN islands i ON edwithin(attime(c.trip,:period_medium), i.geom, :distance) WHERE c.trip && :period_medium AND i.id = :island AND c.id < 1000000000000;
   postgis: |
-    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE c.timestamp BETWEEN :period_medium AND i.id = :island AND c.id > 0;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE c.timestamp BETWEEN :period_medium AND i.id = :island AND c.id < 1000000000000;
   sedona: |
-    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE c.timestamp BETWEEN :period_medium AND i.id = :island AND c.id > 0;
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE c.timestamp BETWEEN :period_medium AND i.id = :island AND c.id > 0 AND c.id < 1000000000000;
   spacetime: |
-    -- BEST-EFFORT FILL: was blank in the source file. Modeled on countActiveCrossingsNearIsland
-    -- and HarbourActivityInPeriod's spacetime patterns elsewhere in this file -- not verified
-    -- against a live SpaceTime instance, please sanity-check before relying on it.
-    SELECT COUNT(DISTINCT id) FROM (
-      SELECT id
-      FROM crossing_points c
-      JOIN islands i ON ST_DWithin(ST_Point(c.x, c.y), ST_ToGeom(i.geom::gmpolygon), :distance)
-      WHERE c.t && EPOCHRANGE :period_medium AND i.id = :island AND c.id > 0
-    ) AS sub;
+    -- (2026-10-02) radius in EPSG:3857 units like every other dialect, converted to SpaceTime's
+    -- local meters by :st_scale = cos(lat) * 0.99842 (see scripts/spacetime_units.py)
+    SELECT COUNT(DISTINCT c.crossing_id)
+    FROM crossing_points c
+    JOIN islands i ON ST_DWithin(ST_Point(c.x, c.y), ST_ToGeom(i.geom::gpolygon), :distance * :st_scale)
+    WHERE i.id = :island and c.crossing_id > 0
+      AND c.t && EPOCHRANGE :period_medium;
   clickhouse: |
-    -- again, not semantically the same, will likely be excluded from results
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
+    -- FIX (2026-09-30, metric parity): see countActiveCrossingsNearIsland's clickhouse block
+    -- above for the full explanation -- same polygonsDistanceSpherical -> polygonsDistanceCartesian
+    -- + Web Mercator reprojection fix, same Polygon/LineString variantType dispatch.
+    -- FIX: added GLOBAL (Distributed-JOIN denial).
+    -- id/crossing_id migration is done -- see CrossingsActiveAtGivenHourOfDay's clickhouse block
+    -- for the full note. No id remap needed here either (rand()-sharded, not id-sharded), so
+    -- "c.id > 0" stays as-is, unlike postgis/mobilitydb's "c.id < 1000000000000".
     SELECT COUNT(DISTINCT c.id)
     FROM crossing_points c
-    JOIN islands i ON i.id = :island
-    WHERE greatCircleDistance(c.lon, c.lat, i.lon, i.lat) <= :distance
-      AND c.timestamp BETWEEN :period_medium AND c.id > 0;
+    GLOBAL JOIN islands i ON i.id = :island
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), :distance)) FROM islands WHERE id = :island AND variantType(geom) = 'Polygon' UNION ALL SELECT arrayJoin(h3CoverLine(geom.LineString, :distance)) FROM islands WHERE id = :island AND variantType(geom) = 'LineString')
+      AND if(variantType(i.geom) = 'LineString',
+             -- (2026-10-08) coastline: minimum distance to the line's segments. Wrapping the line into a
+             -- polygon for polygonsDistanceCartesian closed it into an area, so points inside that area
+             -- counted as distance 0 (one crossing too many vs PostGIS on coastline 45).
+             arrayMin(arrayMap((a, b) -> sqrt(pow(c.x - (a.1 + (b.1 - a.1) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)
+                                            + pow(c.y - (a.2 + (b.2 - a.2) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)),
+                               arrayPopBack(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)), arrayPopFront(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)))),
+             polygonsDistanceCartesian(array(array(tuple(c.x, c.y))),
+               arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon))
+         ) <= :distance
+      AND c.timestamp BETWEEN :period_medium
+      AND c.id > 0 AND c.id < 1000000000000;
+  clickhouse_scan: |
+    -- FIX (2026-09-30, metric parity): see countActiveCrossingsNearIsland's clickhouse block
+    -- above for the full explanation -- same polygonsDistanceSpherical -> polygonsDistanceCartesian
+    -- + Web Mercator reprojection fix, same Polygon/LineString variantType dispatch.
+    -- FIX: added GLOBAL (Distributed-JOIN denial).
+    -- id/crossing_id migration is done -- see CrossingsActiveAtGivenHourOfDay's clickhouse block
+    -- for the full note. No id remap needed here either (rand()-sharded, not id-sharded), so
+    -- "c.id > 0" stays as-is, unlike postgis/mobilitydb's "c.id < 1000000000000".
+    SELECT COUNT(DISTINCT c.id)
+    FROM crossing_points c
+    GLOBAL JOIN islands i ON i.id = :island
+    WHERE polygonsDistanceCartesian(
+            array(array(tuple(c.x, c.y))),
+            multiIf(
+              variantType(i.geom) = 'Polygon',
+                arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon),
+              variantType(i.geom) = 'LineString',
+                array(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)),
+              array(array(tuple(0.0, 0.0)))
+            )
+          ) <= :distance
+      AND c.timestamp BETWEEN :period_medium
+      AND c.id > 0 AND c.id < 1000000000000;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
     -- Point-to-polygon ST_DWithin works directly here (unlike CrateDB's point-only distance()) --
     -- see the header note above. Mirrors the postgis/sedona translation.
-    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE c.timestamp BETWEEN :period_medium AND i.id = :island AND c.id > 0;
-  repetition: 10
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE c.timestamp BETWEEN :period_medium AND i.id = :island AND ST_Intersects_Extent(c.geom, (SELECT ST_MakeEnvelope(ST_XMin(geom) - :distance, ST_YMin(geom) - :distance, ST_XMax(geom) + :distance, ST_YMax(geom) + :distance) FROM islands WHERE id = :island)) AND c.id > 0 AND c.id < 1000000000000;
+  duckdb_scan: |
+    -- Point-to-polygon ST_DWithin works directly here (unlike CrateDB's point-only distance()) --
+    -- see the header note above. Mirrors the postgis/sedona translation.
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, :distance) WHERE c.timestamp BETWEEN :period_medium AND i.id = :island AND c.id > 0 AND c.id < 1000000000000;
+  repetition: 50
   parameters:
   - distance
   - island
@@ -261,43 +612,49 @@ queryConfigs:
   description: "Counts the number of active crossings in a given time period."
   type: temporal
   # EQUIVALENCE NOTE: postgis/sedona use the OVERLAPS predicate directly against the packed
-  # :period_medium parameter; clickhouse has no OVERLAPS operator (left unfixed below, needs
-  # decomposed period_medium_start/period_medium_end parameters the shared parameter list doesn't
-  # provide); duckdb's OVERLAPS support is unconfirmed (see header note), so it is rewritten with
-  # the same decomposed bounds rather than assumed to work. Not 1-1 across all systems without a
-  # harness change to supply the decomposed parameters.
+  # :period_medium parameter; clickhouse/duckdb have no OVERLAPS operator (duckdb's is
+  # unconfirmed at best, see header note) -- both FIXED 2026-09-30 by decomposing
+  # :period_medium into :period_medium_start/:period_medium_end in generateParameterVariations.py
+  # and rewriting those two blocks as the explicit boolean form -- see their FIX comments below.
   mobilitydb: |
     SELECT COUNT(*) FROM crossings c WHERE c.trip && :period_medium;
   postgis: |
+    -- FIX (naming): was "crossing_trajectories" -- the real generic trip-summary table is
+    -- "crossings_summary" (see roles/duckdb+sedona/defaults/main.yml).
     SELECT COUNT(DISTINCT c.id)
-    FROM crossing_trajectories c
+    FROM crossings_summary c
     WHERE (c.start_time, c.end_time) OVERLAPS :period_medium;
   sedona: |
-    SELECT COUNT(DISTINCT s.id)
-    FROM crossing_trajectories_start s
-    JOIN crossing_trajectories_end e
-      ON e.id = s.id
-    WHERE (s.start_time, e.end_time) OVERLAPS :period_medium;
+    -- FIX (naming): was a JOIN across "crossing_trajectories_start"/"crossing_trajectories_end"
+    -- -- those split tables don't exist; the real export is a single "crossings_summary" table,
+    -- no JOIN needed.
+    SELECT COUNT(DISTINCT c.id)
+    FROM crossings_summary c
+    WHERE (c.start_time, c.end_time) OVERLAPS :period_medium;
   spacetime: |
     SELECT COUNT(*) FROM crossings c WHERE c.t && EPOCHRANGE :period_medium;
   clickhouse: |
-    -- NOTE (unfixed): ClickHouse has no OVERLAPS operator at all -- this query will not run
-    -- as written. A correct rewrite needs the period's two bounds as separate scalars
-    -- (e.g. c.start_time < :period_medium_end AND c.end_time >= :period_medium_start),
-    -- which the current single :period_medium parameter can't supply without a harness
-    -- change, so left as-is rather than guessing a parameter contract.
+    -- FIX (2026-09-30): ClickHouse has no OVERLAPS operator -- generateParameterVariations.py
+    -- now decomposes :period_medium into :period_medium_start/:period_medium_end scalars (the
+    -- harness change this NOTE used to say was needed), so this can be rewritten as the
+    -- standard interval-overlap boolean: [c.start_time, c.end_time] overlaps
+    -- [period_medium_start, period_medium_end] iff c.start_time < period_medium_end AND
+    -- period_medium_start < c.end_time. Matches the duckdb block below, which already
+    -- anticipated these exact token names.
     SELECT COUNT(DISTINCT c.id)
-    FROM crossing_trajectories c
-    WHERE (c.start_time, c.end_time) OVERLAPS :period_medium;
-  duckdb: |
-    -- Same OVERLAPS-support gap as clickhouse above (see header note). Rewritten as an explicit
-    -- interval-overlap comparison, which needs the period's two bounds as separate scalars
-    -- rather than the single :period_medium token used elsewhere in this file -- not satisfiable
-    -- by the current shared parameter list without a harness change.
-    SELECT COUNT(DISTINCT c.id)
-    FROM crossing_trajectories c
+    FROM crossings_summary c
     WHERE c.start_time < :period_medium_end AND :period_medium_start < c.end_time;
-  repetition: 10
+  duckdb: |
+    -- FIX (2026-09-30): same OVERLAPS-support gap as clickhouse above (see header note), and
+    -- this query already anticipated the :period_medium_start/:period_medium_end tokens the
+    -- generator now actually supplies (see the clickhouse block's FIX comment above) -- unlike
+    -- the OVERLAPS-shaped queries elsewhere in this file, this one no longer depends on
+    -- DuckDB's unconfirmed OVERLAPS support at all, since it never used it.
+    -- FIX (naming): was "crossing_trajectories" -- see postgis block above.
+    SELECT COUNT(DISTINCT c.id)
+    FROM crossings_summary c
+    WHERE c.start_time < :period_medium_end AND :period_medium_start < c.end_time;
+  repetition: 50
   parameters:
   - period_medium
 
@@ -305,8 +662,10 @@ queryConfigs:
   use: false
   description: "Calculates the average duration of crossings that start at a given harbour within a certain distance and time period."
   type: spatiotemporal
-  # EQUIVALENCE NOTE: same great-circle-vs-planar distance mismatch flagged on
-  # countActiveCrossingsNearIsland above -- applies here too via clickhouse's greatCircleDistance.
+  # FIX (2026-09-30): the great-circle-vs-planar distance mismatch previously flagged here is
+  # fixed below (greatCircleDistance -> webMercatorDistance / polygonsDistanceCartesian, matching
+  # the planar EPSG:3857 metric the other dialects use) -- see crossingsAroundHarbour's clickhouse
+  # block for the full verification.
   mobilitydb: |
     SELECT AVG(endTimestamp(c.trip)-startTimestamp(c.trip)) as avg_duration FROM crossings c JOIN harbours h ON ST_DWithin(startValue(c.trip), h.geom, :radius) WHERE :period_medium @> startTimestamp(c.trip) AND h.name = :harbour;
   postgis: |
@@ -314,43 +673,50 @@ queryConfigs:
     -- BETWEEN-shaped :period_medium substitution this file uses everywhere else in the active
     -- (postgis/sedona/clickhouse) queries; sedona/clickhouse below already use BETWEEN for this
     -- exact query, so standardized postgis to match.
+    -- FIX (naming): was "crossing_trajectories"/"c.origin_geom" -- real table is
+    -- "crossings_summary", whose start-of-trip geometry column is "start_location".
     SELECT
       AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
+    FROM crossings_summary c
     JOIN harbours h
-      ON ST_DWithin(c.origin_geom::geometry, h.geom::geometry, :radius)
+      ON ST_DWithin(c.start_location::geometry, h.geom::geometry, :radius)
     WHERE h.name = :harbour
       AND c.start_time::timestamp BETWEEN :period_medium;
   sedona: |
+    -- FIX (naming): was a JOIN across "crossing_trajectories_start"/"crossing_trajectories_end"
+    -- -- single "crossings_summary" table, no JOIN needed; "s.origin_geom" -> "c.start_location".
     SELECT
-    AVG(e.end_time - s.start_time) AS avg_duration
-    FROM crossing_trajectories_start s
-    JOIN crossing_trajectories_end e
-        ON e.id = s.id
+    AVG(c.end_time - c.start_time) AS avg_duration
+    FROM crossings_summary c
     JOIN harbours h
         ON h.name = :harbour
-        AND ST_DWithin(s.origin_geom, h.geom, :radius)
-    WHERE s.start_time BETWEEN :period_medium;
+        AND ST_DWithin(c.start_location, h.geom, :radius)
+    WHERE c.start_time BETWEEN :period_medium;
   spacetime: |
-    SELECT AVG(@t)
-    FROM harbours h
-    JOIN crossings ON ST_DWithin(ST_Point(x0, y0), ST_ToGeom(h.geom::gpoint), :radius)
-    WHERE h.name = :harbour AND t[0] <@ EPOCHRANGE :period_medium;
+    SELECT AVG(@c.t)
+      FROM crossings c
+      JOIN harbours h ON ST_DWithin(ST_Point(c.x0, c.y0), ST_ToGeom(h.geom::gpoint), :radius)
+    WHERE h.name = :harbour AND c.t[0] <@ EPOCHRANGE :period_medium;
   clickhouse: |
+    -- FIX (naming): was "crossing_trajectories" -- see postgis block above.
+    -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance, same fix as
+    -- crossingsAroundHarbour's clickhouse block (see its FIX comment for the full verification).
+    -- This query is use: false (dormant); correct if ever enabled.
     SELECT AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
+    FROM crossings_summary c
     JOIN harbours h ON h.name = :harbour
-    WHERE greatCircleDistance(c.start_lon, c.start_lat, h.lon, h.lat) <= :radius
+    WHERE webMercatorDistance(c.start_lon, c.start_lat, h.lon, h.lat) <= :radius
       AND c.start_time BETWEEN :period_medium;
   duckdb: |
+    -- FIX (naming): was "crossing_trajectories"/"c.origin_geom" -- see postgis block above.
     SELECT
       AVG(c.end_time - c.start_time) AS avg_duration
-    FROM crossing_trajectories c
+    FROM crossings_summary c
     JOIN harbours h
-      ON ST_DWithin(c.origin_geom, h.geom, :radius)
+      ON ST_DWithin(c.start_location, h.geom, :radius)
     WHERE h.name = :harbour
       AND c.start_time BETWEEN :period_medium;
-  repetition: 10
+  repetition: 50
   parameters:
   - harbour
   - period_medium
@@ -360,36 +726,46 @@ queryConfigs:
   use: false
   description: "Finds crossings that connect two given harbours (i.e are within a specific distance of both harbours.)"
   type: spatial
-  # EQUIVALENCE NOTE: same great-circle-vs-planar distance mismatch flagged on
-  # countActiveCrossingsNearIsland above -- applies here too via clickhouse's greatCircleDistance.
+  # FIX (2026-09-30): the great-circle-vs-planar distance mismatch previously flagged here is
+  # fixed below (greatCircleDistance -> webMercatorDistance / polygonsDistanceCartesian, matching
+  # the planar EPSG:3857 metric the other dialects use) -- see crossingsAroundHarbour's clickhouse
+  # block for the full verification.
   mobilitydb: |
     SELECT c.id FROM crossings c JOIN harbours h_start ON ST_DWithin(startValue(c.trip), h_start.geom, :distance) JOIN harbours h_end ON ST_DWithin(endValue(c.trip), h_end.geom, :distance) WHERE h_start.name = :harbour AND h_end.name = :port;
   postgis: |
-    SELECT DISTINCT c.id FROM crossing_trajectories c JOIN harbours h_start ON h_start.name = :harbour AND ST_DWithin(c.origin_geom::geometry, h_start.geom::geometry, :distance) JOIN harbours h_end ON h_end.name = :port AND ST_DWithin(c.destination_geom::geometry, h_end.geom::geometry, :distance);
+    -- FIX (naming): was "crossing_trajectories"/"origin_geom"/"destination_geom" -- real table
+    -- is "crossings_summary" with "start_location"/"end_location".
+    SELECT DISTINCT c.id FROM crossings_summary c JOIN harbours h_start ON h_start.name = :harbour AND ST_DWithin(c.start_location::geometry, h_start.geom::geometry, :distance) JOIN harbours h_end ON h_end.name = :port AND ST_DWithin(c.end_location::geometry, h_end.geom::geometry, :distance);
   sedona: |
-    SELECT DISTINCT s.id FROM crossing_trajectories_start s JOIN harbours h_start ON h_start.name = :harbour AND ST_DWithin(s.origin_geom, h_start.geom, :distance) JOIN crossing_trajectories_end e ON e.id = s.id JOIN harbours h_end ON h_end.name = :port AND ST_DWithin(e.destination_geom, h_end.geom, :distance);
+    -- FIX (naming): was a JOIN across "crossing_trajectories_start"/"crossing_trajectories_end"
+    -- -- single "crossings_summary" table, no JOIN needed.
+    SELECT DISTINCT c.id FROM crossings_summary c JOIN harbours h_start ON h_start.name = :harbour AND ST_DWithin(c.start_location, h_start.geom, :distance) JOIN harbours h_end ON h_end.name = :port AND ST_DWithin(c.end_location, h_end.geom, :distance);
   spacetime: |
-    -- FIX: original was "FROM harbours h1, harbours h2 JOIN crossings c ON <cond referencing h1>"
-    -- -- standard SQL scopes that JOIN's ON clause to only (h2, c), so h1 was out of scope
-    -- there. Restructured as explicit joins off crossings so both ON clauses stay in scope.
-    SELECT c.id
-    FROM crossings c
-    JOIN harbours h1 ON ST_DWithin(ST_Point(x0, y0), ST_ToGeom(h1.geom::gpoint), :distance)
-    JOIN harbours h2 ON ST_DWithin(ST_Point(x1, y1), ST_ToGeom(h2.geom::gpoint), :distance)
-    WHERE h1.name = :harbour AND h2.name = :port;
+    SELECT c.crossing_id AS id
+    FROM crossings c, harbours h1, harbours h2
+    WHERE h1.name = :harbour AND h2.name = :port
+    AND c.t && CCRANGE(EPOCH '2024-01-01', EPOCH '2025-07-07 23:59:59')
+    AND ST_DWithin(ST_Point(c.x0, c.y0), ST_ToGeom(h1.geom::gpoint), :distance)
+    AND ST_DWithin(ST_Point(c.x1, c.y1), ST_ToGeom(h2.geom::gpoint), :distance);
   clickhouse: |
+    -- FIX (naming): was "crossing_trajectories" -- see postgis block above.
+    -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance, same fix as
+    -- crossingsAroundHarbour's clickhouse block (see its FIX comment for the full verification).
+    -- This query is use: false (dormant); correct if ever enabled.
     SELECT DISTINCT c.id
-    FROM crossing_trajectories c
+    FROM crossings_summary c
     JOIN harbours h_start ON h_start.name = :harbour
     JOIN harbours h_end ON h_end.name = :port
-    WHERE greatCircleDistance(c.start_lon, c.start_lat, h_start.lon, h_start.lat) <= :distance
-      AND greatCircleDistance(c.end_lon, c.end_lat, h_end.lon, h_end.lat) <= :distance;
+    WHERE webMercatorDistance(c.start_lon, c.start_lat, h_start.lon, h_start.lat) <= :distance
+      AND webMercatorDistance(c.end_lon, c.end_lat, h_end.lon, h_end.lat) <= :distance;
   duckdb: |
+    -- FIX (naming): was "crossing_trajectories"/"origin_geom"/"destination_geom" -- see postgis
+    -- block above.
     SELECT DISTINCT c.id
-    FROM crossing_trajectories c
-    JOIN harbours h_start ON h_start.name = :harbour AND ST_DWithin(c.origin_geom, h_start.geom, :distance)
-    JOIN harbours h_end ON h_end.name = :port AND ST_DWithin(c.destination_geom, h_end.geom, :distance);
-  repetition: 10
+    FROM crossings_summary c
+    JOIN harbours h_start ON h_start.name = :harbour AND ST_DWithin(c.start_location, h_start.geom, :distance)
+    JOIN harbours h_end ON h_end.name = :port AND ST_DWithin(c.end_location, h_end.geom, :distance);
+  repetition: 50
   parameters:
   - harbour
   - port
@@ -415,22 +791,34 @@ queryConfigs:
   sedona: |
   spacetime: |
 
+  # FIX: crossing_points has no "geom" column in ClickHouse (it stores lat/lon directly, with
+  # Point/h3 as MATERIALIZED derivatives, same shape as flight_points -- see
+  # insertSingleflightPoint's FIX note in aviation/config/combinedBenchConf.yaml) -- this would
+  # have errored outright on an unknown column. Rewritten with the same :point_lon/:point_lat
+  # decomposition generateParameterVariations.py already builds for other ClickHouse queries.
   clickhouse: |
-    INSERT INTO crossing_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    INSERT INTO crossing_points (id, timestamp, lat, lon)
+    VALUES (:id, :instant, :point_lat, :point_lon);
   duckdb: |
     INSERT INTO crossing_points (id, geom, timestamp)
     VALUES (:id, :point, :instant);
 
-  repetition: 10
+  repetition: 23
   parameters:
   - id
   - point
   - instant
 
-- name: updateCrossingPoint
+# NOTE: "id" is not unique in crossing_points -- it's the crossing's id, shared by every point of
+# that crossing, not a per-row key. updateCrossingPoint/deleteCrossingPoint (WHERE id = :id alone)
+# were ambiguously named for an operation that (outside the benchmark's own scratch-id
+# bookkeeping) touches every point of the crossing, not "a crossing point" as the name implied.
+# Split into an explicit "Mass" variant (unchanged: every point sharing :id) and a "Single"
+# variant that also pins :instant (the exact timestamp of one specific point) so it targets
+# exactly one row -- same split as aviation/config/combinedBenchConf.yaml's flight_points queries.
+- name: updateCrossingPointMass
   use: true
-  description: "Update location of a crossing point"
+  description: "Update location of every point belonging to a crossing id"
   type: update
   # EQUIVALENCE NOTE: write immediacy differs by system here -- mobilitydb/postgis apply this
   # UPDATE synchronously; clickhouse's UPDATE is an async background mutation (ALTER TABLE ...
@@ -450,11 +838,19 @@ queryConfigs:
     WHERE id = :id;
   sedona: |
   spacetime: |
+  # FIX: two more problems on top of the "trip" mistake above. (1) "geom" isn't a ClickHouse
+  # column (see insertSingleCrossingPoint's FIX note); (2) even against the real lat/lon columns,
+  # ALTER TABLE ... UPDATE against crossing_points (the Distributed table) fails outright the same
+  # way flight_points' did -- lat/lon feed the MATERIALIZED h3 column, which is part of the
+  # ORDER BY key, and ClickHouse forbids updating any column a key column derives from, on top of
+  # Distributed tables not accepting mutations directly. Same re-INSERT (self-referencing SELECT
+  # to keep each row's own timestamp) + DELETE workaround as updateflightPointMass, targeting the
+  # underlying _local table on every shard (ON CLUSTER). ClickHouseExecutor.java splits on ";" and
+  # runs each statement in turn to support this.
   clickhouse: |
-    -- FIX: ClickHouse has no standalone UPDATE statement; row-level changes are async
-    -- mutations via ALTER TABLE ... UPDATE ... WHERE ... (the original "UPDATE ... SET ..."
-    -- syntax would fail outright).
-    ALTER TABLE crossing_points UPDATE geom = :point WHERE id = :id;
+    INSERT INTO crossing_points (id, timestamp, lat, lon)
+    SELECT id, timestamp, :point_lat, :point_lon FROM crossing_points WHERE id = :id;
+    ALTER TABLE crossing_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND lat != :point_lat;
   duckdb: |
     -- Runs as a normal UPDATE against the DuckLake-attached table; each commit becomes a new
     -- snapshot with the retry-on-conflict behavior noted in the header above -- a different
@@ -467,9 +863,40 @@ queryConfigs:
   - id
   - point
 
-- name: deleteCrossingPoint
+- name: updateCrossingPointSingle
   use: true
-  description: "Delete a crossing point"
+  description: "Update location of exactly one crossing point, identified by id and timestamp"
+  type: update_single
+  # Same EQUIVALENCE NOTE as updateCrossingPointMass above.
+  mobilitydb: |
+    UPDATE crossing_points
+    SET geom = :point
+    WHERE id = :id AND timestamp = :instant;
+  postgis: |
+    UPDATE crossing_points
+    SET geom = :point
+    WHERE id = :id AND timestamp = :instant;
+  sedona: |
+  spacetime: |
+  # Same re-INSERT + DELETE workaround as updateCrossingPointMass (see its FIX note), scoped down
+  # to the one point via "AND timestamp = :instant" on both statements.
+  clickhouse: |
+    INSERT INTO crossing_points (id, timestamp, lat, lon)
+    SELECT id, timestamp, :point_lat, :point_lon FROM crossing_points WHERE id = :id AND timestamp = :instant;
+    ALTER TABLE crossing_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant AND lat != :point_lat;
+  duckdb: |
+    UPDATE crossing_points
+    SET geom = :point
+    WHERE id = :id AND timestamp = :instant;
+  repetition: 10
+  parameters:
+  - id
+  - point
+  - instant
+
+- name: deleteCrossingPointMass
+  use: false  # (2026-10-02) delete queries retired: benchmark writes are insert/update only, reset after each run
+  description: "Delete every point belonging to a crossing id"
   type: delete
   mobilitydb: |
     DELETE FROM crossing_points
@@ -479,18 +906,41 @@ queryConfigs:
     WHERE id = :id;
   sedona: |
   spacetime: |
+  # FIX: this "lightweight delete" syntax fails outright against crossing_points -- confirmed
+  # live for the equivalent flight_points query ("DELETE query is not supported for table
+  # default.flight_points", a Distributed engine table; crossing_points is built the same way --
+  # see insertSingleCrossingPoint's FIX note). Mutations have to target the underlying _local
+  # table, on every shard (ON CLUSTER), same as updateCrossingPointMass.
   clickhouse: |
-    -- NOTE: this is ClickHouse's "lightweight delete" -- valid on >=23.3 (or older
-    -- versions with allow_experimental_lightweight_delete=1). If your version/settings
-    -- don't support it, use "ALTER TABLE crossing_points DELETE WHERE id = :id;" instead.
-    DELETE FROM crossing_points
-    WHERE id = :id;
+    ALTER TABLE crossing_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id;
   duckdb: |
     DELETE FROM crossing_points
     WHERE id = :id;
-  repetition: 10
+  repetition: 5
   parameters:
   - id
+
+- name: deleteCrossingPointSingle
+  use: false  # (2026-10-02) delete queries retired: benchmark writes are insert/update only, reset after each run
+  description: "Delete exactly one crossing point, identified by id and timestamp"
+  type: delete_single
+  mobilitydb: |
+    DELETE FROM crossing_points
+    WHERE id = :id AND timestamp = :instant;
+  postgis: |
+    DELETE FROM crossing_points
+    WHERE id = :id AND timestamp = :instant;
+  sedona: |
+  spacetime: |
+  clickhouse: |
+    ALTER TABLE crossing_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant;
+  duckdb: |
+    DELETE FROM crossing_points
+    WHERE id = :id AND timestamp = :instant;
+  repetition: 5
+  parameters:
+  - id
+  - instant
 
 - name: bulkInsertCrossingPoints
   use: true
@@ -505,13 +955,16 @@ queryConfigs:
     VALUES :bulk_values;
   sedona: |
   spacetime: |
+  # FIX: same "no geom column" problem as insertSingleCrossingPoint above -- :bulk_values_clickhouse
+  # is a ClickHouse-specific rebuild of the shared :bulk_values tuples (see
+  # generateParameterVariations.py) as (id, timestamp, lat, lon), matching the real columns.
   clickhouse: |
-    INSERT INTO crossing_points (id, geom, timestamp)
-    VALUES :bulk_values;
+    INSERT INTO crossing_points (id, timestamp, lat, lon)
+    VALUES :bulk_values_clickhouse;
   duckdb: |
     INSERT INTO crossing_points (id, geom, timestamp)
     VALUES :bulk_values;
-  repetition: 10
+  repetition: 12
   parameters:
   - bulk_values
 

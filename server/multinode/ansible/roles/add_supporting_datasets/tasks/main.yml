@@ -13,6 +13,65 @@
     delete: no
   when: inventory_hostname in groups['masters']
 
+# FIX: process_parquet.yml below (islands loading) uses the DuckDB CLI, but this role -- unlike
+# postgis_aviation/postgis_ais/postgis_cycling/postgis_geolife -- never actually installed it
+# itself, only ever working by accident when one of those roles happened to run first on the same
+# node in the same playbook (e.g. playbooks/all.yml). Running sync_supporting_datasets.yml on its
+# own against a fresh node failed outright. Installing it here too (become: false, matching every
+# other role's fix for the same become:true-leaks-into-fact-gathering issue) makes this role
+# self-sufficient.
+- name: Check whether DuckDB is installed
+  become: false
+  ansible.builtin.stat:
+    path: "/home/{{ ansible_user }}/.duckdb/cli/latest/duckdb"
+  register: duckdb_installed
+  when: inventory_hostname in groups['masters']
+
+- name: Install DuckDB CLI
+  become: false
+  ansible.builtin.shell: |
+    curl -fsSL https://install.duckdb.org | sh
+  args:
+    creates: "/home/{{ ansible_user }}/.duckdb/cli/latest/duckdb"
+  when: inventory_hostname in groups['masters'] and not duckdb_installed.stat.exists
+
+# FIX: process_parquet.yml's "LOAD postgres;"/"LOAD spatial;" expect these extensions available
+# without ever touching the network -- DuckDB's Postgres scanner is now named "postgres_scanner"
+# (renamed upstream; process_parquet.yml still used the old "postgres" LOAD name), and even the
+# correct name auto-installs over the network on first LOAD, which hangs indefinitely on
+# nst-cluster hardware specifically (DNS for extensions.duckdb.org returns a working IPv4 address
+# alongside an IPv6 one whose route is black-holed there -- SYNs vanish instead of being rejected;
+# DuckDB's installer, unlike curl, never falls back to IPv4). Pre-fetch both explicitly over IPv4
+# into the exact cache path DuckDB's own INSTALL would use, matching roles/duckdb's identical fix
+# for the quack extension -- harmless/no-op anywhere this network problem doesn't exist.
+- name: Determine installed DuckDB CLI version (extension cache path is versioned by it)
+  become: false
+  ansible.builtin.command: "/home/{{ ansible_user }}/.duckdb/cli/latest/duckdb --version"
+  register: duckdb_cli_version_output
+  changed_when: false
+  when: inventory_hostname in groups['masters']
+
+- name: Ensure the DuckDB extension cache directory exists
+  become: false
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64"
+    state: directory
+    mode: '0755'
+  when: inventory_hostname in groups['masters']
+
+- name: Pre-fetch DuckDB extensions this role needs, over IPv4
+  become: false
+  ansible.builtin.shell: >-
+    test -f "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/{{ item.load_name }}.duckdb_extension"
+    || curl -4 -fsSL "http://extensions.duckdb.org/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/{{ item.fetch_name }}.duckdb_extension.gz"
+    | gunzip > "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/{{ item.load_name }}.duckdb_extension"
+  loop:
+    - { load_name: postgres_scanner, fetch_name: postgres_scanner }
+    - { load_name: spatial, fetch_name: spatial }
+  loop_control:
+    label: "{{ item.load_name }}"
+  when: inventory_hostname in groups['masters']
+
 # FIX: this role assumed venv_dir already existed -- it's only ever created by postgis_aviation/
 # postgis_cycling's "Create Python virtual environment" task. Running this role on its own (e.g.
 # via playbooks/sync_supporting_datasets.yml without first running one of those) had no venv to
@@ -31,10 +90,14 @@
     creates: "{{ venv_dir }}/bin/activate"
   when: inventory_hostname in groups['masters']
 
+# FIX: plain "psycopg2" has no prebuilt wheel matching this venv's Python and falls back to
+# compiling from source, which fails outright without python3-dev installed ("fatal error:
+# Python.h: No such file or directory") -- psycopg2-binary ships prebuilt wheels and needs no
+# compiler/headers at all (the upstream-recommended alternative for exactly this situation).
 - name: Install deps with bash
   ansible.builtin.shell: |
     source {{ venv_dir }}/bin/activate
-    pip install pandas pyarrow psycopg2
+    pip install pandas pyarrow psycopg2-binary
   args:
     executable: /bin/bash
   when: inventory_hostname in groups['masters']

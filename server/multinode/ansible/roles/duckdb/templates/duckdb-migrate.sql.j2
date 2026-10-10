@@ -1,0 +1,32 @@
+-- One-time materialization of GeoBenchr's tables into DuckDB's own storage (see the FIX comment
+-- on duckdb_materialize_tables in defaults/main.yml for why). Run once by roles/duckdb's
+-- "Materialize GeoBenchr tables" task, guarded by the ~/.duckdb_tables_materialized marker file --
+-- safe to re-run by hand (DROP VIEW IF EXISTS / CREATE OR REPLACE TABLE), but not idempotent
+-- against a partial failure partway through a large table; check duckdb_tables() row counts
+-- against Postgres before re-running if a previous attempt was interrupted.
+SET autoinstall_known_extensions=false;
+SET autoload_known_extensions=false;
+LOAD httpfs;
+LOAD postgres_scanner;
+LOAD spatial;
+ATTACH 'host={{ db_host }} dbname={{ db_name }} user={{ db_user }} port={{ db_port }} password={{ db_password }}' AS pg (TYPE postgres);
+
+{% for t in duckdb_materialize_tables %}
+-- FIX: "CREATE OR REPLACE TABLE" can't change an object's type (confirmed live: "Catalog Error:
+-- Existing object {{ t.name }} is of type View, trying to replace with type Table") -- it fails
+-- at that point only, *after* fully executing/sorting the SELECT, wasting the expensive part.
+-- Dropping any pre-existing view first (from this role's previous live-view setup) makes the
+-- replace a clean create regardless of what was there before.
+DROP VIEW IF EXISTS {{ t.name }};
+SELECT '{{ t.name }}: start' AS step, now();
+CREATE OR REPLACE TABLE {{ t.name }} AS SELECT * FROM pg.public.{{ t.name }}{% if t.order_by is defined %} ORDER BY {{ t.order_by }}{% endif %};
+{% if t.spatial_index %}
+{% for col in (t.spatial_columns | default(['geom'])) %}
+CREATE INDEX {{ t.name }}_{{ col }}_idx ON {{ t.name }} USING RTREE ({{ col }});
+{% endfor %}
+{% endif %}
+SELECT '{{ t.name }}: done' AS step, now(), count(*) FROM {{ t.name }};
+{% endfor %}
+
+DETACH pg;
+SELECT 'MIGRATION COMPLETE' AS step, now();

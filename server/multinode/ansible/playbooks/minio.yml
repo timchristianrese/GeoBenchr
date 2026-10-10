@@ -1,0 +1,9 @@
+# MinIO runs in distributed mode across every node (unlike DuckDB/Quack itself, which stays
+# master-only) -- it's the shared, multi-node storage backend DuckLake's Postgres-catalog +
+# object-storage DATA_PATH needs, so no single node's disk becomes a bottleneck.
+- name: Setup MinIO (DuckLake storage backend)
+  hosts: all
+  become: true
+  roles:
+    - common
+    - minio

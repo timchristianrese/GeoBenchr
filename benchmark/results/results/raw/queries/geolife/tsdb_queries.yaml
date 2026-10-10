@@ -1,0 +1,440 @@
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: |
+    SELECT *
+    FROM tsdb_geolife_points
+    WHERE venue_type = 'Restaurant' AND ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(116.52415814692183, 39.816789985129965), 4326), 3857), 5000)
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(116.52415814692183, 39.816789985129965), 4326), 3857))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.52415814692183, 39.816789985129965), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: |
+    WITH minute_activity AS (
+     SELECT
+         date_trunc('minute', timestamp) AS minute,
+         COUNT(*) FILTER (WHERE venue_id <> 0) AS venue_updates
+     FROM tsdb_geolife_points
+     WHERE timestamp BETWEEN '2019-07-21 10:16:05' AND '2019-07-21 21:54:45'
+       AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.5041169205436, 39.90839807322859, 116.60771282808577, 39.96538136682634), 4326), 3857))
+     GROUP BY date_trunc('minute', timestamp)
+     ),
+     minute_windows AS (
+         SELECT
+             minute,
+             minute - INTERVAL '10 minutes' AS window_start,
+             minute + INTERVAL '10 minutes' AS window_end
+         FROM minute_activity
+     )
+     SELECT
+         w.minute,
+         SUM(m.venue_updates) AS updates_in_window
+     FROM minute_windows w
+     JOIN minute_activity m
+         ON m.minute BETWEEN w.window_start AND w.window_end
+     GROUP BY w.minute
+     ORDER BY w.minute;
+  params:
+  - '''2019-07-21 10:16:05'' AND ''2019-07-21 21:54:45'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.5041169205436, 39.90839807322859,
+    116.60771282808577, 39.96538136682634), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: |
+    SELECT *
+    FROM tsdb_geolife_points
+    WHERE venue_type = 'Restaurant' AND ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(116.60678636985772, 39.90701751966342), 4326), 3857), 5000)
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(116.60678636985772, 39.90701751966342), 4326), 3857))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.60678636985772, 39.90701751966342), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM tsdb_geolife_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.24321925019548, 39.977136774661325, 116.34681515773765, 40.03412006825908), 4326), 3857))
+    GROUP BY venue_type;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.24321925019548, 39.977136774661325,
+    116.34681515773765, 40.03412006825908), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       COUNT(DISTINCT id) AS users
+    FROM tsdb_geolife_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.31150698574375, 39.91844889127771, 116.41510289328592, 39.975432184875466), 4326), 3857))
+      AND timestamp BETWEEN '2019-07-09 02:53:02' AND '2019-07-11 04:50:33'
+    GROUP BY hour
+    ORDER BY hour;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.31150698574375, 39.91844889127771,
+    116.41510289328592, 39.975432184875466), 4326), 3857)
+  - '''2019-07-09 02:53:02'' AND ''2019-07-11 04:50:33'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       COUNT(DISTINCT id) AS users
+    FROM tsdb_geolife_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.20459161502785, 39.929078264990764, 116.30818752257002, 39.98606155858852), 4326), 3857))
+      AND timestamp BETWEEN '2019-07-07 07:18:41' AND '2019-07-10 19:16:22'
+    GROUP BY hour
+    ORDER BY hour;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.20459161502785, 39.929078264990764,
+    116.30818752257002, 39.98606155858852), 4326), 3857)
+  - '''2019-07-07 07:18:41'' AND ''2019-07-10 19:16:22'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: |
+    WITH minute_activity AS (
+     SELECT
+         date_trunc('minute', timestamp) AS minute,
+         COUNT(*) FILTER (WHERE venue_id <> 0) AS venue_updates
+     FROM tsdb_geolife_points
+     WHERE timestamp BETWEEN '2019-07-08 03:23:50' AND '2019-07-09 10:16:43'
+       AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50057537169228, 39.93626865652794, 116.60417127923445, 39.993251950125696), 4326), 3857))
+     GROUP BY date_trunc('minute', timestamp)
+     ),
+     minute_windows AS (
+         SELECT
+             minute,
+             minute - INTERVAL '10 minutes' AS window_start,
+             minute + INTERVAL '10 minutes' AS window_end
+         FROM minute_activity
+     )
+     SELECT
+         w.minute,
+         SUM(m.venue_updates) AS updates_in_window
+     FROM minute_windows w
+     JOIN minute_activity m
+         ON m.minute BETWEEN w.window_start AND w.window_end
+     GROUP BY w.minute
+     ORDER BY w.minute;
+  params:
+  - '''2019-07-08 03:23:50'' AND ''2019-07-09 10:16:43'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50057537169228, 39.93626865652794,
+    116.60417127923445, 39.993251950125696), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: |
+    SELECT
+    id,
+    COUNT(*)::float / COUNT(DISTINCT DATE(timestamp)) AS avg_points_per_day
+    FROM tsdb_geolife_points
+    WHERE timestamp BETWEEN '2019-07-05 04:04:00' AND '2019-07-08 15:44:21'
+    GROUP BY id;
+  params:
+  - '''2019-07-05 04:04:00'' AND ''2019-07-08 15:44:21'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       COUNT(DISTINCT id) AS users
+    FROM tsdb_geolife_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34210056710815, 39.87091530206668, 116.44569647465032, 39.92789859566443), 4326), 3857))
+      AND timestamp BETWEEN '2019-07-31 14:42:28' AND '2019-07-31 23:59:59'
+    GROUP BY hour
+    ORDER BY hour;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34210056710815, 39.87091530206668,
+    116.44569647465032, 39.92789859566443), 4326), 3857)
+  - '''2019-07-31 14:42:28'' AND ''2019-07-31 23:59:59'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: |
+    SELECT *
+    FROM tsdb_geolife_points
+    WHERE venue_type = 'Restaurant' AND ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(116.32233606307769, 39.807099482561426), 4326), 3857), 5000)
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(116.32233606307769, 39.807099482561426), 4326), 3857))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.32233606307769, 39.807099482561426), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: |
+    SELECT *
+    FROM tsdb_geolife_points
+    WHERE venue_type = 'Restaurant' AND ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(116.19761065108271, 39.88863886714664), 4326), 3857), 5000)
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(116.19761065108271, 39.88863886714664), 4326), 3857))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.19761065108271, 39.88863886714664), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: |
+    SELECT
+    id,
+    COUNT(*)::float / COUNT(DISTINCT DATE(timestamp)) AS avg_points_per_day
+    FROM tsdb_geolife_points
+    WHERE timestamp BETWEEN '2019-07-14 20:16:33' AND '2019-07-17 11:35:40'
+    GROUP BY id;
+  params:
+  - '''2019-07-14 20:16:33'' AND ''2019-07-17 11:35:40'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: |
+    WITH minute_activity AS (
+     SELECT
+         date_trunc('minute', timestamp) AS minute,
+         COUNT(*) FILTER (WHERE venue_id <> 0) AS venue_updates
+     FROM tsdb_geolife_points
+     WHERE timestamp BETWEEN '2019-07-14 15:16:29' AND '2019-07-15 23:05:28'
+       AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.16791292513895, 39.902438017981105, 116.27150883268112, 39.95942131157886), 4326), 3857))
+     GROUP BY date_trunc('minute', timestamp)
+     ),
+     minute_windows AS (
+         SELECT
+             minute,
+             minute - INTERVAL '10 minutes' AS window_start,
+             minute + INTERVAL '10 minutes' AS window_end
+         FROM minute_activity
+     )
+     SELECT
+         w.minute,
+         SUM(m.venue_updates) AS updates_in_window
+     FROM minute_windows w
+     JOIN minute_activity m
+         ON m.minute BETWEEN w.window_start AND w.window_end
+     GROUP BY w.minute
+     ORDER BY w.minute;
+  params:
+  - '''2019-07-14 15:16:29'' AND ''2019-07-15 23:05:28'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.16791292513895, 39.902438017981105,
+    116.27150883268112, 39.95942131157886), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: |
+    SELECT id,
+       MIN(timestamp) AS first_seen,
+       MAX(timestamp) AS last_seen
+    FROM tsdb_geolife_points
+    WHERE timestamp BETWEEN '2019-07-24 16:11:47' AND '2019-07-28 10:44:46'
+    GROUP BY id;
+  params:
+  - '''2019-07-24 16:11:47'' AND ''2019-07-28 10:44:46'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: |
+    SELECT
+    id,
+    COUNT(*)::float / COUNT(DISTINCT DATE(timestamp)) AS avg_points_per_day
+    FROM tsdb_geolife_points
+    WHERE timestamp BETWEEN '2019-07-03 08:55:21' AND '2019-07-06 08:32:07'
+    GROUP BY id;
+  params:
+  - '''2019-07-03 08:55:21'' AND ''2019-07-06 08:32:07'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: |
+    WITH minute_activity AS (
+     SELECT
+         date_trunc('minute', timestamp) AS minute,
+         COUNT(*) FILTER (WHERE venue_id <> 0) AS venue_updates
+     FROM tsdb_geolife_points
+     WHERE timestamp BETWEEN '2019-07-24 11:17:47' AND '2019-07-26 09:09:59'
+       AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32817741235621, 39.80544461766248, 116.43177331989838, 39.862427911260234), 4326), 3857))
+     GROUP BY date_trunc('minute', timestamp)
+     ),
+     minute_windows AS (
+         SELECT
+             minute,
+             minute - INTERVAL '10 minutes' AS window_start,
+             minute + INTERVAL '10 minutes' AS window_end
+         FROM minute_activity
+     )
+     SELECT
+         w.minute,
+         SUM(m.venue_updates) AS updates_in_window
+     FROM minute_windows w
+     JOIN minute_activity m
+         ON m.minute BETWEEN w.window_start AND w.window_end
+     GROUP BY w.minute
+     ORDER BY w.minute;
+  params:
+  - '''2019-07-24 11:17:47'' AND ''2019-07-26 09:09:59'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32817741235621, 39.80544461766248,
+    116.43177331989838, 39.862427911260234), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       COUNT(DISTINCT id) AS users
+    FROM tsdb_geolife_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30752201140997, 39.8685382612401, 116.41111791895214, 39.92552155483785), 4326), 3857))
+      AND timestamp BETWEEN '2019-07-23 21:48:14' AND '2019-07-27 00:50:56'
+    GROUP BY hour
+    ORDER BY hour;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30752201140997, 39.8685382612401,
+    116.41111791895214, 39.92552155483785), 4326), 3857)
+  - '''2019-07-23 21:48:14'' AND ''2019-07-27 00:50:56'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: |
+    SELECT *
+    FROM tsdb_geolife_points
+    WHERE venue_type = 'Restaurant' AND ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(116.24284583777377, 40.024807555857045), 4326), 3857), 5000)
+    ORDER BY ST_Distance(geom, ST_Transform(ST_SetSRID(ST_Point(116.24284583777377, 40.024807555857045), 4326), 3857))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.24284583777377, 40.024807555857045), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: |
+    SELECT id,
+       MIN(timestamp) AS first_seen,
+       MAX(timestamp) AS last_seen
+    FROM tsdb_geolife_points
+    WHERE timestamp BETWEEN '2019-07-27 08:29:18' AND '2019-07-29 14:27:31'
+    GROUP BY id;
+  params:
+  - '''2019-07-27 08:29:18'' AND ''2019-07-29 14:27:31'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM tsdb_geolife_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.40848885237345, 39.967224025746624, 116.51208475991562, 40.02420731934438), 4326), 3857))
+    GROUP BY venue_type;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.40848885237345, 39.967224025746624,
+    116.51208475991562, 40.02420731934438), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: |
+    SELECT id,
+       MIN(timestamp) AS first_seen,
+       MAX(timestamp) AS last_seen
+    FROM tsdb_geolife_points
+    WHERE timestamp BETWEEN '2019-07-03 15:59:07' AND '2019-07-06 09:37:38'
+    GROUP BY id;
+  params:
+  - '''2019-07-03 15:59:07'' AND ''2019-07-06 09:37:38'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT date_trunc('hour', timestamp) AS hour,
+       COUNT(DISTINCT id) AS users
+    FROM tsdb_geolife_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.42983980559023, 39.82757726598545, 116.5334357131324, 39.8845605595832), 4326), 3857))
+      AND timestamp BETWEEN '2019-07-24 07:52:29' AND '2019-07-27 04:20:40'
+    GROUP BY hour
+    ORDER BY hour;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.42983980559023, 39.82757726598545,
+    116.5334357131324, 39.8845605595832), 4326), 3857)
+  - '''2019-07-24 07:52:29'' AND ''2019-07-27 04:20:40'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: |
+    WITH minute_activity AS (
+     SELECT
+         date_trunc('minute', timestamp) AS minute,
+         COUNT(*) FILTER (WHERE venue_id <> 0) AS venue_updates
+     FROM tsdb_geolife_points
+     WHERE timestamp BETWEEN '2019-07-12 00:25:18' AND '2019-07-13 00:04:00'
+       AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2788372441846, 39.935625315610295, 116.38243315172677, 39.99260860920805), 4326), 3857))
+     GROUP BY date_trunc('minute', timestamp)
+     ),
+     minute_windows AS (
+         SELECT
+             minute,
+             minute - INTERVAL '10 minutes' AS window_start,
+             minute + INTERVAL '10 minutes' AS window_end
+         FROM minute_activity
+     )
+     SELECT
+         w.minute,
+         SUM(m.venue_updates) AS updates_in_window
+     FROM minute_windows w
+     JOIN minute_activity m
+         ON m.minute BETWEEN w.window_start AND w.window_end
+     GROUP BY w.minute
+     ORDER BY w.minute;
+  params:
+  - '''2019-07-12 00:25:18'' AND ''2019-07-13 00:04:00'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2788372441846, 39.935625315610295,
+    116.38243315172677, 39.99260860920805), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: |
+    SELECT
+    id,
+    COUNT(*)::float / COUNT(DISTINCT DATE(timestamp)) AS avg_points_per_day
+    FROM tsdb_geolife_points
+    WHERE timestamp BETWEEN '2019-07-26 21:10:25' AND '2019-07-30 16:17:23'
+    GROUP BY id;
+  params:
+  - '''2019-07-26 21:10:25'' AND ''2019-07-30 16:17:23'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: |
+    SELECT id,
+       MIN(timestamp) AS first_seen,
+       MAX(timestamp) AS last_seen
+    FROM tsdb_geolife_points
+    WHERE timestamp BETWEEN '2019-07-26 17:43:21' AND '2019-07-30 09:21:45'
+    GROUP BY id;
+  params:
+  - '''2019-07-26 17:43:21'' AND ''2019-07-30 09:21:45'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM tsdb_geolife_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51961237336279, 39.84967356645507, 116.62320828090496, 39.90665686005282), 4326), 3857))
+    GROUP BY venue_type;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51961237336279, 39.84967356645507,
+    116.62320828090496, 39.90665686005282), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM tsdb_geolife_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.45292447753606, 39.81254531291944, 116.55652038507823, 39.86952860651719), 4326), 3857))
+    GROUP BY venue_type;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.45292447753606, 39.81254531291944,
+    116.55652038507823, 39.86952860651719), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: |
+    SELECT
+    id,
+    COUNT(*)::float / COUNT(DISTINCT DATE(timestamp)) AS avg_points_per_day
+    FROM tsdb_geolife_points
+    WHERE timestamp BETWEEN '2019-07-10 12:16:46' AND '2019-07-12 13:05:00'
+    GROUP BY id;
+  params:
+  - '''2019-07-10 12:16:46'' AND ''2019-07-12 13:05:00'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: |
+    SELECT id,
+       MIN(timestamp) AS first_seen,
+       MAX(timestamp) AS last_seen
+    FROM tsdb_geolife_points
+    WHERE timestamp BETWEEN '2019-07-10 14:53:09' AND '2019-07-14 05:50:15'
+    GROUP BY id;
+  params:
+  - '''2019-07-10 14:53:09'' AND ''2019-07-14 05:50:15'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM tsdb_geolife_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46574622826829, 39.91364462858925, 116.56934213581046, 39.970627922187006), 4326), 3857))
+    GROUP BY venue_type;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46574622826829, 39.91364462858925,
+    116.56934213581046, 39.970627922187006), 4326), 3857)

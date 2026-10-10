@@ -10,7 +10,7 @@
     
 
 # FIX: nothing ever synced a parquet file onto the target machine -- "Find parquet files" always
-# found zero. data_generator_geolife/synthetic_output exists but is empty locally, so this syncs
+# found zero. data_generators/geolife/synthetic_output exists but is empty locally, so this syncs
 # a small dummy file matching the pipeline's expected schema instead of real data.
 - name: Sync sample geolife parquet file to target machine
   ansible.posix.synchronize:

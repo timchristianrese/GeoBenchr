@@ -25,7 +25,7 @@
 # ---------------------------------------
 # FIX: no sync task existed at all here (not even a commented-out one, unlike the other
 # postgis_* roles) -- "Find parquet files" below always found zero and everything after it
-# silently no-op'd. data_generator_geolife/synthetic_output exists but is empty locally, so this
+# silently no-op'd. data_generators/geolife/synthetic_output exists but is empty locally, so this
 # syncs a small dummy file matching the pipeline's expected schema instead of real data.
 - name: Sync sample geolife parquet file to target machine
   ansible.posix.synchronize:
@@ -101,10 +101,14 @@
   args:
     creates: "{{ venv_dir }}/bin/activate"
   when: inventory_hostname in groups['masters']
+# FIX: plain "psycopg2" has no prebuilt wheel matching this venv's Python and falls back to
+# compiling from source, which fails outright without python3-dev installed ("fatal error:
+# Python.h: No such file or directory") -- psycopg2-binary ships prebuilt wheels and needs no
+# compiler/headers at all (the upstream-recommended alternative for exactly this situation).
 - name: Install deps with bash
   ansible.builtin.shell: |
     source {{ venv_dir }}/bin/activate
-    pip install pandas pyarrow psycopg2
+    pip install pandas pyarrow psycopg2-binary
   args:
     executable: /bin/bash
   when: inventory_hostname in groups['masters']

@@ -50,7 +50,7 @@ benchmark:
   sut: MobilityDB      # informational label only -- not read by benchmark_client
   mixed: false          # see "Repetition and randomization" below
   nodes: ['']           # informational only (client's real thread/node config is the
-  threads: 16            #  NUM_THREADS env var + run_manager.sh/run_worker.sh, not this file)
+  threads: 16            #  NUM_THREADS env var, not this file)
   test: false           # informational only
   random_seed: 1500     # makes generation reproducible -- same seed -> same generated queries
 

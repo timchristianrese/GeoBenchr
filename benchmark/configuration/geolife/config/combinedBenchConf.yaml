@@ -56,7 +56,17 @@ queryConfigs:
       WHERE timestamp BETWEEN :period_medium
       GROUP BY id;
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
+    SELECT user_id AS id,
+     MIN(t) AS first_seen,
+     MAX(t) AS last_seen
+    FROM geolife_points
+    -- FIX: confirmed live -- ":period_medium" substitutes to a bracketed-range STRING literal for
+    -- spacetime ("'[t1, t2]'", see generateParameterVariations.py's period-specific substitution),
+    -- and "<@" needs an actual EPOCHRANGE value on its right side to type-check against a
+    -- timestamp column ("no matching overload for: '<@'" otherwise) -- same EPOCHRANGE cast the
+    -- "&&"-based queries elsewhere in this file already apply.
+    WHERE t <@ EPOCHRANGE :period_medium
+    GROUP BY user_id;
   clickhouse: |
       SELECT id,
        MIN(timestamp) AS first_seen,
@@ -71,7 +81,7 @@ queryConfigs:
     FROM geolife_points
     WHERE timestamp BETWEEN :period_medium
     GROUP BY id;
-  repetition: 10
+  repetition: 50
   parameters:
   - period_medium
 - name: AverageDailyActivityPerUserInPeriod #temporal
@@ -107,7 +117,20 @@ queryConfigs:
     WHERE timestamp BETWEEN :period_medium
     GROUP BY id;
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
+    WITH user_day_cnt AS (
+      SELECT user_id, TS_DAYSTART(t) day, COUNT(*) AS day_cnt
+      FROM geolife_points
+      -- FIX: confirmed live -- ":period_medium" substitutes to a bracketed-range STRING literal for
+    -- spacetime ("'[t1, t2]'", see generateParameterVariations.py's period-specific substitution),
+    -- and "<@" needs an actual EPOCHRANGE value on its right side to type-check against a
+    -- timestamp column ("no matching overload for: '<@'" otherwise) -- same EPOCHRANGE cast the
+    -- "&&"-based queries elsewhere in this file already apply.
+    WHERE t <@ EPOCHRANGE :period_medium
+      GROUP BY user_id, day
+    )
+    SELECT user_id AS id, SUM(day_cnt)::f64 / COUNT(*) AS avg_points_per_day
+    FROM user_day_cnt
+    GROUP BY user_id;
   clickhouse: |
     -- FIX: uniq() is an APPROXIMATE distinct count in ClickHouse (HyperLogLog-based) -- it is not
     -- the same statistic as postgis/sedona's exact COUNT(DISTINCT DATE(timestamp)) above, so
@@ -125,7 +148,7 @@ queryConfigs:
     FROM geolife_points
     WHERE timestamp BETWEEN :period_medium
     GROUP BY id;
-  repetition: 10
+  repetition: 50
   parameters:
   - period_medium
 
@@ -133,23 +156,21 @@ queryConfigs:
   use: true
   description: "Find the closest restaurant to a specified point using CheckInData. This query identifies the nearest restaurant based on spatial proximity. This query assumes that there is a restaurant within 5 km of the given point."
   type: spatial
-  # EQUIVALENCE NOTE: clickhouse's greatCircleDistance is a true great-circle metric, while
-  # postgis/sedona/duckdb's ST_DWithin/ST_Distance here run in EPSG:3857 (a planar, latitude-
-  # distorted "meter") -- at Beijing's latitude these are not the same 5000m radius, so results
-  # can diverge (already flagged inline on the clickhouse block below, which also needed an arity
-  # fix for greatCircleDistance's 4-scalar signature).
+  # FIX (2026-09-30): the great-circle-vs-planar mismatch previously noted here is fixed below
+  # via webMercatorDistance -- see ais/config/combinedBenchConf.yaml's crossingsAroundHarbour
+  # clickhouse block for the formula derivation and live verification.
   # NOT IMPLEMENTED: left blank in the source file.
   mobilitydb: |
   postgis: |
     SELECT *
     FROM geolife_points
-    WHERE venue_type = 'restaurant' AND ST_DWithin(geom, :point, 5000)
+    WHERE venue_type = 'Restaurant' AND ST_DWithin(geom, :point, 5000)
     ORDER BY ST_Distance(geom, :point)
     LIMIT 1;
   sample_postgis: |
     SELECT *
     FROM geolife_points
-    WHERE venue_type = 'restaurant' AND ST_DWithin(
+    WHERE venue_type = 'Restaurant' AND ST_DWithin(
         geom,
         ST_Transform(
             ST_SetSRID(ST_MakePoint(116.4074, 39.9042), 4326),
@@ -168,34 +189,75 @@ queryConfigs:
   sedona: |
     SELECT *
     FROM geolife_points
-    WHERE venue_type = 'restaurant' AND ST_DWithin(geom, :point, 5000)
+    WHERE venue_type = 'Restaurant' AND ST_DWithin(geom, :point, 5000)
     ORDER BY ST_Distance(geom, :point)
     LIMIT 1;
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
+    -- (2026-10-02) radius in EPSG:3857 units like every other dialect, converted to SpaceTime's
+    -- local meters by :st_scale = cos(lat) * 0.99842 (see scripts/spacetime_units.py)
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 1 AND ST_DWithin(ST_Point(x, y), ST_ToGeom(:point::gpoint), 5000 * :st_scale)
+    ORDER BY ST_Distance(ST_Point(x, y), ST_ToGeom(:point::gpoint))
+    LIMIT 1;
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
     -- NOTE: greatCircleDistance needs 4 scalar args (lon1, lat1, lon2, lat2).
     -- The original passed :point (a single packed geometry parameter, the same
     -- shape postgis/sedona use above) as if it were two scalars -- wrong arity,
     -- would not run. Fixed assuming decomposed :point_lon / :point_lat parameters,
     -- which are NOT currently in this query's shared `parameters:` list below --
-    -- the harness needs to supply them for ClickHouse specifically. Also note: this
-    -- is a true great-circle distance, while postgis/sedona's ST_DWithin/ST_Distance
-    -- run in EPSG:3857 (a planar, latitude-distorted "meter"), so even once the
-    -- arity is fixed the two families of dialects are not measuring quite the same
-    -- thing at Beijing's latitude.
+    -- the harness needs to supply them for ClickHouse specifically.
+    -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance, a SQL UDF
+    -- (created ON CLUSTER cluster_1 -- see COORDINATION.md) that projects both points into Web
+    -- Mercator (EPSG:3857) and takes the planar Euclidean distance, matching ST_DWithin/
+    -- ST_Distance's metric exactly even at Beijing's latitude -- see
+    -- ais/config/combinedBenchConf.yaml's crossingsAroundHarbour clickhouse block for the
+    -- formula derivation and live verification.
     SELECT *
     FROM geolife_points
-    WHERE venue_type = 'restaurant' AND greatCircleDistance(lon, lat, :point_lon, :point_lat) <= 5000
-    ORDER BY greatCircleDistance(lon, lat, :point_lon, :point_lat)
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(:point_lon, :point_lat, 5000)))
+      AND venue_type = 'Restaurant' AND sqrt(pow(x - 6378137. * radians(:point_lon), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(:point_lat) / 2)), 2)) <= 5000
+    ORDER BY sqrt(pow(x - 6378137. * radians(:point_lon), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(:point_lat) / 2)), 2))
+    LIMIT 1;
+  clickhouse_scan: |
+    -- NOTE: greatCircleDistance needs 4 scalar args (lon1, lat1, lon2, lat2).
+    -- The original passed :point (a single packed geometry parameter, the same
+    -- shape postgis/sedona use above) as if it were two scalars -- wrong arity,
+    -- would not run. Fixed assuming decomposed :point_lon / :point_lat parameters,
+    -- which are NOT currently in this query's shared `parameters:` list below --
+    -- the harness needs to supply them for ClickHouse specifically.
+    -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance, a SQL UDF
+    -- (created ON CLUSTER cluster_1 -- see COORDINATION.md) that projects both points into Web
+    -- Mercator (EPSG:3857) and takes the planar Euclidean distance, matching ST_DWithin/
+    -- ST_Distance's metric exactly even at Beijing's latitude -- see
+    -- ais/config/combinedBenchConf.yaml's crossingsAroundHarbour clickhouse block for the
+    -- formula derivation and live verification.
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 'Restaurant' AND sqrt(pow(x - 6378137. * radians(:point_lon), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(:point_lat) / 2)), 2)) <= 5000
+    ORDER BY sqrt(pow(x - 6378137. * radians(:point_lon), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(:point_lat) / 2)), 2))
     LIMIT 1;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
     SELECT *
     FROM geolife_points
-    WHERE venue_type = 'restaurant' AND ST_DWithin(geom, :point, 5000)
+    WHERE venue_type = 'Restaurant' AND ST_Intersects_Extent(geom, ST_MakeEnvelope(ST_XMin(:point) - 5000, ST_YMin(:point) - 5000, ST_XMax(:point) + 5000, ST_YMax(:point) + 5000)) AND ST_DWithin(geom, :point, 5000)
     ORDER BY ST_Distance(geom, :point)
     LIMIT 1;
-  repetition: 10
+  duckdb_scan: |
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 'Restaurant' AND ST_DWithin(geom, :point, 5000)
+    ORDER BY ST_Distance(geom, :point)
+    LIMIT 1;
+  repetition: 50
   parameters:
   - point
 - name: CountPOIsByTypeInRegion #spatial
@@ -232,18 +294,54 @@ queryConfigs:
     WHERE ST_Intersects(geom, :region_medium)
     GROUP BY venue_type;
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
-  clickhouse: |
     SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
     FROM geolife_points
-    WHERE pointInPolygon((lon, lat), :region_medium)
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom(:region_medium::gpolygon))
+    GROUP BY venue_type;
+  clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
+    -- FIX: ClickHouse has no ST_MakeEnvelope/ST_SetSRID/ST_Transform (PostGIS-only, Code 46
+    -- UNKNOWN_FUNCTION, confirmed live) -- :region_medium decomposes into
+    -- :region_medium_lon_min/_lat_min/_lon_max/_lat_max for this dialect only (see
+    -- generateParameterVariations.py's region_* decomposition, same pattern as :point_lon/
+    -- :point_lat), used here as a plain bbox check instead of pointInPolygon against a geometry
+    -- expression.
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing([(:region_medium_lon_min, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_max), (:region_medium_lon_min, :region_medium_lat_max)], 0)))
+      AND lon BETWEEN :region_medium_lon_min AND :region_medium_lon_max
+      AND lat BETWEEN :region_medium_lat_min AND :region_medium_lat_max
+    GROUP BY venue_type;
+  clickhouse_scan: |
+    -- FIX: ClickHouse has no ST_MakeEnvelope/ST_SetSRID/ST_Transform (PostGIS-only, Code 46
+    -- UNKNOWN_FUNCTION, confirmed live) -- :region_medium decomposes into
+    -- :region_medium_lon_min/_lat_min/_lon_max/_lat_max for this dialect only (see
+    -- generateParameterVariations.py's region_* decomposition, same pattern as :point_lon/
+    -- :point_lat), used here as a plain bbox check instead of pointInPolygon against a geometry
+    -- expression.
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE lon BETWEEN :region_medium_lon_min AND :region_medium_lon_max
+      AND lat BETWEEN :region_medium_lat_min AND :region_medium_lat_max
     GROUP BY venue_type;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE ST_Intersects_Extent(geom, :region_medium) AND ST_Intersects(geom, :region_medium)
+    GROUP BY venue_type;
+  duckdb_scan: |
     SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
     FROM geolife_points
     WHERE ST_Intersects(geom, :region_medium)
     GROUP BY venue_type;
-  repetition: 10
+  repetition: 50
   parameters:
   - region_medium
 
@@ -337,11 +435,71 @@ queryConfigs:
     GROUP BY w.minute
     ORDER BY w.minute;
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
+    LET minute_activity =
+      SELECT TS_TRUNC('minute', t) AS minute,
+             COUNT(IF(venue_id <> 0, 1, NULL)) AS venue_updates
+      FROM geolife_points
+      -- FIX: same EPOCHRANGE cast as the other spacetime blocks in this file -- see
+      -- FirstAndLastActivityInPeriod's mobilitydb block above for the full rationale.
+      WHERE t <@ EPOCHRANGE :period_short
+        AND ST_Intersects(ST_Point(x, y), ST_ToGeom(:region_medium::gpolygon))
+      GROUP BY 1;
+    SELECT a.minute, SUM(b.venue_updates) AS updates_in_window
+    FROM minute_activity a
+    JOIN minute_activity b ON b.minute BETWEEN a.minute - TP '10min' AND a.minute + TP '10min'
+    GROUP BY a.minute
+    ORDER BY a.minute;
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
     -- FIX: "COUNTIf" -> "countIf". ClickHouse function names are case-sensitive; the built-in
     -- combinator is lowercase-c "countIf", not "COUNTIf" -- as written this would fail with an
     -- unknown-function error.
+    -- FIX: ClickHouse has no ST_MakeEnvelope/ST_SetSRID/ST_Transform (PostGIS-only, Code 46
+    -- UNKNOWN_FUNCTION, confirmed live) -- :region_medium decomposes into
+    -- :region_medium_lon_min/_lat_min/_lon_max/_lat_max for this dialect only (see
+    -- generateParameterVariations.py's region_* decomposition, same pattern as :point_lon/
+    -- :point_lat), used here as a plain bbox check instead of pointInPolygon against a geometry
+    -- expression.
+    WITH minute_activity AS (
+        SELECT
+            toStartOfMinute(timestamp) AS minute,
+            COUNT(*) AS updates,
+            countIf(venue_id <> 0) AS venue_updates
+        FROM geolife_points
+        WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing([(:region_medium_lon_min, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_max), (:region_medium_lon_min, :region_medium_lat_max)], 0)))
+          AND timestamp BETWEEN :period_short
+          AND lon BETWEEN :region_medium_lon_min AND :region_medium_lon_max
+          AND lat BETWEEN :region_medium_lat_min AND :region_medium_lat_max
+        GROUP BY minute
+    ),
+    minute_windows AS (
+        SELECT
+            minute,
+            minute - INTERVAL 10 MINUTE AS window_start,
+            minute + INTERVAL 10 MINUTE AS window_end
+        FROM minute_activity
+    )
+    SELECT
+        w.minute,
+        SUM(m.venue_updates) AS updates_in_window
+    FROM minute_windows w
+    JOIN minute_activity m
+        ON m.minute BETWEEN w.window_start AND w.window_end
+    GROUP BY w.minute
+    ORDER BY w.minute;
+  clickhouse_scan: |
+    -- FIX: "COUNTIf" -> "countIf". ClickHouse function names are case-sensitive; the built-in
+    -- combinator is lowercase-c "countIf", not "COUNTIf" -- as written this would fail with an
+    -- unknown-function error.
+    -- FIX: ClickHouse has no ST_MakeEnvelope/ST_SetSRID/ST_Transform (PostGIS-only, Code 46
+    -- UNKNOWN_FUNCTION, confirmed live) -- :region_medium decomposes into
+    -- :region_medium_lon_min/_lat_min/_lon_max/_lat_max for this dialect only (see
+    -- generateParameterVariations.py's region_* decomposition, same pattern as :point_lon/
+    -- :point_lat), used here as a plain bbox check instead of pointInPolygon against a geometry
+    -- expression.
     WITH minute_activity AS (
         SELECT
             toStartOfMinute(timestamp) AS minute,
@@ -349,7 +507,8 @@ queryConfigs:
             countIf(venue_id <> 0) AS venue_updates
         FROM geolife_points
         WHERE timestamp BETWEEN :period_short
-          AND pointInPolygon((lon, lat), :region_medium)
+          AND lon BETWEEN :region_medium_lon_min AND :region_medium_lon_max
+          AND lat BETWEEN :region_medium_lat_min AND :region_medium_lat_max
         GROUP BY minute
     ),
     minute_windows AS (
@@ -368,6 +527,35 @@ queryConfigs:
     GROUP BY w.minute
     ORDER BY w.minute;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
+    WITH minute_activity AS (
+      SELECT
+          date_trunc('minute', timestamp) AS minute,
+          COUNT(*) FILTER (WHERE venue_id <> 0) AS venue_updates
+      FROM geolife_points
+      WHERE timestamp BETWEEN :period_short
+        AND ST_Intersects_Extent(geom, :region_medium) AND ST_Intersects(geom, :region_medium)
+      GROUP BY date_trunc('minute', timestamp)
+    ),
+    minute_windows AS (
+        SELECT
+            minute,
+            minute - INTERVAL '10 minutes' AS window_start,
+            minute + INTERVAL '10 minutes' AS window_end
+        FROM minute_activity
+    )
+    SELECT
+        w.minute,
+        SUM(m.venue_updates) AS updates_in_window
+    FROM minute_windows w
+    JOIN minute_activity m
+        ON m.minute BETWEEN w.window_start AND w.window_end
+    GROUP BY w.minute
+    ORDER BY w.minute;
+  duckdb_scan: |
     WITH minute_activity AS (
       SELECT
           date_trunc('minute', timestamp) AS minute,
@@ -392,7 +580,7 @@ queryConfigs:
         ON m.minute BETWEEN w.window_start AND w.window_end
     GROUP BY w.minute
     ORDER BY w.minute;
-  repetition: 10
+  repetition: 50
   parameters:
   - period_short
   - region_medium
@@ -438,18 +626,73 @@ queryConfigs:
     GROUP BY hour
     ORDER BY hour;
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
+    WITH user_hour_activity AS (
+      SELECT TS_TRUNC('hour', t) AS hour, user_id
+      FROM geolife_points
+      -- FIX: confirmed live -- ":period_medium" substitutes to a bracketed-range STRING literal for
+    -- spacetime ("'[t1, t2]'", see generateParameterVariations.py's period-specific substitution),
+    -- and "<@" needs an actual EPOCHRANGE value on its right side to type-check against a
+    -- timestamp column ("no matching overload for: '<@'" otherwise) -- same EPOCHRANGE cast the
+    -- "&&"-based queries elsewhere in this file already apply.
+    WHERE t <@ EPOCHRANGE :period_medium AND ST_Intersects(ST_Point(x, y), ST_ToGeom(:region_medium::gpolygon))
+      GROUP BY 1, 2
+    )
+    SELECT hour, COUNT(*) AS users
+    FROM user_hour_activity
+    GROUP BY hour
+    ORDER BY hour;
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
     -- FIX: uniq() is an APPROXIMATE distinct count in ClickHouse; switched to uniqExact() so
     -- this matches postgis/sedona's exact COUNT(DISTINCT id) above rather than an estimate.
+    -- FIX: ClickHouse has no ST_MakeEnvelope/ST_SetSRID/ST_Transform (PostGIS-only, Code 46
+    -- UNKNOWN_FUNCTION, confirmed live) -- :region_medium decomposes into
+    -- :region_medium_lon_min/_lat_min/_lon_max/_lat_max for this dialect only (see
+    -- generateParameterVariations.py's region_* decomposition, same pattern as :point_lon/
+    -- :point_lat), used here as a plain bbox check instead of pointInPolygon against a geometry
+    -- expression.
     SELECT toStartOfHour(timestamp) AS hour,
        uniqExact(id) AS users
     FROM geolife_points
-    WHERE pointInPolygon((lon, lat), :region_medium)
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing([(:region_medium_lon_min, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_max), (:region_medium_lon_min, :region_medium_lat_max)], 0)))
+      AND lon BETWEEN :region_medium_lon_min AND :region_medium_lon_max
+      AND lat BETWEEN :region_medium_lat_min AND :region_medium_lat_max
+      AND timestamp BETWEEN :period_medium
+    GROUP BY hour
+    ORDER BY hour;
+  clickhouse_scan: |
+    -- FIX: uniq() is an APPROXIMATE distinct count in ClickHouse; switched to uniqExact() so
+    -- this matches postgis/sedona's exact COUNT(DISTINCT id) above rather than an estimate.
+    -- FIX: ClickHouse has no ST_MakeEnvelope/ST_SetSRID/ST_Transform (PostGIS-only, Code 46
+    -- UNKNOWN_FUNCTION, confirmed live) -- :region_medium decomposes into
+    -- :region_medium_lon_min/_lat_min/_lon_max/_lat_max for this dialect only (see
+    -- generateParameterVariations.py's region_* decomposition, same pattern as :point_lon/
+    -- :point_lat), used here as a plain bbox check instead of pointInPolygon against a geometry
+    -- expression.
+    SELECT toStartOfHour(timestamp) AS hour,
+       uniqExact(id) AS users
+    FROM geolife_points
+    WHERE lon BETWEEN :region_medium_lon_min AND :region_medium_lon_max
+      AND lat BETWEEN :region_medium_lat_min AND :region_medium_lat_max
       AND timestamp BETWEEN :period_medium
     GROUP BY hour
     ORDER BY hour;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
+    SELECT date_trunc('hour', timestamp) AS hour,
+       COUNT(DISTINCT id) AS users
+    FROM geolife_points
+    WHERE ST_Intersects_Extent(geom, :region_medium) AND ST_Intersects(geom, :region_medium)
+      AND timestamp BETWEEN :period_medium
+    GROUP BY hour
+    ORDER BY hour;
+  duckdb_scan: |
     SELECT date_trunc('hour', timestamp) AS hour,
        COUNT(DISTINCT id) AS users
     FROM geolife_points
@@ -457,7 +700,7 @@ queryConfigs:
       AND timestamp BETWEEN :period_medium
     GROUP BY hour
     ORDER BY hour;
-  repetition: 10
+  repetition: 50
   parameters:
   - region_medium
   - period_medium
@@ -473,35 +716,54 @@ queryConfigs:
     -- FIX: was blank. geolife_points has the same id/geom/timestamp shape used by
     -- postgis/clickhouse below, and MobilityDB is a Postgres extension, so a plain
     -- point-table insert works the same way as postgis.
-    INSERT INTO geolife_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    -- FIX: didn't write "venue_id"/"venue_type" -- geolife_points has those columns (see
+    -- postgis/clickhouse below) that a "geolife point" isn't complete without.
+    INSERT INTO geolife_points (id, geom, timestamp, venue_id, venue_type)
+    VALUES (:id, :point, :instant, :venue_id, :venue_type);
   postgis: |
-    INSERT INTO geolife_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    -- FIX: didn't write "venue_id"/"venue_type" -- see mobilitydb FIX note above.
+    INSERT INTO geolife_points (id, geom, timestamp, venue_id, venue_type)
+    VALUES (:id, :point, :instant, :venue_id, :venue_type);
   sedona: |
   spacetime: |
 
+  # FIX: geolife_points has no "geom" column in ClickHouse (it stores lat/lon directly, with
+  # Point/h3 as MATERIALIZED derivatives, same shape as flight_points -- see
+  # insertSingleflightPoint's FIX note in aviation/config/combinedBenchConf.yaml) -- this would
+  # have errored outright on an unknown column. Rewritten with the same :point_lon/:point_lat
+  # decomposition generateParameterVariations.py already builds for other ClickHouse queries.
+  # FIX: also didn't write "venue_id"/"venue_type" -- see mobilitydb FIX note above.
   clickhouse: |
-    INSERT INTO geolife_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    INSERT INTO geolife_points (id, timestamp, venue_id, venue_type, lat, lon)
+    VALUES (:id, :instant, :venue_id, :venue_type, :point_lat, :point_lon);
   duckdb: |
-    INSERT INTO geolife_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    -- FIX: didn't write "venue_id"/"venue_type" -- see mobilitydb FIX note above.
+    INSERT INTO geolife_points (id, geom, timestamp, venue_id, venue_type)
+    VALUES (:id, :point, :instant, :venue_id, :venue_type);
 
-  repetition: 10
+  repetition: 23
   parameters:
   - id
   - point
   - instant
+  - venue_id
+  - venue_type
 
-- name: updategeolifePoint
+# NOTE: "id" is not unique in geolife_points -- it's the user trace's id, shared by every point
+# of that trace, not a per-row key. updategeolifePoint/deletegeolifePoint (WHERE id = :id alone)
+# were ambiguously named for an operation that (outside the benchmark's own scratch-id
+# bookkeeping) touches every point of the trace, not "a geolife point" as the name implied. Split
+# into an explicit "Mass" variant (unchanged: every point sharing :id) and a "Single" variant that
+# also pins :instant (the exact timestamp of one specific point) so it targets exactly one row --
+# same split as aviation/config/combinedBenchConf.yaml's flight_points queries.
+- name: updategeolifePointMass
   use: true
-  description: "Update location of a geolife point"
+  description: "Update location of every point belonging to a geolife trace id"
   type: update
   # EQUIVALENCE NOTE: write immediacy differs by system -- see the same note on
-  # updateCrossingPoint in crossings_benchmark.yaml (clickhouse's UPDATE is an async mutation;
-  # duckdb's write goes through DuckLake's snapshot-commit-with-possible-retry path; sedona
-  # doesn't support live updates).
+  # updateCrossingPointMass in ais/config/combinedBenchConf.yaml (clickhouse's UPDATE is an async
+  # mutation; duckdb's write goes through DuckLake's snapshot-commit-with-possible-retry path;
+  # sedona doesn't support live updates).
   # FIX: was blank -- filled in analogous to postgis below.
   mobilitydb: |
     UPDATE geolife_points
@@ -513,9 +775,20 @@ queryConfigs:
     WHERE id = :id;
   sedona: |
   spacetime: |
+  # FIX: two more problems on top of "ClickHouse has no standalone UPDATE statement". (1) "geom"
+  # isn't a ClickHouse column (see insertSinglegeolifePoint's FIX note); (2) even against the real
+  # lat/lon columns, ALTER TABLE ... UPDATE against geolife_points (the Distributed table) fails
+  # outright the same way flight_points' did -- lat/lon feed the MATERIALIZED h3 column, which is
+  # part of the ORDER BY key, and ClickHouse forbids updating any column a key column derives
+  # from, on top of Distributed tables not accepting mutations directly. Same re-INSERT
+  # (self-referencing SELECT to keep each row's own venue_id/venue_type/timestamp) + DELETE
+  # workaround as updateflightPointMass, targeting the underlying _local table on every shard
+  # (ON CLUSTER). ClickHouseExecutor.java splits on ";" and runs each statement in turn to support
+  # this.
   clickhouse: |
-    -- FIX: ClickHouse has no standalone UPDATE statement; needs the ALTER TABLE mutation form.
-    ALTER TABLE geolife_points UPDATE geom = :point WHERE id = :id;
+    INSERT INTO geolife_points (id, timestamp, venue_id, venue_type, lat, lon)
+    SELECT id, timestamp, venue_id, venue_type, :point_lat, :point_lon FROM geolife_points WHERE id = :id;
+    ALTER TABLE geolife_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND lat != :point_lat;
   duckdb: |
     UPDATE geolife_points
     SET geom = :point
@@ -525,9 +798,40 @@ queryConfigs:
   - id
   - point
 
-- name: deletegeolifePoint
+- name: updategeolifePointSingle
   use: true
-  description: "Delete a geolife point"
+  description: "Update location of exactly one geolife point, identified by id and timestamp"
+  type: update_single
+  # Same EQUIVALENCE NOTE as updategeolifePointMass above.
+  mobilitydb: |
+    UPDATE geolife_points
+    SET geom = :point
+    WHERE id = :id AND timestamp = :instant;
+  postgis: |
+    UPDATE geolife_points
+    SET geom = :point
+    WHERE id = :id AND timestamp = :instant;
+  sedona: |
+  spacetime: |
+  # Same re-INSERT + DELETE workaround as updategeolifePointMass (see its FIX note), scoped down
+  # to the one point via "AND timestamp = :instant" on both statements.
+  clickhouse: |
+    INSERT INTO geolife_points (id, timestamp, venue_id, venue_type, lat, lon)
+    SELECT id, timestamp, venue_id, venue_type, :point_lat, :point_lon FROM geolife_points WHERE id = :id AND timestamp = :instant;
+    ALTER TABLE geolife_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant AND lat != :point_lat;
+  duckdb: |
+    UPDATE geolife_points
+    SET geom = :point
+    WHERE id = :id AND timestamp = :instant;
+  repetition: 10
+  parameters:
+  - id
+  - point
+  - instant
+
+- name: deletegeolifePointMass
+  use: false  # (2026-10-02) delete queries retired: benchmark writes are insert/update only, reset after each run
+  description: "Delete every point belonging to a geolife trace id"
   type: delete
   mobilitydb: |
     -- FIX: was blank -- filled in analogous to postgis below.
@@ -538,20 +842,41 @@ queryConfigs:
     WHERE id = :id;
   sedona: |
   spacetime: |
+  # FIX: this "lightweight delete" syntax fails outright against geolife_points -- confirmed live
+  # for the equivalent flight_points query ("DELETE query is not supported for table
+  # default.flight_points", a Distributed engine table; geolife_points is built the same way --
+  # see insertSinglegeolifePoint's FIX note). Mutations have to target the underlying _local
+  # table, on every shard (ON CLUSTER), same as updategeolifePointMass.
   clickhouse: |
-    -- FIX: this block was completely empty for an active (use: true) query -- it would
-    -- have been a no-op or an error at benchmark time. NOTE: this is ClickHouse's
-    -- "lightweight delete", valid on >=23.3 (or older versions with
-    -- allow_experimental_lightweight_delete=1); otherwise use
-    -- "ALTER TABLE geolife_points DELETE WHERE id = :id;".
-    DELETE FROM geolife_points
-    WHERE id = :id;
+    ALTER TABLE geolife_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id;
   duckdb: |
     DELETE FROM geolife_points
     WHERE id = :id;
-  repetition: 10
+  repetition: 5
   parameters:
   - id
+
+- name: deletegeolifePointSingle
+  use: false  # (2026-10-02) delete queries retired: benchmark writes are insert/update only, reset after each run
+  description: "Delete exactly one geolife point, identified by id and timestamp"
+  type: delete_single
+  mobilitydb: |
+    DELETE FROM geolife_points
+    WHERE id = :id AND timestamp = :instant;
+  postgis: |
+    DELETE FROM geolife_points
+    WHERE id = :id AND timestamp = :instant;
+  sedona: |
+  spacetime: |
+  clickhouse: |
+    ALTER TABLE geolife_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant;
+  duckdb: |
+    DELETE FROM geolife_points
+    WHERE id = :id AND timestamp = :instant;
+  repetition: 5
+  parameters:
+  - id
+  - instant
 
 - name: bulkInsertgeolifePoints
   use: true
@@ -559,20 +884,28 @@ queryConfigs:
   type: bulk_insert
   mobilitydb: |
     -- FIX: was blank -- filled in analogous to postgis below.
-    INSERT INTO geolife_points (id, geom, timestamp)
+    -- FIX: didn't write "venue_id"/"venue_type" -- see insertSinglegeolifePoint's FIX note.
+    INSERT INTO geolife_points (id, geom, timestamp, venue_id, venue_type)
     VALUES :bulk_values;
   postgis: |
-    INSERT INTO geolife_points (id, geom, timestamp)
+    -- FIX: didn't write "venue_id"/"venue_type" -- see insertSinglegeolifePoint's FIX note.
+    INSERT INTO geolife_points (id, geom, timestamp, venue_id, venue_type)
     VALUES :bulk_values;
   sedona: |
   spacetime: |
+  # FIX: same "no geom column" problem as insertSinglegeolifePoint above --
+  # :bulk_values_clickhouse is a ClickHouse-specific rebuild of the shared :bulk_values tuples
+  # (see generateParameterVariations.py) as (id, timestamp, venue_id, venue_type, lat, lon),
+  # matching the real columns. FIX: also didn't write "venue_id"/"venue_type" -- see
+  # insertSinglegeolifePoint's FIX note.
   clickhouse: |
-    INSERT INTO geolife_points (id, geom, timestamp)
-    VALUES :bulk_values;
+    INSERT INTO geolife_points (id, timestamp, venue_id, venue_type, lat, lon)
+    VALUES :bulk_values_clickhouse;
   duckdb: |
-    INSERT INTO geolife_points (id, geom, timestamp)
+    -- FIX: didn't write "venue_id"/"venue_type" -- see insertSinglegeolifePoint's FIX note.
+    INSERT INTO geolife_points (id, geom, timestamp, venue_id, venue_type)
     VALUES :bulk_values;
-  repetition: 10
+  repetition: 12
   parameters:
   - bulk_values
 

@@ -91,7 +91,7 @@ and likewise `insert_ais_data[_clickhouse].yml`, `insert_cycling_data[_clickhous
 Postgres/Citus coordinator and one ClickHouse ingestion point per cluster) and:
 1. Syncs a parquet file from the control machine to the target node -- `<dataset>_sample_parquet_file`
    in the chosen inventory's `group_vars/all/all.yml`. For `aviation` this is one real file out of the full
-   `data_generator_aviation` output (the rest is tens of GB, too large to sync routinely); for
+   `data_generators/aviation` output (the rest is tens of GB, too large to sync routinely); for
    `ais`/`cycling`/`geolife` it's a small synthetic dummy file matching that pipeline's real schema
    and configured partition time range, since the real generators for those either produce nothing
    checked in locally or are similarly too large. Point these variables at real generator output

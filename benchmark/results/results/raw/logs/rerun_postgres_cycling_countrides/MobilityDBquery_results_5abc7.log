@@ -1,0 +1,5 @@
+[pool-3-thread-1] [MobilityDB] [cycling] SUCCESS: 'CountRidesFullyInDistrictRadius': 171589ms [rep=1 sql=224c8f49 at=2026-10-08T07:32:39.787806409Z]
+[pool-3-thread-1] [MobilityDB] [cycling] SUCCESS: 'CountRidesFullyInDistrictRadius': 191068ms [rep=2 sql=7eb9d227 at=2026-10-08T07:35:50.860430541Z]
+[pool-3-thread-1] [MobilityDB] [cycling] SUCCESS: 'CountRidesFullyInDistrictRadius': 145840ms [rep=3 sql=eb75155a at=2026-10-08T07:38:16.701699327Z]
+[pool-3-thread-1] [MobilityDB] [cycling] SUCCESS: 'CountRidesFullyInDistrictRadius': 181982ms [rep=4 sql=153070a6 at=2026-10-08T07:41:18.684774650Z]
+[pool-3-thread-1] [MobilityDB] [cycling] SUCCESS: 'CountRidesFullyInDistrictRadius': 167432ms [rep=5 sql=525ab632 at=2026-10-08T07:44:06.122126971Z]

@@ -28,11 +28,15 @@
       <artifactId>duckdb_jdbc</artifactId>
       <version>1.5.4.0</version>
     </dependency>
-    <!-- DuckDB Quack-->
+    <!-- DuckDB Quack -->
+    <!-- FIX: 0.1.0-alpha.1 swallows the Quack server's actual error response body, surfacing every
+         failure as a bare "Quack HTTP returned status 500" (confirmed live: upgrading to
+         0.2.0-alpha.6 was what revealed the real handshake error, a missing "LOAD httpfs" on the
+         server; see roles/duckdb/templates/duckdb-quack-start.sh.j2) instead of an opaque 500. -->
     <dependency>
       <groupId>com.gizmodata</groupId>
       <artifactId>quack-jdbc</artifactId>
-      <version>0.1.0-alpha.1</version>
+      <version>0.2.0-alpha.6</version>
     </dependency>
     <!-- ClickHouse JDBC ("all" classifier bundles the HTTP client, no separate dependency needed) -->
     <dependency>

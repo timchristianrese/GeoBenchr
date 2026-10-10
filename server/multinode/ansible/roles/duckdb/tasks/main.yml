@@ -92,6 +92,162 @@
     | gunzip > "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/quack.duckdb_extension"
   when: not quack_extension_cached.stat.exists
 
+# FIX: the quack-served DuckDB instance had no data of its own and nothing attaching it to
+# Postgres either -- every query against it (e.g. bare "flight_points"/"cities" references in
+# benchmark/configuration/*/queries/duckdb_queries.yaml) would just fail with "table does not
+# exist". duckdb-quack-start.sh.j2 now ATTACHes the same Postgres instance every other SUT here
+# reads and `USE`s it as the default catalog, matching this project's documented design ("DuckDB
+# ... read[s] the same PostGIS tables at query time"). Needs the postgres_scanner extension
+# (DuckDB's Postgres scanner extension's current name -- process_parquet.yml elsewhere in this
+# project used to reference it under an old "postgres" alias that no longer exists) pre-cached the
+# same way as quack above, since auto-install hangs indefinitely on nst-cluster's blackholed IPv6
+# route to extensions.duckdb.org.
+- name: Check whether the postgres_scanner extension is already cached locally
+  become: false
+  ansible.builtin.stat:
+    path: "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/postgres_scanner.duckdb_extension"
+  register: postgres_scanner_extension_cached
+
+- name: Fetch the postgres_scanner extension over IPv4 into the local DuckDB extension cache
+  become: false
+  ansible.builtin.shell: >-
+    curl -4 -fsSL "http://extensions.duckdb.org/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/postgres_scanner.duckdb_extension.gz"
+    | gunzip > "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/postgres_scanner.duckdb_extension"
+  when: not postgres_scanner_extension_cached.stat.exists
+
+# FIX: the query set (e.g. benchmark/configuration/aviation/queries/duckdb_queries.yaml's
+# "SpatialBBox") calls PostGIS-style spatial functions (ST_Intersects, ST_Transform,
+# ST_MakeEnvelope, ...) directly against tables read through the Postgres ATTACH -- these resolve
+# against DuckDB's own `spatial` extension, not something the ATTACHed connection provides
+# automatically. Without it, every such query failed with an opaque "Quack HTTP returned status
+# 500" (quack-jdbc's exception message doesn't surface the underlying DuckDB error text). Same
+# IPv4 pre-fetch treatment as postgres_scanner above, same reason.
+- name: Check whether the spatial extension is already cached locally
+  become: false
+  ansible.builtin.stat:
+    path: "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/spatial.duckdb_extension"
+  register: spatial_extension_cached
+
+- name: Fetch the spatial extension over IPv4 into the local DuckDB extension cache
+  become: false
+  ansible.builtin.shell: >-
+    curl -4 -fsSL "http://extensions.duckdb.org/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/spatial.duckdb_extension.gz"
+    | gunzip > "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/spatial.duckdb_extension"
+  when: not spatial_extension_cached.stat.exists
+
+# FIX: quack_serve()'s handshake itself (before any query runs) failed for every single request --
+# read or write, any query text -- with an opaque "Quack HTTP returned status 500" (confirmed live
+# with a quack-jdbc 0.2.0-alpha.6 probe, which -- unlike the 0.1.0-alpha.1 this project pins --
+# actually surfaces the response body: "DuckDB currently has a read-only crypto module loaded.
+# Please ensure httpfs is loaded using `LOAD httpfs`..."). Loading httpfs before quack fixes the
+# handshake outright; same IPv4 pre-fetch treatment as the other three extensions above, same
+# blackholed-IPv6-route reason.
+- name: Check whether the httpfs extension is already cached locally
+  become: false
+  ansible.builtin.stat:
+    path: "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/httpfs.duckdb_extension"
+  register: httpfs_extension_cached
+
+- name: Fetch the httpfs extension over IPv4 into the local DuckDB extension cache
+  become: false
+  ansible.builtin.shell: >-
+    curl -4 -fsSL "http://extensions.duckdb.org/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/httpfs.duckdb_extension.gz"
+    | gunzip > "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/httpfs.duckdb_extension"
+  when: not httpfs_extension_cached.stat.exists
+
+# FIX: confirmed live -- the previous live-view-over-Postgres setup made every query with no
+# pushable filter take 45-90s regardless of the query itself, since every row crossed the
+# postgres_scanner wire on every single request. This one-time bulk copy (see
+# duckdb_materialize_tables in defaults/main.yml for the table list and the fairness reasoning
+# behind which tables get a spatial index / sort order) needs the Quack server stopped first --
+# DuckDB allows only one read-write connection to a database file at a time, and the running
+# service already holds one.
+- name: Check for the "GeoBenchr tables materialized" marker
+  become: false
+  ansible.builtin.stat:
+    path: "/home/{{ ansible_user }}/.duckdb_tables_materialized"
+  register: duckdb_materialized_marker
+
+# FIX: confirmed live -- on a fresh install (playbooks/all.yml runs before any dataset is loaded,
+# same ordering issue as roles/sedona's matching FIX comment), every table in duckdb_materialize_
+# tables was missing, so the migration script logged nothing but Catalog Errors end to end and
+# never actually materialized anything real -- but still printed "MIGRATION COMPLETE" (each
+# missing table is a tolerated per-entry error, by design, so partially-loaded data still works),
+# so the marker got set anyway. On a later run *after* data was loaded, the marker already existed
+# and permanently skipped ever doing the real materialization. Checking that at least one source
+# table exists first before treating the run as "done" mirrors roles/sedona's fix for the same
+# root cause; unlike sedona this doesn't skip the migration script itself (its own per-table
+# skip/tolerate logic already handles partial data fine) -- it only gates whether *this run*
+# counts as the one that finishes the job and sets the marker.
+- name: Check whether any of the source Postgres tables exist yet (used below to decide whether this run's migration attempt "counts")
+  become: false
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: >-
+      SELECT bool_or(to_regclass(t) IS NOT NULL) AS any_exist
+      FROM unnest(ARRAY['public.flight_points', 'public.geolife_points',
+                         'public.crossing_points', 'public.ride_points']) AS t
+  register: duckdb_source_tables_check
+  ignore_errors: true
+  when: not duckdb_materialized_marker.stat.exists
+
+- name: Stop DuckDB Quack server before materializing tables
+  become: true
+  ansible.builtin.systemd:
+    name: duckdb-quack
+    state: stopped
+  failed_when: false
+  when: not duckdb_materialized_marker.stat.exists
+
+- name: Render the one-time table-materialization script
+  become: false
+  ansible.builtin.template:
+    src: duckdb-migrate.sql.j2
+    dest: "/home/{{ ansible_user }}/duckdb_migrate.sql"
+    mode: '0644'
+  when: not duckdb_materialized_marker.stat.exists
+
+# FIX: confirmed live on a fresh install with no dataset loaded yet -- duckdb-migrate.sql.j2
+# already tolerates missing source tables per-entry (each "CREATE OR REPLACE TABLE x AS SELECT
+# FROM pg.public.x" that errors just logs a Catalog Error and moves on to the next table,
+# finishing with "MIGRATION COMPLETE" regardless of how many tables didn't exist yet -- and the
+# "Verify the materialization script actually completed" task below already checks for exactly
+# that marker). But the DuckDB CLI itself still exits non-zero whenever *any* statement in the
+# session errored, even though it ran to completion -- so this task died on that raw exit code
+# before ever reaching the verification step that would have assessed it correctly.
+# failed_when: false (matching the Quack-stop task above) defers the real pass/fail call to that
+# verification step instead.
+- name: Materialize GeoBenchr tables into DuckDB's own storage (one-time bulk copy -- the largest table, ride_points, took ~26 minutes in testing)
+  become: false
+  ansible.builtin.shell: >-
+    /home/{{ ansible_user }}/.duckdb/cli/latest/duckdb {{ duckdb_db_file }} -unsigned
+    < /home/{{ ansible_user }}/duckdb_migrate.sql
+    > /home/{{ ansible_user }}/duckdb_migrate.log 2>&1
+  failed_when: false
+  when: not duckdb_materialized_marker.stat.exists
+
+- name: Verify the materialization script actually completed
+  become: false
+  ansible.builtin.command: >-
+    grep -q 'MIGRATION COMPLETE' /home/{{ ansible_user }}/duckdb_migrate.log
+  changed_when: false
+  when: not duckdb_materialized_marker.stat.exists
+
+- name: Record that GeoBenchr tables have been materialized
+  become: false
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.duckdb_tables_materialized"
+    state: touch
+    mode: '0644'
+  when: >-
+    not duckdb_materialized_marker.stat.exists
+    and duckdb_source_tables_check is succeeded
+    and duckdb_source_tables_check.query_result[0].any_exist | default(false)
+
 # FIX: quack_serve() needs allow_other_hostname=true to bind 0.0.0.0 (it refuses any non-localhost
 # bind by default), and -- since it starts its listener on a background thread and returns
 # immediately -- also needs the CLI kept alive past that CALL, which the wrapper script below does

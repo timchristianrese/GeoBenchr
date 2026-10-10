@@ -1,0 +1,2 @@
+geolife/SlidingWindowActivityInRegionPerMinuteWithNonZeroID: 699 rows, identical to PostGIS after reading the Sedona timestamp labels as Europe/Berlin and converting to UTC
+geolife/UniqueUsersPerHourInRegionInPeriod: 51 rows, identical to PostGIS after the same conversion

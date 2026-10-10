@@ -21,7 +21,7 @@ set -euo pipefail
 VM_VCPUS="${VM_VCPUS:-2}"
 VM_MEM_MB="${VM_MEM_MB:-4096}"
 VM_DISK_GB="${VM_DISK_GB:-40}"
-DEBIAN_SUITE="${DEBIAN_SUITE:-bookworm}"        # Debian 12
+DEBIAN_SUITE="${DEBIAN_SUITE:-bookworm}"        # Debian codename, e.g. bookworm (12), trixie (13)
 NET_NAME="${NET_NAME:-geobenchr-net}"
 SUBNET_PREFIX="${SUBNET_PREFIX:-10.122.0}"      # matches the convention already used in hosts.yml
 POOL_DIR="${POOL_DIR:-/var/lib/libvirt/images/geobenchr}"
@@ -41,8 +41,14 @@ ANSIBLE_DIR="$(cd "$SCRIPT_DIR/../ansible" && pwd)"
 WORK_DIR="$SCRIPT_DIR/.work"
 mkdir -p "$WORK_DIR"
 
-IMAGE_URL="https://cloud.debian.org/images/cloud/${DEBIAN_SUITE}/latest/debian-12-genericcloud-amd64.qcow2"
-BASE_IMAGE="$WORK_DIR/debian-12-genericcloud-amd64.qcow2"
+IMAGE_DIR_URL="https://cloud.debian.org/images/cloud/${DEBIAN_SUITE}/latest/"
+IMAGE_FILENAME="$(curl -fsSL "$IMAGE_DIR_URL" | grep -oE 'href="[A-Za-z0-9.-]+-genericcloud-amd64\.qcow2"' | head -1 | sed -E 's/^href="//; s/"$//')"
+if [ -z "$IMAGE_FILENAME" ]; then
+  echo "ERROR: could not find a genericcloud-amd64.qcow2 image for suite '${DEBIAN_SUITE}' under ${IMAGE_DIR_URL}" >&2
+  exit 1
+fi
+IMAGE_URL="${IMAGE_DIR_URL}${IMAGE_FILENAME}"
+BASE_IMAGE="$WORK_DIR/${IMAGE_FILENAME}"
 
 # node name -> [group, num_id, host-octet, mac suffix]
 NODES=(geobenchr-sut-1 geobenchr-sut-2 geobenchr-sut-3 geobenchr-sut-4 geobenchr-sut-5)
@@ -58,7 +64,9 @@ log "Installing KVM/libvirt prerequisites"
 sudo apt-get update -qq
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
   qemu-system-x86 qemu-utils libvirt-daemon-system libvirt-clients virtinst \
-  cloud-image-utils genisoimage wget openssh-client >/dev/null
+  cloud-image-utils genisoimage wget openssh-client cloud-guest-utils gdisk >/dev/null
+
+sudo modprobe nbd max_part=16
 
 sudo usermod -aG libvirt,kvm "$USER" || true
 
@@ -84,7 +92,7 @@ if [ ! -f "$BASE_IMAGE" ]; then
   log "Downloading Debian ${DEBIAN_SUITE} generic cloud image"
   wget -q --show-progress -O "$BASE_IMAGE.tmp" "$IMAGE_URL"
   wget -q -O "$WORK_DIR/SHA512SUMS" "https://cloud.debian.org/images/cloud/${DEBIAN_SUITE}/latest/SHA512SUMS"
-  EXPECTED="$(grep 'debian-12-genericcloud-amd64.qcow2$' "$WORK_DIR/SHA512SUMS" | awk '{print $1}')"
+  EXPECTED="$(grep "${IMAGE_FILENAME}\$" "$WORK_DIR/SHA512SUMS" | awk '{print $1}')"
   ACTUAL="$(sha512sum "$BASE_IMAGE.tmp" | awk '{print $1}')"
   if [ "$EXPECTED" != "$ACTUAL" ]; then
     echo "ERROR: checksum mismatch on downloaded Debian cloud image" >&2
@@ -102,7 +110,7 @@ sudo mkdir -p "$POOL_DIR"
 # for every VM's disk. $WORK_DIR lives under $HOME, which isn't traversable by other users, so
 # the backing file actually used has to live under the pool dir instead (owned by root, matching
 # the default /var/lib/libvirt/images permissions, world-readable).
-POOL_BASE_IMAGE="$POOL_DIR/debian-12-genericcloud-amd64.qcow2"
+POOL_BASE_IMAGE="$POOL_DIR/${IMAGE_FILENAME}"
 if [ ! -f "$POOL_BASE_IMAGE" ]; then
   sudo install -m 0644 "$BASE_IMAGE" "$POOL_BASE_IMAGE"
 fi
@@ -144,7 +152,7 @@ for node in "${NODES[@]}"; do
     if [ "$FORCE" -eq 1 ]; then
       echo "  --force: destroying existing domain $node"
       sudo virsh destroy "$node" >/dev/null 2>&1 || true
-      sudo virsh undefine "$node" --remove-all-storage >/dev/null 2>&1 || true
+      sudo virsh undefine "$node" --remove-all-storage --nvram >/dev/null 2>&1 || true
     else
       echo "  domain $node already exists, skipping (use --force to recreate)"
       continue
@@ -181,6 +189,51 @@ EOF
   sudo qemu-img create -f qcow2 -F qcow2 -b "$POOL_BASE_IMAGE" "$DISK_PATH" "${VM_DISK_GB}G" >/dev/null
   sudo cp "$NODE_DIR/seed.iso" "$SEED_PATH"
 
+  # FIX: cloud-init never actually runs on these VMs (confirmed via the offline journal -- zero
+  # cloud-init log lines on a genuinely fresh single boot), and separately sshd never starts either
+  # ("no hostkeys available -- exiting", looping forever): with /etc/machine-id empty, systemd
+  # under KVM derives a *transient* machine ID from the DMI/SMBIOS UUID instead of doing a real
+  # first-boot generation, which never satisfies `ConditionFirstBoot=yes` -- so
+  # sshd-keygen.service (gated on that condition) permanently skips, on every boot, forever, not
+  # just the first one. Since this environment can't be relied on to run cloud-init at all,
+  # provision hostname/network/SSH access/host keys directly on the disk before first boot instead
+  # of via the cloud-init seed ISO (still attached above -- harmless if cloud-init ever does start
+  # working here, just redundant).
+  NBD_DEV="/dev/nbd8"
+  sudo qemu-nbd --connect="$NBD_DEV" "$DISK_PATH"
+  for i in $(seq 1 20); do [ -e "${NBD_DEV}p1" ] && break; sleep 0.5; done
+  sudo growpart "$NBD_DEV" 1 || true
+  sudo e2fsck -fy "${NBD_DEV}p1" >/dev/null 2>&1 || true
+  sudo resize2fs "${NBD_DEV}p1" >/dev/null
+
+  MNT_DIR="$WORK_DIR/mnt-$node"
+  sudo mkdir -p "$MNT_DIR"
+  sudo mount "${NBD_DEV}p1" "$MNT_DIR"
+
+  echo "$node" | sudo tee "$MNT_DIR/etc/hostname" >/dev/null
+
+  sudo mkdir -p "$MNT_DIR/etc/systemd/network"
+  printf '[Match]\nName=en* eth*\n\n[Network]\nDHCP=yes\n' | sudo tee "$MNT_DIR/etc/systemd/network/10-dhcp.network" >/dev/null
+
+  # The base genericcloud image ships only "root" -- the "debian" user this project's Ansible
+  # inventory (ansible_user: debian) and SSH access both assume is normally created by cloud-init's
+  # "users: [default]" directive, which never runs here (see above).
+  sudo chroot "$MNT_DIR" useradd -m -s /bin/bash debian 2>/dev/null || true
+  echo "debian ALL=(ALL) NOPASSWD:ALL" | sudo tee "$MNT_DIR/etc/sudoers.d/90-debian" >/dev/null
+  sudo chmod 440 "$MNT_DIR/etc/sudoers.d/90-debian"
+  sudo mkdir -p "$MNT_DIR/home/debian/.ssh"
+  echo "$SSH_PUBKEY_CONTENT" | sudo tee "$MNT_DIR/home/debian/.ssh/authorized_keys" >/dev/null
+  sudo chmod 700 "$MNT_DIR/home/debian/.ssh"
+  sudo chmod 600 "$MNT_DIR/home/debian/.ssh/authorized_keys"
+  sudo chroot "$MNT_DIR" chown -R debian:debian /home/debian
+
+  sudo mount --bind /dev "$MNT_DIR/dev"
+  sudo chroot "$MNT_DIR" ssh-keygen -A >/dev/null 2>&1
+  sudo umount "$MNT_DIR/dev"
+
+  sudo umount "$MNT_DIR"
+  sudo qemu-nbd --disconnect "$NBD_DEV" >/dev/null
+
   VIRT_TYPE_ARGS=(--virt-type qemu)
   CPU_ARGS=(--cpu qemu64)
   if [ "$KVM_OK" -eq 1 ]; then
@@ -188,6 +241,12 @@ EOF
     CPU_ARGS=(--cpu host-passthrough)
   fi
 
+  # Debian's genericcloud images ship a hybrid GPT (BIOS boot partition + ESP) and boot fine
+  # under legacy SeaBIOS on bookworm, but trixie's image hits a GRUB/gfxterm init failure under
+  # legacy BIOS on a headless (no video device) VM -- GRUB repeatedly clears the screen and
+  # reprints "Booting `Debian GNU/Linux'" without ever reaching the kernel, resetting in a loop
+  # roughly once a second, forever. `--boot uefi` (OVMF, auto-selected via libvirt's firmware
+  # descriptors) boots the same image cleanly and works for both suites, so use it unconditionally.
   sudo virt-install \
     --name "$node" \
     --memory "$VM_MEM_MB" \
@@ -195,6 +254,7 @@ EOF
     "${VIRT_TYPE_ARGS[@]}" \
     "${CPU_ARGS[@]}" \
     --osinfo detect=on,require=off \
+    --boot uefi \
     --disk path="$DISK_PATH",format=qcow2,bus=virtio \
     --disk path="$SEED_PATH",device=cdrom \
     --network network="$NET_NAME",model=virtio,mac="${NODE_MAC[$node]}" \
@@ -206,13 +266,16 @@ done
 
 # ---- 6. wait for SSH to come up -------------------------------------------------------------------
 log "Waiting for all nodes to become reachable over SSH"
+SSH_WAIT_FAILED=0
 for node in "${NODES[@]}"; do
   ip="${SUBNET_PREFIX}.${NODE_OCTET[$node]}"
   printf "  %s (%s) " "$node" "$ip"
+  node_ready=0
   for i in $(seq 1 60); do
     if ssh -i "$SSH_KEY" -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
          -o ConnectTimeout=3 "debian@${ip}" true 2>/dev/null; then
       echo "ready"
+      node_ready=1
       break
     fi
     if [ "$i" -eq 60 ]; then
@@ -220,7 +283,18 @@ for node in "${NODES[@]}"; do
     fi
     sleep 5
   done
+  [ "$node_ready" -eq 1 ] || SSH_WAIT_FAILED=1
 done
+
+# FIX: this used to fall through to writing the inventory and printing "Done." / exit 0 even when
+# every node timed out above -- silently handing back a working-looking inventory for VMs nothing
+# can actually reach, discovered when a trixie GRUB/gfxterm boot loop (see --boot uefi above) left
+# all 5 nodes unreachable but the script still reported success.
+if [ "$SSH_WAIT_FAILED" -eq 1 ]; then
+  echo "ERROR: one or more nodes never became reachable over SSH -- not writing the inventory." >&2
+  echo "       Check console output (virsh console <node>, or read /dev/pts/N per 'virsh dumpxml <node> | grep console') to diagnose." >&2
+  exit 1
+fi
 
 # ---- 7. write the ansible inventory ------------------------------------------------------------
 INVENTORY_PATH="$ANSIBLE_DIR/inventory/local/hosts.local.yml"

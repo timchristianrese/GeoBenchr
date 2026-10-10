@@ -1,12 +1,20 @@
-# FIX: ansible_env.HOME resolves to /root under this play's become: true, but the duckdb CLI
-# this role installs (main.yml's "Install DuckDB CLI", same fix applied there) lands under
-# /home/{{ ansible_user }}.
+# FIX: this task had no become: override, so it inherited the play's become: true and ran the
+# DuckDB CLI as root -- whose $HOME is /root, not /home/{{ ansible_user }} where main.yml's
+# pre-fetch task (postgis_aviation's, the only role that actually pre-fetches postgres_scanner)
+# caches the extension. Same fix as postgis_aviation/tasks/process_parquet.yml: become: false
+# (this task only reads {{ item.path }}, world-readable, and talks to Postgres over the network,
+# no OS privilege needed), LOAD the extension under its real current name, and disable the
+# auto-install/auto-load network check outright so a cache miss can never fall back to a fetch
+# that hangs on this network.
 - name: Load parquet into staging (DuckDB → Postgres)
+  become: false
   ansible.builtin.shell: |
     set -euo pipefail
 
-    /home/{{ ansible_user }}/.duckdb/cli/latest/duckdb <<EOF
-    LOAD postgres;
+    /home/{{ ansible_user }}/.duckdb/cli/latest/duckdb -unsigned <<EOF
+    SET autoinstall_known_extensions=false;
+    SET autoload_known_extensions=false;
+    LOAD postgres_scanner;
 
     ATTACH
       'host={{ db_host }}

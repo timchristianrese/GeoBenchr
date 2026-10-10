@@ -33,10 +33,19 @@ queryConfigs:
   description: "Application-Agnostic Spatial Range Query, covering 1-5% of the dataset bounding box"
   type: spatial
   mobilitydb: |
+    -- FIX (2026-09-30): purely spatial, no temporal/multi-point semantics at all -- no benefit
+    -- to routing this through a trajectory table (unlike timeInterval/timeAggregation/
+    -- spatioTemporalRange/IDsInsideRegion1Andsecond_region below). MobilityDB's Postgres
+    -- instance has the same flat :dataset point table every other dialect here uses, so this is
+    -- identical to the postgis block -- not skipped for geolife, since :dataset (unlike
+    -- :trajectory) always resolves.
+    SELECT COUNT(*) AS update_count
+    FROM :dataset
+    WHERE :id_filter AND ST_Intersects(geom, :region);
   postgis: |
     SELECT COUNT(*) AS update_count
     FROM :dataset
-    WHERE ST_Intersects(geom, :region);
+    WHERE :id_filter AND ST_Intersects(geom, :region);
   sample_postgis: |
     SELECT COUNT(*) AS update_count
     FROM geolife_points
@@ -50,32 +59,73 @@ queryConfigs:
   sedona: |
     SELECT COUNT(*) AS update_count
     FROM :dataset
-    WHERE ST_Intersects(geom, :region);
+    WHERE :id_filter AND ST_Intersects(geom, :region);
   spacetime: |
+    SELECT COUNT(*) as update_count
+    FROM :dataset
+    WHERE :id_filter AND ST_Intersects(ST_Point(x, y), ST_ToGeom(:region::gpolygon))
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
     -- FIX: was "pointInPolygon(geom, :region)" -- ClickHouse has no PostGIS-style GEOMETRY column;
     -- "geom" here would not be a valid Point argument. Rewritten to build the point from the
     -- table's lon/lat columns, matching the working "(lon, lat)" tuple pattern already used by the
     -- IDsInsideRegion1Andsecond_region clickhouse query below.
+    -- FIX (2026-09-30): ":region" itself is a PostGIS-only ST_MakeEnvelope(...) expression --
+    -- confirmed live this failed outright ("Function with name `ST_MakeEnvelope` does not
+    -- exist"). Uses ":region_ch" instead, a decomposed ClickHouse Ring literal (see
+    -- generateParameterVariations.py's FIX comment on the ":region"/"second_region" decomposition
+    -- for the full explanation).
     SELECT COUNT(*) AS update_count
     FROM :dataset
-    WHERE pointInPolygon((lon, lat), :region);
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(:region_ch, 0)))
+      AND :id_filter AND pointInPolygon((lon, lat), :region_ch);
+  clickhouse_scan: |
+    -- FIX: was "pointInPolygon(geom, :region)" -- ClickHouse has no PostGIS-style GEOMETRY column;
+    -- "geom" here would not be a valid Point argument. Rewritten to build the point from the
+    -- table's lon/lat columns, matching the working "(lon, lat)" tuple pattern already used by the
+    -- IDsInsideRegion1Andsecond_region clickhouse query below.
+    -- FIX (2026-09-30): ":region" itself is a PostGIS-only ST_MakeEnvelope(...) expression --
+    -- confirmed live this failed outright ("Function with name `ST_MakeEnvelope` does not
+    -- exist"). Uses ":region_ch" instead, a decomposed ClickHouse Ring literal (see
+    -- generateParameterVariations.py's FIX comment on the ":region"/"second_region" decomposition
+    -- for the full explanation).
+    SELECT COUNT(*) AS update_count
+    FROM :dataset
+    WHERE :id_filter AND pointInPolygon((lon, lat), :region_ch);
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
     SELECT COUNT(*) AS update_count
     FROM :dataset
-    WHERE ST_Intersects(geom, :region);
-  repetition: 10
+    WHERE :id_filter AND ST_Intersects_Extent(geom, :region) AND ST_Intersects(geom, :region);
+  duckdb_scan: |
+    SELECT COUNT(*) AS update_count
+    FROM :dataset
+    WHERE :id_filter AND ST_Intersects(geom, :region);
+  repetition: 50
   parameters:
   - region
 - name: kNN
   use: true
-  description: "Application-Agnostic kNN Query, finding the k nearest neighbors to a given point" 
+  description: "Application-Agnostic kNN Query, finding the k nearest neighbors to a given point"
   type: spatial
   mobilitydb: |
+    -- FIX (2026-09-30): same reasoning as SpatialBBox above -- purely spatial (nearest
+    -- neighbors to a point), no trajectory benefit, identical to the postgis block.
+    SELECT id, geom, timestamp
+    FROM :dataset
+    WHERE :id_filter AND ST_DWithin(geom, :point, :radius)
+    ORDER BY geom <-> :point
+    LIMIT :k;
   postgis: |
     SELECT id, geom, timestamp
     FROM :dataset
-    WHERE ST_DWithin(geom, :point, :radius)
+    WHERE :id_filter AND ST_DWithin(geom, :point, :radius)
     ORDER BY geom <-> :point
     LIMIT :k;
   sample_postgis: |
@@ -87,28 +137,71 @@ queryConfigs:
   sedona: |
     SELECT id, geom, timestamp
     FROM :dataset
-    WHERE ST_Distance(geom, :point) <= :radius
+    WHERE :id_filter AND ST_Distance(geom, :point) <= :radius
     ORDER BY ST_Distance(geom, :point)
     LIMIT :k;
   spacetime: |
+    -- (2026-10-02) radius in EPSG:3857 units like every other dialect, converted to SpaceTime's
+    -- local meters by :st_scale = cos(lat) * 0.99842 (see scripts/spacetime_units.py)
+    SELECT :id as id, ST_Point(x,y) as geom, t AS timestamp
+    FROM :dataset
+    WHERE :id_filter AND ST_DWithin(ST_Point(x, y), ST_ToGeom(:point::gpoint), :radius * :st_scale)
+    ORDER BY ST_Distance(ST_Point(x,y), ST_ToGeom(:point::gpoint))
+    LIMIT :k;
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
     -- FIX: greatCircleDistance needs 4 scalar args (lon1, lat1, lon2, lat2); the original passed
     -- "geom" and ":point" as if each were a single scalar -- wrong arity, would not run. Fixed
     -- assuming decomposed :point_lon / :point_lat parameters, which are NOT currently in this
     -- query's shared `parameters:` list below -- the harness needs to supply them for ClickHouse
     -- specifically (same treatment as flightClosestToPoint in aviation_benchmark.yaml).
+    -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance, a SQL UDF
+    -- (created ON CLUSTER cluster_1 -- see COORDINATION.md) that projects both points into Web
+    -- Mercator (EPSG:3857) and takes the planar Euclidean distance, matching ST_DWithin/
+    -- ST_Distance's metric exactly -- see ais/config/combinedBenchConf.yaml's
+    -- crossingsAroundHarbour clickhouse block for the formula derivation and live verification.
     SELECT id, lon, lat, timestamp
     FROM :dataset
-    WHERE greatCircleDistance(lon, lat, :point_lon, :point_lat) <= :radius
-    ORDER BY greatCircleDistance(lon, lat, :point_lon, :point_lat)
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(:point_lon, :point_lat, :radius)))
+      AND :id_filter AND sqrt(pow(x - 6378137. * radians(:point_lon), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(:point_lat) / 2)), 2)) <= :radius
+    ORDER BY sqrt(pow(x - 6378137. * radians(:point_lon), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(:point_lat) / 2)), 2))
+    LIMIT :k;
+  clickhouse_scan: |
+    -- FIX: greatCircleDistance needs 4 scalar args (lon1, lat1, lon2, lat2); the original passed
+    -- "geom" and ":point" as if each were a single scalar -- wrong arity, would not run. Fixed
+    -- assuming decomposed :point_lon / :point_lat parameters, which are NOT currently in this
+    -- query's shared `parameters:` list below -- the harness needs to supply them for ClickHouse
+    -- specifically (same treatment as flightClosestToPoint in aviation_benchmark.yaml).
+    -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance, a SQL UDF
+    -- (created ON CLUSTER cluster_1 -- see COORDINATION.md) that projects both points into Web
+    -- Mercator (EPSG:3857) and takes the planar Euclidean distance, matching ST_DWithin/
+    -- ST_Distance's metric exactly -- see ais/config/combinedBenchConf.yaml's
+    -- crossingsAroundHarbour clickhouse block for the formula derivation and live verification.
+    SELECT id, lon, lat, timestamp
+    FROM :dataset
+    WHERE :id_filter AND sqrt(pow(x - 6378137. * radians(:point_lon), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(:point_lat) / 2)), 2)) <= :radius
+    ORDER BY sqrt(pow(x - 6378137. * radians(:point_lon), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(:point_lat) / 2)), 2))
     LIMIT :k;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
     SELECT id, geom, timestamp
     FROM :dataset
-    WHERE ST_Distance(geom, :point) <= :radius
+    WHERE :id_filter AND ST_Intersects_Extent(geom, ST_MakeEnvelope(ST_XMin(:point) - :radius, ST_YMin(:point) - :radius, ST_XMax(:point) + :radius, ST_YMax(:point) + :radius)) AND ST_Distance(geom, :point) <= :radius
     ORDER BY ST_Distance(geom, :point)
     LIMIT :k;
-  repetition: 10
+  duckdb_scan: |
+    SELECT id, geom, timestamp
+    FROM :dataset
+    WHERE :id_filter AND ST_Distance(geom, :point) <= :radius
+    ORDER BY ST_Distance(geom, :point)
+    LIMIT :k;
+  repetition: 50
   parameters:
   - point
   - k
@@ -118,10 +211,32 @@ queryConfigs:
   description: "Collect all ids within a specified time interval."
   type: temporal
   mobilitydb: |
+    -- FIX (2026-09-30): genuinely trajectory-natural (which trajectories were active during
+    -- the period) -- uses :trajectory (a MobilityDB-native tgeompoint table: crossings/
+    -- flights/rides, distinct from :dataset's flat point table), not generated for geolife
+    -- (no trajectory-table equivalent exists there -- see DATASET_CONFIG's comment in
+    -- generateParameterVariations.py). Verified live against crossings: real, non-zero count.
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :trajectory
+    WHERE :id_filter AND trip && :period;
+  mobilitydb_trip_summary: |
+    -- (2026-10-02) used instead of the block above when the dataset declares a trip summary
+    -- table (ais): SpaceTime's ais timeInterval counts trips whose span lies inside the period
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :trip_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= TIMESTAMP :period_start AND end_time <= TIMESTAMP :period_end;
   postgis: |
     SELECT COUNT(DISTINCT id) AS id_count
     FROM :dataset
-    WHERE timestamp BETWEEN :period;
+    WHERE :id_filter AND timestamp BETWEEN :period;
+  postgis_trip_summary: |
+    -- (2026-10-02) used instead of the block above when the dataset declares a trip summary
+    -- table (ais): SpaceTime's ais timeInterval counts trips whose span lies inside the period
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :trip_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= TIMESTAMP :period_start AND end_time <= TIMESTAMP :period_end;
   sample_postgis: |
     SELECT COUNT(DISTINCT id) AS id_count
     FROM geolife_points
@@ -129,17 +244,41 @@ queryConfigs:
   sedona: |
     SELECT COUNT(DISTINCT id) AS id_count
     FROM :dataset
-    WHERE timestamp BETWEEN :period;
+    WHERE :id_filter AND timestamp BETWEEN :period;
+  sedona_trip_summary: |
+    -- (2026-10-02) used instead of the block above when the dataset declares a trip summary
+    -- table (ais): SpaceTime's ais timeInterval counts trips whose span lies inside the period
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :trip_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= to_timestamp(:period_start) AND end_time <= to_timestamp(:period_end);
   spacetime: |
+    SELECT COUNT(DISTINCT :id) AS id_count
+    FROM :dataset_trip
+    WHERE :id_filter AND t <@ EPOCHRANGE :period;
   clickhouse: |
     SELECT COUNT(DISTINCT id) AS id_count
     FROM :dataset
-    WHERE timestamp BETWEEN :period;
+    WHERE :id_filter AND timestamp BETWEEN :period;
+  clickhouse_trip_summary: |
+    -- (2026-10-02) used instead of the block above when the dataset declares a trip summary
+    -- table (ais): SpaceTime's ais timeInterval counts trips whose span lies inside the period
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :trip_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= toDateTime(:period_start, 'UTC') AND end_time <= toDateTime(:period_end, 'UTC');
   duckdb: |
     SELECT COUNT(DISTINCT id) AS id_count
     FROM :dataset
-    WHERE timestamp BETWEEN :period;
-  repetition: 10
+    WHERE :id_filter AND timestamp BETWEEN :period;
+  duckdb_trip_summary: |
+    -- (2026-10-02) used instead of the block above when the dataset declares a trip summary
+    -- table (ais): SpaceTime's ais timeInterval counts trips whose span lies inside the period
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :trip_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= TIMESTAMP :period_start AND end_time <= TIMESTAMP :period_end;
+  repetition: 50
   parameters:
   - period
 - name: timeAggregation
@@ -147,14 +286,38 @@ queryConfigs:
   description: "Aggregate the number of points per id within a specified time interval, grouped by hour."
   type: temporal
   mobilitydb: |
+    -- FIX (2026-09-30): same unnest(timestamps(atTime(...))) pattern already established
+    -- elsewhere in this project (e.g. ais's CrossingsActiveAtGivenHourOfDay) -- atTime()
+    -- restricts the trajectory to the period, timestamps() gets the instant timestamps,
+    -- unnest() expands to rows so plain date_trunc() can bucket them. Uses :trajectory, not
+    -- generated for geolife (see timeInterval above). Verified live against crossings.
+    WITH ts_table AS (
+      SELECT id, unnest(timestamps(atTime(trip, :period))) AS ts
+      FROM :trajectory
+      WHERE :id_filter AND trip && :period
+    )
+    -- FIX (2026-10-01): :trajectory_tz is the wall-clock zone the trajectory instants must be read in
+    -- to match the point tables ('UTC' for crossings/flights, 'Europe/Berlin' for rides -- see
+    -- DATASET_CONFIG); explicit because Citus evaluates date_trunc on the workers, so a session
+    -- SET TIME ZONE wouldn't reach it.
+    -- (2026-10-02) wrapped to return one summary row (groups, points, largest group) instead of
+    -- every (hour, id) group: same grouping work, but no multi-million-row result for the client
+    -- to buffer (PostGIS/MobilityDB ran the 1 GB benchmark client out of heap on ais).
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', ts AT TIME ZONE :trajectory_tz) AS hour, id, COUNT(*) AS cnt
+      FROM ts_table
+      GROUP BY hour, id
+    ) g;
   postgis: |
-    SELECT date_trunc('hour', timestamp) AS hour,
-       id,
-       COUNT(*) AS cnt
-    FROM :dataset
-    WHERE timestamp between :period 
-    GROUP BY hour, id
-    ORDER BY hour;
+    -- (2026-10-02) wrapped to return one summary row (groups, points, largest group) instead of
+    -- every (hour, id) group: same grouping work, but no multi-million-row result for the client
+    -- to buffer (PostGIS/MobilityDB ran the 1 GB benchmark client out of heap on ais).
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM :dataset
+      WHERE :id_filter AND timestamp between :period
+      GROUP BY hour, id
+    ) g;
   
   sample_postgis: |
     SELECT date_trunc('hour', timestamp) AS hour,
@@ -165,25 +328,38 @@ queryConfigs:
     GROUP BY hour, id
     ORDER BY hour;
   sedona: |
-
+    -- FIX (2026-09-30): plain standard SQL (date_trunc, GROUP BY, ORDER BY) with no
+    -- PostGIS-specific syntax -- Sedona/Spark SQL supports date_trunc('hour', ...) directly,
+    -- confirmed live via spark-sql against real HDFS data (crossing_points, real non-zero
+    -- per-id/hour counts). Reused the postgis block verbatim rather than leaving it blank.
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM :dataset
+      WHERE :id_filter AND timestamp between :period
+      GROUP BY hour, id
+    ) g;
   spacetime: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT (t::i64 / 3600 ) * 3600 as hour, :id as id, count(*) as cnt
+      FROM :dataset
+      WHERE :id_filter AND t <@ EPOCHRANGE :period
+      GROUP BY hour, id
+    ) g;
   clickhouse: |
-    SELECT toStartOfHour(timestamp) AS hour,
-       id,
-       COUNT(*) AS cnt
-    FROM :dataset
-    WHERE timestamp between :period
-    GROUP BY hour, id
-    ORDER BY hour;
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT toStartOfHour(timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM :dataset
+      WHERE :id_filter AND timestamp between :period
+      GROUP BY hour, id
+    ) g;
   duckdb: |
-    SELECT date_trunc('hour', timestamp) AS hour,
-       id,
-       COUNT(*) AS cnt
-    FROM :dataset
-    WHERE timestamp between :period
-    GROUP BY hour, id
-    ORDER BY hour;
-  repetition: 10
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM :dataset
+      WHERE :id_filter AND timestamp between :period
+      GROUP BY hour, id
+    ) g;
+  repetition: 50
   parameters:
   - period
 - name: spatioTemporalRange
@@ -191,10 +367,23 @@ queryConfigs:
   description: "Get all ids within a specified time interval and spatial region."
   type: spatiotemporal
   mobilitydb: |
+    -- FIX (2026-09-30): instants() (unlike timestamps()) gets the set of tgeompoint instant
+    -- sub-values within the atTime() restriction, each carrying both its point value and its
+    -- timestamp -- unnest() expands to rows, getValue() extracts each instant's geometry for
+    -- the spatial filter (same pattern used for cycling's AverageUpdatesPerRideInDistrictInPeriod).
+    -- Uses :trajectory, not generated for geolife (see timeInterval above). Verified live.
+    WITH ts_table AS (
+      SELECT id, unnest(instants(atTime(trip, :period))) AS inst
+      FROM :trajectory
+      WHERE :id_filter AND trip && :period
+    )
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ts_table
+    WHERE ST_Intersects(getValue(inst)::geometry, :region);
   postgis: |
     SELECT COUNT(DISTINCT id) AS id_count
     FROM :dataset
-    WHERE timestamp BETWEEN :period
+    WHERE :id_filter AND timestamp BETWEEN :period
       AND ST_Intersects(geom, :region);
   sample_postgis: |
     SELECT COUNT(DISTINCT id) AS id_count
@@ -208,22 +397,59 @@ queryConfigs:
                 4326
             ), 3857));
   sedona: |
-
+    -- FIX (2026-09-30): plain standard SQL (WHERE ... AND ST_Intersects(...)) with no
+    -- PostGIS-specific syntax -- Sedona/Spark SQL supports ST_Intersects directly, confirmed
+    -- live via spark-sql against real HDFS data (crossing_points, real non-zero count).
+    -- Reused the postgis block verbatim rather than leaving it blank.
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :dataset
+    WHERE :id_filter AND timestamp BETWEEN :period
+      AND ST_Intersects(geom, :region);
   spacetime: |
+    SELECT COUNT(DISTINCT :id) AS id_count
+    FROM :dataset
+    WHERE :id_filter AND t <@ EPOCHRANGE :period
+      AND ST_Intersects(ST_Point(x, y), ST_ToGeom(:region::gpolygon));
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
     -- FIX: was "pointInPolygon(geom, :region)" -- same "geom" column doesn't exist as a
     -- ClickHouse-native point type issue as SpatialBBox above; rewritten to the "(lon, lat)" tuple
     -- pattern already used by the IDsInsideRegion1Andsecond_region clickhouse query below.
+    -- FIX (2026-09-30): ":region" is a PostGIS-only ST_MakeEnvelope(...) expression -- uses
+    -- ":region_ch" instead (see SpatialBBox's clickhouse block for the full explanation).
     SELECT COUNT(DISTINCT id) AS id_count
     FROM :dataset
-    WHERE timestamp BETWEEN :period
-      AND pointInPolygon((lon, lat), :region);
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(:region_ch, 0)))
+      AND :id_filter AND timestamp BETWEEN :period
+      AND pointInPolygon((lon, lat), :region_ch);
+  clickhouse_scan: |
+    -- FIX: was "pointInPolygon(geom, :region)" -- same "geom" column doesn't exist as a
+    -- ClickHouse-native point type issue as SpatialBBox above; rewritten to the "(lon, lat)" tuple
+    -- pattern already used by the IDsInsideRegion1Andsecond_region clickhouse query below.
+    -- FIX (2026-09-30): ":region" is a PostGIS-only ST_MakeEnvelope(...) expression -- uses
+    -- ":region_ch" instead (see SpatialBBox's clickhouse block for the full explanation).
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :dataset
+    WHERE :id_filter AND timestamp BETWEEN :period
+      AND pointInPolygon((lon, lat), :region_ch);
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
     SELECT COUNT(DISTINCT id) AS id_count
     FROM :dataset
-    WHERE timestamp BETWEEN :period
+    WHERE :id_filter AND timestamp BETWEEN :period
+      AND ST_Intersects_Extent(geom, :region) AND ST_Intersects(geom, :region);
+  duckdb_scan: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM :dataset
+    WHERE :id_filter AND timestamp BETWEEN :period
       AND ST_Intersects(geom, :region);
-  repetition: 10
+  repetition: 50
   parameters:
   - period
   - region
@@ -232,12 +458,29 @@ queryConfigs:
   description: "Find users who have activities in two specified regions during a given time period."
   type: spatiotemporal
   mobilitydb: |
+    -- FIX (2026-09-30): same instants()/getValue() pattern as spatioTemporalRange above,
+    -- grouped by id with BOOL_OR over each region -- same structure as the postgis block below,
+    -- just sourced from unnested trajectory instants instead of point-table rows. Uses
+    -- :trajectory, not generated for geolife (see timeInterval above). Verified live.
+    WITH ts_table AS (
+      SELECT id, unnest(instants(atTime(trip, :period))) AS inst
+      FROM :trajectory
+      WHERE :id_filter AND trip && :period
+    )
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ts_table
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(getValue(inst)::geometry, :region))
+           AND BOOL_OR(ST_Intersects(getValue(inst)::geometry, :second_region))
+    ) AS matching_ids;
   postgis: |
     SELECT COUNT(*) AS id_count
     FROM (
         SELECT id
         FROM :dataset
-        WHERE timestamp BETWEEN :period
+        WHERE :id_filter AND timestamp BETWEEN :period
         GROUP BY id
         HAVING BOOL_OR(ST_Intersects(geom, :region)) AND BOOL_OR(ST_Intersects(geom, :second_region))
     ) AS matching_ids;
@@ -264,31 +507,75 @@ queryConfigs:
     FROM (
         SELECT id
         FROM :dataset
-        WHERE timestamp BETWEEN :period
+        WHERE :id_filter AND timestamp BETWEEN :period
         GROUP BY id
         HAVING BOOL_OR(ST_Intersects(geom, :region)) AND BOOL_OR(ST_Intersects(geom, :second_region))
     ) AS matching_ids;
   spacetime: |
+    SELECT COUNT(*) AS id_count FROM (
+      SELECT :id as id
+      FROM :dataset
+      WHERE :id_filter AND t <@ EPOCHRANGE :period
+        AND (ST_Intersects(ST_Point(x, y), ST_ToGeom(:region::gpolygon))
+          OR ST_Intersects(ST_Point(x, y), ST_ToGeom(:second_region::gpolygon)))
+      GROUP BY :id
+      HAVING BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom(:region::gpolygon)))
+        AND BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom(:second_region::gpolygon)))
+    )
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
+    -- FIX (2026-09-30): ":region"/":second_region" are PostGIS-only ST_MakeEnvelope(...)
+    -- expressions -- uses ":region_ch"/":second_region_ch" instead (see SpatialBBox's clickhouse
+    -- block for the full explanation).
     SELECT COUNT(*) AS id_count
     FROM (
         SELECT id
         FROM :dataset
-        WHERE timestamp BETWEEN :period
+        WHERE h3 GLOBAL IN (SELECT arrayJoin(arrayConcat(h3CoverRing(:region_ch, 0), h3CoverRing(:second_region_ch, 0))))
+          AND :id_filter AND timestamp BETWEEN :period
         GROUP BY id
-        HAVING countIf(pointInPolygon((lon, lat), :region)) > 0
-          AND countIf(pointInPolygon((lon, lat), :second_region)) > 0
+        HAVING countIf(pointInPolygon((lon, lat), :region_ch)) > 0
+          AND countIf(pointInPolygon((lon, lat), :second_region_ch)) > 0
+    );
+  clickhouse_scan: |
+    -- FIX (2026-09-30): ":region"/":second_region" are PostGIS-only ST_MakeEnvelope(...)
+    -- expressions -- uses ":region_ch"/":second_region_ch" instead (see SpatialBBox's clickhouse
+    -- block for the full explanation).
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM :dataset
+        WHERE :id_filter AND timestamp BETWEEN :period
+        GROUP BY id
+        HAVING countIf(pointInPolygon((lon, lat), :region_ch)) > 0
+          AND countIf(pointInPolygon((lon, lat), :second_region_ch)) > 0
     );
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
     SELECT COUNT(*) AS id_count
     FROM (
         SELECT id
         FROM :dataset
-        WHERE timestamp BETWEEN :period
+        WHERE :id_filter AND timestamp BETWEEN :period AND (ST_Intersects_Extent(geom, :region) OR ST_Intersects_Extent(geom, :second_region))
         GROUP BY id
         HAVING BOOL_OR(ST_Intersects(geom, :region)) AND BOOL_OR(ST_Intersects(geom, :second_region))
     ) AS matching_ids;
-  repetition: 10
+  duckdb_scan: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM :dataset
+        WHERE :id_filter AND timestamp BETWEEN :period
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, :region)) AND BOOL_OR(ST_Intersects(geom, :second_region))
+    ) AS matching_ids;
+  repetition: 50
   parameters:
   - region
   - second_region

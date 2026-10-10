@@ -1,0 +1,54 @@
+ais/CrossingsActiveAtGivenHourOfDay                            mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+ais/HarbourActivityInPeriod                                    mobil: SAME | click: SAME | duckd: SAME | space: SAME (zero-count row) | sedon: SAME
+ais/IDsInsideRegion1Andsecond_region                           mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+ais/SpatialBBox                                                mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+ais/busiestDayInWeekPeriod                                     mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+ais/countActiveCrossingsNearIsland                             mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+ais/crossingsAroundHarbour                                     mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+ais/islandOrCoastLineCrossingsInPeriod                         mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+ais/kNN                                                        mobil: SAME | click: KNN (geometry format / ties at equal distance) | duckd: KNN (geometry format / ties at equal distance) | space: KNN (geometry format / ties at equal distance) | sedon: KNN (geometry format / ties at equal distance)
+ais/spatioTemporalRange                                        mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+ais/timeAggregation                                            mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+ais/timeInterval                                               mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+aviation/CityActivityAtInstant                                 mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+aviation/FlightsAtLowAltitudeInPeriod                          mobil: SAME COUNT | click: SAME COUNT | duckd: SAME COUNT | space: CLOSE COUNT 155941 vs 155942 (0.001 %) | sedon: SAME COUNT
+aviation/FlightsAtNightInPeriod                                mobil: SAME COUNT | click: SAME COUNT | duckd: SAME COUNT | space: SAME COUNT | sedon: SAME COUNT
+aviation/IDsInsideRegion1Andsecond_region                      mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+aviation/SpatialBBox                                           mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+aviation/countFlightsInCounties                                mobil: SAME | click: CLOSE (max 0.000 %) | duckd: SAME | space: CLOSE (max 0.000 %) | sedon: SAME
+aviation/flightClosestToPoint                                  mobil: SAME | click: SAME | duckd: SAME | space: CLOSE (max 0.378 %) | sedon: SAME
+aviation/flightsInCountyInPeriod                               mobil: SAME COUNT | click: SAME COUNT | duckd: SAME COUNT | space: SAME COUNT | sedon: SAME COUNT
+aviation/kNN                                                   mobil: SAME | click: KNN (geometry format / ties at equal distance) | duckd: KNN (geometry format / ties at equal distance) | space: KNN (geometry format / ties at equal distance) | sedon: KNN (geometry format / ties at equal distance)
+aviation/spatioTemporalRange                                   mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+aviation/timeAggregation                                       mobil: SAME | click: SAME | duckd: SAME | space: CLOSE (max 0.000 %) | sedon: SAME
+aviation/timeInterval                                          mobil: SAME | click: SAME | duckd: SAME | space: CLOSE (max 0.001 %) | sedon: SAME
+cycling/AverageUpdatesPerRideInDistrictInPeriod                mobil: SAME | click: CLOSE (max 0.006 %) | duckd: SAME | space: SAME | sedon: SAME
+cycling/CountRidesFullyInDistrictRadius                        mobil: SAME COUNT | click: n/a | duckd: SAME COUNT | space: CLOSE COUNT 414216 vs 414206 (0.002 %) | sedon: SAME COUNT
+cycling/IDsInsideRegion1Andsecond_region                       mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+cycling/RidesAcrossMultipleHours                               mobil: SAME COUNT | click: SAME COUNT | duckd: SAME COUNT | space: SAME COUNT | sedon: SAME COUNT
+cycling/RidesDuringRushHourInPeriod                            mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+cycling/RidesPastOrToUniversityInPeriod                        mobil: SAME COUNT | click: CLOSE COUNT 14614 vs 14610 (0.027 %) | duckd: SAME COUNT | space: SAME COUNT | sedon: SAME COUNT
+cycling/SpatialBBox                                            mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+cycling/countRideInDistrict                                    mobil: SAME | click: CLOSE (max 0.000 %) | duckd: SAME | space: CLOSE (max 0.082 %) | sedon: SAME
+cycling/kNN                                                    mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+cycling/spatioTemporalRange                                    mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+cycling/timeAggregation                                        mobil: SAME | click: CLOSE (max 0.044 %) | duckd: SAME | space: SAME | sedon: SAME
+cycling/timeInterval                                           mobil: SAME | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+geolife/AverageDailyActivityPerUserInPeriod                    mobil: n/a | click: SAME COUNT | duckd: SAME COUNT | space: SAME COUNT | sedon: SAME COUNT
+geolife/ClosestRestaurantToPoint                               mobil: n/a | click: KNN (geometry format / ties at equal distance) | duckd: KNN (geometry format / ties at equal distance) | space: KNN (geometry format / ties at equal distance) | sedon: KNN (geometry format / ties at equal distance)
+geolife/CountPOIsByTypeInRegion                                mobil: n/a | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+geolife/FirstAndLastActivityInPeriod                           mobil: n/a | click: SAME COUNT | duckd: SAME COUNT | space: SAME COUNT | sedon: SAME COUNT
+geolife/IDsInsideRegion1Andsecond_region                       mobil: n/a | click: SAME | duckd: SAME | space: CLOSE (max 0.033 %) | sedon: SAME
+geolife/SlidingWindowActivityInRegionPerMinuteWithNonZeroID    mobil: n/a | click: SAME | duckd: SAME | space: VALUE DIFF 695/699 rows, e.g. pg=('2019-07-21 10:16:00', '66 | sedon: SAME
+geolife/SpatialBBox                                            mobil: SAME | click: SAME | duckd: SAME | space: VALUE DIFF 1/1 rows, e.g. pg=('2.60908e+06',) spacetime=('2. | sedon: CLOSE (max 0.265 %)
+geolife/UniqueUsersPerHourInRegionInPeriod                     mobil: n/a | click: SAME | duckd: SAME | space: CLOSE (max 0.486 %) | sedon: SAME
+geolife/kNN                                                    mobil: KNN (geometry format / ties at equal distance) | click: KNN (geometry format / ties at equal distance) | duckd: KNN (geometry format / ties at equal distance) | space: KNN (geometry format / ties at equal distance) | sedon: KNN (geometry format / ties at equal distance)
+geolife/spatioTemporalRange                                    mobil: n/a | click: SAME | duckd: SAME | space: CLOSE (max 0.314 %) | sedon: SAME
+geolife/timeAggregation                                        mobil: n/a | click: SAME | duckd: SAME | space: VALUE DIFF 1/1 rows, e.g. pg=('695667', '3.96047e+07', '296' | sedon: SAME
+geolife/timeInterval                                           mobil: n/a | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+
+mobilitydb {'SAME': 31, 'SAME COUNT': 6, 'n/a': 10, 'KNN': 1}
+clickhouse {'SAME': 32, 'KNN': 4, 'SAME COUNT': 6, 'CLOSE': 4, 'n/a': 1, 'CLOSE COUNT': 1}
+duckdb {'SAME': 36, 'KNN': 4, 'SAME COUNT': 8}
+spacetime {'SAME': 25, 'KNN': 4, 'CLOSE COUNT': 2, 'SAME COUNT': 6, 'CLOSE': 8, 'VALUE DIFF': 3}
+sedona {'SAME': 35, 'KNN': 4, 'SAME COUNT': 8, 'CLOSE': 1}

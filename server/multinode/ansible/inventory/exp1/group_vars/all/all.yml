@@ -1,0 +1,81 @@
+# group_vars/all.yml
+#
+# exp1 inventory: 5 geobenchr-sut-{1..5} VMs hosted on the exp1 hypervisor,
+# reachable only via that hypervisor as a jump host (they sit on the
+# 10.122.0.0/24 virbr-gbr bridge, not directly routable). Confirmed working
+# jump-host address: `ssh ubuntu@141.23.28.205 -p 60001` (2026-09-25).
+#
+# ansible_user: NOT YET LIVE-VERIFIED. Inferred from the local/ inventory's
+# equivalent file (same geobenchr-sut-N hostnames, same role split) and from
+# the VM base image's own name on the hypervisor
+# (/var/lib/libvirt/images/geobenchr/debian-13-genericcloud-amd64.qcow2 --
+# i.e. a Debian cloud image). At the time this file was written, all 5 VMs
+# were paused by libvirt due to the hypervisor's root filesystem being 100%
+# full (0 bytes available -- see the qcow2 "No space left on device" I/O
+# error in `sudo virsh dominfo geobenchr-sut-5`), so SSH access into the VMs
+# themselves could not be live-tested. Once the disk space issue is resolved
+# and the VMs stay resumed, verify this user is actually correct (and update
+# this comment) before trusting it for anything unattended.
+ansible_user: debian
+ansible_ssh_common_args: >-
+      -o ProxyCommand="ssh -W %h:%p -p 60001 ubuntu@141.23.28.205"
+ansible_python_interpreter: /usr/bin/python3
+
+postgres_version: 17
+mbdb_db_name: postgres
+mbdb_db_user: postgres
+mbdb_db_password: postgres
+citus_version: 14.1
+
+spark_home: /opt/spark
+
+sedona_jar: sedona-spark-shaded-4.0_2.13-1.8.1.jar
+geotools_jar: geotools-wrapper-1.8.1-33.1.jar
+
+postgres_host: "{{ groups['masters'][0] }}"
+db_name: postgres
+db_user: postgres
+db_password: postgres
+
+postgres_jdbc_jar: postgresql-42.7.9.jar
+
+pg_hba_conf_path: /etc/postgresql/{{ postgres_version }}/main/pg_hba.conf
+
+cycling_data_dir: "/var/lib/data/cycling"
+aviation_data_dir: "/var/lib/data/aviation"
+ais_data_dir: "/var/lib/data/ais"
+
+geolife_data_dir: /var/lib/data/geolife
+
+clickhouse_data_dir: /var/lib/data
+clickhouse_cycling_data_dir: /var/lib/data/cycling
+clickhouse_aviation_data_dir: /var/lib/data/aviation
+
+local_parquet_dir: "{{ playbook_dir }}/../../../../data_generators/cycling/output/parquet"
+venv_dir: "/var/lib/data/venv"
+
+aviation_sample_parquet_dir: "{{ playbook_dir }}/../../../../data_generators/aviation/parquet_flights"
+aviation_sample_file_count: 20
+
+ais_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generators/ais/output_data/crossing_points/dummy_sample.parquet"
+cycling_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generators/cycling/output/parquet/dummy_sample.parquet"
+geolife_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generators/geolife/synthetic_output/dummy_sample.parquet"
+
+db_host: "127.0.0.1"
+db_port: 5433
+ch_host: "127.0.0.1"
+ch_port: 9500
+ch_keeper_port: 9444
+ch_user: "default"
+ch_password: "default"
+
+hdfs_target_dir: /data/ais/raw
+local_data_path: /data/ais
+hadoop_home: /opt/hadoop
+local_supporting_dataset_path: "{{ playbook_dir }}/../../supporting_datasets"
+supporting_dataset_path: /var/lib/data/supporting_datasets/
+
+duckdb_data_dir: /var/lib/duckdb
+duckdb_db_file: "{{ duckdb_data_dir }}/geobenchr.duckdb"
+duckdb_quack_port: 9494
+duckdb_quack_token: my-secret-token

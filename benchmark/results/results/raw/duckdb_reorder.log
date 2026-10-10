@@ -1,0 +1,54 @@
+2026-10-08T19:50:49+02:00 run_all start
+2026-10-08T19:50:49+02:00 [ride_points] start: 1178625381 rows, 618 GB free, need ~144 GB
+2026-10-08T19:52:12+02:00 [ride_points] check query on the original table: result 0, 83466 ms
+2026-10-08T19:52:19+02:00 [ride_points] extent 1460598.2478479429 6870293.311967753 1510960.630945189 6912225.8066652035; building ride_points_hilbert
+2026-10-08T19:53:57+02:00 [ride_points] ride_points_hilbert built: 1178625381 rows, geometry segments with unknown extent: 0
+2026-10-08T19:55:22+02:00 [ride_points] check query on the reordered table: result 0, 84727 ms
+2026-10-08T19:55:23+02:00 [ride_points] swapped: ride_points is now in Hilbert order; check query 83466 ms -> 84727 ms; 618G free
+2026-10-08T19:55:23+02:00 [flight_points] start: 2703631682 rows, 618 GB free, need ~266 GB
+2026-10-08T19:58:40+02:00 [flight_points] check query on the original table: result 19139075, 196733 ms
+2026-10-08T19:58:50+02:00 [flight_points] extent 612257.2042158751 6498393.576016421 1057535.1452672658 6909348.755730894; building flight_points_hilbert
+2026-10-08T20:04:59+02:00 [flight_points] flight_points_hilbert built: 2703631682 rows, geometry segments with unknown extent: 0
+2026-10-08T20:07:54+02:00 [flight_points] check query on the reordered table: result 19139075, 174818 ms
+2026-10-08T20:07:55+02:00 [flight_points] swapped: flight_points is now in Hilbert order; check query 196733 ms -> 174818 ms; 618G free
+2026-10-08T20:07:55+02:00 [geolife_points] start: 3949479382 rows, 618 GB free, need ~365 GB
+2026-10-08T20:12:13+02:00 [geolife_points] check query on the original table: result 2609083, 257942 ms
+2026-10-08T20:12:29+02:00 [geolife_points] extent 12931434.695018861 4834547.461112298 12983008.4566035 4871531.615260489; building geolife_points_hilbert
+2026-10-08T20:20:40+02:00 [geolife_points] failed (see above), continuing
+2026-10-08T20:20:41+02:00 [crossing_points] start: 5984837218 rows, 618 GB free, need ~528 GB
+2026-10-08T20:25:20+02:00 [crossing_points] check query on the original table: result 27939, 279273 ms
+2026-10-08T20:25:58+02:00 [crossing_points] extent 149291.34833929472 6867389.46769285 2090074.9805679484 8509566.586051013; building crossing_points_hilbert
+2026-10-08T20:33:14+02:00 [crossing_points] stopped by hand: the single global sort risked filling the disk (Postgres/ClickHouse share it); switching to per-month sorting
+2026-10-08T20:37:21+02:00 run_rest start
+2026-10-08T20:37:21+02:00 [geolife_points] start: 3949479382 rows, 618 GB free, need ~365 GB
+2026-10-08T20:42:17+02:00 [geolife_points] check query on the original table: result 2609083, 296446 ms
+2026-10-08T20:42:34+02:00 [geolife_points] extent 12931434.695018861 4834547.461112298 12983008.4566035 4871531.615260489; building geolife_points_hilbert
+2026-10-08T20:51:48+02:00 [geolife_points] geolife_points_hilbert built: 3949479382 rows, geometry segments with unknown extent: 0
+2026-10-08T20:56:48+02:00 [geolife_points] check query on the reordered table: result 2609083, 299816 ms
+2026-10-08T20:56:51+02:00 [geolife_points] swapped: geolife_points is now in Hilbert order; check query 296446 ms -> 299816 ms; 805G free
+2026-10-08T20:56:51+02:00 [crossing_points] chunked start: 5984837218 rows, 805 GB free
+2026-10-08T21:01:43+02:00 [crossing_points] check query on the original table: result 27939, 292043 ms
+2026-10-08T21:02:18+02:00 [crossing_points] extent 149291.34833929472 6867389.46769285 2090074.9805679484 8509566.586051013; 19 months
+2026-10-08T21:02:45+02:00 [crossing_points] month 2024-01-01 done (806 GB free)
+2026-10-08T21:03:12+02:00 [crossing_points] month 2024-02-01 done (806 GB free)
+2026-10-08T21:03:43+02:00 [crossing_points] month 2024-03-01 done (806 GB free)
+2026-10-08T21:04:13+02:00 [crossing_points] month 2024-04-01 done (806 GB free)
+2026-10-08T21:04:50+02:00 [crossing_points] month 2024-05-01 done (805 GB free)
+2026-10-08T21:05:26+02:00 [crossing_points] month 2024-06-01 done (805 GB free)
+2026-10-08T21:06:04+02:00 [crossing_points] month 2024-07-01 done (797 GB free)
+2026-10-08T21:06:42+02:00 [crossing_points] month 2024-08-01 done (788 GB free)
+2026-10-08T21:07:20+02:00 [crossing_points] month 2024-09-01 done (779 GB free)
+2026-10-08T21:07:52+02:00 [crossing_points] month 2024-10-01 done (771 GB free)
+2026-10-08T21:08:22+02:00 [crossing_points] month 2024-11-01 done (764 GB free)
+2026-10-08T21:08:53+02:00 [crossing_points] month 2024-12-01 done (759 GB free)
+2026-10-08T21:09:23+02:00 [crossing_points] month 2025-01-01 done (752 GB free)
+2026-10-08T21:09:53+02:00 [crossing_points] month 2025-02-01 done (746 GB free)
+2026-10-08T21:10:24+02:00 [crossing_points] month 2025-03-01 done (738 GB free)
+2026-10-08T21:10:57+02:00 [crossing_points] month 2025-04-01 done (731 GB free)
+2026-10-08T21:11:32+02:00 [crossing_points] month 2025-05-01 done (722 GB free)
+2026-10-08T21:12:08+02:00 [crossing_points] month 2025-06-01 done (714 GB free)
+2026-10-08T21:12:32+02:00 [crossing_points] month 2025-07-01 done (711 GB free)
+2026-10-08T21:13:44+02:00 [crossing_points] crossing_points_hilbert built: 5984837218 rows, geometry segments with unknown extent: 0
+2026-10-08T21:17:58+02:00 [crossing_points] check query on the reordered table: result 27939, 254227 ms
+2026-10-08T21:18:00+02:00 [crossing_points] swapped: crossing_points is now in (month, Hilbert) order; check query 292043 ms -> 254227 ms; 711 GB free
+2026-10-08T21:18:00+02:00 run_rest done

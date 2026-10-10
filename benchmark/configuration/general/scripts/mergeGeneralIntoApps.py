@@ -28,6 +28,8 @@ import yaml
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generateParameterVariations as gpv  # noqa: E402
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
+import sedona_crs  # noqa: E402
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))  # .../benchmark/configuration/general/scripts
 GENERAL_APP_DIR = os.path.dirname(SCRIPT_DIR)  # .../benchmark/configuration/general
@@ -76,16 +78,41 @@ def generate_for_app(app_key: str, config: dict, rnd: random.Random):
     ) = gpv.prepare_query_tasks(config, rnd)
 
     # Same shuffle-by-permutation the original script applies, so query order is randomized the
-    # same way across dialects (a given index still refers to "the same logical query" everywhere).
-    num_queries = len(mobilitydb_queries)
-    indices = list(range(num_queries))
-    rnd.shuffle(indices)
-    mobilitydb_queries = [mobilitydb_queries[i] for i in indices]
-    postgis_queries = [postgis_queries[i] for i in indices]
-    sedona_queries = [sedona_queries[i] for i in indices]
-    spacetime_queries = [spacetime_queries[i] for i in indices]
-    clickhouse_queries = [clickhouse_queries[i] for i in indices]
-    duckdb_queries = [duckdb_queries[i] for i in indices]
+    # same way across dialects (a given index still refers to "the same logical query" everywhere)
+    # -- EXCEPT this can no longer assume every dialect list is the same length: mobilitydb_queries
+    # can now be shorter than the other five (see prepare_query_tasks's "needs_trajectory" check
+    # in generateParameterVariations.py -- queries that need a MobilityDB trajectory table are
+    # skipped entirely for mobilitydb when running against a dataset with no such table, e.g.
+    # geolife). A single shared `indices` sized to len(mobilitydb_queries) and applied to every
+    # list -- the previous version of this code -- silently truncated the other five lists down
+    # to mobilitydb's shorter length instead (confirmed live: geolife's postgis/clickhouse/
+    # duckdb/spacetime lists were cut from 300 entries to 100, discarding 200 real ones, and
+    # already got merged into the real resource files once before this was caught and reverted).
+    # The other five dialects are still always mutually equal in length (nothing skips per-dialect
+    # for them), so they can still share one permutation; mobilitydb gets its own, sized to its
+    # own (possibly shorter) length.
+    other_len = len(postgis_queries)
+    assert other_len == len(sedona_queries) == len(spacetime_queries) == len(clickhouse_queries) == len(duckdb_queries), (
+        "postgis/sedona/spacetime/clickhouse/duckdb are expected to always stay the same length "
+        "as each other (only mobilitydb ever skips entries per-dataset) -- if this fires, that "
+        "assumption no longer holds and the shuffle below needs rethinking, not silencing."
+    )
+    other_indices = list(range(other_len))
+    rnd.shuffle(other_indices)
+    postgis_queries = [postgis_queries[i] for i in other_indices]
+    sedona_queries = [sedona_queries[i] for i in other_indices]
+    spacetime_queries = [spacetime_queries[i] for i in other_indices]
+    clickhouse_queries = [clickhouse_queries[i] for i in other_indices]
+    duckdb_queries = [duckdb_queries[i] for i in other_indices]
+
+    mob_indices = list(range(len(mobilitydb_queries)))
+    rnd.shuffle(mob_indices)
+    mobilitydb_queries = [mobilitydb_queries[i] for i in mob_indices]
+    # (2026-10-09) MobilityDB is a trajectory system and geolife has no trajectories: it runs no geolife
+    # queries at all, including these general point-table ones. Cleared after the shuffle so the random
+    # sequence -- and every other dialect's parameters -- stays the same.
+    if app_key == "geolife":
+        mobilitydb_queries = []
 
     # sedonaSQL-specific post-processing (verbatim from generateParameterVariations.py's __main__)
     def fix_sedona(entries):
@@ -100,6 +127,7 @@ def generate_for_app(app_key: str, config: dict, rnd: random.Random):
                 sql,
             )
             sql = sql.replace("DATE(st.start_ts)", "CAST(st.start_ts AS DATE)")
+            sql = sedona_crs.fix_text(sql)  # explicit CRS strings for ST_Transform (scripts/sedona_crs.py)
             e.sql = sql
         return entries
 

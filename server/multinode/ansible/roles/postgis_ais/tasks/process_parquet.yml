@@ -1,12 +1,20 @@
-# FIX: ansible_env.HOME resolves to /root under this play's become: true, but the duckdb CLI
-# this role installs (main.yml's "Install DuckDB CLI", same fix applied there) lands under
-# /home/{{ ansible_user }}.
+# FIX: this task had no become: override, so it inherited the play's become: true and ran the
+# DuckDB CLI as root -- whose $HOME is /root, not /home/{{ ansible_user }} where main.yml's
+# pre-fetch task (postgis_aviation's, the only role that actually pre-fetches postgres_scanner)
+# caches the extension. Same fix as postgis_aviation/tasks/process_parquet.yml: become: false
+# (this task only reads {{ item.path }}, world-readable, and talks to Postgres over the network,
+# no OS privilege needed), LOAD the extension under its real current name, and disable the
+# auto-install/auto-load network check outright so a cache miss can never fall back to a fetch
+# that hangs on this network.
 - name: Load parquet into staging (DuckDB → Postgres)
+  become: false
   ansible.builtin.shell: |
     set -euo pipefail
 
-    /home/{{ ansible_user }}/.duckdb/cli/latest/duckdb <<EOF
-    LOAD postgres;
+    /home/{{ ansible_user }}/.duckdb/cli/latest/duckdb -unsigned <<EOF
+    SET autoinstall_known_extensions=false;
+    SET autoload_known_extensions=false;
+    LOAD postgres_scanner;
 
     ATTACH
       'host={{ db_host }}
@@ -16,6 +24,9 @@
        password={{ db_password }}'
     AS pg (TYPE postgres);
 
+    -- crossing_id here is the source parquet's own column name (both the dummy fixture and the
+    -- converted real AIS sample use it) -- only the destination table's column was renamed to
+    -- "id" to match the other scenarios, so this positional INSERT still reads it as-is.
     INSERT INTO pg.public.crossing_points_raw
     SELECT
         crossing_id,
@@ -36,18 +47,22 @@
     login_db: "{{ db_name }}"
     query: |
       INSERT INTO crossing_points (
-          crossing_id,
+          id,
           timestamp,
           lat,
           lon,
           geom
       )
       SELECT
-          crossing_id,
+          id,
           timestamp,
           lat,
           lon,
           ST_Transform(ST_SetSRID(ST_MakePoint(lon, lat), 4326), 3857)
-      FROM crossing_points_raw;
+      FROM crossing_points_raw
+      -- FIX: real AIS data uses lat=91/lon=181 as "position unavailable" sentinel values (out of
+      -- valid WGS84 range) instead of NULL -- ST_Transform errors outright ("Invalid coordinate")
+      -- on the first one it hits, aborting the whole INSERT. Drop rows outside the valid range.
+      WHERE lat BETWEEN -90 AND 90 AND lon BETWEEN -180 AND 180;
 
       TRUNCATE TABLE crossing_points_raw;

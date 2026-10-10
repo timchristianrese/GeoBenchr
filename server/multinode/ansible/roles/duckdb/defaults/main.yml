@@ -2,3 +2,61 @@ duckdb_data_dir: /var/lib/duckdb
 duckdb_db_file: "{{ duckdb_data_dir }}/geobenchr.duckdb"
 duckdb_quack_port: 9494
 duckdb_quack_token: my-secret-token
+
+# FIX: this used to be a live "CREATE OR REPLACE VIEW <name> AS SELECT * FROM pg.public.<name>"
+# per table, scanning through Postgres via postgres_scanner on every single query -- confirmed
+# live, every query with no pushable filter (no WHERE Postgres could push down) took 45-90s
+# regardless of what the query itself was doing, since every row crossed that wire on every
+# request. This is now a one-time bulk copy into DuckDB's own native storage instead (see the
+# "Materialize GeoBenchr tables" tasks below) -- add a dataset's table(s) here once its
+# insert_<dataset>_data.yml (or sync_supporting_datasets.yml, for the reference tables) has
+# actually created them in Postgres.
+#
+# `spatial_index: true` mirrors wherever Postgres itself already has a gist(geom) index
+# (confirmed via pg_indexes) -- crossing_points has none there, so it gets none here either;
+# giving DuckDB a spatial index Postgres doesn't have would make the two engines' comparison less
+# fair, not more, since it'd be comparing DuckDB's optimized path against Postgres's unoptimized
+# one instead of comparing the engines themselves on equal footing.
+# `order_by` mirrors wherever Postgres has a btree index on that column -- DuckDB doesn't use
+# secondary btree indexes for range scans the way Postgres does, but a matching physical sort
+# order gets the same practical effect (zone-map pruning) on that column.
+duckdb_materialize_tables:
+  - name: flight_points
+    order_by: timestamp
+    spatial_index: true
+  - name: geolife_points
+    order_by: timestamp
+    spatial_index: true
+  - name: crossing_points
+    spatial_index: false
+  - name: ride_points
+    order_by: timestamp
+    spatial_index: true
+  - name: counties
+    spatial_index: true
+  - name: cities
+    spatial_index: true
+  - name: berlin_districts
+    spatial_index: true
+  - name: universities
+    spatial_index: true
+  - name: harbours
+    spatial_index: true
+  - name: islands
+    spatial_index: true
+  # Generic, engine-portable trip-summary tables (one row per trip, start/end point + scalar
+  # stats -- no LineString) -- distinct from the MobilityDB-native tgeompoint "flights"/"rides"/
+  # "crossings" tables, which stay Postgres/MobilityDB-only since only MobilityDB understands
+  # that type. See benchmark/configuration/scripts/summary_*.sql for how these get built.
+  - name: flights_summary
+    order_by: start_time
+    spatial_index: true
+    spatial_columns: [start_location, end_location]
+  - name: rides_summary
+    order_by: start_time
+    spatial_index: true
+    spatial_columns: [start_location, end_location]
+  - name: crossings_summary
+    order_by: start_time
+    spatial_index: true
+    spatial_columns: [start_location, end_location]

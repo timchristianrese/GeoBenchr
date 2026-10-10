@@ -1,0 +1,5 @@
+[pool-1-thread-1] [PostGIS] [cycling] SUCCESS: 'CountRidesFullyInDistrictRadius': 25392ms [rep=1 sql=4fd7518e at=2026-10-08T07:28:04.673606078Z]
+[pool-1-thread-1] [PostGIS] [cycling] SUCCESS: 'CountRidesFullyInDistrictRadius': 25298ms [rep=2 sql=b209412c at=2026-10-08T07:28:29.973846801Z]
+[pool-1-thread-1] [PostGIS] [cycling] SUCCESS: 'CountRidesFullyInDistrictRadius': 27743ms [rep=3 sql=4a380b1f at=2026-10-08T07:28:57.720766456Z]
+[pool-1-thread-1] [PostGIS] [cycling] SUCCESS: 'CountRidesFullyInDistrictRadius': 25647ms [rep=4 sql=b1d0beeb at=2026-10-08T07:29:23.369255552Z]
+[pool-1-thread-1] [PostGIS] [cycling] SUCCESS: 'CountRidesFullyInDistrictRadius': 24819ms [rep=5 sql=7fe57877 at=2026-10-08T07:29:48.190425507Z]

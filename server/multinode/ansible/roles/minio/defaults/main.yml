@@ -1,0 +1,23 @@
+# MinIO backs DuckLake's storage layer (Parquet data files) so DuckDB/Quack gets genuinely
+# distributed storage across all 5 nodes instead of one node's local disk -- see the DuckLake
+# docs' "DuckDB + Quack" deployment pattern (Postgres catalog + object-storage DATA_PATH). Runs on
+# every node in `groups['all']` (masters + workers), in distributed mode, so no single node's disk
+# is a bottleneck or single point of failure -- matching how HDFS/Citus/ClickHouse are already
+# spread across the cluster.
+minio_version: "RELEASE.2025-04-08T15-41-24Z"
+
+# FIX: MinIO's own default API port (9000) collides with HDFS's NameNode RPC port on nst-1
+# (confirmed live via `ss -tlnp` across all 5 nodes before picking these -- 9000/9001 are free
+# nowhere on this cluster, everything in the 9004-9009/9444-9555/9864-9870 ranges is already
+# HDFS/ClickHouse/Citus). 9100/9101 are clear on every node.
+minio_api_port: 9100
+minio_console_port: 9101
+
+minio_data_dir: /var/lib/minio/data
+
+# Not a real secret -- same "private network, low-security-by-design" convention as this
+# project's other SUT credentials (Postgres "postgres"/"postgres", Quack's "my-secret-token").
+minio_root_user: minioadmin
+minio_root_password: minioadminpassword
+
+minio_bucket: geobenchr-ducklake

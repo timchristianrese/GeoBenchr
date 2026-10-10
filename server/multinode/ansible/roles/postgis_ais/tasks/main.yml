@@ -34,7 +34,7 @@
 # generator's own output directory, not ais's), so "Find parquet files" below always found zero
 # and everything after it silently no-op'd. Syncing one small dummy file (real aisdk-*.parquet
 # files are ~300M rows/~5GB each -- far too large here) rather than the whole
-# data_generator_ais/output_data/crossing_points directory.
+# data_generators/ais/output_data/crossing_points directory.
 - name: Sync sample ais parquet file to target machine
   ansible.posix.synchronize:
     src: "{{ ais_sample_parquet_file }}"
@@ -118,10 +118,14 @@
     creates: "{{ venv_dir }}/bin/activate"
   when: inventory_hostname in groups['masters']
   
+# FIX: plain "psycopg2" has no prebuilt wheel matching this venv's Python and falls back to
+# compiling from source, which fails outright without python3-dev installed ("fatal error:
+# Python.h: No such file or directory") -- psycopg2-binary ships prebuilt wheels and needs no
+# compiler/headers at all (the upstream-recommended alternative for exactly this situation).
 - name: Install deps with bash
   ansible.builtin.shell: |
     source {{ venv_dir }}/bin/activate
-    pip install pandas pyarrow psycopg2
+    pip install pandas pyarrow psycopg2-binary
   args:
     executable: /bin/bash
   when: inventory_hostname in groups['masters']
@@ -154,6 +158,20 @@
       DROP TABLE IF EXISTS crossing_points_raw;
   when: inventory_hostname in groups['masters']
 
+# FIX: must run before "Drop final PostGIS table" -- the materialized view built at the end of
+# this role depends on crossing_points, so Postgres refuses to drop the table on a re-run until
+# the view is gone too (same fix as postgis_aviation's "flights").
+- name: Drop MobilityDB crossings trajectory view
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      DROP MATERIALIZED VIEW IF EXISTS crossings;
+  when: inventory_hostname in groups['masters']
+
 - name: Drop final PostGIS table
   community.postgresql.postgresql_query:
     login_host: "{{ db_host }}"
@@ -165,6 +183,14 @@
       DROP TABLE IF EXISTS crossing_points;
   when: inventory_hostname in groups['masters']
 
+# FIX: id was "varchar" -- the only one of the 4 scenarios' point tables not using bigint like
+# ride_points/flight_points/geolife_points, even though the source data (see
+# server/multinode/data_processing/csv_to_parquet.py) generates crossing_id as UInt64 from the
+# start. CREATE TABLE IF NOT EXISTS is a no-op against an already-provisioned cluster, so this
+# only matters for a fresh deploy -- the existing nst-1 cluster needs
+# benchmark/configuration/scripts/migrate_crossing_points_id_to_integer.sql run separately
+# (crossing_points is also Citus-distributed ON the id column -- see create_distributed_table
+# below -- so that migration isn't a plain ALTER COLUMN TYPE, see the script for why).
 - name: Create final PostGIS table
   community.postgresql.postgresql_query:
     login_host: "{{ db_host }}"
@@ -174,7 +200,7 @@
     login_db: "{{ db_name }}"
     query: |
       CREATE TABLE IF NOT EXISTS crossing_points (
-        crossing_id varchar,
+        id bigint,
         timestamp timestamp,
         lat DOUBLE PRECISION,
         lon DOUBLE PRECISION,
@@ -191,7 +217,7 @@
     login_password: "{{ db_password }}"
     login_db: "{{ db_name }}"
     query: |
-      Select create_distributed_table('crossing_points', 'crossing_id');
+      Select create_distributed_table('crossing_points', 'id');
 
       SELECT create_time_partitions(
         table_name := 'crossing_points',
@@ -210,7 +236,7 @@
     login_db: "{{ db_name }}"
     query: |
       CREATE TABLE IF NOT EXISTS crossing_points_raw (
-          crossing_id varchar,
+          id bigint,
           timestamp timestamp,
           lat DOUBLE PRECISION,
           lon DOUBLE PRECISION
@@ -239,10 +265,12 @@
       ADD COLUMN IF NOT EXISTS line_geom geometry(LineString, 3857);
   when: inventory_hostname in groups['masters']
 
-# FIX: referenced a column "id" that doesn't exist on crossing_points at all (its identifier
-# column is crossing_id, unlike flight_points/ride_points/geolife_points which really do use
-# "id") -- copy-pasted from one of those without updating the column name, so this would fail
-# outright with "column \"id\" does not exist".
+# FIX: crossing_points' identifier column used to be named crossing_id, unlike
+# flight_points/ride_points/geolife_points which all use "id" -- every hand-written query in
+# benchmark/configuration/ais/config/combinedBenchConf.yaml (across all 6 dialects) was written
+# assuming "id" like the other three scenarios, so every one of them failed against the real
+# column name. Renamed crossing_id -> id here (and in clickhouse_ais, process_parquet.yml) to
+# match the convention instead of hand-editing that much SQL across 6 dialects.
 - name: Update line_geom column in crossing_points from point data
   community.postgresql.postgresql_query:
     login_host: "{{ db_host }}"
@@ -255,17 +283,17 @@
       SET line_geom = sub.line_geom
       FROM (
       SELECT
-      crossing_id,
+      id,
       ST_MakeLine(
       geom,
       LEAD(geom) OVER (
-      PARTITION BY crossing_id
+      PARTITION BY id
       ORDER BY timestamp
       )
       ) AS line_geom
       FROM crossing_points
       ) sub
-      WHERE t.crossing_id = sub.crossing_id;
+      WHERE t.id = sub.id;
 
 
 # FIX: crossing_points is a Citus-distributed table -- DDL propagated to worker shards goes over
@@ -283,7 +311,7 @@
   loop:
     - "CREATE INDEX IF NOT EXISTS crossing_points_geom_idx ON crossing_points USING GIST (geom);"
     - "CREATE INDEX IF NOT EXISTS crossing_points_timestamp_idx ON crossing_points (timestamp);"
-    - "CREATE INDEX IF NOT EXISTS crossing_points_crossingid_idx ON crossing_points (crossing_id);"
+    - "CREATE INDEX IF NOT EXISTS crossing_points_id_idx ON crossing_points (id);"
     - "CREATE INDEX IF NOT EXISTS crossing_points_line_geom_idx ON crossing_points USING GIST (line_geom);"
   when: inventory_hostname in groups['masters']
 
@@ -323,6 +351,55 @@
 #       CREATE INDEX IF NOT EXISTS ride_points_geom_idx
 #       ON ride_points
 #       USING GIST (geom);
+
+# FIX: MobilityDB's read queries (countActiveCrossingsNearIsland, crossingsAroundHarbour,
+# CrossingsActiveAtGivenHourOfDay, HarbourActivityInPeriod, islandOrCoastLineCrossingsInPeriod --
+# see benchmark/configuration/ais/config/combinedBenchConf.yaml) all read from "crossings", a
+# one-row-per-vessel trajectory table (trip tgeompoint) -- nothing built it, so every one of
+# those queries failed with "relation crossings does not exist". Materialized (not a plain view)
+# for the same reason as postgis_aviation's "flights": avoids recomputing the trajectory
+# aggregation on every read. Same two data workarounds as flights, and for the same underlying
+# reasons: `AT TIME ZONE 'UTC'` avoids a DST-crossing reorder from this session's Europe/Berlin
+# default (it stores the naive wall-clock digits as UTC instants, so MobilityDB queries read them
+# back with an explicit AT TIME ZONE 'UTC' in the query itself), and dedup on
+# (id, timestamp) -- ~5.4M groups here, a genuine trait of the real AISdk dataset: multiple
+# coastal base stations independently log the same vessel broadcast (confirmed identical lat/lon
+# across duplicates), not something specific to this subset.
+- name: Build MobilityDB crossings trajectory view
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      DROP MATERIALIZED VIEW IF EXISTS crossings;
+      CREATE MATERIALIZED VIEW crossings AS
+      WITH deduped AS (
+        SELECT DISTINCT ON (id, timestamp) id, geom, timestamp AT TIME ZONE 'UTC' AS ts
+        FROM crossing_points
+        ORDER BY id, timestamp
+      )
+      SELECT id,
+             tgeompointseq(array_agg(tgeompoint(geom, ts) ORDER BY ts)) AS trip
+      FROM deduped
+      GROUP BY id;
+  when: inventory_hostname in groups['masters']
+
+# FIX: see postgis_aviation/postgis_cycling's matching FIX comment -- confirmed live on "rides"
+# (50M rows, no index) that an eintersects(r.trip, d.geom) spatial join took 10+ minutes doing a
+# full sequential scan. "crossings" is bigger still, so it needs this even more. MobilityDB
+# supports a plain GiST index on a tgeompoint column.
+- name: Build spatiotemporal index on crossings trajectory view
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      CREATE INDEX IF NOT EXISTS crossings_trip_gist_idx ON crossings USING gist (trip);
+  when: inventory_hostname in groups['masters']
 
 - name: Swap python interpreter back to system Python
   ansible.builtin.set_fact:

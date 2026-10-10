@@ -3,6 +3,12 @@ package benchmark_client;
 import java.util.List;
 
 public class BenchmarkClient {
+    private static final java.util.Set<String> SELECTED = new java.util.LinkedHashSet<>();
+
+    private static boolean runs(String system) {
+        return SELECTED.isEmpty() || SELECTED.contains(system);
+    }
+
     public static void main(String[] args) throws Exception {
         //File encoding to handle german characters in data
         System.setProperty("file.encoding", "UTF-8");
@@ -21,6 +27,16 @@ public class BenchmarkClient {
         String application = args.length > 0 ? args[0] : "aviation";
         System.out.println("Starting benchmark for application: " + application + " with " + numThreads + " threads.");
 
+        // SYSTEMS (comma-separated, e.g. "SpaceTime,PostGIS") limits a run to those systems -- e.g. so
+        // Sedona can run from a cluster node while the other systems run from nst-inserter. Unset = all.
+        String systems = System.getenv().getOrDefault("SYSTEMS", "").trim();
+        if (!systems.isEmpty()) {
+            for (String sys : systems.split(",")) {
+                SELECTED.add(sys.trim());
+            }
+            System.out.println("Systems in this run: " + SELECTED);
+        }
+
         //Initialize variables
         String yamlPath;
         List<QueryConfig> queries;
@@ -28,10 +44,23 @@ public class BenchmarkClient {
 
 
         //SpaceTime
+        // FIX: pointed at a nonexistent "/opt/msql-server/msql-client" CLI with made-up
+        // "mireo"/"root" auth on port 31339 -- none of that matches the real partner cluster (see
+        // docs/spacetime-cluster-access.md: SpaceTime needs no auth, its real port is 31340, and
+        // its only client is the Python-only `pymsql` library, no JDBC driver). SpaceTimeExecutor
+        // now shells out to scripts/spacetime_query_runner.py instead -- deploy that script
+        // alongside pymsql's own venv (see the script's docstring) on whatever machine runs this
+        // client; SPACETIME_PYTHON/SPACETIME_RUNNER_SCRIPT default to that documented layout but
+        // can be overridden, matching the SUT_HOST convention used everywhere else here.
+        if (runs("SpaceTime")) {
         yamlPath = application + "/spaceTimeSQL_queries.yaml";
+        String spaceTimePython = System.getenv().getOrDefault(
+                "SPACETIME_PYTHON", System.getProperty("user.home") + "/bench/.venv/bin/python");
+        String spaceTimeScript = System.getenv().getOrDefault(
+                "SPACETIME_RUNNER_SCRIPT", System.getProperty("user.home") + "/bench/spacetime_query_runner.py");
+        int spaceTimePort = Integer.parseInt(System.getenv().getOrDefault("SPACETIME_PORT", "31340"));
         SpaceTimeExecutor spaceTimeExecutor = new SpaceTimeExecutor(
-                sutHost + ":31339",
-        "mireo","root","@2e9R]3]=O"
+                sutHost, spaceTimePort, spaceTimePython, spaceTimeScript
         );
         queries = QueryDispatcher.loadQueries(yamlPath);
         System.out.println("Setup complete. Starting benchmark...");
@@ -39,12 +68,20 @@ public class BenchmarkClient {
         benchLogger.logText("SpaceTime Start");
         runner.run();
         benchLogger.logText("SpaceTime End");
+        }
     
         
 
+        // FIX: hardcoded password "test" -- correct for whatever single-box "geobenchr-sut-5"
+        // test setup this originally targeted, but this partner cluster's real Postgres/Citus
+        // password is "postgres" (confirmed live via every psql session used to load its data).
+        // Same env-var-over-literal treatment as SUT_HOST above, so neither deployment needs a
+        // source edit to work.
+        String sutDbPassword = System.getenv().getOrDefault("SUT_DB_PASSWORD", "test");
         PostgreSQLExecutor postgresqlExecutor = new PostgreSQLExecutor(
-              "jdbc:postgresql://" + sutHost + ":5433/", "postgres", "test", application
+              "jdbc:postgresql://" + sutHost + ":5433/", "postgres", sutDbPassword, application
         );
+        if (runs("PostGIS")) {
         //PostGIS
         yamlPath = application + "/" + "postgisSQL_queries.yaml";
         queries = QueryDispatcher.loadQueries(yamlPath);
@@ -52,7 +89,9 @@ public class BenchmarkClient {
         benchLogger.logText("PostGIS Start");
         runner.run();
         benchLogger.logText("PostGIS End");
+        }
 
+        if (runs("MobilityDB")) {
         //MobilityDB
         yamlPath = application + "/" + "mobilitydb_queries.yaml";
         queries = QueryDispatcher.loadQueries(yamlPath);
@@ -60,6 +99,7 @@ public class BenchmarkClient {
         benchLogger.logText("MobilityDB Start");
         runner.run();
         benchLogger.logText("MobilityDB End");
+        }
 
         // //MobilityDB Time Partitioned
         // yamlPath = application + "/" + "mobilitydb_queries_time_partitioned.yaml";
@@ -88,6 +128,7 @@ public class BenchmarkClient {
         // INSTALL quack;
         // LOAD quack;
         // CALL quack_serve('quack:127.0.0.1:9494', token=>'my-secret-token');
+        if (runs("DuckDB")) {
         yamlPath = application + "/" + "duckdb_queries.yaml";
         // FIX: URL must use the "jdbc:quack:" scheme -- that's the prefix the quack-jdbc driver
         // (com.gizmodata.quack.jdbc.sql.QuackDriver) registers and accepts for the remote
@@ -102,7 +143,9 @@ public class BenchmarkClient {
         benchLogger.logText("DuckDB Start");
         runner.run();
         benchLogger.logText("DuckDB End");
+        }
 
+        if (runs("ClickHouse")) {
         //ClickHouse
         yamlPath = application + "/" + "clickhouse_queries.yaml";
         ClickHouseExecutor clickHouseExecutor = new ClickHouseExecutor(
@@ -113,6 +156,7 @@ public class BenchmarkClient {
         benchLogger.logText("ClickHouse Start");
         runner.run();
         benchLogger.logText("ClickHouse End");
+        }
 
         //Sedona (Not SedonaDB)
         // FIX: was commented out with two bugs that would've kept it broken even if enabled --
@@ -120,6 +164,7 @@ public class BenchmarkClient {
         // starts one (no start-master.sh anywhere in that role); the cluster is YARN-only, matching
         // spark-defaults.conf's "spark.master yarn". And the BenchmarkRunner call was missing the
         // trailing runID argument every other call here passes.
+        if (runs("Sedona")) {
         yamlPath = application + "/" + "sedonaSQL_queries.yaml";
         String sparkMasterUrl = System.getenv().getOrDefault("SPARK_MASTER", "yarn");
         SedonaExecutor sedonaExecutor = new SedonaExecutor(sparkMasterUrl, sutHost);
@@ -128,17 +173,8 @@ public class BenchmarkClient {
         benchLogger.logText("Sedona Start");
         runner.run();
         benchLogger.logText("Sedona End");
-        
-        //GeoMesa
-        // //yamlPath = application + "/" + "geomesaSQL_queries.yaml";
-        // GeoMesaExecutor geoMesaExecutor = new GeoMesaExecutor(
-        //         "test","server-peter-lan","root","test","example","flight_points",
-        // );
-        // queries = QueryDispatcher.loadQueries(yamlPath);
-        // runner = new BenchmarkRunner(geoMesaExecutor, queries, numThreads, "GeoMesa", application, runID);
-        // runner.run();
-        
-        //QueryExecutor executor = new MockExecutor();
+        }
+
 
         benchLogger.moveLogFile();
         System.out.println("Benchmark run " + runID + " completed.");

@@ -1,0 +1,5 @@
+[pool-30-thread-1] [Sedona] [aviation] SUCCESS: 'kNN': 36193ms [rep=1 sql=0a9bf63f at=2026-10-08T09:34:55.387304897Z]
+[pool-30-thread-1] [Sedona] [aviation] SUCCESS: 'kNN': 30828ms [rep=2 sql=8eea3196 at=2026-10-08T09:35:26.215937267Z]
+[pool-30-thread-1] [Sedona] [aviation] SUCCESS: 'kNN': 30526ms [rep=3 sql=2055da66 at=2026-10-08T09:35:56.741603294Z]
+[pool-30-thread-1] [Sedona] [aviation] SUCCESS: 'kNN': 32455ms [rep=4 sql=5d890a20 at=2026-10-08T09:36:29.197098695Z]
+[pool-30-thread-1] [Sedona] [aviation] SUCCESS: 'kNN': 30851ms [rep=5 sql=813023b5 at=2026-10-08T09:37:00.048190299Z]

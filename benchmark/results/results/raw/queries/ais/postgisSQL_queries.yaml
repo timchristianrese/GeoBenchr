@@ -1,0 +1,670 @@
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4146) WHERE c.timestamp BETWEEN '2024-06-24 05:53:53' AND '2024-07-01 23:33:49' AND i.id = 45 AND c.id < 1000000000000;
+  params:
+  - 4146
+  - 45
+  - - '2024-06-24 05:53:53'
+    - '2024-07-01 23:33:49'
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2092) WHERE c.timestamp BETWEEN '2025-05-31 18:16:39' AND '2025-06-08 11:31:18' AND h.name = 'Molengat' AND c.id < 1000000000000 GROUP BY h.name;
+  params:
+  - - '2025-05-31 18:16:39'
+    - '2025-06-08 11:31:18'
+  - 2092
+  - Molengat
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3760) WHERE c.timestamp BETWEEN '2024-01-25 11:37:00' AND '2024-01-31 22:04:39' AND i.id = 32 AND c.id < 1000000000000;
+  params:
+  - 3760
+  - 32
+  - - '2024-01-25 11:37:00'
+    - '2024-01-31 22:04:39'
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT d.day::date AS day, COUNT(*) AS unique_crossings
+    FROM generate_series(date_trunc('day', TIMESTAMP '2025-04-07 12:58:49'), TIMESTAMP '2025-04-21 05:14:04', INTERVAL '1 day') AS d(day)
+    JOIN crossings_summary s ON s.start_time < d.day + INTERVAL '1 day' AND s.end_time >= d.day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= TIMESTAMP '2025-04-21 05:14:04' AND s.end_time >= TIMESTAMP '2025-04-07 12:58:49'
+    GROUP BY d.day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - - '2025-04-07 12:58:49'
+    - '2025-04-21 05:14:04'
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 4174) WHERE i.id = 85 AND c.id < 1000000000000 GROUP BY i.id;
+  params:
+  - 85
+  - 4174
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1533) WHERE i.id = 36 AND c.id < 1000000000000 GROUP BY i.id;
+  params:
+  - 36
+  - 1533
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2097) WHERE c.timestamp BETWEEN '2025-06-23 18:13:38' AND '2025-07-06 09:00:28' AND h.name = 'Bensersiel' AND c.id < 1000000000000 GROUP BY h.name;
+  params:
+  - - '2025-06-23 18:13:38'
+    - '2025-07-06 09:00:28'
+  - 2097
+  - Bensersiel
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1032) WHERE c.timestamp BETWEEN '2024-07-15 21:28:38' AND '2024-07-24 07:10:10' AND i.id = 48 AND c.id < 1000000000000;
+  params:
+  - 1032
+  - 48
+  - - '2024-07-15 21:28:38'
+    - '2024-07-24 07:10:10'
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4004) WHERE c.timestamp BETWEEN '2025-05-25 08:58:01' AND '2025-06-06 05:11:17' AND h.name = 'Langendamm' AND c.id < 1000000000000 GROUP BY h.name;
+  params:
+  - - '2025-05-25 08:58:01'
+    - '2025-06-06 05:11:17'
+  - 4004
+  - Langendamm
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 4278) WHERE h.name = 'Ön' AND c.id < 1000000000000;
+  params:
+  - Ön
+  - 4278
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 1288) WHERE h.name = 'Maurholen' AND c.id < 1000000000000;
+  params:
+  - Maurholen
+  - 1288
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3791) WHERE c.timestamp BETWEEN '2024-08-07 06:50:03' AND '2024-08-13 13:30:36' AND i.id = 96 AND c.id < 1000000000000;
+  params:
+  - 3791
+  - 96
+  - - '2024-08-07 06:50:03'
+    - '2024-08-13 13:30:36'
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT d.day::date AS day, COUNT(*) AS unique_crossings
+    FROM generate_series(date_trunc('day', TIMESTAMP '2024-04-03 00:31:17'), TIMESTAMP '2024-04-17 07:48:58', INTERVAL '1 day') AS d(day)
+    JOIN crossings_summary s ON s.start_time < d.day + INTERVAL '1 day' AND s.end_time >= d.day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= TIMESTAMP '2024-04-17 07:48:58' AND s.end_time >= TIMESTAMP '2024-04-03 00:31:17'
+    GROUP BY d.day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - - '2024-04-03 00:31:17'
+    - '2024-04-17 07:48:58'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 2367) WHERE h.name = 'Bramel' AND c.id < 1000000000000;
+  params:
+  - Bramel
+  - 2367
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT d.day::date AS day, COUNT(*) AS unique_crossings
+    FROM generate_series(date_trunc('day', TIMESTAMP '2024-09-18 20:32:30'), TIMESTAMP '2024-09-25 06:27:40', INTERVAL '1 day') AS d(day)
+    JOIN crossings_summary s ON s.start_time < d.day + INTERVAL '1 day' AND s.end_time >= d.day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= TIMESTAMP '2024-09-25 06:27:40' AND s.end_time >= TIMESTAMP '2024-09-18 20:32:30'
+    GROUP BY d.day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - - '2024-09-18 20:32:30'
+    - '2024-09-25 06:27:40'
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2688) WHERE i.id = 7 AND c.id < 1000000000000 GROUP BY i.id;
+  params:
+  - 7
+  - 2688
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 2566) WHERE c.timestamp BETWEEN '2024-03-02 02:58:04' AND '2024-03-10 00:27:34' AND h.name = 'Vierverlaten' AND c.id < 1000000000000 GROUP BY h.name;
+  params:
+  - - '2024-03-02 02:58:04'
+    - '2024-03-10 00:27:34'
+  - 2566
+  - Vierverlaten
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(*) FROM (
+      SELECT GREATEST(s.start_time, TIMESTAMP '2024-05-16 03:48:07') AS lo,
+             LEAST(s.end_time, TIMESTAMP '2024-05-24 00:50:45') AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= TIMESTAMP '2024-05-24 00:50:45' AND s.end_time >= TIMESTAMP '2024-05-16 03:48:07'
+    ) w
+    WHERE hi - lo >= INTERVAL '24 hours'
+       OR (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (18 + 1) AND hi - date_trunc('day', hi) >= INTERVAL '1 hour' * 18)
+       OR (date_trunc('day', lo) <> date_trunc('day', hi)
+           AND (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (18 + 1) OR hi - date_trunc('day', hi) >= INTERVAL '1 hour' * 18));
+  params:
+  - 18
+  - - '2024-05-16 03:48:07'
+    - '2024-05-24 00:50:45'
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT d.day::date AS day, COUNT(*) AS unique_crossings
+    FROM generate_series(date_trunc('day', TIMESTAMP '2024-07-23 02:31:34'), TIMESTAMP '2024-07-25 07:45:02', INTERVAL '1 day') AS d(day)
+    JOIN crossings_summary s ON s.start_time < d.day + INTERVAL '1 day' AND s.end_time >= d.day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= TIMESTAMP '2024-07-25 07:45:02' AND s.end_time >= TIMESTAMP '2024-07-23 02:31:34'
+    GROUP BY d.day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - - '2024-07-23 02:31:34'
+    - '2024-07-25 07:45:02'
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 3758) WHERE i.id = 30 AND c.id < 1000000000000 GROUP BY i.id;
+  params:
+  - 30
+  - 3758
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 2622) WHERE c.timestamp BETWEEN '2025-03-31 22:52:11' AND '2025-04-10 06:39:45' AND i.id = 52 AND c.id < 1000000000000;
+  params:
+  - 2622
+  - 52
+  - - '2025-03-31 22:52:11'
+    - '2025-04-10 06:39:45'
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) FROM crossing_points c JOIN islands i ON ST_DWithin(c.geom, i.geom, 1287) WHERE i.id = 72 AND c.id < 1000000000000 GROUP BY i.id;
+  params:
+  - 72
+  - 1287
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT d.day::date AS day, COUNT(*) AS unique_crossings
+    FROM generate_series(date_trunc('day', TIMESTAMP '2024-09-04 10:05:38'), TIMESTAMP '2024-09-10 13:39:58', INTERVAL '1 day') AS d(day)
+    JOIN crossings_summary s ON s.start_time < d.day + INTERVAL '1 day' AND s.end_time >= d.day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= TIMESTAMP '2024-09-10 13:39:58' AND s.end_time >= TIMESTAMP '2024-09-04 10:05:38'
+    GROUP BY d.day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - - '2024-09-04 10:05:38'
+    - '2024-09-10 13:39:58'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 4739) WHERE h.name = 'Farsund' AND c.id < 1000000000000;
+  params:
+  - Farsund
+  - 4739
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(*) FROM (
+      SELECT GREATEST(s.start_time, TIMESTAMP '2024-06-02 11:48:18') AS lo,
+             LEAST(s.end_time, TIMESTAMP '2024-06-05 11:40:33') AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= TIMESTAMP '2024-06-05 11:40:33' AND s.end_time >= TIMESTAMP '2024-06-02 11:48:18'
+    ) w
+    WHERE hi - lo >= INTERVAL '24 hours'
+       OR (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (3 + 1) AND hi - date_trunc('day', hi) >= INTERVAL '1 hour' * 3)
+       OR (date_trunc('day', lo) <> date_trunc('day', hi)
+           AND (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (3 + 1) OR hi - date_trunc('day', hi) >= INTERVAL '1 hour' * 3));
+  params:
+  - 3
+  - - '2024-06-02 11:48:18'
+    - '2024-06-05 11:40:33'
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(*) FROM (
+      SELECT GREATEST(s.start_time, TIMESTAMP '2024-07-16 12:11:48') AS lo,
+             LEAST(s.end_time, TIMESTAMP '2024-07-22 14:46:59') AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= TIMESTAMP '2024-07-22 14:46:59' AND s.end_time >= TIMESTAMP '2024-07-16 12:11:48'
+    ) w
+    WHERE hi - lo >= INTERVAL '24 hours'
+       OR (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (10 + 1) AND hi - date_trunc('day', hi) >= INTERVAL '1 hour' * 10)
+       OR (date_trunc('day', lo) <> date_trunc('day', hi)
+           AND (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (10 + 1) OR hi - date_trunc('day', hi) >= INTERVAL '1 hour' * 10));
+  params:
+  - 10
+  - - '2024-07-16 12:11:48'
+    - '2024-07-22 14:46:59'
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour FROM harbours h JOIN crossing_points c ON ST_DWithin(c.geom, h.geom, 4160) WHERE c.timestamp BETWEEN '2024-10-12 11:36:14' AND '2024-10-22 09:32:52' AND h.name = 'Baelum' AND c.id < 1000000000000 GROUP BY h.name;
+  params:
+  - - '2024-10-12 11:36:14'
+    - '2024-10-22 09:32:52'
+  - 4160
+  - Baelum
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(*) FROM (
+      SELECT GREATEST(s.start_time, TIMESTAMP '2025-04-29 07:16:49') AS lo,
+             LEAST(s.end_time, TIMESTAMP '2025-05-06 02:15:33') AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= TIMESTAMP '2025-05-06 02:15:33' AND s.end_time >= TIMESTAMP '2025-04-29 07:16:49'
+    ) w
+    WHERE hi - lo >= INTERVAL '24 hours'
+       OR (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (4 + 1) AND hi - date_trunc('day', hi) >= INTERVAL '1 hour' * 4)
+       OR (date_trunc('day', lo) <> date_trunc('day', hi)
+           AND (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (4 + 1) OR hi - date_trunc('day', hi) >= INTERVAL '1 hour' * 4));
+  params:
+  - 4
+  - - '2025-04-29 07:16:49'
+    - '2025-05-06 02:15:33'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id FROM crossing_points c JOIN harbours h ON ST_DWithin(c.geom, h.geom, 1598) WHERE h.name = 'Altenwerder' AND c.id < 1000000000000;
+  params:
+  - Altenwerder
+  - 1598
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT COUNT(*) FROM (
+      SELECT GREATEST(s.start_time, TIMESTAMP '2024-01-24 21:12:37') AS lo,
+             LEAST(s.end_time, TIMESTAMP '2024-02-01 07:02:29') AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= TIMESTAMP '2024-02-01 07:02:29' AND s.end_time >= TIMESTAMP '2024-01-24 21:12:37'
+    ) w
+    WHERE hi - lo >= INTERVAL '24 hours'
+       OR (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (9 + 1) AND hi - date_trunc('day', hi) >= INTERVAL '1 hour' * 9)
+       OR (date_trunc('day', lo) <> date_trunc('day', hi)
+           AND (lo - date_trunc('day', lo) < INTERVAL '1 hour' * (9 + 1) OR hi - date_trunc('day', hi) >= INTERVAL '1 hour' * 9));
+  params:
+  - 9
+  - - '2024-01-24 21:12:37'
+    - '2024-02-01 07:02:29'
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-04-03 11:41:47' AND '2025-04-09 00:39:23'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(16.80776363619747, 54.81020807445127, 18.55119943619747, 55.622136274451265), 4326), 3857));
+  params:
+  - '''2025-04-03 11:41:47'' AND ''2025-04-09 00:39:23'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(16.80776363619747, 54.81020807445127,
+    18.55119943619747, 55.622136274451265), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(16.21717311529076, 57.98126697611902, 17.96060891529076, 58.79319517611901), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(16.21717311529076, 57.98126697611902,
+    17.96060891529076, 58.79319517611901), 4326), 3857)
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossings_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= TIMESTAMP '2025-06-03 02:15:31' AND end_time <= TIMESTAMP '2025-06-08 15:13:07';
+  params:
+  - '''2025-06-03 02:15:31'' AND ''2025-06-08 15:13:07'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(15.250346843299917, 57.95112887617158, 16.993782643299916, 58.76305707617158), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(15.250346843299917, 57.95112887617158,
+    16.993782643299916, 58.76305707617158), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(13.605885126389673, 58.405102323675266, 15.349320926389673, 59.21703052367526), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(13.605885126389673, 58.405102323675266,
+    15.349320926389673, 59.21703052367526), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(7.76604653863176, 53.51582142373925), 4326), 3857), 14476.695443995899)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(7.76604653863176, 53.51582142373925), 4326), 3857)
+    LIMIT 5;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(7.76604653863176, 53.51582142373925), 4326),
+    3857)
+  - 5
+  - 14476.695443995899
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-03-18 02:42:08' AND '2025-03-23 15:39:44'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(1.4658040433969415, 56.7589633035587, 3.209239843396942, 57.5708915035587), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(9.070501884995991, 54.96754096989253, 10.813937684995992, 55.77946916989253), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(1.4658040433969415, 56.7589633035587,
+    3.209239843396942, 57.5708915035587), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(9.070501884995991, 54.96754096989253,
+    10.813937684995992, 55.77946916989253), 4326), 3857)
+  - '''2025-03-18 02:42:08'' AND ''2025-03-23 15:39:44'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-06-20 10:49:48' AND '2025-06-25 23:47:24'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(11.653181979606137, 53.95839910849795, 13.396617779606137, 54.77032730849795), 4326), 3857));
+  params:
+  - '''2025-06-20 10:49:48'' AND ''2025-06-25 23:47:24'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(11.653181979606137, 53.95839910849795,
+    13.396617779606137, 54.77032730849795), 4326), 3857)
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM crossing_points
+      WHERE id > 0 AND id < 1000000000000 AND timestamp between '2024-02-20 13:01:58' AND '2024-02-26 01:59:34'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-02-20 13:01:58'' AND ''2024-02-26 01:59:34'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-03-14 22:29:23' AND '2025-03-20 11:26:59'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(5.147655646444631, 57.18573859090348, 6.891091446444631, 57.99766679090348), 4326), 3857));
+  params:
+  - '''2025-03-14 22:29:23'' AND ''2025-03-20 11:26:59'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(5.147655646444631, 57.18573859090348,
+    6.891091446444631, 57.99766679090348), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2024-06-06 20:35:16' AND '2024-06-12 09:32:52'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(9.307240936125165, 53.95014108501311, 11.050676736125165, 54.762069285013105), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(4.848411956259879, 57.063086627577974, 6.591847756259879, 57.87501482757797), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(9.307240936125165, 53.95014108501311,
+    11.050676736125165, 54.762069285013105), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(4.848411956259879, 57.063086627577974,
+    6.591847756259879, 57.87501482757797), 4326), 3857)
+  - '''2024-06-06 20:35:16'' AND ''2024-06-12 09:32:52'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM crossing_points
+      WHERE id > 0 AND id < 1000000000000 AND timestamp between '2025-03-01 02:46:56' AND '2025-03-06 15:44:32'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2025-03-01 02:46:56'' AND ''2025-03-06 15:44:32'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM crossing_points
+      WHERE id > 0 AND id < 1000000000000 AND timestamp between '2024-08-14 00:46:05' AND '2024-08-19 13:43:41'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-08-14 00:46:05'' AND ''2024-08-19 13:43:41'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(14.074244542219049, 54.638159706703355, 15.817680342219049, 55.45008790670335), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(14.074244542219049, 54.638159706703355,
+    15.817680342219049, 55.45008790670335), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(6.905128271866109, 55.32325368986663), 4326), 3857), 36357.606934021875)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(6.905128271866109, 55.32325368986663), 4326), 3857)
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(6.905128271866109, 55.32325368986663), 4326),
+    3857)
+  - 1
+  - 36357.606934021875
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-01-04 14:10:28' AND '2025-01-10 03:08:04'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.906509119902678, 55.21558940886748, 8.649944919902678, 56.02751760886748), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(10.70491677975697, 52.87001319251856, 12.448352579756971, 53.68194139251856), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.906509119902678, 55.21558940886748,
+    8.649944919902678, 56.02751760886748), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(10.70491677975697, 52.87001319251856,
+    12.448352579756971, 53.68194139251856), 4326), 3857)
+  - '''2025-01-04 14:10:28'' AND ''2025-01-10 03:08:04'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossings_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= TIMESTAMP '2024-07-05 04:39:20' AND end_time <= TIMESTAMP '2024-07-10 17:36:56';
+  params:
+  - '''2024-07-05 04:39:20'' AND ''2024-07-10 17:36:56'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-05-23 23:20:36' AND '2025-05-29 12:18:12'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(3.635433736268631, 57.31588189953412, 5.378869536268631, 58.127810099534116), 4326), 3857));
+  params:
+  - '''2025-05-23 23:20:36'' AND ''2025-05-29 12:18:12'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(3.635433736268631, 57.31588189953412,
+    5.378869536268631, 58.127810099534116), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(17.31432435680017, 57.75927040605165), 4326), 3857), 37459.57297987162)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(17.31432435680017, 57.75927040605165), 4326), 3857)
+    LIMIT 3;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(17.31432435680017, 57.75927040605165), 4326),
+    3857)
+  - 3
+  - 37459.57297987162
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM crossing_points
+      WHERE id > 0 AND id < 1000000000000 AND timestamp between '2024-03-12 09:34:27' AND '2024-03-17 22:32:03'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-03-12 09:34:27'' AND ''2024-03-17 22:32:03'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM crossing_points
+      WHERE id > 0 AND id < 1000000000000 AND timestamp between '2024-02-08 12:59:00' AND '2024-02-14 01:56:36'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-02-08 12:59:00'' AND ''2024-02-14 01:56:36'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-06-28 05:39:49' AND '2025-07-03 18:37:25'
+      AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.5633319732366555, 54.329041026610426, 8.306767773236656, 55.14096922661042), 4326), 3857));
+  params:
+  - '''2025-06-28 05:39:49'' AND ''2025-07-03 18:37:25'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.5633319732366555, 54.329041026610426,
+    8.306767773236656, 55.14096922661042), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-02-20 12:35:13' AND '2025-02-26 01:32:49'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(15.51937997215473, 55.22081233279502, 17.26281577215473, 56.03274053279502), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.649813826121923, 52.42066584412211, 9.393249626121923, 53.23259404412211), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(15.51937997215473, 55.22081233279502,
+    17.26281577215473, 56.03274053279502), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.649813826121923, 52.42066584412211,
+    9.393249626121923, 53.23259404412211), 4326), 3857)
+  - '''2025-02-20 12:35:13'' AND ''2025-02-26 01:32:49'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossings_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= TIMESTAMP '2025-06-06 22:23:53' AND end_time <= TIMESTAMP '2025-06-12 11:21:29';
+  params:
+  - '''2025-06-06 22:23:53'' AND ''2025-06-12 11:21:29'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(15.264366570638858, 57.10291095012025), 4326), 3857), 26716.293072247405)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(15.264366570638858, 57.10291095012025), 4326), 3857)
+    LIMIT 4;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(15.264366570638858, 57.10291095012025), 4326),
+    3857)
+  - 4
+  - 26716.293072247405
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossings_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= TIMESTAMP '2024-09-22 14:04:35' AND end_time <= TIMESTAMP '2024-09-28 03:02:11';
+  params:
+  - '''2024-09-22 14:04:35'' AND ''2024-09-28 03:02:11'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossings_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= TIMESTAMP '2024-04-02 02:11:46' AND end_time <= TIMESTAMP '2024-04-07 15:09:22';
+  params:
+  - '''2024-04-02 02:11:46'' AND ''2024-04-07 15:09:22'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.444903303137676, 54.84619366205435, 8.188339103137675, 55.658121862054344), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.444903303137676, 54.84619366205435,
+    8.188339103137675, 55.658121862054344), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM crossing_points
+    WHERE id > 0 AND id < 1000000000000 AND ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(17.001528399310665, 56.48186642422439), 4326), 3857), 26563.19952036117)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(17.001528399310665, 56.48186642422439), 4326), 3857)
+    LIMIT 5;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(17.001528399310665, 56.48186642422439), 4326),
+    3857)
+  - 5
+  - 26563.19952036117
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-05-12 20:31:06' AND '2025-05-18 09:28:42'
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.3439531002182425, 56.83937398226577, 9.087388900218242, 57.651302182265766), 4326), 3857))) AND BOOL_OR(ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(12.71220106342008, 53.73049535035192, 14.45563686342008, 54.54242355035192), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.3439531002182425, 56.83937398226577,
+    9.087388900218242, 57.651302182265766), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(12.71220106342008, 53.73049535035192,
+    14.45563686342008, 54.54242355035192), 4326), 3857)
+  - '''2025-05-12 20:31:06'' AND ''2025-05-18 09:28:42'''

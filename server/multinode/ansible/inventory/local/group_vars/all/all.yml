@@ -25,7 +25,19 @@ postgres_jdbc_jar: postgresql-42.7.9.jar
 
 pg_hba_conf_path: /etc/postgresql/{{ postgres_version }}/main/pg_hba.conf
 
-cycling_data_dir: "{{ ansible_env.HOME }}/data/cycling"
+# FIX: was "{{ ansible_env.HOME }}/data/cycling" -- ansible_env.HOME is a fact, gathered once
+# under whichever become context the play's fact-gathering ran in (here, the play's own
+# become: true), not re-resolved per task. roles/postgis_cycling's "Ensure data directory
+# exists"/"Sync sample parquet files" tasks (become: true) wrote into /root/data/cycling, but
+# "Load parquet into staging" (become: false, runs as the debian user, consistent with every
+# other DuckDB-invoking task in this project) then couldn't see into /root at all -- DuckDB's
+# read_parquet failed with "No files found that match the pattern" (not a permission error,
+# since debian can't even stat into /root to know the path exists). An absolute, become-
+# independent path sidesteps this entirely -- matching aviation_data_dir/ais_data_dir/
+# geolife_data_dir below (none of which are HOME-relative) and clickhouse_cycling_data_dir
+# (already /var/lib/data/cycling -- this was the only one of the four datasets' *_data_dir
+# actually still HOME-relative).
+cycling_data_dir: "/var/lib/data/cycling"
 aviation_data_dir: "/var/lib/data/aviation"
 ais_data_dir: "/var/lib/data/ais"
 
@@ -44,22 +56,27 @@ clickhouse_aviation_data_dir: /var/lib/data/aviation
 # whichever playbook is currently running, every playbook here lives in .../ansible/playbooks) is
 # stable across machines since it's relative to the repo checkout itself, so this now needs no
 # editing no matter which machine ansible-playbook runs from.
-local_parquet_dir: "{{ playbook_dir }}/../../../../data_generator_cycling/output/parquet"
+local_parquet_dir: "{{ playbook_dir }}/../../../../data_generators/cycling/output/parquet"
 venv_dir: "/var/lib/data/venv"
 
-# One real sample file (out of ~676 in data_generator_aviation/parquet_flights, ~70GB total) --
+# One real sample file (out of ~676 in data_generators/aviation/parquet_flights, ~70GB total) --
 # postgis_aviation/clickhouse_aviation sync just this one file rather than the whole directory.
 # Same playbook_dir-relative reasoning as local_parquet_dir/local_supporting_dataset_path above.
-aviation_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generator_aviation/parquet_flights/flights_000000.parquet"
+# aviation_sample_file_count real files (flights_000000.parquet, flights_000001.parquet, ...,
+# sorted by filename) get synced out of the ~676-file/~66GB full data_generators/aviation/
+# parquet_flights directory -- see postgis_aviation/clickhouse_aviation's "Sync sample aviation
+# parquet files" tasks. Bump this for a bigger/smaller load; each file is ~100MB real data.
+aviation_sample_parquet_dir: "{{ playbook_dir }}/../../../../data_generators/aviation/parquet_flights"
+aviation_sample_file_count: 20
 
 # Small synthetic sample files for the other three insertion pipelines. Unlike aviation, the real
 # generators for these either produce nothing checked in locally (cycling/geolife -- their output
 # directories exist but are empty) or are far too large to use here (ais: real files are
 # ~300M rows/~5GB each) -- so these are small dummy datasets matching each pipeline's exact
 # expected schema and configured partition-time-range instead of real data.
-ais_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generator_ais/output_data/crossing_points/dummy_sample.parquet"
-cycling_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generator_cycling/output/parquet/dummy_sample.parquet"
-geolife_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generator_geolife/synthetic_output/dummy_sample.parquet"
+ais_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generators/ais/output_data/crossing_points/dummy_sample.parquet"
+cycling_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generators/cycling/output/parquet/dummy_sample.parquet"
+geolife_sample_parquet_file: "{{ playbook_dir }}/../../../../data_generators/geolife/synthetic_output/dummy_sample.parquet"
 
 db_host: "127.0.0.1"
 db_port: 5433

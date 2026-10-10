@@ -31,24 +31,58 @@ queryConfigs:
   use: true
   description: "Find Flights that occur during nighttime hours (e.g., 10 PM to 7 AM) within a specified time period."
   type: temporal
+  # FIX: unnest(attime(...)) AS u(value, time) fails outright ("The temporal value cannot have
+  # linear interpolation") -- flights.trip uses linear interpolation between GPS fixes, and you
+  # can't pair a continuum of interpolated values with discrete instants via unnest. The query
+  # never actually reads u.value (only u.time, for the hour-of-day filter), so unnesting just the
+  # timestamps -- same pattern the AIS benchmark's CrossingsActiveAtGivenHourOfDay already uses
+  # successfully -- sidesteps the interpolation restriction entirely.
   mobilitydb: |
-    SELECT DISTINCT f.id
-    FROM flights f, unnest(attime(f.trip, :period_medium)) AS u(value, time)
-    WHERE f.trip && :period_medium
-      AND (EXTRACT(HOUR FROM u.time) BETWEEN 22 AND 23 OR EXTRACT(HOUR FROM u.time) BETWEEN 0 AND 6);
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT s.id FROM flights_summary s
+    WHERE s.start_time >= TIMESTAMP :period_medium_start AND s.end_time <= TIMESTAMP :period_medium_end
+      AND (date_trunc('day', s.start_time) <> date_trunc('day', s.end_time)
+           OR s.start_time - date_trunc('day', s.start_time) < INTERVAL '7 hours'
+           OR s.end_time - date_trunc('day', s.end_time) >= INTERVAL '22 hours');
   postgis: |
-    SELECT DISTINCT f.id FROM flight_points f WHERE (EXTRACT(HOUR FROM f.timestamp) BETWEEN 22 AND 23 OR EXTRACT(HOUR FROM f.timestamp) BETWEEN 0 AND 6) AND f.timestamp BETWEEN :period_medium;
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT s.id FROM flights_summary s
+    WHERE s.start_time >= TIMESTAMP :period_medium_start AND s.end_time <= TIMESTAMP :period_medium_end
+      AND (date_trunc('day', s.start_time) <> date_trunc('day', s.end_time)
+           OR s.start_time - date_trunc('day', s.start_time) < INTERVAL '7 hours'
+           OR s.end_time - date_trunc('day', s.end_time) >= INTERVAL '22 hours');
   sample_postgis: |
     SELECT DISTINCT f.id FROM flight_points f WHERE (EXTRACT(HOUR FROM f.timestamp) BETWEEN 22 AND 23 OR EXTRACT(HOUR FROM f.timestamp) BETWEEN 0 AND 6) AND '2024-01-01 00:00:00'::timestamp <= f.timestamp AND f.timestamp <= '2024-01-05 23:59:59'::timestamp;
   sedona: |
-    SELECT DISTINCT f.id FROM flight_points f WHERE (EXTRACT(HOUR FROM f.timestamp) BETWEEN 22 AND 23 OR EXTRACT(HOUR FROM f.timestamp) BETWEEN 0 AND 6) AND f.timestamp BETWEEN :period_medium;
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT s.id FROM flights_summary s
+    WHERE s.start_time >= to_timestamp(:period_medium_start) AND s.end_time <= to_timestamp(:period_medium_end)
+      AND (date_trunc('DAY', s.start_time) <> date_trunc('DAY', s.end_time) OR hour(s.start_time) < 7 OR hour(s.end_time) >= 22);
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
+    SELECT f.flight_id AS id
+      FROM flights f
+      WHERE f.t <@ EPOCHRANGE :period_medium
+      AND (TS_DAYSTART(f.t[0]) <> TS_DAYSTART(f.t[1])
+      OR TS_TIMEOFDAY(f.t[0]) <  TP '7h'
+      OR TS_TIMEOFDAY(f.t[1]) >= TP '22h');
   clickhouse: |
-    SELECT DISTINCT f.id FROM flight_points f WHERE (toHour(f.timestamp) BETWEEN 22 AND 23 OR toHour(f.timestamp) BETWEEN 0 AND 6) AND f.timestamp BETWEEN :period_medium;
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT s.id FROM flights_summary s
+    WHERE s.start_time >= toDateTime(:period_medium_start, 'UTC') AND s.end_time <= toDateTime(:period_medium_end, 'UTC')
+      AND (toStartOfDay(s.start_time) != toStartOfDay(s.end_time) OR toHour(s.start_time) < 7 OR toHour(s.end_time) >= 22);
   duckdb: |
-    SELECT DISTINCT f.id FROM flight_points f WHERE (EXTRACT(HOUR FROM f.timestamp) BETWEEN 22 AND 23 OR EXTRACT(HOUR FROM f.timestamp) BETWEEN 0 AND 6) AND f.timestamp BETWEEN :period_medium;
-  repetition: 10
+    -- (2026-10-02) trip-span version on the trip summary table, same question as SpaceTime's
+    -- (whose rides/flights/crossings are trip summaries, one row per trip with its time range)
+    SELECT s.id FROM flights_summary s
+    WHERE s.start_time >= TIMESTAMP :period_medium_start AND s.end_time <= TIMESTAMP :period_medium_end
+      AND (date_trunc('day', s.start_time) <> date_trunc('day', s.end_time)
+           OR s.start_time - date_trunc('day', s.start_time) < INTERVAL '7 hours'
+           OR s.end_time - date_trunc('day', s.end_time) >= INTERVAL '22 hours');
+  repetition: 50
   parameters:
   - period_medium
 
@@ -65,13 +99,21 @@ queryConfigs:
     -- restricts the temporal value to the instants where it falls inside the given span; a non-null
     -- result means the altitude really was inside the band at least once during the period, the
     -- true analogue of the single-threshold version's "?<" ever-check.
-    SELECT DISTINCT f.id FROM flights f WHERE atSpan(attime(f.altitude, :period_medium), floatspan(:low_altitude, :high_altitude)) IS NOT NULL AND f.trip && :period_medium;
+    -- FIX: two problems, both this MobilityDB version renaming things out from under the query
+    -- (confirmed live against the actual instance): (1) floatspan(a, b) doesn't exist as a
+    -- two-value constructor (only floatspan(intspan)/floatspan(tbox) single-arg overloads) --
+    -- like tstzspan/period earlier, the two-value constructor is the generic span(lo, hi), which
+    -- also needs explicit float casts since :low_altitude/:high_altitude substitute as bare
+    -- integers and span() has no (integer, integer) -> floatspan overload. (2) atSpan(tfloat,
+    -- floatspan) doesn't exist either -- the value-restriction function is atvalues(tfloat,
+    -- floatspan).
+    SELECT DISTINCT f.id FROM flights f WHERE atvalues(attime(f.altitude, :period_medium), span(:low_altitude::float, :high_altitude::float)) IS NOT NULL AND f.trip && :period_medium;
   postgis: |
     SELECT DISTINCT f.id FROM flight_points f
     WHERE f.altitude BETWEEN :low_altitude AND :high_altitude AND f.timestamp BETWEEN :period_medium;
   sample_postgis: |
     -- Sample bounds [9300, 10300]: chosen from the actual altitude distribution in
-    -- data_generator_aviation/parquet_flights (sampled 2 of 676 files, ~8M points, altitude range
+    -- data_generators/aviation/parquet_flights (sampled 2 of 676 files, ~8M points, altitude range
     -- 1000-10500) -- altitude is ~uniform from 1000-9075 (climb/descent) but over half of all points
     -- sit in [9550, 10500] (cruise), so [9300, 10300] lands right on that transition and splits the
     -- sampled data almost exactly in half (~51% inside), unlike a low/generic band which would
@@ -81,15 +123,20 @@ queryConfigs:
   sedona: |
     SELECT DISTINCT f.id FROM flight_points f
     WHERE f.altitude BETWEEN :low_altitude AND :high_altitude AND f.timestamp BETWEEN :period_medium;
+  # FIX: nst's translation predates the low/high_altitude band split (their comment marks it a
+  # placeholder pending T21540) and only compared against a single :low_altitude bound. Rewritten
+  # to the two-bound BETWEEN, which the SpaceTime dialect already uses elsewhere for non-time
+  # ranges (e.g. cycling's RidesDuringRushHourInPeriod), to match every other engine's query above.
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
+    SELECT DISTINCT f.flight_id AS id FROM flight_points f
+    WHERE f.altitude BETWEEN :low_altitude AND :high_altitude AND f.t <@ EPOCHRANGE :period_medium;
   clickhouse: |
     SELECT DISTINCT f.id FROM flight_points f
     WHERE f.altitude BETWEEN :low_altitude AND :high_altitude AND f.timestamp BETWEEN :period_medium;
   duckdb: |
     SELECT DISTINCT f.id FROM flight_points f
     WHERE f.altitude BETWEEN :low_altitude AND :high_altitude AND f.timestamp BETWEEN :period_medium;
-  repetition: 10
+  repetition: 50
   parameters:
     - period_medium
     - low_altitude
@@ -108,21 +155,48 @@ queryConfigs:
   sedona: |
     SELECT k.name, COUNT(DISTINCT f.id) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = :county GROUP BY k.name;
   spacetime: |
-    SELECT name, COUNT(id) AS flight_count FROM (
-      SELECT DISTINCT k.name, f.id
-      FROM counties k
-      JOIN fsegment f ON ST_Intersects(ST_Line(f.x[0], f.y[0], f.x[1], f.y[1]),ST_ToGeom(k.geom::gpolygon))
-      WHERE k.name = :county
-    ) GROUP BY name;
-  clickhouse: |
-    SELECT k.name, COUNT(DISTINCT f.id) as flight_count
+    SELECT :county as name, COUNT(DISTINCT f.flight_id) AS flight_count
     FROM counties k
-    JOIN flight_points f ON pointInPolygon((f.lon, f.lat), k.geom)
+    JOIN flight_points f ON ST_Point(f.x, f.y) <@ ST_ToGeom(k.geom::gpolygon)
+    WHERE k.name = :county;
+  # FIX: joining two Distributed-engine tables (counties, flight_points) fails outright --
+  # confirmed live ("Double-distributed IN/JOIN subqueries is denied"). GLOBAL JOIN broadcasts
+  # counties (small, one row per name filter) to every node instead of attempting a
+  # distributed-to-distributed join.
+  clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
+    -- FIX: GLOBAL JOIN broadcasts whichever table is on the JOIN's right-hand side -- this had it
+    -- backwards, broadcasting the 2.7B-row flight_points fact table to every node instead of the
+    -- 53-row counties table (confirmed live: Code 241 MEMORY_LIMIT_EXCEEDED, would use 9.32GiB).
+    -- Swapped so flight_points is FROM/left and the small counties table is the GLOBAL/right side.
+    SELECT k.name, COUNT(DISTINCT f.id) as flight_count
+    FROM flight_points f
+    GLOBAL JOIN counties k ON pointInPolygon((f.lon, f.lat), k.geom)
+    WHERE k.name = :county
+      AND f.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 0)) FROM counties WHERE name = :county)
+    GROUP BY k.name;
+  clickhouse_scan: |
+    -- FIX: GLOBAL JOIN broadcasts whichever table is on the JOIN's right-hand side -- this had it
+    -- backwards, broadcasting the 2.7B-row flight_points fact table to every node instead of the
+    -- 53-row counties table (confirmed live: Code 241 MEMORY_LIMIT_EXCEEDED, would use 9.32GiB).
+    -- Swapped so flight_points is FROM/left and the small counties table is the GLOBAL/right side.
+    SELECT k.name, COUNT(DISTINCT f.id) as flight_count
+    FROM flight_points f
+    GLOBAL JOIN counties k ON pointInPolygon((f.lon, f.lat), k.geom)
     WHERE k.name = :county
     GROUP BY k.name;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
+    SELECT k.name, COUNT(DISTINCT f.id) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = :county AND ST_Intersects_Extent(f.geom, (SELECT ST_MakeEnvelope(ST_XMin(geom) - 0, ST_YMin(geom) - 0, ST_XMax(geom) + 0, ST_YMax(geom) + 0) FROM counties WHERE name = :county)) GROUP BY k.name;
+  duckdb_scan: |
     SELECT k.name, COUNT(DISTINCT f.id) as flight_count FROM counties k JOIN flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = :county GROUP BY k.name;
-  repetition: 10
+  repetition: 50
   parameters:
   - county
 
@@ -130,13 +204,15 @@ queryConfigs:
   use: true
   description: "Finds the flight that comes closest to a given point within a certain distance."
   type: spatial
-  # EQUIVALENCE NOTE: clickhouse's greatCircleDistance is a true great-circle metric, while
-  # mobilitydb/postgis/sedona/duckdb's <->/ST_Distance/ST_DWithin here run in EPSG:3857 (a
-  # planar, latitude-distorted "meter") -- same :distance value means different real-world radii,
-  # so results can diverge between these two families of dialects (flagged inline on the
-  # clickhouse block below, which also needed an arity fix).
+  # FIX (2026-09-30): the great-circle-vs-planar mismatch previously noted here (clickhouse's
+  # greatCircleDistance vs. the other dialects' planar EPSG:3857 <->/ST_Distance/ST_DWithin) is
+  # fixed below via webMercatorDistance -- see the clickhouse block's comment.
   mobilitydb: |
-    SELECT f.id, f.trip <-> :point AS min_distance FROM flights f WHERE edwithin(f.trip, :point, :distance) ORDER BY min_distance ASC LIMIT 1;
+    -- FIX (2026-10-01): "trip <-> point" is MobilityDB's *temporal* distance (a tfloat over time),
+    -- not a scalar, so this returned a whole distance series and ordered by it. |=| is the
+    -- nearest-approach distance -- the scalar min over the trajectory, matching postgis's
+    -- per-point ST_Distance + ORDER BY ... LIMIT 1.
+    SELECT f.id, f.trip |=| :point AS min_distance FROM flights f WHERE edwithin(f.trip, :point, :distance) ORDER BY min_distance ASC LIMIT 1;
   postgis: |
     SELECT f.id, ST_Distance(f.geom, :point) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, :point, :distance) ORDER BY min_distance ASC LIMIT 1;
   sample_postgis: |
@@ -144,22 +220,63 @@ queryConfigs:
   sedona: |
     SELECT f.id, ST_Distance(f.geom, :point) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, :point, :distance) ORDER BY min_distance ASC LIMIT 1;
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
+    -- (2026-10-02) radius in EPSG:3857 units like every other dialect, converted to SpaceTime's
+    -- local meters by :st_scale = cos(lat) * 0.99842 (see scripts/spacetime_units.py)
+    SELECT f.flight_id AS id, ST_Distance(ST_ToGeom(:point::gpoint), ST_Point(f.x, f.y)) / :st_scale as min_distance
+    FROM flight_points f
+    WHERE ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(:point::gpoint), :distance * :st_scale)
+    ORDER BY min_distance ASC
+    LIMIT 1;
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
     -- FIX: greatCircleDistance needs 4 scalar args (lon1, lat1, lon2, lat2). The original passed
     -- :point (a single packed geometry parameter, the same shape postgis/sedona use above) as if
     -- it were one scalar -- wrong arity, would not run. Fixed assuming decomposed :point_lon /
     -- :point_lat parameters, which are NOT currently in this query's shared `parameters:` list
     -- below -- the harness needs to supply them for ClickHouse specifically (same treatment as
     -- ClosestRestaurantToPoint in geolife_benchmark.yaml).
-    SELECT f.id, greatCircleDistance(f.lon, f.lat, :point_lon, :point_lat) AS min_distance
+    -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance, a SQL UDF
+    -- (created ON CLUSTER cluster_1 -- see COORDINATION.md) that projects both points into Web
+    -- Mercator (EPSG:3857) and takes the planar Euclidean distance, matching ST_DWithin/<->'s
+    -- metric exactly rather than approximately -- see ais/config/combinedBenchConf.yaml's
+    -- crossingsAroundHarbour clickhouse block for the formula derivation and live verification
+    -- (exact row-set match against postgis/mobilitydb/sedona for a real harbour query).
+    SELECT f.id, sqrt(pow(f.x - 6378137. * radians(:point_lon), 2) + pow(f.y - 6378137. * log(tan(pi() / 4 + radians(:point_lat) / 2)), 2)) AS min_distance
     FROM flight_points f
-    WHERE greatCircleDistance(f.lon, f.lat, :point_lon, :point_lat) <= :distance
+    WHERE f.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(:point_lon, :point_lat, :distance)))
+      AND sqrt(pow(f.x - 6378137. * radians(:point_lon), 2) + pow(f.y - 6378137. * log(tan(pi() / 4 + radians(:point_lat) / 2)), 2)) <= :distance
+    ORDER BY min_distance ASC
+    LIMIT 1;
+  clickhouse_scan: |
+    -- FIX: greatCircleDistance needs 4 scalar args (lon1, lat1, lon2, lat2). The original passed
+    -- :point (a single packed geometry parameter, the same shape postgis/sedona use above) as if
+    -- it were one scalar -- wrong arity, would not run. Fixed assuming decomposed :point_lon /
+    -- :point_lat parameters, which are NOT currently in this query's shared `parameters:` list
+    -- below -- the harness needs to supply them for ClickHouse specifically (same treatment as
+    -- ClosestRestaurantToPoint in geolife_benchmark.yaml).
+    -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance, a SQL UDF
+    -- (created ON CLUSTER cluster_1 -- see COORDINATION.md) that projects both points into Web
+    -- Mercator (EPSG:3857) and takes the planar Euclidean distance, matching ST_DWithin/<->'s
+    -- metric exactly rather than approximately -- see ais/config/combinedBenchConf.yaml's
+    -- crossingsAroundHarbour clickhouse block for the formula derivation and live verification
+    -- (exact row-set match against postgis/mobilitydb/sedona for a real harbour query).
+    SELECT f.id, sqrt(pow(f.x - 6378137. * radians(:point_lon), 2) + pow(f.y - 6378137. * log(tan(pi() / 4 + radians(:point_lat) / 2)), 2)) AS min_distance
+    FROM flight_points f
+    WHERE sqrt(pow(f.x - 6378137. * radians(:point_lon), 2) + pow(f.y - 6378137. * log(tan(pi() / 4 + radians(:point_lat) / 2)), 2)) <= :distance
     ORDER BY min_distance ASC
     LIMIT 1;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
+    SELECT f.id, ST_Distance(f.geom, :point) AS min_distance FROM flight_points f WHERE ST_Intersects_Extent(f.geom, ST_MakeEnvelope(ST_XMin(:point) - :distance, ST_YMin(:point) - :distance, ST_XMax(:point) + :distance, ST_YMax(:point) + :distance)) AND ST_DWithin(f.geom, :point, :distance) ORDER BY min_distance ASC LIMIT 1;
+  duckdb_scan: |
     SELECT f.id, ST_Distance(f.geom, :point) AS min_distance FROM flight_points f WHERE ST_DWithin(f.geom, :point, :distance) ORDER BY min_distance ASC LIMIT 1;
-  repetition: 10
+  repetition: 50
   parameters:
   - point
   - distance
@@ -177,18 +294,37 @@ queryConfigs:
   sedona: |
     SELECT DISTINCT f.id FROM flight_points f, counties k WHERE k.name = :county AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN :period_medium;
   spacetime: |
-    SELECT DISTINCT f.id
-    FROM fsegment f
-    JOIN counties k ON ST_Point(f.x[0], f.y[0]) <@ ST_ToGeom(k.geom::gpolygon)
-    WHERE k.name = :county AND t && EPOCHRANGE :period_medium;
+    SELECT DISTINCT f.flight_id AS id
+    FROM flight_points f
+    JOIN counties k ON ST_Point(f.x, f.y) <@ ST_ToGeom(k.geom::gpolygon)
+    WHERE k.name = :county AND f.t <@ EPOCHRANGE :period_medium;
+  # FIX: same "Double-distributed IN/JOIN subqueries is denied" issue as countFlightsInCounties
+  # above -- GLOBAL JOIN broadcasts counties instead of attempting a distributed-to-distributed
+  # join.
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
     SELECT DISTINCT f.id
     FROM flight_points f
-    JOIN counties k ON pointInPolygon((f.lon, f.lat), k.geom)
+    GLOBAL JOIN counties k ON pointInPolygon((f.lon, f.lat), k.geom)
+    WHERE k.name = :county AND f.timestamp BETWEEN :period_medium
+      AND f.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 0)) FROM counties WHERE name = :county);
+  clickhouse_scan: |
+    SELECT DISTINCT f.id
+    FROM flight_points f
+    GLOBAL JOIN counties k ON pointInPolygon((f.lon, f.lat), k.geom)
     WHERE k.name = :county AND f.timestamp BETWEEN :period_medium;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
+    SELECT DISTINCT f.id FROM flight_points f, counties k WHERE k.name = :county AND ST_Intersects_Extent(f.geom, (SELECT ST_MakeEnvelope(ST_XMin(geom) - 0, ST_YMin(geom) - 0, ST_XMax(geom) + 0, ST_YMax(geom) + 0) FROM counties WHERE name = :county)) AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN :period_medium;
+  duckdb_scan: |
     SELECT DISTINCT f.id FROM flight_points f, counties k WHERE k.name = :county AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN :period_medium;
-  repetition: 10
+  repetition: 50
   parameters:
   - period_medium
   - county
@@ -196,28 +332,34 @@ queryConfigs:
   use: true
   description: "Find the number of distinct flights that were active in a specific city (+ radius) at a given instant in time, +- 10 seconds."
   type: spatiotemporal
-  # EQUIVALENCE NOTE: clickhouse's greatCircleDistance is a true great-circle metric, while
-  # mobilitydb/postgis/sedona/duckdb's edwithin/ST_DWithin here run in EPSG:3857 (a planar,
-  # latitude-distorted "meter") -- same :radius value means different real-world radii, so results
-  # can diverge between these two families of dialects.
-  # FIX: the CTE's closing ")" was replaced with a "," in the source, leaving the CTE
-  # unterminated and the main SELECT dangling after it -- invalid syntax (a CTE body must be
-  # closed with ")" before the query that uses it begins). Closed the CTE properly.
+  # FIX (2026-09-30): the great-circle-vs-planar mismatch previously noted here is fixed below
+  # via webMercatorDistance -- see flightClosestToPoint's clickhouse block above.
+  # FIX: two problems. (1) the CTE's closing ")" was replaced with a "," in the source, leaving
+  # the CTE unterminated and the main SELECT dangling after it -- invalid syntax (a CTE body must
+  # be closed with ")" before the query that uses it begins). Closed the CTE properly.
+  # (2) period(ts1, ts2) doesn't exist in MobilityDB 1.1+ -- the type itself was renamed
+  # period -> tstzspan, and its two-timestamptz constructor is the generic span(ts1, ts2), not a
+  # type-named function (confirmed live: \df period/tstzspan on the actual instance).
   mobilitydb: |
     WITH filtered_flights AS (
       SELECT f.id, f.trip
       FROM flights f
-      WHERE f.trip && period(:instant - INTERVAL '10 seconds', :instant + INTERVAL '10 seconds')
+      WHERE f.trip && span(:instant - INTERVAL '10 seconds', :instant + INTERVAL '10 seconds')
     )
     SELECT COUNT(DISTINCT ff.id) AS flight_count
     FROM filtered_flights ff
-    JOIN cities c ON edwithin(attime(ff.trip, :instant), c.geom, :radius)
+    JOIN cities c ON edwithin(attime(ff.trip, span(:instant - INTERVAL '10 seconds', :instant + INTERVAL '10 seconds')), c.geom, :radius)
     WHERE c.name = :city;
+  # FIX: ":instant" substitutes as a bare quoted string -- "unknown_literal - INTERVAL" resolves
+  # the literal's type to match the interval operator overload rather than inferring timestamp
+  # from the surrounding BETWEEN context, so Postgres tried to parse the date string itself AS an
+  # interval ("invalid input syntax for type interval") before ever reaching the comparison.
+  # Explicit ::timestamp cast confirmed live.
   postgis: |
    WITH filtered_flights AS (
       SELECT f.id, f.geom
       FROM flight_points f
-      WHERE f.timestamp BETWEEN :instant - INTERVAL '10 seconds' AND :instant + INTERVAL '10 seconds')
+      WHERE f.timestamp BETWEEN :instant::timestamp - INTERVAL '10 seconds' AND :instant::timestamp + INTERVAL '10 seconds')
     SELECT COUNT(DISTINCT ff.id) AS flight_count
     FROM filtered_flights ff
     JOIN cities c ON ST_DWithin(ff.geom, c.geom, :radius)
@@ -241,26 +383,67 @@ queryConfigs:
     JOIN cities c ON ST_DWithin(ff.geom, c.geom, :radius)
     WHERE c.name = :city;
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
+    -- (2026-10-02) radius in EPSG:3857 units like every other dialect, converted to SpaceTime's
+    -- local meters by :st_scale = cos(lat) * 0.99842 (see scripts/spacetime_units.py)
+    SELECT COUNT(DISTINCT f.flight_id) as flight_count
+    FROM flight_points f
+    JOIN cities c ON ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(c.geom::gpoint), :radius * :st_scale)
+    WHERE c.name = :city
+      AND f.t <@ RANGE ((:instant - TP '10s')::epoch, (:instant + TP '10s')::epoch);
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
+    -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance -- see
+    -- ais/config/combinedBenchConf.yaml's crossingsAroundHarbour clickhouse block for the
+    -- formula derivation and live verification.
     WITH filtered_flights AS (
-      SELECT f.id, f.lon, f.lat
+      SELECT f.id, f.x, f.y
       FROM flight_points f
-      WHERE f.timestamp BETWEEN :instant - INTERVAL '10 seconds' AND :instant + INTERVAL '10 seconds')
+      WHERE f.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, :radius)) FROM cities WHERE name = :city)
+        AND f.timestamp BETWEEN toDateTime(:instant, 'UTC') - INTERVAL 10 SECOND AND toDateTime(:instant, 'UTC') + INTERVAL 10 SECOND)
     SELECT COUNT(DISTINCT ff.id) AS flight_count
     FROM filtered_flights ff
-    JOIN cities c ON greatCircleDistance(ff.lon, ff.lat, c.lon, c.lat) <= :radius
+    JOIN cities c ON sqrt(pow(ff.x - c.x, 2) + pow(ff.y - c.y, 2)) <= :radius
+    WHERE c.name = :city;
+  clickhouse_scan: |
+    -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance -- see
+    -- ais/config/combinedBenchConf.yaml's crossingsAroundHarbour clickhouse block for the
+    -- formula derivation and live verification.
+    WITH filtered_flights AS (
+      SELECT f.id, f.x, f.y
+      FROM flight_points f
+      WHERE f.timestamp BETWEEN toDateTime(:instant, 'UTC') - INTERVAL 10 SECOND AND toDateTime(:instant, 'UTC') + INTERVAL 10 SECOND)
+    SELECT COUNT(DISTINCT ff.id) AS flight_count
+    FROM filtered_flights ff
+    JOIN cities c ON sqrt(pow(ff.x - c.x, 2) + pow(ff.y - c.y, 2)) <= :radius
     WHERE c.name = :city;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
+    -- FIX (2026-10-01): DuckDB can't resolve "'<literal>' - INTERVAL" (ambiguous overload) -- cast first.
     WITH filtered_flights AS (
       SELECT f.id, f.geom
       FROM flight_points f
-      WHERE f.timestamp BETWEEN :instant - INTERVAL '10 seconds' AND :instant + INTERVAL '10 seconds')
+      WHERE ST_Intersects_Extent(f.geom, (SELECT ST_MakeEnvelope(ST_XMin(geom) - :radius, ST_YMin(geom) - :radius, ST_XMax(geom) + :radius, ST_YMax(geom) + :radius) FROM cities WHERE name = :city)) AND f.timestamp BETWEEN CAST(:instant AS TIMESTAMP) - INTERVAL '10 seconds' AND CAST(:instant AS TIMESTAMP) + INTERVAL '10 seconds')
     SELECT COUNT(DISTINCT ff.id) AS flight_count
     FROM filtered_flights ff
     JOIN cities c ON ST_DWithin(ff.geom, c.geom, :radius)
     WHERE c.name = :city;
-  repetition: 10
+  duckdb_scan: |
+    -- FIX (2026-10-01): DuckDB can't resolve "'<literal>' - INTERVAL" (ambiguous overload) -- cast first.
+    WITH filtered_flights AS (
+      SELECT f.id, f.geom
+      FROM flight_points f
+      WHERE f.timestamp BETWEEN CAST(:instant AS TIMESTAMP) - INTERVAL '10 seconds' AND CAST(:instant AS TIMESTAMP) + INTERVAL '10 seconds')
+    SELECT COUNT(DISTINCT ff.id) AS flight_count
+    FROM filtered_flights ff
+    JOIN cities c ON ST_DWithin(ff.geom, c.geom, :radius)
+    WHERE c.name = :city;
+  repetition: 50
   parameters:
   - city
   - instant
@@ -271,10 +454,8 @@ queryConfigs:
   use: false
   description: "Finds distinct flights that have flown within a certain radius of a given city during a specified time period."
   type: spatiotemporal
-  # EQUIVALENCE NOTE: clickhouse's greatCircleDistance is a true great-circle metric, while
-  # mobilitydb/postgis/sedona/duckdb's eDwithin/ST_DWithin here run in EPSG:3857 (a planar,
-  # latitude-distorted "meter") -- same :radius value means different real-world radii, so results
-  # can diverge between these two families of dialects.
+  # FIX (2026-09-30): the great-circle-vs-planar mismatch previously noted here is fixed below
+  # via webMercatorDistance -- see flightClosestToPoint's clickhouse block above.
   mobilitydb: |
     SELECT DISTINCT f.id FROM cities AS c JOIN flights AS f ON eDwithin(attime(f.trip, :period_medium), c.geom, :radius) WHERE c.name = :city AND f.trip && :period_medium;
   postgis: |
@@ -300,12 +481,22 @@ queryConfigs:
     WHERE f.timestamp BETWEEN :period_medium;
 
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
-
+    SELECT DISTINCT f.flight_id AS id
+    FROM flight_points f
+    JOIN cities c ON ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(c.geom::gpoint), :radius)
+    WHERE c.name = :city
+      AND f.t <@ EPOCHRANGE :period_medium;
   clickhouse: |
+    -- FIX: the "c" subquery only projected name/geom, but the WHERE clause below reads c.lon/
+    -- c.lat -- neither is in that subquery's column list ("column c.lon does not exist"). cities
+    -- has real lon/lat columns in ClickHouse (unlike universities/islands/berlin_districts/
+    -- counties, which only have geom) -- the subquery now projects lon/lat directly instead of
+    -- the unused geom.
+    -- FIX (2026-09-30, metric parity): greatCircleDistance -> webMercatorDistance. This query is
+    -- use: false (dormant); correct if ever enabled.
     SELECT DISTINCT f.id
-    FROM (SELECT name, geom FROM cities WHERE name = :city) AS c
-    JOIN flight_points AS f ON greatCircleDistance(f.lon, f.lat, c.lon, c.lat) <= :radius
+    FROM (SELECT name, lon, lat FROM cities WHERE name = :city) AS c
+    JOIN flight_points AS f ON sqrt(pow(f.x - c.x, 2) + pow(f.y - c.y, 2)) <= :radius
     WHERE f.timestamp BETWEEN :period_medium;
 
   duckdb: |
@@ -314,7 +505,7 @@ queryConfigs:
     JOIN flight_points AS f ON ST_DWithin(f.geom, c.geom, :radius)
     WHERE f.timestamp BETWEEN :period_medium;
 
-  repetition: 10
+  repetition: 50
   parameters:
   - period_medium
   - city
@@ -333,30 +524,45 @@ queryConfigs:
     -- benchmark time. Filled in analogous to postgis below, matching the equivalent insert
     -- queries in the other three benchmark files (crossings/rides/geolife all resolve
     -- mobilitydb writes to the flat per-point table, not the "flights" trajectory table).
-    INSERT INTO flight_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    -- FIX: didn't write "altitude" -- flight_points has an altitude column (see postgis/
+    -- clickhouse below) that a "flight point" isn't complete without.
+    INSERT INTO flight_points (id, geom, timestamp, altitude)
+    VALUES (:id, :point, :instant, :altitude);
   postgis: |
-    INSERT INTO flight_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    -- FIX: didn't write "altitude" -- see mobilitydb FIX note above.
+    INSERT INTO flight_points (id, geom, timestamp, altitude)
+    VALUES (:id, :point, :instant, :altitude);
   sedona: |
   spacetime: |
 
+  # FIX: flight_points has no "geom" column in ClickHouse (it stores lat/lon directly, with
+  # Point/h3 as MATERIALIZED derivatives) -- reuses the same :point_lon/:point_lat decomposition
+  # generateParameterVariations.py already does for other ClickHouse queries.
+  # FIX: didn't write "altitude" -- see mobilitydb FIX note above.
   clickhouse: |
-    INSERT INTO flight_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    INSERT INTO flight_points (id, timestamp, lat, lon, altitude)
+    VALUES (:id, :instant, :point_lat, :point_lon, :altitude);
   duckdb: |
-    INSERT INTO flight_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    -- FIX: didn't write "altitude" -- see mobilitydb FIX note above.
+    INSERT INTO flight_points (id, geom, timestamp, altitude)
+    VALUES (:id, :point, :instant, :altitude);
 
-  repetition: 10
+  repetition: 23
   parameters:
   - id
   - point
   - instant
+  - altitude
 
-- name: updateflightPoint
+# NOTE: "id" is not unique in flight_points -- it's the flight's id, shared by every point of
+# that flight, not a per-row key. updateflightPoint/deleteflightPoint (WHERE id = :id alone) were
+# ambiguously named for an operation that (outside the benchmark's own scratch-id bookkeeping)
+# touches every point of the flight, not "a flight point" as the name implied. Split into an
+# explicit "Mass" variant (unchanged: every point sharing :id) and a "Single" variant that also
+# pins :instant (the exact timestamp of one specific point) so it targets exactly one row.
+- name: updateflightPointMass
   use: true
-  description: "Update location of a flight point"
+  description: "Update location of every point belonging to a flight id"
   type: update
   # EQUIVALENCE NOTE: write immediacy differs by system -- clickhouse's UPDATE is an async
   # background mutation (ALTER TABLE ... UPDATE, not guaranteed visible immediately after the call
@@ -382,8 +588,18 @@ queryConfigs:
   sedona: |
 
   spacetime: |
+  # FIX: ALTER TABLE ... UPDATE fails outright against flight_points -- confirmed live
+  # (CANNOT_UPDATE_COLUMN): lat/lon feed the MATERIALIZED h3 column, which is part of the
+  # ORDER BY key, and ClickHouse forbids updating any column a key column derives from. There's
+  # no single-statement way to "move" a point in a MergeTree table like this, so it's a re-INSERT
+  # (using a self-referencing SELECT to keep each row's own timestamp/altitude) followed by a
+  # DELETE of the old rows -- disambiguated from the just-inserted ones by lat, since :point_lat
+  # is a freshly generated coordinate that won't collide with an existing point's latitude.
+  # ClickHouseExecutor.java now splits on ";" and runs each statement in turn to support this.
   clickhouse: |
-    ALTER TABLE flight_points UPDATE geom = :point WHERE id = :id;
+    INSERT INTO flight_points (id, timestamp, lat, lon, altitude)
+    SELECT id, timestamp, :point_lat, :point_lon, altitude FROM flight_points WHERE id = :id;
+    ALTER TABLE flight_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND lat != :point_lat;
   duckdb: |
     UPDATE flight_points
     SET geom = :point
@@ -393,9 +609,40 @@ queryConfigs:
   - id
   - point
 
-- name: deleteflightPoint
+- name: updateflightPointSingle
   use: true
-  description: "Delete a flight point"
+  description: "Update location of exactly one flight point, identified by id and timestamp"
+  type: update_single
+  # Same EQUIVALENCE NOTE as updateflightPointMass above.
+  mobilitydb: |
+    UPDATE flight_points
+    SET geom = :point
+    WHERE id = :id AND timestamp = :instant;
+  postgis: |
+    UPDATE flight_points
+    SET geom = :point
+    WHERE id = :id AND timestamp = :instant;
+  sedona: |
+  spacetime: |
+  # Same re-INSERT + DELETE workaround as updateflightPointMass (see its FIX note), scoped down
+  # to the one point via "AND timestamp = :instant" on both statements.
+  clickhouse: |
+    INSERT INTO flight_points (id, timestamp, lat, lon, altitude)
+    SELECT id, timestamp, :point_lat, :point_lon, altitude FROM flight_points WHERE id = :id AND timestamp = :instant;
+    ALTER TABLE flight_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant AND lat != :point_lat;
+  duckdb: |
+    UPDATE flight_points
+    SET geom = :point
+    WHERE id = :id AND timestamp = :instant;
+  repetition: 10
+  parameters:
+  - id
+  - point
+  - instant
+
+- name: deleteflightPointMass
+  use: false  # (2026-10-02) delete queries retired: benchmark writes are insert/update only, reset after each run
+  description: "Delete every point belonging to a flight id"
   type: delete
   mobilitydb: |
     -- FIX: was "DELETE FROM flights WHERE id = :id" -- "flights" is the one-row-per-trajectory
@@ -410,14 +657,39 @@ queryConfigs:
     WHERE id = :id;
   sedona: |
   spacetime: |
+  # FIX: plain DELETE fails outright against flight_points -- confirmed live ("DELETE query is
+  # not supported for table default.flight_points", a Distributed engine table). Mutations have
+  # to target the underlying _local table, on every shard (ON CLUSTER), same as updateflightPointMass.
   clickhouse: |
-    DELETE FROM flight_points WHERE id = :id;
+    ALTER TABLE flight_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id;
   duckdb: |
     DELETE FROM flight_points
     WHERE id = :id;
-  repetition: 10
+  repetition: 5
   parameters:
   - id
+
+- name: deleteflightPointSingle
+  use: false  # (2026-10-02) delete queries retired: benchmark writes are insert/update only, reset after each run
+  description: "Delete exactly one flight point, identified by id and timestamp"
+  type: delete_single
+  mobilitydb: |
+    DELETE FROM flight_points
+    WHERE id = :id AND timestamp = :instant;
+  postgis: |
+    DELETE FROM flight_points
+    WHERE id = :id AND timestamp = :instant;
+  sedona: |
+  spacetime: |
+  clickhouse: |
+    ALTER TABLE flight_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant;
+  duckdb: |
+    DELETE FROM flight_points
+    WHERE id = :id AND timestamp = :instant;
+  repetition: 5
+  parameters:
+  - id
+  - instant
 
 - name: bulkInsertflightPoints
   use: true
@@ -429,20 +701,27 @@ queryConfigs:
     -- flat (id, point, timestamp) tuples in :bulk_values were never going to bind against it --
     -- the same "trip"-column mistake already found and fixed on the equivalent mobilitydb write
     -- queries in crossings_benchmark.yaml. Corrected to the flat flight_points table.
-    INSERT INTO flight_points (id, geom, timestamp)
+    -- FIX: didn't write "altitude" -- see insertSingleflightPoint's FIX note.
+    INSERT INTO flight_points (id, geom, timestamp, altitude)
     VALUES :bulk_values;
   postgis: |
-    INSERT INTO flight_points (id, geom, timestamp)
+    -- FIX: didn't write "altitude" -- see insertSingleflightPoint's FIX note.
+    INSERT INTO flight_points (id, geom, timestamp, altitude)
     VALUES :bulk_values;
   sedona: |
   spacetime: |
+  # FIX: same "no geom column" problem as insertSingleflightPoint above -- :bulk_values_clickhouse
+  # is a ClickHouse-specific rebuild of the shared :bulk_values tuples (see
+  # generateParameterVariations.py) as (id, timestamp, lat, lon, altitude), matching the real
+  # columns. FIX: also didn't write "altitude" -- see insertSingleflightPoint's FIX note.
   clickhouse: |
-    INSERT INTO flight_points (id, geom, timestamp)
-    VALUES :bulk_values;
+    INSERT INTO flight_points (id, timestamp, lat, lon, altitude)
+    VALUES :bulk_values_clickhouse;
   duckdb: |
-    INSERT INTO flight_points (id, geom, timestamp)
+    -- FIX: didn't write "altitude" -- see insertSingleflightPoint's FIX note.
+    INSERT INTO flight_points (id, geom, timestamp, altitude)
     VALUES :bulk_values;
-  repetition: 10
+  repetition: 12
   parameters:
   - bulk_values
 

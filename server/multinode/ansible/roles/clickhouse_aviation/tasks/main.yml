@@ -11,16 +11,30 @@
 
 # FIX: nothing here ever synced a parquet file onto the target machine -- "Find parquet files"
 # always found zero and every task below it silently no-op'd (the loop just had nothing to
-# iterate). Syncing one real file (aviation_sample_parquet_file) rather than the whole
-# data_generator_aviation/parquet_flights directory (~676 files, ~70GB) -- see that variable's
-# comment in group_vars/all/all.yml. Shares its destination directory with postgis_aviation
-# (clickhouse_aviation_data_dir == aviation_data_dir, both /var/lib/data/aviation), so whichever
-# of these two roles runs first does the actual sync; this is just a harmless no-op rsync check
-# if the file's already there.
-- name: Sync sample aviation parquet file to target machine
+# iterate). Syncing aviation_sample_file_count real files (sorted by filename) rather than the
+# whole data_generators/aviation/parquet_flights directory (~676 files, ~70GB) -- see those
+# variables' comments in group_vars/all/all.yml. Shares its destination directory with
+# postgis_aviation (clickhouse_aviation_data_dir == aviation_data_dir, both /var/lib/data/
+# aviation), so whichever of these two roles runs first does the actual sync; this is just a
+# harmless no-op rsync check for any files already there.
+- name: Enumerate aviation sample parquet files on the control machine
+  ansible.builtin.find:
+    paths: "{{ aviation_sample_parquet_dir }}"
+    patterns: "*.parquet"
+  delegate_to: localhost
+  connection: local
+  become: false
+  run_once: true
+  register: aviation_local_parquet_files
+  when: inventory_hostname in groups['masters']
+
+- name: Sync sample aviation parquet files to target machine
   ansible.posix.synchronize:
-    src: "{{ aviation_sample_parquet_file }}"
+    src: "{{ item.path }}"
     dest: "{{ clickhouse_aviation_data_dir }}/"
+  loop: "{{ (aviation_local_parquet_files.files | sort(attribute='path'))[:aviation_sample_file_count] }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
   when: inventory_hostname in groups['masters']
 
 - name: Find parquet files
@@ -90,7 +104,7 @@
 #     ADD INDEX idx_h3 h3 TYPE set(1000) GRANULARITY 4;
 #     "
 
-# FIX: the real parquet files (data_generator_aviation/parquet_flights) name their flight-id
+# FIX: the real parquet files (data_generators/aviation/parquet_flights) name their flight-id
 # column "flight_id", not "id" -- this SELECT referenced a column that doesn't exist.
 - name: Load parquet into ClickHouse directly
   ansible.builtin.shell: |

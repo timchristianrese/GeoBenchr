@@ -174,12 +174,22 @@
     - src/planner/distributed_mobilitydb_explain.c
     - src/planner/query_parameters.c
 
+# FIX: confirmed live on Debian trixie (GCC 14) -- table_ops.c's DistributedColumnType() passes a
+# Datum (an integer type) straight to DatumGetCString()'s `char *` parameter with no cast
+# ("const char * columnType = (char *)DatumGetCString(SPI_getvalue(...))" -- the outer (char*)
+# casts DatumGetCString's *return value*, not the Datum argument going in). GCC < 14 treated this
+# as a warning; GCC 14 promotted implicit int-to-pointer conversions to a hard error by default,
+# so the same real bug in DistributedMobilityDB's source now fails the build outright instead of
+# just warning. -Wno-error=int-conversion downgrades it back to a warning (matching the older-GCC
+# behavior this third-party code was written against) rather than patching the cast ourselves --
+# consistent with this role's other DistributedMobilityDB fixes only touching what's needed to
+# unblock the build (renamed symbol collision, vendored headers) and not upstream's own logic.
 - name: Build DistributedMobilityDB
   shell: |
     cd /tmp/DistributedMobilityDB
     mkdir -p build
     cd build
-    cmake ..
+    cmake -DCMAKE_C_FLAGS="-Wno-error=int-conversion" ..
     make
     make install
   environment:

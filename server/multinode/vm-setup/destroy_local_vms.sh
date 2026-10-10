@@ -23,7 +23,13 @@ for node in "${NODES[@]}"; do
   if sudo virsh dominfo "$node" >/dev/null 2>&1; then
     echo ">>> Removing $node"
     sudo virsh destroy "$node" >/dev/null 2>&1 || true
-    sudo virsh undefine "$node" --remove-all-storage >/dev/null 2>&1 || true
+    # FIX: setup_local_vms.sh creates these with --boot uefi (see its own FIX comment), which gives
+    # each domain a per-VM UEFI nvram file -- undefine refuses "cannot undefine domain with nvram"
+    # without --nvram, leaving the domain defined (just stopped) and its disk still claimed. The
+    # storage pool's stale volume cache from that half-removed state then made the *next*
+    # setup_local_vms.sh run fail with "already in use by other guests" on a freshly-created disk
+    # of the same name, even though `rm -rf "$POOL_DIR"` below had already deleted the file.
+    sudo virsh undefine "$node" --remove-all-storage --nvram >/dev/null 2>&1 || true
   fi
 done
 
@@ -34,6 +40,12 @@ if [ "$KEEP_NETWORK" -eq 0 ] && sudo virsh net-info "$NET_NAME" >/dev/null 2>&1;
 fi
 
 sudo rm -rf "$POOL_DIR"
+
+# Deleting pool files directly (rather than via `virsh vol-delete`) leaves libvirtd's cached
+# volume list for this pool stale until refreshed -- without this, the next setup_local_vms.sh run
+# can fail defining a same-named disk with "already in use by other guests" even though the file
+# was just removed above.
+sudo virsh pool-refresh geobenchr >/dev/null 2>&1 || true
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ "$KEEP_CACHE" -eq 0 ]; then

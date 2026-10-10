@@ -4,14 +4,31 @@
 #    (main.yml's "Install DuckDB CLI" task, same fix applied there) lands under
 #    /home/{{ ansible_user }} -- so this was about to redundantly re-download and install a whole
 #    separate copy under /root instead of reusing the one already there.
-# 2. The real parquet files (data_generator_aviation/parquet_flights) name their flight-id column
+# 2. The real parquet files (data_generators/aviation/parquet_flights) name their flight-id column
 #    "flight_id", not "id" -- this SELECT referenced a column that doesn't exist.
+# 3. This task has no become: override, so it inherits the play's become: true and runs the
+#    DuckDB CLI as root -- whose $HOME is /root, not /home/{{ ansible_user }} where main.yml's
+#    pre-fetch task actually cached postgres_scanner (become: false there, matching every other
+#    DuckDB-path fix in this codebase). Confirmed via the actual failure: "Extension
+#    /root/.duckdb/extensions/.../postgres_scanner.duckdb_extension not found" -- the file's
+#    real path was never wrong, this task was just looking in the wrong home directory (root's
+#    sudo session appears to inconsistently reset $HOME, hence this failing on some loop
+#    iterations and not others rather than every single one). become: false fixes it outright by
+#    removing the ambiguity: this task only ever needs to read {{ item.path }} (world-readable,
+#    synced in by an earlier become: true task) and connect to Postgres over the network -- no OS
+#    privilege required either way. The two SETs below are a secondary hardening measure: even
+#    with the right file found locally, DuckDB can still ping the remote registry to verify/
+#    auto-update a "known" extension on LOAD, so disable that outright -- no version check, no
+#    network call, ever, regardless of which $HOME ends up in play.
 - name: Load parquet into staging (DuckDB → Postgres)
+  become: false
   ansible.builtin.shell: |
     set -euo pipefail
 
-    /home/{{ ansible_user }}/.duckdb/cli/latest/duckdb <<EOF
-    LOAD postgres;
+    /home/{{ ansible_user }}/.duckdb/cli/latest/duckdb -unsigned <<EOF
+    SET autoinstall_known_extensions=false;
+    SET autoload_known_extensions=false;
+    LOAD postgres_scanner;
 
     ATTACH
       'host={{ db_host }}

@@ -1,0 +1,35 @@
+2026-10-08T21:16:28+02:00 start
+2026-10-08T21:17:55+02:00 start
+2026-10-08T21:18:55+02:00 duckdb reorder finished: 2026-10-08T20:07:55+02:00 [flight_points] swapped: flight_points is now in Hilbert order; check query 196733 ms -> 174818 ms; 618G free 2026-10-08T20:20:40+02:00 [geolife_points] failed (see above), continuing 2026-10-08T20:56:51+02:00 [geolife_points] swapped: geolife_points is now in Hilbert order; check query 296446 ms -> 299816 ms; 805G free 2026-10-08T21:18:00+02:00 [crossing_points] swapped: crossing_points is now in (month, Hilbert) order; check query 292043 ms -> 254227 ms; 711 GB free 
+2026-10-08T21:30:20+02:00 duckdb equivalence done: 48/48
+2026-10-08T22:21:55+02:00 geoparquet flight_points verified (2703631682 rows)
+2026-10-08T22:21:56+02:00 geoparquet ride_points verified (1178625381 rows)
+2026-10-08T22:21:57+02:00 geoparquet geolife_points verified (3960126695 rows)
+2026-10-08T22:21:57+02:00 geoparquet crossing_points NOT used: build failed
+2026-10-08T22:21:57+02:00 geoparquet tables in use: flight_points,ride_points,geolife_points,
+2026-10-08T22:21:58+02:00 flag duck_bench_go 
+2026-10-08T22:52:01+02:00 duckdb benchmark done
+2026-10-08T22:59:36+02:00 sedona ais in /home/tim/final_auto/sedona_eq rc=0
+2026-10-08T23:05:04+02:00 sedona aviation in /home/tim/final_auto/sedona_eq rc=0
+2026-10-08T23:07:36+02:00 sedona cycling in /home/tim/final_auto/sedona_eq rc=0
+2026-10-08T23:17:37+02:00 sedona geolife in /home/tim/final_auto/sedona_eq rc=0
+2026-10-08T23:51:41+02:00 sedona ais in /home/tim/final_auto/sedona_full rc=0
+2026-10-09T00:16:03+02:00 sedona aviation in /home/tim/final_auto/sedona_full rc=0
+2026-10-09T00:25:23+02:00 sedona cycling in /home/tim/final_auto/sedona_full rc=0
+2026-10-09T01:12:15+02:00 sedona geolife in /home/tim/final_auto/sedona_full rc=0
+2026-10-09T01:12:15+02:00 sedona benchmark done
+e/SpatialBBox                                            mobil: SAME | click: SAME | duckd: SAME | space: VALUE DIFF 1/1 rows, e.g. pg=('2.60908e+06',) spacetime=('2. | sedon: CLOSE (max 0.265 %)
+geolife/UniqueUsersPerHourInRegionInPeriod                     mobil: n/a | click: SAME | duckd: SAME | space: CLOSE (max 0.486 %) | sedon: SAME
+geolife/kNN                                                    mobil: KNN (geometry format / ties at equal distance) | click: KNN (geometry format / ties at equal distance) | duckd: KNN (geometry format / ties at equal distance) | space: KNN (geometry format / ties at equal distance) | sedon: KNN (geometry format / ties at equal distance)
+geolife/spatioTemporalRange                                    mobil: n/a | click: SAME | duckd: SAME | space: CLOSE (max 0.314 %) | sedon: SAME
+geolife/timeAggregation                                        mobil: n/a | click: SAME | duckd: SAME | space: VALUE DIFF 1/1 rows, e.g. pg=('695667', '3.96047e+07', '296' | sedon: SAME
+geolife/timeInterval                                           mobil: n/a | click: SAME | duckd: SAME | space: SAME | sedon: SAME
+
+mobilitydb {'SAME': 31, 'SAME COUNT': 6, 'n/a': 10, 'KNN': 1}
+clickhouse {'SAME': 32, 'KNN': 4, 'SAME COUNT': 6, 'CLOSE': 4, 'n/a': 1, 'CLOSE COUNT': 1}
+duckdb {'SAME': 36, 'KNN': 4, 'SAME COUNT': 8}
+spacetime {'SAME': 25, 'KNN': 4, 'CLOSE COUNT': 2, 'SAME COUNT': 6, 'CLOSE': 8, 'VALUE DIFF': 3}
+sedona {'SAME': 35, 'KNN': 4, 'SAME COUNT': 8, 'CLOSE': 1}
+
+2026-10-09T01:12:16+02:00 flag final_done /home/tim/final_auto
+2026-10-09T01:12:16+02:00 ALL DONE

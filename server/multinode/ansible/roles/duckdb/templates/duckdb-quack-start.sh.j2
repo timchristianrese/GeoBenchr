@@ -14,10 +14,43 @@
 # with `curl -4` (proven to work) straight into ~/.duckdb/extensions/, in the exact path DuckDB's
 # own INSTALL would have used -- so LOAD here finds it locally and never touches the network at
 # all, sidestepping the broken route entirely rather than depending on it failing fast.
+# FIX: even with quack already cached locally (see roles/duckdb's pre-fetch tasks -- needed since
+# auto-install hangs on nst-cluster's blackholed IPv6 route to extensions.duckdb.org), DuckDB
+# still occasionally pings the remote registry to verify/auto-update a "known" extension on LOAD
+# -- observed for real during the aviation data load (17 of 20 identical LOADs had just succeeded
+# before one such verification ping timed out and failed the task). Disabling both below makes
+# LOAD only ever look at the local cache for the life of this long-running server -- no version
+# check, no network call, ever.
+# FIX: the query set (e.g. benchmark/configuration/aviation/queries/duckdb_queries.yaml's
+# "SpatialBBox") calls PostGIS-style spatial functions (ST_Intersects, ST_Transform,
+# ST_MakeEnvelope, ...) directly -- these resolve against DuckDB's own `spatial` extension, which
+# has to be loaded explicitly (it isn't automatic just because the tables' geom columns came from
+# Postgres originally). Needs the same IPv4 pre-fetch treatment as quack -- see roles/duckdb's
+# tasks.
+# FIX: the handshake itself failed outright for every single request (any query, read or write)
+# with an opaque "Quack HTTP returned status 500" -- confirmed live (via a throwaway quack-jdbc
+# 0.2.0-alpha.6 probe; the 0.1.0-alpha.1 this project's own client pins never surfaces the
+# response body) that the real error is "DuckDB currently has a read-only crypto module loaded.
+# Please ensure httpfs is loaded using `LOAD httpfs`...". quack_serve()'s auth/token handshake
+# apparently needs httpfs's fuller crypto support; loading it before quack resolves the handshake.
+# FIX: this used to ATTACH the shared Postgres instance and create a view per table
+# ("CREATE OR REPLACE VIEW <name> AS SELECT * FROM pg.public.<name>"), scanning through Postgres
+# via postgres_scanner on every single query -- confirmed live, every query with no pushable
+# filter took 45-90s regardless of what the query itself was doing, since every row crossed that
+# wire on every request. roles/duckdb's "Materialize GeoBenchr tables" task now bulk-copies each
+# table into DuckDB's own native storage once (with an RTree spatial index on the geom column
+# wherever Postgres itself has a gist(geom) index, matching that baseline rather than giving
+# DuckDB an advantage Postgres doesn't have) -- point/reference tables here are real tables, not
+# views, and insert/update/delete/bulk_insert queries land in DuckDB's own storage instead of
+# silently writing through to the Postgres instance every other engine reads.
 set -e
 {
   cat <<SQL
+SET autoinstall_known_extensions=false;
+SET autoload_known_extensions=false;
+LOAD httpfs;
 LOAD quack;
+LOAD spatial;
 CALL quack_serve('quack:0.0.0.0:{{ duckdb_quack_port }}', token=>'{{ duckdb_quack_token }}', allow_other_hostname=>true);
 SQL
   sleep infinity

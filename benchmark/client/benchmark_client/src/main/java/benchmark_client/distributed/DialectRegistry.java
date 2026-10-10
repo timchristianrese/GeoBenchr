@@ -25,6 +25,18 @@ public class DialectRegistry {
     };
 
     private static final String SUT_HOST = System.getenv().getOrDefault("SUT_HOST", "geobenchr-sut-5");
+    // See BenchmarkClient.java's matching FIX comment: "test" is right for the single-box
+    // "geobenchr-sut-5" setup, wrong for this partner cluster (real password: "postgres").
+    private static final String SUT_DB_PASSWORD = System.getenv().getOrDefault("SUT_DB_PASSWORD", "test");
+
+    // See BenchmarkClient.java's matching FIX comment: SpaceTime needs no auth, its real port is
+    // 31340 (not 31339), and its only client is the Python-only `pymsql` library shelled out to
+    // via scripts/spacetime_query_runner.py -- not the nonexistent CLI binary this used to assume.
+    private static final int SPACETIME_PORT = Integer.parseInt(System.getenv().getOrDefault("SPACETIME_PORT", "31340"));
+    private static final String SPACETIME_PYTHON = System.getenv().getOrDefault(
+            "SPACETIME_PYTHON", System.getProperty("user.home") + "/bench/.venv/bin/python");
+    private static final String SPACETIME_RUNNER_SCRIPT = System.getenv().getOrDefault(
+            "SPACETIME_RUNNER_SCRIPT", System.getProperty("user.home") + "/bench/spacetime_query_runner.py");
 
     // Unlike the JDBC dialects above (a plain host:port), submitting to Sedona's cluster means
     // acting as a YARN client, matching roles/spark's spark-defaults.conf (spark.master yarn).
@@ -65,10 +77,10 @@ public class DialectRegistry {
     public static QueryExecutor createExecutor(String dialect, String application) {
         switch (dialect) {
             case "SpaceTime":
-                return new SpaceTimeExecutor(SUT_HOST + ":31339", "mireo", "root", "@2e9R]3]=O");
+                return new SpaceTimeExecutor(SUT_HOST, SPACETIME_PORT, SPACETIME_PYTHON, SPACETIME_RUNNER_SCRIPT);
             case "PostGIS":
             case "MobilityDB":
-                return new PostgreSQLExecutor("jdbc:postgresql://" + SUT_HOST + ":5433/", "postgres", "test", application);
+                return new PostgreSQLExecutor("jdbc:postgresql://" + SUT_HOST + ":5433/", "postgres", SUT_DB_PASSWORD, application);
             case "DuckDB":
                 return new DuckDBExecutor("jdbc:quack://" + SUT_HOST + ":9494/", "my-secret-token");
             case "ClickHouse":

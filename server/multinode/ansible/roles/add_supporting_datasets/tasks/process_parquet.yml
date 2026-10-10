@@ -6,13 +6,22 @@
 # dash on Debian/Ubuntu and doesn't support that option ("Illegal option -o pipefail"). Every
 # other shell task in this codebase that relies on bash features sets executable: /bin/bash
 # explicitly; this one just hadn't been.
+# FIX: this task had no become: override either, so it inherited the play's become: true and ran
+# the DuckDB CLI as root -- whose $HOME is /root, not /home/{{ ansible_user }} where main.yml's
+# pre-fetch task actually cached postgres_scanner/spatial (become: false there). Same bug, same
+# fix, as postgis_aviation's identical task hit for real during the aviation data load (see that
+# file's comment for the full failure signature) -- become: false removes the ambiguity outright,
+# since this task only needs to read a world-readable local file and talk to Postgres over the
+# network either way.
 - name: Load parquet into staging (DuckDB → Postgres)
+  become: false
   ansible.builtin.shell: |
     set -euo pipefail
 
-    /home/{{ ansible_user }}/.duckdb/cli/latest/duckdb <<EOF
-    LOAD postgres;
-    INSTALL spatial;
+    /home/{{ ansible_user }}/.duckdb/cli/latest/duckdb -unsigned <<EOF
+    SET autoinstall_known_extensions=false;
+    SET autoload_known_extensions=false;
+    LOAD postgres_scanner;
     LOAD spatial;
     ATTACH
       'host={{ db_host }}

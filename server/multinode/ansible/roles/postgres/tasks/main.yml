@@ -11,13 +11,25 @@
   become: true
   when: purge_conflicting_installs | default(true)
 
+- name: Gather service facts (to check for a pre-existing PostgreSQL install)
+  ansible.builtin.service_facts:
+  when: purge_conflicting_installs | default(true)
+
+# FIX: on a genuinely fresh machine with no PostgreSQL ever installed, there's no "postgresql"
+# systemd unit to query at all -- `ignore_errors: yes` (this task used to rely on that alone)
+# does NOT catch this: the service module raises "Could not find the requested service
+# postgresql: host" as a raw module-load exception rather than a normal failed:true result, which
+# ansible-core propagates as a fatal `[ERROR]: Task failed: Module failed` regardless of
+# ignore_errors. Checking the unit's actual presence first (service_facts, populated above) avoids
+# calling the module at all when there's nothing to stop.
 - name: Stop PostgreSQL service if present
   ansible.builtin.service:
     name: postgresql
     state: stopped
-  ignore_errors: yes
   become: yes
-  when: purge_conflicting_installs | default(true)
+  when:
+    - purge_conflicting_installs | default(true)
+    - "'postgresql.service' in ansible_facts.services"
 
 - name: Remove old libpq-dev if it exists
   apt:

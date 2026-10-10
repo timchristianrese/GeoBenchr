@@ -67,7 +67,10 @@ queryConfigs:
     WHERE r.timestamp BETWEEN :period_short
       AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
   spacetime: |
-    -- NOT IMPLEMENTED: left blank, no confident analogous template elsewhere in this file.
+    SELECT COUNT(DISTINCT trip_id) AS ride_count
+    FROM ride_points
+    WHERE EPOCHRANGE :period_short @> t
+      AND (HOUR(t) BETWEEN 7 AND 9 OR HOUR(t) BETWEEN 16 AND 18)
   clickhouse: |
     SELECT COUNT(DISTINCT r.id) AS ride_count
     FROM ride_points r
@@ -79,7 +82,7 @@ queryConfigs:
     WHERE r.timestamp BETWEEN :period_short
       AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
 
-  repetition: 10
+  repetition: 50
   parameters:
     - period_short
 
@@ -118,7 +121,14 @@ queryConfigs:
     GROUP BY r.id
     HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
   spacetime: |
-    -- NOT IMPLEMENTED: left blank, no confident analogous template elsewhere in this file.
+    SELECT trip_id AS id FROM (
+      SELECT r.trip_id, HOUR(r.t) h
+      FROM ride_points r
+      WHERE EPOCHRANGE :period_short @> r.t
+      GROUP BY r.trip_id, h
+    )
+    GROUP BY trip_id
+    HAVING COUNT(h) > 1
   clickhouse: |
     SELECT r.id
     FROM ride_points r
@@ -131,7 +141,7 @@ queryConfigs:
     WHERE r.timestamp BETWEEN :period_short
     GROUP BY r.id
     HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
-  repetition: 10
+  repetition: 50
   parameters:
     - period_short
 
@@ -142,20 +152,23 @@ queryConfigs:
   # EQUIVALENCE NOTE: clickhouse cannot express "every point of the trajectory stays within
   # :radius of the district" at all (left unimplemented below) -- it has no BOOL_AND-style
   # per-group aggregate over a spatial predicate and no trajectory/containment type. Every other
-  # dialect here (mobilitydb via containment against a buffered polygon, postgis/sedona/duckdb via
+  # dialect here (mobilitydb via adwithin(), postgis/sedona/duckdb via
   # BOOL_AND(ST_DWithin(...))) can express it. Not 1-1 across all systems -- this is a genuine
   # capability gap for clickhouse, not a translation oversight.
-  # FIX: edwithin() is MobilityDB's "ever within distance" (existential) predicate -- it only
-  # requires SOME point of the trip to be near the district, not the whole ride, so it did not
-  # match "fully contained" from the description, nor the BOOL_AND-over-every-point ("always")
-  # semantics postgis/sedona actually implement below. Rewritten using the containment operator
-  # against a buffered district polygon, which correctly requires the entire trajectory to stay
-  # within :radius of the district the whole time.
+  # FIX (2026-10-01): adwithin() is MobilityDB's "always within distance" predicate -- the exact
+  # counterpart of BOOL_AND(ST_DWithin(...)) over every point, since rides.trip uses Discrete
+  # interpolation (no interpolated positions between samples). Replaces two broken attempts:
+  # `trip <@ ST_Buffer(...)` errors (no tgeompoint <@ geometry operator), and
+  # acontains(ST_Buffer(...), trip) returns false positives on discrete trips (e.g. ride 503514:
+  # two instants 530m/577m out, buffer 470m, acontains still true). GROUP BY + BOOL_AND because
+  # rides holds several trajectory rows per id. Verified live: 1,027,129 for Reinickendorf/470,
+  # exact match with postgis.
   mobilitydb: |
     SELECT r.id
     FROM rides r
     JOIN berlin_districts d ON d.name = :district
-    WHERE r.trip <@ ST_Buffer(d.geom, :radius);
+    GROUP BY r.id
+    HAVING BOOL_AND(adwithin(r.trip, d.geom, :radius));
   postgis: |
     WITH d AS (
       SELECT geom
@@ -186,9 +199,34 @@ queryConfigs:
     GROUP BY r.id
     HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, :radius));
   spacetime: |
-    -- NOT IMPLEMENTED: left blank, no confident analogous template elsewhere in this file.
+    -- (2026-10-02) radius in EPSG:3857 units like every other dialect, converted to SpaceTime's
+    -- local meters by :st_scale = cos(lat) * 0.99842 (see scripts/spacetime_units.py)
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = :district
+    ),
+    candidates AS (
+      SELECT DISTINCT r.trip_id
+      FROM ride_points r, d
+      WHERE ST_DWithin(ST_Point(r.x, r.y), ST_ToGeom(d.geom::gpolygon), :radius * :st_scale)
+    )
+    SELECT r.trip_id AS id
+    FROM ride_points r
+    STRAIGHT JOIN candidates c ON r.trip_id = c.trip_id
+    CROSS JOIN d
+    GROUP BY r.trip_id
+    HAVING BOOL_AND(ST_DWithin(ST_Point(r.x, r.y), ST_ToGeom(d.geom::gpolygon), :radius * :st_scale));
   clickhouse: |
-    -- as of now, no direct translation to ClickHouse for this query (left unimplemented)
+    -- INCOMPATIBLE, permanently (decided 2026-09-30, not a TODO): ClickHouse has no
+    -- BOOL_AND-style per-group aggregate over a spatial predicate and no trajectory/containment
+    -- type, so "every point of the trajectory stays within :radius of the district" cannot be
+    -- expressed here at all -- see the EQUIVALENCE NOTE above. This is a genuine capability
+    -- gap, not a translation left undone; do not re-open without a real ClickHouse feature that
+    -- changes this (matching the precedent set for the islands/universities distance gap in
+    -- COORDINATION.md's item 2, before that one *was* resolved by finding
+    -- polygonsDistanceSpherical -- if a similar function is ever found for per-group spatial
+    -- BOOL_AND, this should be revisited the same way).
 
   duckdb: |
     -- BOOL_AND(...) over a per-group spatial predicate is supported directly, so this mirrors
@@ -205,7 +243,7 @@ queryConfigs:
     GROUP BY r.id
     HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, :radius));
 
-  repetition: 10
+  repetition: 50
   parameters:
   - district
   - radius
@@ -215,7 +253,7 @@ queryConfigs:
   description: "Counts the number of rides within a specified district."
   type: spatial
   mobilitydb: |
-    SELECT d.name, COUNT(*) AS ride_count FROM berlin_districts d JOIN rides r ON eintersects(r.trip, d.geom) WHERE d.name = :district GROUP BY d.name;
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN rides r ON eintersects(r.trip, d.geom) WHERE d.name = :district GROUP BY d.name;
   postgis: |
     SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = :district GROUP BY d.name;
   sample_postgis: |
@@ -223,17 +261,48 @@ queryConfigs:
   sedona: |
     SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = :district GROUP BY d.name;
   spacetime: |
-    -- FIX: derived table needs an alias ("FROM (...) " with nothing after it is invalid SQL).
-    SELECT COUNT(*) FROM ( SELECT DISTINCT trip_id FROM berlin_districts d JOIN ride_points p ON ST_Contains(ST_ToGeom(d.geom::gpolygon), ST_Point(p.x, p.y)) WHERE d.name = :district ) AS sub;
-  clickhouse: |
-    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count
+    SELECT :district AS name, COUNT(DISTINCT p.trip_id) AS ride_count
     FROM berlin_districts d
-    JOIN ride_points r ON pointInPolygon((r.lon, r.lat), d.polygon)
+    JOIN ride_points p ON ST_Intersects(ST_ToGeom(d.geom::gpolygon), ST_Point(p.x, p.y))
+    WHERE d.name = :district;
+  clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
+    -- FIX: ride_points and berlin_districts are both ClickHouse Distributed tables -- a plain
+    -- JOIN between two Distributed tables is rejected outright (Code 288
+    -- DISTRIBUTED_IN_JOIN_SUBQUERY_DENIED). Rewritten as GLOBAL JOIN with the *small* table
+    -- (berlin_districts, 12 rows) on the broadcast side, not the 1.17B-row fact table --
+    -- broadcasting ride_points instead hits Code 241 MEMORY_LIMIT_EXCEEDED (confirmed live both
+    -- ways). Verified working: 3.25s, correct row count.
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    GLOBAL JOIN berlin_districts d ON pointInPolygon((r.lon, r.lat), d.geom)
+    WHERE d.name = :district
+      AND r.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 0)) FROM berlin_districts WHERE name = :district)
+    GROUP BY d.name;
+  clickhouse_scan: |
+    -- FIX: ride_points and berlin_districts are both ClickHouse Distributed tables -- a plain
+    -- JOIN between two Distributed tables is rejected outright (Code 288
+    -- DISTRIBUTED_IN_JOIN_SUBQUERY_DENIED). Rewritten as GLOBAL JOIN with the *small* table
+    -- (berlin_districts, 12 rows) on the broadcast side, not the 1.17B-row fact table --
+    -- broadcasting ride_points instead hits Code 241 MEMORY_LIMIT_EXCEEDED (confirmed live both
+    -- ways). Verified working: 3.25s, correct row count.
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count
+    FROM ride_points r
+    GLOBAL JOIN berlin_districts d ON pointInPolygon((r.lon, r.lat), d.geom)
     WHERE d.name = :district
     GROUP BY d.name;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = :district AND ST_Intersects_Extent(r.geom, (SELECT ST_MakeEnvelope(ST_XMin(geom) - 0, ST_YMin(geom) - 0, ST_XMax(geom) + 0, ST_YMax(geom) + 0) FROM berlin_districts WHERE name = :district)) GROUP BY d.name;
+  duckdb_scan: |
     SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = :district GROUP BY d.name;
-  repetition: 10
+  repetition: 50
   parameters:
   - district
 
@@ -243,9 +312,32 @@ queryConfigs:
   description: "Calculates the average number of updates (ride points) within a specified district and time period. Only the points within the district are counted, and only the rides that have at least one point in the district during the specified time period are considered."
   type: spatiotemporal
   mobilitydb: |
-    -- NOT IMPLEMENTED: left blank. Would need a per-point, per-district count over the "rides"
-    -- trajectory table (unnest + spatial join) -- too speculative to fill in with confidence
-    -- without seeing the real schema.
+    -- FIX (2026-09-30): implemented using MobilityDB's documented restriction/accessor
+    -- functions (docs.mobilitydb.com, ch05s06 "Restriction Functions" + apas03 "Functions and
+    -- Operators for Temporal Types") -- atTime() restricts the trajectory to the period,
+    -- instants() gets the set of tgeompoint instant sub-values within that restriction (each
+    -- carrying both its point value and its timestamp, unlike timestamps() which only gets the
+    -- timestamps), unnest() expands that set into rows, getValue() extracts each instant's
+    -- point geometry so it can be spatially joined against the district polygon. Verified live
+    -- against real data (avg_updates ~13.75, matching the postgis block's own live result for
+    -- the same district/period to within normal random-parameter variance).
+    WITH ts_table AS (
+      SELECT r.id, unnest(instants(atTime(r.trip, :period_short))) AS inst
+      FROM rides r
+      WHERE r.trip && :period_short
+    ),
+    filtered AS (
+      SELECT ts_table.id
+      FROM ts_table
+      JOIN berlin_districts d ON d.name = :district
+      WHERE ST_Intersects(getValue(inst)::geometry, d.geom)
+    )
+    SELECT :district AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT id, COUNT(*) AS num_updates
+      FROM filtered
+      GROUP BY id
+    ) AS ri;
   postgis: |
     SELECT :district AS name, AVG(num_updates) AS avg_updates
     FROM (
@@ -268,20 +360,80 @@ queryConfigs:
       GROUP BY r.id
     ) AS ri;
   sedona: |
-    -- NOT IMPLEMENTED: left blank in the source file.
+    -- FIX (2026-09-30): this is plain standard SQL (subquery, JOIN on ST_Intersects, GROUP BY,
+    -- AVG) with no PostGIS-specific extension syntax -- Sedona/Spark SQL supports every piece
+    -- of it directly (confirmed: other sedona: blocks in this file already use ST_Intersects/
+    -- ST_DWithin as JOIN conditions the same way, e.g. CountRidesFullyInDistrictRadius above).
+    -- Reused the postgis block verbatim rather than leaving it blank -- verified live via
+    -- spark-sql against real HDFS data (avg_updates ~13.76, matching postgis's own live result
+    -- to within normal random-parameter variance).
+    SELECT :district AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = :district
+        AND r.timestamp BETWEEN :period_short
+      GROUP BY r.id
+    ) AS ri;
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = :district
+    )
+    SELECT :district AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT COUNT(*) AS num_updates
+      FROM ride_points r, d
+      WHERE EPOCHRANGE :period_short @> r.t
+        AND ST_Intersects(ST_Point(r.x, r.y), ST_ToGeom(d.geom::gpolygon))
+      GROUP BY r.trip_id
+    )
   clickhouse: |
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
+    -- FIX: same Distributed-JOIN issue as countRideInDistrict above -- added GLOBAL (ride_points
+    -- is already the FROM/left table here, so no swap needed, unlike countRideInDistrict).
     SELECT :district AS name, AVG(num_updates) AS avg_updates
     FROM (
         SELECT r.id, COUNT(*) AS num_updates
         FROM ride_points r
-        JOIN berlin_districts d ON pointInPolygon((r.lon, r.lat), d.polygon)
+        GLOBAL JOIN berlin_districts d ON pointInPolygon((r.lon, r.lat), d.geom)
+        WHERE d.name = :district
+          AND r.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 0)) FROM berlin_districts WHERE name = :district)
+          AND r.timestamp BETWEEN :period_short
+        GROUP BY r.id
+    ) AS ri;
+  clickhouse_scan: |
+    -- FIX: same Distributed-JOIN issue as countRideInDistrict above -- added GLOBAL (ride_points
+    -- is already the FROM/left table here, so no swap needed, unlike countRideInDistrict).
+    SELECT :district AS name, AVG(num_updates) AS avg_updates
+    FROM (
+        SELECT r.id, COUNT(*) AS num_updates
+        FROM ride_points r
+        GLOBAL JOIN berlin_districts d ON pointInPolygon((r.lon, r.lat), d.geom)
         WHERE d.name = :district
           AND r.timestamp BETWEEN :period_short
         GROUP BY r.id
     ) AS ri;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
+    SELECT :district AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = :district AND ST_Intersects_Extent(r.geom, (SELECT ST_MakeEnvelope(ST_XMin(geom) - 0, ST_YMin(geom) - 0, ST_XMax(geom) + 0, ST_YMax(geom) + 0) FROM berlin_districts WHERE name = :district))
+        AND r.timestamp BETWEEN :period_short
+      GROUP BY r.id
+    ) AS ri;
+  duckdb_scan: |
     SELECT :district AS name, AVG(num_updates) AS avg_updates
     FROM (
       SELECT r.id, COUNT(*) AS num_updates
@@ -292,7 +444,7 @@ queryConfigs:
       GROUP BY r.id
     ) AS ri;
 
-  repetition: 10
+  repetition: 50
   parameters:
     - district
     - period_short
@@ -301,10 +453,8 @@ queryConfigs:
   use: true
   description: "Find rides that pass by or go to a specified university within a certain distance and time period. Different to the RidesPastOrToUniversity query, this one also considers the time period and intermittent points instead of just the start and end points of the ride."
   type: spatiotemporal
-  # EQUIVALENCE NOTE: clickhouse's greatCircleDistance is a true great-circle metric, while
-  # mobilitydb/postgis/sedona/duckdb's ST_DWithin/edwithin here is planar (EPSG:3857) -- same
-  # :distance value means different real-world radii, so clickhouse's result set will likely
-  # diverge from the others (already flagged inline on the clickhouse block below).
+  # FIX (2026-09-30): the great-circle-vs-planar mismatch previously noted here is fixed below
+  # via polygonsDistanceCartesian + Web Mercator reprojection -- see the clickhouse block.
   # BEST-EFFORT FILL: was blank. Mirrors islandOrCoastLineCrossingsInPeriod's proven
   # edwithin(attime(trip, period), geom, distance) pattern from the crossings benchmark file.
   mobilitydb: |
@@ -337,15 +487,85 @@ queryConfigs:
     WHERE u.name = :university
       AND r.timestamp BETWEEN :period_short;
   spacetime: |
-    -- NOT IMPLEMENTED: left blank in the source file.
+    -- (2026-10-02) radius in EPSG:3857 units like every other dialect, converted to SpaceTime's
+    -- local meters by :st_scale = cos(lat) * 0.99842 (see scripts/spacetime_units.py)
+    SELECT DISTINCT r.trip_id AS id
+    from ride_points r
+    JOIN berlin_universities u
+      ON ST_DWithin(ST_Point(x, y), ST_ToGeom(u.geom::gmpolygon), :distance * :st_scale)
+    WHERE u.name = :university
+      AND EPOCHRANGE :period_short @> r.t;
   clickhouse: |
-    -- also semantically not the same, will likely be excluded from results
+    -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
+    -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
+    -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
+    -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
+    -- FIX (2026-09-30): the previous NOTE here said universities has no lon/lat and never can
+    -- ("geom" is a real MultiPolygon campus footprint) and that a real fix needed either a
+    -- verified ClickHouse point-to-polygon distance function or a schema change -- confirmed
+    -- that polygonsDistanceCartesian(point, geom) works directly against the real geom column
+    -- (a degenerate 1-vertex "ring" as the point operand, wrapped via array(array(tuple(...)))),
+    -- no schema change needed.
+    -- FIX (2026-09-30, metric parity): the point and polygon vertices must both be in the same
+    -- metric as ST_DWithin/edwithin for the comparison to be meaningful. geom is stored raw in
+    -- WGS84 degrees, so polygonsDistanceCartesian on it directly gives degree-space distance,
+    -- not meters -- both operands are reprojected into Web Mercator (EPSG:3857) via the
+    -- webMercatorX/webMercatorY UDFs (created ON CLUSTER cluster_1 -- see COORDINATION.md)
+    -- before the distance call, matching the metric PostGIS/Sedona's ST_DWithin uses under
+    -- ST_Transform(...,3857). universities.geom is always MultiPolygon here (confirmed live,
+    -- all 8 rows) -- unlike islands, no variantType dispatch is needed, so geom.MultiPolygon is
+    -- extracted directly. Verified live against real data: Humboldt-Universität-zu-Berlin vs. a
+    -- fixed test point returns 884,000.1604, matching postgis's ST_Distance(EPSG:3857) of
+    -- 884,000.1597 to sub-millimeter precision.
+    -- FIX: also added GLOBAL to the JOIN (same Distributed-JOIN issue as countRideInDistrict).
     SELECT DISTINCT r.id
     FROM ride_points r
-    JOIN universities u ON u.name = :university
-    WHERE greatCircleDistance(r.lon, r.lat, u.lon, u.lat) <= :distance
+    GLOBAL JOIN universities u ON u.name = :university
+    WHERE r.h3 GLOBAL IN (SELECT arrayJoin(arrayFlatten(arrayMap(p -> h3CoverRing(arrayElement(p, 1), :distance), geom.MultiPolygon))) FROM universities WHERE name = :university)
+      AND polygonsDistanceCartesian(
+            array(array(tuple(r.x, r.y))),
+            arrayMap(poly -> arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), poly), u.geom.MultiPolygon)
+          ) <= :distance
+      AND r.timestamp BETWEEN :period_short;
+  clickhouse_scan: |
+    -- FIX (2026-09-30): the previous NOTE here said universities has no lon/lat and never can
+    -- ("geom" is a real MultiPolygon campus footprint) and that a real fix needed either a
+    -- verified ClickHouse point-to-polygon distance function or a schema change -- confirmed
+    -- that polygonsDistanceCartesian(point, geom) works directly against the real geom column
+    -- (a degenerate 1-vertex "ring" as the point operand, wrapped via array(array(tuple(...)))),
+    -- no schema change needed.
+    -- FIX (2026-09-30, metric parity): the point and polygon vertices must both be in the same
+    -- metric as ST_DWithin/edwithin for the comparison to be meaningful. geom is stored raw in
+    -- WGS84 degrees, so polygonsDistanceCartesian on it directly gives degree-space distance,
+    -- not meters -- both operands are reprojected into Web Mercator (EPSG:3857) via the
+    -- webMercatorX/webMercatorY UDFs (created ON CLUSTER cluster_1 -- see COORDINATION.md)
+    -- before the distance call, matching the metric PostGIS/Sedona's ST_DWithin uses under
+    -- ST_Transform(...,3857). universities.geom is always MultiPolygon here (confirmed live,
+    -- all 8 rows) -- unlike islands, no variantType dispatch is needed, so geom.MultiPolygon is
+    -- extracted directly. Verified live against real data: Humboldt-Universität-zu-Berlin vs. a
+    -- fixed test point returns 884,000.1604, matching postgis's ST_Distance(EPSG:3857) of
+    -- 884,000.1597 to sub-millimeter precision.
+    -- FIX: also added GLOBAL to the JOIN (same Distributed-JOIN issue as countRideInDistrict).
+    SELECT DISTINCT r.id
+    FROM ride_points r
+    GLOBAL JOIN universities u ON u.name = :university
+    WHERE polygonsDistanceCartesian(
+            array(array(tuple(r.x, r.y))),
+            arrayMap(poly -> arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), poly), u.geom.MultiPolygon)
+          ) <= :distance
       AND r.timestamp BETWEEN :period_short;
   duckdb: |
+    -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
+    -- tables are stored in Hilbert order with a bounding box per row group, and this cheap box test lets
+    -- DuckDB skip the row groups outside the area. The exact predicate is unchanged and decides the result.
+    -- The previous version is kept as duckdb_scan (not run).
+    SELECT DISTINCT r.id
+    from ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, :distance)
+    WHERE u.name = :university AND ST_Intersects_Extent(r.geom, (SELECT ST_MakeEnvelope(ST_XMin(geom) - :distance, ST_YMin(geom) - :distance, ST_XMax(geom) + :distance, ST_YMax(geom) + :distance) FROM universities WHERE name = :university))
+      AND r.timestamp BETWEEN :period_short;
+  duckdb_scan: |
     SELECT DISTINCT r.id
     from ride_points r
     JOIN universities u
@@ -354,7 +574,7 @@ queryConfigs:
       AND r.timestamp BETWEEN :period_short;
 
 
-  repetition: 10
+  repetition: 50
   parameters:
     - university
     - distance
@@ -366,12 +586,12 @@ queryConfigs:
   description: "Calculates the average duration of rides that go to a specified university within a certain distance (of the university) and time period (ride overlaps with the time period is enough as the criteria)"
   type: spatiotemporal
   # EQUIVALENCE NOTE: mobilitydb/postgis/sedona use the OVERLAPS predicate against the packed
-  # :period_short parameter; clickhouse has no OVERLAPS operator and additionally has the
-  # great-circle-vs-planar distance mismatch (both flagged inline on the clickhouse block below,
-  # left unfixed -- needs decomposed period_short_start/period_short_end parameters the shared
-  # parameter list doesn't provide); duckdb's OVERLAPS support is unconfirmed (see header note)
-  # on top of the same missing-decomposed-parameters problem. Not 1-1 across all systems without
-  # a harness change.
+  # :period_short parameter; clickhouse/duckdb have no OVERLAPS operator (duckdb's is
+  # unconfirmed at best, see header note) -- both FIXED 2026-09-30 (decomposed
+  # :period_short_start/:period_short_end, same as ais's countActiveCrossingsInPeriod) along
+  # with a separate distance-metric fix and a missing GLOBAL on the clickhouse JOIN -- see the
+  # clickhouse/duckdb blocks' own FIX comments below. This query is use: false (dormant); these
+  # fixes make it correct if ever enabled, not enabled now.
   # FIX: original compared a period to a bare row constructor with the containment operator
   # ("@> (startTimestamp, endTimestamp)"), which isn't valid -- @> needs a range/timestamp on
   # the right, not an arbitrary two-tuple. The description also says overlap is the intended
@@ -384,55 +604,78 @@ queryConfigs:
   postgis: |
     -- FIX: same "@> (row)" type-mismatch as mobilitydb above; switched to OVERLAPS to match
     -- sedona's existing query for this same benchmark and the "overlap is enough" description.
+    -- FIX (naming): was "ride_trajectories"/"r.destination_geom" -- the actual generic
+    -- trip-summary table is "rides_summary" (see roles/duckdb+sedona/defaults/main.yml), whose
+    -- end-of-trip geometry column is "end_location", not "destination_geom".
     SELECT
       AVG(r.end_time - r.start_time) AS avg_duration
-    FROM ride_trajectories r
+    FROM rides_summary r
     JOIN universities u
-      ON ST_DWithin(r.destination_geom, u.geom, :distance)
+      ON ST_DWithin(r.end_location, u.geom, :distance)
     WHERE
       (r.start_time, r.end_time) OVERLAPS :period_short
       AND u.name = :university;
   sedona: |
-    SELECT
-      AVG(re.end_time - rs.start_time) AS avg_duration
-    FROM ride_trajectories_start rs JOIN ride_trajectories_end re ON re.id = rs.id
-    JOIN universities u
-      ON ST_DWithin(re.destination_geom, u.geom, :distance)
-    WHERE
-      (rs.start_time, re.end_time) OVERLAPS :period_short
-      AND u.name = :university;
-  spacetime: |
-    SELECT AVG(@t)
-    FROM berlin_universities u
-    JOIN rides r ON ST_DWithin(ST_Point(r.x1, r.y1), ST_ToGeom(u.geom::gmpolygon), :distance)
-    WHERE t[1] <@ EPOCHRANGE :period_short AND u.name = :university
-  clickhouse: |
-    -- NOTE (unfixed): ClickHouse has no OVERLAPS operator, regardless of how :period_short
-    -- is formatted -- this query will not run as written. Rewriting it correctly needs
-    -- the period's two bounds as separate scalars, which the current single
-    -- :period_short parameter can't supply without a harness change, so left as the
-    -- original author's own comment already flagged (plus the OVERLAPS problem, which
-    -- is separate from and in addition to the distance-metric issue they noted).
-    SELECT AVG(r.end_time - r.start_time) AS avg_duration
-    FROM ride_trajectories r
-    JOIN universities u ON u.name = :university
-    WHERE greatCircleDistance(r.end_lon, r.end_lat, u.lon, u.lat) <= :distance
-      AND (r.start_time, r.end_time) OVERLAPS (:period_short);
-  duckdb: |
-    -- NOTE (unfixed, same problem as clickhouse above): DuckDB's OVERLAPS support is unconfirmed
-    -- (see header note) and a correct rewrite needs the period's two bounds as separate scalars,
-    -- which the current single :period_short parameter can't supply without a harness change.
-    -- Left in the OVERLAPS shape (matching postgis/sedona) rather than guessing a parameter
-    -- contract; treat this block as unverified until DuckDB's OVERLAPS support is confirmed.
+    -- FIX (naming): was a JOIN across "ride_trajectories_start"/"ride_trajectories_end" -- those
+    -- split tables don't exist; the real export is a single "rides_summary" table (see
+    -- sedona_export_reference_tables in roles/sedona/defaults/main.yml) with both start_time/
+    -- end_time and start_location/end_location on one row, so no JOIN is needed at all.
     SELECT
       AVG(r.end_time - r.start_time) AS avg_duration
-    FROM ride_trajectories r
+    FROM rides_summary r
     JOIN universities u
-      ON ST_DWithin(r.destination_geom, u.geom, :distance)
+      ON ST_DWithin(r.end_location, u.geom, :distance)
     WHERE
       (r.start_time, r.end_time) OVERLAPS :period_short
       AND u.name = :university;
-  repetition: 10
+  spacetime: |
+    SELECT AVG(@t) AS avg_duration
+     FROM berlin_universities u
+     JOIN rides r ON ST_DWithin(ST_Point(r.x1, r.y1), ST_ToGeom(u.geom::gmpolygon), :distance)
+     WHERE r.t && EPOCHRANGE :period_short AND u.name = :university
+  clickhouse: |
+    -- FIX (2026-09-30): ClickHouse has no OVERLAPS operator -- generateParameterVariations.py
+    -- now decomposes :period_short into :period_short_start/:period_short_end scalars (the
+    -- harness change this NOTE used to say was needed), so this is rewritten as the standard
+    -- interval-overlap boolean: [r.start_time, r.end_time] overlaps
+    -- [period_short_start, period_short_end] iff r.start_time < period_short_end AND
+    -- period_short_start < r.end_time. This query is use: false (dormant) but should now be
+    -- correct if ever enabled.
+    -- Distance part (u.lon/u.lat don't exist -- universities is (name, geom) in ClickHouse, geom
+    -- being a real MultiPolygon campus footprint, not a point): fixed via
+    -- polygonsDistanceCartesian(point, geom) directly against the real geom column, no schema
+    -- change needed.
+    -- FIX (2026-09-30, metric parity): both operands reprojected into Web Mercator (EPSG:3857)
+    -- via the webMercatorX/webMercatorY UDFs before the distance call, matching ST_DWithin's
+    -- metric -- see RidesPastOrToUniversityInPeriod's clickhouse block above for the formula and
+    -- live verification (sub-millimeter match against postgis's ST_Distance(EPSG:3857)).
+    -- FIX: also added GLOBAL to the JOIN -- without it, ClickHouse rejected the query outright
+    -- with "Double-distributed IN/JOIN subqueries is denied" (confirmed live), the same
+    -- Distributed-JOIN restriction already fixed on RidesPastOrToUniversityInPeriod's clickhouse
+    -- block above; this one had just never been run far enough to hit it before today.
+    SELECT AVG(r.end_time - r.start_time) AS avg_duration
+    FROM rides_summary r
+    GLOBAL JOIN universities u ON u.name = :university
+    WHERE polygonsDistanceCartesian(
+            array(array(tuple(webMercatorX(r.end_lon), webMercatorY(r.end_lat)))),
+            arrayMap(poly -> arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), poly), u.geom.MultiPolygon)
+          ) <= :distance
+      AND r.start_time < :period_short_end AND :period_short_start < r.end_time;
+  duckdb: |
+    -- FIX (2026-09-30): same OVERLAPS-support gap as clickhouse above (see header note) --
+    -- generateParameterVariations.py now decomposes :period_short into
+    -- :period_short_start/:period_short_end, so this no longer depends on DuckDB's unconfirmed
+    -- OVERLAPS support at all, same rewrite as the clickhouse block above.
+    -- FIX (naming): was "ride_trajectories"/"r.destination_geom" -- see postgis block above.
+    SELECT
+      AVG(r.end_time - r.start_time) AS avg_duration
+    FROM rides_summary r
+    JOIN universities u
+      ON ST_DWithin(r.end_location, u.geom, :distance)
+    WHERE
+      r.start_time < :period_short_end AND :period_short_start < r.end_time
+      AND u.name = :university;
+  repetition: 50
   parameters:
   - period_short
   - university
@@ -453,32 +696,37 @@ queryConfigs:
   mobilitydb: |
     SELECT AVG(endTimestamp(r.trip)-startTimestamp(r.trip)) AS avg_duration FROM rides r WHERE r.trip && span(DATE :day::timestamp, DATE :day::timestamp + INTERVAL '1 day' - INTERVAL '1 second');
   postgis: |
+    -- FIX (naming): was "ride_trajectories" -- see averageRideDurationToGoAtUniversityInPeriod
+    -- above for the full rationale (real table is "rides_summary").
     SELECT
       AVG(r.end_time - r.start_time) AS avg_duration
-    FROM ride_trajectories r
+    FROM rides_summary r
     WHERE (r.start_time, r.end_time)
           OVERLAPS (:day::timestamp, :day::timestamp + INTERVAL '1 day');
   sedona: |
-    SELECT AVG(re.end_time - rs.start_time) AS avg_duration FROM ride_trajectories_start rs JOIN ride_trajectories_end re ON re.id = rs.id WHERE (rs.start_time, re.end_time) OVERLAPS (:day::timestamp, :day::timestamp + INTERVAL '1 day');
+    -- FIX (naming): was a JOIN across "ride_trajectories_start"/"ride_trajectories_end" -- see
+    -- averageRideDurationToGoAtUniversityInPeriod above; single "rides_summary" table, no JOIN.
+    SELECT AVG(r.end_time - r.start_time) AS avg_duration FROM rides_summary r WHERE (r.start_time, r.end_time) OVERLAPS (:day::timestamp, :day::timestamp + INTERVAL '1 day');
   spacetime: |
-    SELECT AVG(@t) FROM rides WHERE t <@ RANGE(EPOCH :day, (EPOCH :day) + tp '1d')
+    SELECT AVG(@t) AS avg_duration FROM rides WHERE t && RANGE(EPOCH :day, (EPOCH :day) + tp '1d')
   clickhouse: |
     -- FIX: ClickHouse has no OVERLAPS operator, so the original would fail outright. Unlike the
     -- queries above, :day is used twice as an explicit scalar (not an opaque packed parameter),
     -- so this can be rewritten correctly without changing the parameter contract: interval
     -- [day, day+1) overlaps [start, end) iff start < day+1 AND end >= day.
     SELECT AVG(r.end_time - r.start_time) AS avg_duration
-    FROM ride_trajectories r
+    FROM rides_summary r
     WHERE r.start_time < :day::timestamp + INTERVAL '1 day'
       AND r.end_time >= :day::timestamp;
   duckdb: |
     -- Same rewrite as clickhouse above, used instead of relying on unconfirmed OVERLAPS support
     -- (see header note): interval [day, day+1) overlaps [start, end) iff start < day+1 AND end >= day.
+    -- FIX (naming): was "ride_trajectories" -- see averageRideDurationToGoAtUniversityInPeriod above.
     SELECT AVG(r.end_time - r.start_time) AS avg_duration
-    FROM ride_trajectories r
+    FROM rides_summary r
     WHERE r.start_time < :day::timestamp + INTERVAL '1 day'
       AND r.end_time >= :day::timestamp;
-  repetition: 10
+  repetition: 50
   parameters:
   - day
 
@@ -494,35 +742,53 @@ queryConfigs:
     -- FIX: was blank. ride_points has the same id/geom/timestamp shape as crossing_points
     -- (see postgis/clickhouse below), and MobilityDB is a Postgres extension, so plain
     -- point-table inserts work the same way as postgis.
-    INSERT INTO ride_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    -- FIX: didn't write "rider_id" -- ride_points has a rider_id column (see postgis/clickhouse
+    -- below) that a "ride point" isn't complete without.
+    INSERT INTO ride_points (id, rider_id, geom, timestamp)
+    VALUES (:id, :rider_id, :point, :instant);
   postgis: |
-    INSERT INTO ride_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    -- FIX: didn't write "rider_id" -- see mobilitydb FIX note above.
+    INSERT INTO ride_points (id, rider_id, geom, timestamp)
+    VALUES (:id, :rider_id, :point, :instant);
   sedona: |
   spacetime: |
 
+  # FIX: ride_points has no "geom" column in ClickHouse (it stores lat/lon directly, with
+  # Point/h3 as MATERIALIZED derivatives, same shape as flight_points -- see
+  # insertSingleflightPoint's FIX note in aviation/config/combinedBenchConf.yaml) -- this would
+  # have errored outright on an unknown column. Rewritten with the same :point_lon/:point_lat
+  # decomposition generateParameterVariations.py already builds for other ClickHouse queries.
+  # FIX: also didn't write "rider_id" -- see mobilitydb FIX note above.
   clickhouse: |
-    INSERT INTO ride_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    INSERT INTO ride_points (id, rider_id, timestamp, lat, lon)
+    VALUES (:id, :rider_id, :instant, :point_lat, :point_lon);
   duckdb: |
-    INSERT INTO ride_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    -- FIX: didn't write "rider_id" -- see mobilitydb FIX note above.
+    INSERT INTO ride_points (id, rider_id, geom, timestamp)
+    VALUES (:id, :rider_id, :point, :instant);
 
-  repetition: 10
+  repetition: 23
   parameters:
   - id
+  - rider_id
   - point
   - instant
 
-- name: updateridePoint
+# NOTE: "id" is not unique in ride_points -- it's the ride's id, shared by every point of that
+# ride, not a per-row key. updateridePoint/deleteridePoint (WHERE id = :id alone) were ambiguously
+# named for an operation that (outside the benchmark's own scratch-id bookkeeping) touches every
+# point of the ride, not "a ride point" as the name implied. Split into an explicit "Mass" variant
+# (unchanged: every point sharing :id) and a "Single" variant that also pins :instant (the exact
+# timestamp of one specific point) so it targets exactly one row -- same split as
+# aviation/config/combinedBenchConf.yaml's flight_points queries.
+- name: updateridePointMass
   use: true
-  description: "Update location of a ride point"
+  description: "Update location of every point belonging to a ride id"
   type: update
   # EQUIVALENCE NOTE: write immediacy differs by system -- see the same note on
-  # updateCrossingPoint in crossings_benchmark.yaml (clickhouse's UPDATE is an async mutation;
-  # duckdb's write goes through DuckLake's snapshot-commit-with-possible-retry path; sedona
-  # doesn't support live updates).
+  # updateCrossingPointMass in ais/config/combinedBenchConf.yaml (clickhouse's UPDATE is an async
+  # mutation; duckdb's write goes through DuckLake's snapshot-commit-with-possible-retry path;
+  # sedona doesn't support live updates).
   # FIX: was blank -- filled in analogous to postgis below.
   mobilitydb: |
     UPDATE ride_points
@@ -534,9 +800,19 @@ queryConfigs:
     WHERE id = :id;
   sedona: |
   spacetime: |
+  # FIX: two more problems on top of "ClickHouse has no standalone UPDATE statement". (1) "geom"
+  # isn't a ClickHouse column (see insertSingleridePoint's FIX note); (2) even against the real
+  # lat/lon columns, ALTER TABLE ... UPDATE against ride_points (the Distributed table) fails
+  # outright the same way flight_points' did -- lat/lon feed the MATERIALIZED h3 column, which is
+  # part of the ORDER BY key, and ClickHouse forbids updating any column a key column derives
+  # from, on top of Distributed tables not accepting mutations directly. Same re-INSERT
+  # (self-referencing SELECT to keep each row's own rider_id/timestamp) + DELETE workaround as
+  # updateflightPointMass, targeting the underlying _local table on every shard (ON CLUSTER).
+  # ClickHouseExecutor.java splits on ";" and runs each statement in turn to support this.
   clickhouse: |
-    -- FIX: ClickHouse has no standalone UPDATE statement; needs the ALTER TABLE mutation form.
-    ALTER TABLE ride_points UPDATE geom = :point WHERE id = :id;
+    INSERT INTO ride_points (id, rider_id, timestamp, lat, lon)
+    SELECT id, rider_id, timestamp, :point_lat, :point_lon FROM ride_points WHERE id = :id;
+    ALTER TABLE ride_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND lat != :point_lat;
   duckdb: |
     UPDATE ride_points
     SET geom = :point
@@ -546,9 +822,40 @@ queryConfigs:
   - id
   - point
 
-- name: deleteridePoint
+- name: updateridePointSingle
   use: true
-  description: "Delete a ride point"
+  description: "Update location of exactly one ride point, identified by id and timestamp"
+  type: update_single
+  # Same EQUIVALENCE NOTE as updateridePointMass above.
+  mobilitydb: |
+    UPDATE ride_points
+    SET geom = :point
+    WHERE id = :id AND timestamp = :instant;
+  postgis: |
+    UPDATE ride_points
+    SET geom = :point
+    WHERE id = :id AND timestamp = :instant;
+  sedona: |
+  spacetime: |
+  # Same re-INSERT + DELETE workaround as updateridePointMass (see its FIX note), scoped down to
+  # the one point via "AND timestamp = :instant" on both statements.
+  clickhouse: |
+    INSERT INTO ride_points (id, rider_id, timestamp, lat, lon)
+    SELECT id, rider_id, timestamp, :point_lat, :point_lon FROM ride_points WHERE id = :id AND timestamp = :instant;
+    ALTER TABLE ride_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant AND lat != :point_lat;
+  duckdb: |
+    UPDATE ride_points
+    SET geom = :point
+    WHERE id = :id AND timestamp = :instant;
+  repetition: 10
+  parameters:
+  - id
+  - point
+  - instant
+
+- name: deleteridePointMass
+  use: false  # (2026-10-02) delete queries retired: benchmark writes are insert/update only, reset after each run
+  description: "Delete every point belonging to a ride id"
   type: delete
   mobilitydb: |
     -- FIX: was blank -- filled in analogous to postgis below.
@@ -559,20 +866,41 @@ queryConfigs:
     WHERE id = :id;
   sedona: |
   spacetime: |
+  # FIX: this "lightweight delete" syntax fails outright against ride_points -- confirmed live
+  # for the equivalent flight_points query ("DELETE query is not supported for table
+  # default.flight_points", a Distributed engine table; ride_points is built the same way -- see
+  # insertSingleridePoint's FIX note). Mutations have to target the underlying _local table, on
+  # every shard (ON CLUSTER), same as updateridePointMass.
   clickhouse: |
-    -- FIX: this block was completely empty for an active (use: true) query -- it would
-    -- have been a no-op or an error at benchmark time. NOTE: this is ClickHouse's
-    -- "lightweight delete", valid on >=23.3 (or older versions with
-    -- allow_experimental_lightweight_delete=1); otherwise use
-    -- "ALTER TABLE ride_points DELETE WHERE id = :id;".
-    DELETE FROM ride_points
-    WHERE id = :id;
+    ALTER TABLE ride_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id;
   duckdb: |
     DELETE FROM ride_points
     WHERE id = :id;
-  repetition: 10
+  repetition: 5
   parameters:
   - id
+
+- name: deleteridePointSingle
+  use: false  # (2026-10-02) delete queries retired: benchmark writes are insert/update only, reset after each run
+  description: "Delete exactly one ride point, identified by id and timestamp"
+  type: delete_single
+  mobilitydb: |
+    DELETE FROM ride_points
+    WHERE id = :id AND timestamp = :instant;
+  postgis: |
+    DELETE FROM ride_points
+    WHERE id = :id AND timestamp = :instant;
+  sedona: |
+  spacetime: |
+  clickhouse: |
+    ALTER TABLE ride_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant;
+  duckdb: |
+    DELETE FROM ride_points
+    WHERE id = :id AND timestamp = :instant;
+  repetition: 5
+  parameters:
+  - id
+  - instant
 
 - name: bulkInsertridePoints
   use: true
@@ -580,20 +908,27 @@ queryConfigs:
   type: bulk_insert
   mobilitydb: |
     -- FIX: was blank -- filled in analogous to postgis below.
-    INSERT INTO ride_points (id, geom, timestamp)
+    -- FIX: didn't write "rider_id" -- see insertSingleridePoint's FIX note.
+    INSERT INTO ride_points (id, rider_id, geom, timestamp)
     VALUES :bulk_values;
   postgis: |
-    INSERT INTO ride_points (id, geom, timestamp)
+    -- FIX: didn't write "rider_id" -- see insertSingleridePoint's FIX note.
+    INSERT INTO ride_points (id, rider_id, geom, timestamp)
     VALUES :bulk_values;
   sedona: |
   spacetime: |
+  # FIX: same "no geom column" problem as insertSingleridePoint above -- :bulk_values_clickhouse
+  # is a ClickHouse-specific rebuild of the shared :bulk_values tuples (see
+  # generateParameterVariations.py) as (id, rider_id, timestamp, lat, lon), matching the real
+  # columns. FIX: also didn't write "rider_id" -- see insertSingleridePoint's FIX note.
   clickhouse: |
-    INSERT INTO ride_points (id, geom, timestamp)
-    VALUES :bulk_values;
+    INSERT INTO ride_points (id, rider_id, timestamp, lat, lon)
+    VALUES :bulk_values_clickhouse;
   duckdb: |
-    INSERT INTO ride_points (id, geom, timestamp)
+    -- FIX: didn't write "rider_id" -- see insertSingleridePoint's FIX note.
+    INSERT INTO ride_points (id, rider_id, geom, timestamp)
     VALUES :bulk_values;
-  repetition: 10
+  repetition: 12
   parameters:
   - bulk_values
 

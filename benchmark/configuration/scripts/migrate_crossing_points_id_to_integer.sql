@@ -1,0 +1,115 @@
+-- One-time migration: crossing_points' id column is varchar (Postgres)/String (ClickHouse), but
+-- ride_points/flight_points/geolife_points are all bigint (Postgres) / UInt64 (ClickHouse) "id" --
+-- crossing_points is the only outlier. Root cause: server/multinode/data_processing/
+-- csv_to_parquet.py generates crossing_id as a genuine UInt64 from the start (it even filters
+-- crossing_id != 0 there as a known placeholder for "no distinct crossing"), so the varchar/String
+-- typing downstream was a mistake, not an intentional design choice -- restoring the real type
+-- also makes "id > 0" work directly again instead of needing a "!= '0'" string-comparison
+-- workaround (see combinedBenchConf.yaml's item 13 FIX comments, which this migration obsoletes).
+--
+-- Data verified safe to cast (2026-09-17): zero non-numeric id/crossing_id values in either
+-- Postgres or ClickHouse; max value 13,055,240,730 (11 digits), comfortably within bigint/UInt64.
+-- id = '0' placeholder rows: 1,822,712,501 in Postgres, 2,167,254,794 in ClickHouse (both cast to
+-- integer 0 cleanly, and the id > 0 filter across combinedBenchConf.yaml's 6 ais query names --
+-- CrossingsActiveAtGivenHourOfDay, busiestDayInWeekPeriod, countActiveCrossingsNearIsland,
+-- crossingsAroundHarbour, HarbourActivityInPeriod, islandOrCoastLineCrossingsInPeriod -- exists
+-- specifically to exclude these).
+--
+-- NOT run yet as of this writing -- prepared and reviewed, execution deferred because:
+--   1. Postgres: crossing_points is a live, currently-busy instance (geolife_points reload was
+--      in progress) -- this is a full rewrite of ~1.8B+ rows across 19 monthly partitions, heavy
+--      I/O, should run when the instance is otherwise idle.
+--   2. Postgres: crossing_points is a Citus distributed table, sharded ON the id column being
+--      changed (see create_distributed_table('crossing_points', 'id') in
+--      server/multinode/ansible/roles/postgis_ais/tasks/main.yml) -- changing a distribution
+--      key's type isn't a plain ALTER COLUMN TYPE, needs undistribute/alter/redistribute (below),
+--      untested against this Citus version -- try on a throwaway table or partition first.
+--   3. ClickHouse: independent of Postgres, lower risk, but still a full rewrite of ~6B rows
+--      across the cluster -- worth doing when cluster load is otherwise low too.
+-- After running, revert the ClickHouse/postgis/sedona/duckdb query text back from
+-- "c.crossing_id"/"!= '0'" to plain "c.id"/"> 0" -- combinedBenchConf.yaml already has this ready
+-- (see the item-13/14 FIX comments there, dated 2026-09-17), just needs regenerating +
+-- redeploying the benchmark_client jar afterward.
+--
+-- UPDATE (2026-09-17, per geobenchr-18): BOTH sections below are now MOOT for the live cluster --
+-- neither engine needs the in-place migration. crossing_points is queued last in geobenchr-18's
+-- reload pipeline on BOTH Postgres and ClickHouse (smallest-first ordering, same as the rest of
+-- the reload work), and both currently just hold old broken/duplicated pre-dedup-fix data that's
+-- getting replaced regardless. When geobenchr-18 gets to it: Postgres gets dropped + recreated
+-- from the now-corrected roles/postgis_ais CREATE TABLE def (id bigint); ClickHouse's
+-- crossing_points_local gets truncated + recreated from the now-corrected roles/clickhouse_ais
+-- CREATE TABLE def (id UInt64) and reloaded, the same way ride_points was already handled. No
+-- live ALTER/RENAME needed on either engine. Both sections below are kept only as reference for
+-- what an in-place migration would have looked like, in case this is ever needed for a table that
+-- isn't being reloaded from scratch -- not the plan for nst-1's crossing_points on either engine.
+
+-- ============================================================
+-- 1. Postgres -- NOT NEEDED for nst-1 (see UPDATE above). Kept for reference only.
+-- ============================================================
+-- Citus-aware: the distribution key itself is changing type, so a plain ALTER COLUMN TYPE is not
+-- expected to work. UNTESTED -- verify against a scratch/throwaway table first, and check
+-- `SELECT citus_version();` against Citus's own docs for the deployed version's supported path
+-- (undistribute_table/create_distributed_table existed as of Citus 11.1+; older versions may need
+-- a manual "create new table, copy data, rename" approach instead).
+-- BEGIN;
+--
+-- SELECT undistribute_table('crossing_points');
+--
+-- ALTER TABLE crossing_points
+--   ALTER COLUMN id TYPE bigint USING id::bigint;
+--
+-- -- crossing_points_id_idx (see postgis_ais/tasks/main.yml) should survive a same-column ALTER
+-- -- TYPE, but verify with \d crossing_points after -- recreate if it didn't:
+-- -- CREATE INDEX IF NOT EXISTS crossing_points_id_idx ON crossing_points (id);
+--
+-- SELECT create_distributed_table('crossing_points', 'id');
+--
+-- COMMIT;
+--
+-- Verify afterward:
+-- SELECT column_name, data_type FROM information_schema.columns
+--   WHERE table_name = 'crossing_points' AND column_name = 'id';
+-- SELECT count(*) FROM crossing_points WHERE id = 0;
+-- (row count depends entirely on the fresh reload's data, not the 1,822,712,501 figure above,
+-- which described the OLD data this table is being replaced with)
+
+-- ============================================================
+-- 2. ClickHouse -- NOT NEEDED for nst-1 either (see UPDATE above). Kept for reference only.
+-- ============================================================
+-- Run on any cluster node; ON CLUSTER propagates to all shards. RENAME COLUMN + MODIFY COLUMN are
+-- both metadata-level for a String -> UInt64 change where every value already parses cleanly
+-- (verified above) -- ClickHouse still has to rewrite the underlying column data for MODIFY
+-- COLUMN's type change (not a free metadata-only op like a plain rename would be), so expect this
+-- to take real time and I/O across ~6B rows -- not instant.
+--
+-- ALTER TABLE crossing_points_local ON CLUSTER cluster_1
+--   RENAME COLUMN crossing_id TO id;
+-- ALTER TABLE crossing_points_local ON CLUSTER cluster_1
+--   MODIFY COLUMN id UInt64;
+--
+-- The crossing_points Distributed table is defined as "AS crossing_points_local" (see
+-- clickhouse_ais/tasks/main.yml) so it should pick up the renamed/retyped column automatically --
+-- verify with DESCRIBE TABLE crossing_points afterward, don't assume.
+--
+-- Verify afterward:
+-- DESCRIBE TABLE crossing_points;  -- expect "id  UInt64", no crossing_id
+-- SELECT count() FROM crossing_points WHERE id = 0;  -- should be close to 2,167,254,794
+
+-- ============================================================
+-- 3. NOT covered by this script -- needs separate investigation before assuming the same fix
+-- ============================================================
+-- Sedona: reads crossing_points from an HDFS parquet export built from the same Postgres source
+-- (see roles/sedona/tasks/main.yml) -- very likely has the same varchar id, but not independently
+-- verified here (would need a Spark job to inspect the parquet schema; not run as part of this
+-- pass). Re-export from Postgres after step 1 runs, or verify+ALTER the existing parquet directly.
+--
+-- DuckDB: has its own materialized copy of these tables (see roles/duckdb's "Materialize
+-- GeoBenchr tables" task) -- also very likely has the same varchar id, not independently verified
+-- here. Deliberately not touched by this investigation -- the Quack server / DuckDB CLI file was
+-- flagged busy by another session (geolife_points RTREE index work) at the time this was written;
+-- check current status in COORDINATION.md before touching it.
+--
+-- SpaceTime: does NOT use a uniform "id" column at all -- its own schema keys per scenario
+-- (crossing_id, flight_id, etc. -- see purge_scratch_writes.sql's note on this), which appears to
+-- be SpaceTime's own intentional convention, not something to align to "id". Not part of this
+-- migration; flagging only so nobody assumes SpaceTime needs the same treatment.

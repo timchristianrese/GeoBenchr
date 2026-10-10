@@ -1,0 +1,345 @@
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Reinickendorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM tsdb_ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Reinickendorf'
+        AND r.timestamp BETWEEN '2026-06-02 17:45:41' AND '2026-06-02 19:43:42'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Reinickendorf
+  - '''2026-06-02 17:45:41'' AND ''2026-06-02 19:43:42'''
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Neukölln' GROUP BY d.name;
+  params:
+  - Neukölln
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 778)
+    WHERE u.name = 'Freie-Universität-Berlin'
+      AND r.timestamp BETWEEN '2026-06-02 07:57:59' AND '2026-06-02 09:22:02';
+  params:
+  - Freie-Universität-Berlin
+  - 778
+  - '''2026-06-02 07:57:59'' AND ''2026-06-02 09:22:02'''
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM tsdb_ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-01 15:45:12' AND '2026-06-01 16:59:29'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-01 15:45:12'' AND ''2026-06-01 16:59:29'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM tsdb_ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-02 11:14:37' AND '2026-06-02 12:57:39'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-02 11:14:37'' AND ''2026-06-02 12:57:39'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM tsdb_ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-04 13:35:53' AND '2026-06-04 14:17:04'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-04 13:35:53'' AND ''2026-06-04 14:17:04'''
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 877)
+    WHERE u.name = 'Technische-Universität-Berlin'
+      AND r.timestamp BETWEEN '2026-06-02 22:16:11' AND '2026-06-02 23:10:39';
+  params:
+  - Technische-Universität-Berlin
+  - 877
+  - '''2026-06-02 22:16:11'' AND ''2026-06-02 23:10:39'''
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM tsdb_ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-04 06:58:13' AND '2026-06-04 08:49:03'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-04 06:58:13'' AND ''2026-06-04 08:49:03'''
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf' GROUP BY d.name;
+  params:
+  - Charlottenburg-Wilmersdorf
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 875)
+    WHERE u.name = 'European-School-of-Management-and-Technology-Berlin'
+      AND r.timestamp BETWEEN '2026-06-04 12:41:44' AND '2026-06-04 13:12:21';
+  params:
+  - European-School-of-Management-and-Technology-Berlin
+  - 875
+  - '''2026-06-04 12:41:44'' AND ''2026-06-04 13:12:21'''
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Charlottenburg-Wilmersdorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM tsdb_ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Charlottenburg-Wilmersdorf'
+        AND r.timestamp BETWEEN '2026-06-04 13:12:53' AND '2026-06-04 14:43:48'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Charlottenburg-Wilmersdorf
+  - '''2026-06-04 13:12:53'' AND ''2026-06-04 14:43:48'''
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 463)
+    WHERE u.name = 'Charité-Campus-Klinik'
+      AND r.timestamp BETWEEN '2026-06-02 03:41:05' AND '2026-06-02 05:05:54';
+  params:
+  - Charité-Campus-Klinik
+  - 463
+  - '''2026-06-02 03:41:05'' AND ''2026-06-02 05:05:54'''
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM tsdb_ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-02 15:53:40' AND '2026-06-02 16:25:10'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-02 15:53:40'' AND ''2026-06-02 16:25:10'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM tsdb_ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-04 01:02:05' AND '2026-06-04 02:51:52'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-04 01:02:05'' AND ''2026-06-04 02:51:52'''
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Charlottenburg-Wilmersdorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM tsdb_ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Charlottenburg-Wilmersdorf'
+        AND r.timestamp BETWEEN '2026-06-04 02:35:51' AND '2026-06-04 04:05:09'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Charlottenburg-Wilmersdorf
+  - '''2026-06-04 02:35:51'' AND ''2026-06-04 04:05:09'''
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Steglitz-Zehlendorf' GROUP BY d.name;
+  params:
+  - Steglitz-Zehlendorf
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Spandau'
+    )
+    SELECT r.id
+    FROM tsdb_ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 433));
+  params:
+  - Spandau
+  - 433
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM tsdb_ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-02 04:20:48' AND '2026-06-02 05:57:41'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-02 04:20:48'' AND ''2026-06-02 05:57:41'''
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Lichtenberg'
+    )
+    SELECT r.id
+    FROM tsdb_ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 393));
+  params:
+  - Lichtenberg
+  - 393
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    from tsdb_ride_points r
+    JOIN universities u
+      ON ST_DWithin(r.geom, u.geom, 842)
+    WHERE u.name = 'Bard-College'
+      AND r.timestamp BETWEEN '2026-06-03 12:07:20' AND '2026-06-03 13:25:26';
+  params:
+  - Bard-College
+  - 842
+  - '''2026-06-03 12:07:20'' AND ''2026-06-03 13:25:26'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM tsdb_ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-01 16:32:41' AND '2026-06-01 17:35:46'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-01 16:32:41'' AND ''2026-06-01 17:35:46'''
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    SELECT r.id
+    FROM tsdb_ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-02 22:36:11' AND '2026-06-02 23:34:54'
+    GROUP BY r.id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM r.timestamp)) > 1;
+  params:
+  - '''2026-06-02 22:36:11'' AND ''2026-06-02 23:34:54'''
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Mitte' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM tsdb_ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Mitte'
+        AND r.timestamp BETWEEN '2026-06-03 22:19:58' AND '2026-06-03 23:20:47'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Mitte
+  - '''2026-06-03 22:19:58'' AND ''2026-06-03 23:20:47'''
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+  params:
+  - Tempelhof-Schöneberg
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN tsdb_ride_points r ON ST_Intersects(r.geom, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf' GROUP BY d.name;
+  params:
+  - Charlottenburg-Wilmersdorf
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Charlottenburg-Wilmersdorf'
+    )
+    SELECT r.id
+    FROM tsdb_ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 785));
+  params:
+  - Charlottenburg-Wilmersdorf
+  - 785
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT r.id) AS ride_count
+    FROM tsdb_ride_points r
+    WHERE r.timestamp BETWEEN '2026-06-04 14:39:49' AND '2026-06-04 16:24:09'
+      AND (EXTRACT(HOUR FROM r.timestamp) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM r.timestamp) BETWEEN 16 AND 18);
+  params:
+  - '''2026-06-04 14:39:49'' AND ''2026-06-04 16:24:09'''
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Treptow-Köpenick'
+    )
+    SELECT r.id
+    FROM tsdb_ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 123));
+  params:
+  - Treptow-Köpenick
+  - 123
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = 'Spandau'
+    )
+    SELECT r.id
+    FROM tsdb_ride_points r
+    JOIN d ON true
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 508));
+  params:
+  - Spandau
+  - 508
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT 'Reinickendorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT r.id, COUNT(*) AS num_updates
+      FROM tsdb_ride_points r
+      JOIN berlin_districts d ON ST_Intersects(r.geom, d.geom)
+      WHERE d.name = 'Reinickendorf'
+        AND r.timestamp BETWEEN '2026-06-04 20:05:21' AND '2026-06-04 20:43:53'
+      GROUP BY r.id
+    ) AS ri;
+  params:
+  - Reinickendorf
+  - '''2026-06-04 20:05:21'' AND ''2026-06-04 20:43:53'''

@@ -47,10 +47,16 @@
   become_user: "{{ ansible_user }}"
 
 - name: Create local crossing_points table (optimized for geo queries)
+  # FIX: id was "varchar" -- the only one of the 4 scenarios' point tables not using UInt64 like
+  # ride_points/flight_points/geolife_points, even though the source data (see
+  # server/multinode/data_processing/csv_to_parquet.py) generates crossing_id as UInt64 from the
+  # start. CREATE TABLE IF NOT EXISTS is a no-op against an already-provisioned cluster, so this
+  # only matters for a fresh deploy -- the existing nst-1 cluster needs
+  # benchmark/configuration/scripts/migrate_crossing_points_id_to_integer.sql run separately.
   shell: |
     clickhouse-client --port {{ ch_port }} --query "
     CREATE TABLE IF NOT EXISTS crossing_points_local ON CLUSTER cluster_1 (
-        crossing_id varchar,
+        id UInt64,
         timestamp DateTime,
         lat Float64,
         lon Float64,
@@ -59,7 +65,7 @@
     )
     ENGINE = ReplicatedMergeTree()
     PARTITION BY toYYYYMM(timestamp)
-    ORDER BY (h3, timestamp, crossing_id)
+    ORDER BY (h3, timestamp, id)
     SETTINGS index_granularity = 8192;
     "
   when: inventory_hostname in groups['masters']
@@ -86,7 +92,7 @@
     clickhouse-client --port {{ ch_port}}  --query "
     INSERT INTO crossing_points
     SELECT
-        crossing_id,
+        crossing_id AS id,
         toDateTime(t) AS timestamp,
         latitude,
         longitude

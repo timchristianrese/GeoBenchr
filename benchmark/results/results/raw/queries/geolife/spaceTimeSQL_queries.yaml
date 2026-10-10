@@ -1,0 +1,765 @@
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: |
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 1 AND ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (116.52415814692183 39.816789985129965)'::gpoint), 5000 * 0.766882)
+    ORDER BY ST_Distance(ST_Point(x, y), ST_ToGeom('POINT (116.52415814692183 39.816789985129965)'::gpoint))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.52415814692183, 39.816789985129965), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: |
+    LET minute_activity =
+      SELECT TS_TRUNC('minute', t) AS minute,
+             COUNT(IF(venue_id <> 0, 1, NULL)) AS venue_updates
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-21 10:16:05, 2019-07-21 21:54:45]'
+        AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.5041169205436 39.90839807322859, 116.60771282808577 39.90839807322859, 116.60771282808577 39.96538136682634, 116.5041169205436 39.96538136682634, 116.5041169205436 39.90839807322859))'::gpolygon))
+      GROUP BY 1;
+    SELECT a.minute, SUM(b.venue_updates) AS updates_in_window
+    FROM minute_activity a
+    JOIN minute_activity b ON b.minute BETWEEN a.minute - TP '10min' AND a.minute + TP '10min'
+    GROUP BY a.minute
+    ORDER BY a.minute;
+  params:
+  - '''2019-07-21 10:16:05'' AND ''2019-07-21 21:54:45'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.5041169205436, 39.90839807322859,
+    116.60771282808577, 39.96538136682634), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: |
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 1 AND ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (116.60678636985772 39.90701751966342)'::gpoint), 5000 * 0.765875)
+    ORDER BY ST_Distance(ST_Point(x, y), ST_ToGeom('POINT (116.60678636985772 39.90701751966342)'::gpoint))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.60678636985772, 39.90701751966342), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.24321925019548 39.977136774661325, 116.34681515773765 39.977136774661325, 116.34681515773765 40.03412006825908, 116.24321925019548 40.03412006825908, 116.24321925019548 39.977136774661325))'::gpolygon))
+    GROUP BY venue_type;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.24321925019548, 39.977136774661325,
+    116.34681515773765, 40.03412006825908), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH user_hour_activity AS (
+      SELECT TS_TRUNC('hour', t) AS hour, user_id
+      FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-09 02:53:02, 2019-07-11 04:50:33]' AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.31150698574375 39.91844889127771, 116.41510289328592 39.91844889127771, 116.41510289328592 39.975432184875466, 116.31150698574375 39.975432184875466, 116.31150698574375 39.91844889127771))'::gpolygon))
+      GROUP BY 1, 2
+    )
+    SELECT hour, COUNT(*) AS users
+    FROM user_hour_activity
+    GROUP BY hour
+    ORDER BY hour;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.31150698574375, 39.91844889127771,
+    116.41510289328592, 39.975432184875466), 4326), 3857)
+  - '''2019-07-09 02:53:02'' AND ''2019-07-11 04:50:33'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH user_hour_activity AS (
+      SELECT TS_TRUNC('hour', t) AS hour, user_id
+      FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-07 07:18:41, 2019-07-10 19:16:22]' AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.20459161502785 39.929078264990764, 116.30818752257002 39.929078264990764, 116.30818752257002 39.98606155858852, 116.20459161502785 39.98606155858852, 116.20459161502785 39.929078264990764))'::gpolygon))
+      GROUP BY 1, 2
+    )
+    SELECT hour, COUNT(*) AS users
+    FROM user_hour_activity
+    GROUP BY hour
+    ORDER BY hour;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.20459161502785, 39.929078264990764,
+    116.30818752257002, 39.98606155858852), 4326), 3857)
+  - '''2019-07-07 07:18:41'' AND ''2019-07-10 19:16:22'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: |
+    LET minute_activity =
+      SELECT TS_TRUNC('minute', t) AS minute,
+             COUNT(IF(venue_id <> 0, 1, NULL)) AS venue_updates
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-08 03:23:50, 2019-07-09 10:16:43]'
+        AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.50057537169228 39.93626865652794, 116.60417127923445 39.93626865652794, 116.60417127923445 39.993251950125696, 116.50057537169228 39.993251950125696, 116.50057537169228 39.93626865652794))'::gpolygon))
+      GROUP BY 1;
+    SELECT a.minute, SUM(b.venue_updates) AS updates_in_window
+    FROM minute_activity a
+    JOIN minute_activity b ON b.minute BETWEEN a.minute - TP '10min' AND a.minute + TP '10min'
+    GROUP BY a.minute
+    ORDER BY a.minute;
+  params:
+  - '''2019-07-08 03:23:50'' AND ''2019-07-09 10:16:43'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50057537169228, 39.93626865652794,
+    116.60417127923445, 39.993251950125696), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: |
+    WITH user_day_cnt AS (
+      SELECT user_id, TS_DAYSTART(t) day, COUNT(*) AS day_cnt
+      FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-05 04:04:00, 2019-07-08 15:44:21]'
+      GROUP BY user_id, day
+    )
+    SELECT user_id AS id, SUM(day_cnt)::f64 / COUNT(*) AS avg_points_per_day
+    FROM user_day_cnt
+    GROUP BY user_id;
+  params:
+  - '''2019-07-05 04:04:00'' AND ''2019-07-08 15:44:21'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH user_hour_activity AS (
+      SELECT TS_TRUNC('hour', t) AS hour, user_id
+      FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-31 14:42:28, 2019-07-31 23:59:59]' AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.34210056710815 39.87091530206668, 116.44569647465032 39.87091530206668, 116.44569647465032 39.92789859566443, 116.34210056710815 39.92789859566443, 116.34210056710815 39.87091530206668))'::gpolygon))
+      GROUP BY 1, 2
+    )
+    SELECT hour, COUNT(*) AS users
+    FROM user_hour_activity
+    GROUP BY hour
+    ORDER BY hour;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34210056710815, 39.87091530206668,
+    116.44569647465032, 39.92789859566443), 4326), 3857)
+  - '''2019-07-31 14:42:28'' AND ''2019-07-31 23:59:59'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: |
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 1 AND ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (116.32233606307769 39.807099482561426)'::gpoint), 5000 * 0.766990)
+    ORDER BY ST_Distance(ST_Point(x, y), ST_ToGeom('POINT (116.32233606307769 39.807099482561426)'::gpoint))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.32233606307769, 39.807099482561426), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: |
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 1 AND ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (116.19761065108271 39.88863886714664)'::gpoint), 5000 * 0.766080)
+    ORDER BY ST_Distance(ST_Point(x, y), ST_ToGeom('POINT (116.19761065108271 39.88863886714664)'::gpoint))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.19761065108271, 39.88863886714664), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: |
+    WITH user_day_cnt AS (
+      SELECT user_id, TS_DAYSTART(t) day, COUNT(*) AS day_cnt
+      FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-14 20:16:33, 2019-07-17 11:35:40]'
+      GROUP BY user_id, day
+    )
+    SELECT user_id AS id, SUM(day_cnt)::f64 / COUNT(*) AS avg_points_per_day
+    FROM user_day_cnt
+    GROUP BY user_id;
+  params:
+  - '''2019-07-14 20:16:33'' AND ''2019-07-17 11:35:40'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: |
+    LET minute_activity =
+      SELECT TS_TRUNC('minute', t) AS minute,
+             COUNT(IF(venue_id <> 0, 1, NULL)) AS venue_updates
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-14 15:16:29, 2019-07-15 23:05:28]'
+        AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.16791292513895 39.902438017981105, 116.27150883268112 39.902438017981105, 116.27150883268112 39.95942131157886, 116.16791292513895 39.95942131157886, 116.16791292513895 39.902438017981105))'::gpolygon))
+      GROUP BY 1;
+    SELECT a.minute, SUM(b.venue_updates) AS updates_in_window
+    FROM minute_activity a
+    JOIN minute_activity b ON b.minute BETWEEN a.minute - TP '10min' AND a.minute + TP '10min'
+    GROUP BY a.minute
+    ORDER BY a.minute;
+  params:
+  - '''2019-07-14 15:16:29'' AND ''2019-07-15 23:05:28'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.16791292513895, 39.902438017981105,
+    116.27150883268112, 39.95942131157886), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: |
+    SELECT user_id AS id,
+     MIN(t) AS first_seen,
+     MAX(t) AS last_seen
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-24 16:11:47, 2019-07-28 10:44:46]'
+    GROUP BY user_id;
+  params:
+  - '''2019-07-24 16:11:47'' AND ''2019-07-28 10:44:46'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: |
+    WITH user_day_cnt AS (
+      SELECT user_id, TS_DAYSTART(t) day, COUNT(*) AS day_cnt
+      FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-03 08:55:21, 2019-07-06 08:32:07]'
+      GROUP BY user_id, day
+    )
+    SELECT user_id AS id, SUM(day_cnt)::f64 / COUNT(*) AS avg_points_per_day
+    FROM user_day_cnt
+    GROUP BY user_id;
+  params:
+  - '''2019-07-03 08:55:21'' AND ''2019-07-06 08:32:07'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: |
+    LET minute_activity =
+      SELECT TS_TRUNC('minute', t) AS minute,
+             COUNT(IF(venue_id <> 0, 1, NULL)) AS venue_updates
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-24 11:17:47, 2019-07-26 09:09:59]'
+        AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.32817741235621 39.80544461766248, 116.43177331989838 39.80544461766248, 116.43177331989838 39.862427911260234, 116.32817741235621 39.862427911260234, 116.32817741235621 39.80544461766248))'::gpolygon))
+      GROUP BY 1;
+    SELECT a.minute, SUM(b.venue_updates) AS updates_in_window
+    FROM minute_activity a
+    JOIN minute_activity b ON b.minute BETWEEN a.minute - TP '10min' AND a.minute + TP '10min'
+    GROUP BY a.minute
+    ORDER BY a.minute;
+  params:
+  - '''2019-07-24 11:17:47'' AND ''2019-07-26 09:09:59'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32817741235621, 39.80544461766248,
+    116.43177331989838, 39.862427911260234), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH user_hour_activity AS (
+      SELECT TS_TRUNC('hour', t) AS hour, user_id
+      FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-23 21:48:14, 2019-07-27 00:50:56]' AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.30752201140997 39.8685382612401, 116.41111791895214 39.8685382612401, 116.41111791895214 39.92552155483785, 116.30752201140997 39.92552155483785, 116.30752201140997 39.8685382612401))'::gpolygon))
+      GROUP BY 1, 2
+    )
+    SELECT hour, COUNT(*) AS users
+    FROM user_hour_activity
+    GROUP BY hour
+    ORDER BY hour;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30752201140997, 39.8685382612401,
+    116.41111791895214, 39.92552155483785), 4326), 3857)
+  - '''2019-07-23 21:48:14'' AND ''2019-07-27 00:50:56'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: |
+    SELECT *
+    FROM geolife_points
+    WHERE venue_type = 1 AND ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (116.24284583777377 40.024807555857045)'::gpoint), 5000 * 0.764556)
+    ORDER BY ST_Distance(ST_Point(x, y), ST_ToGeom('POINT (116.24284583777377 40.024807555857045)'::gpoint))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.24284583777377, 40.024807555857045), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: |
+    SELECT user_id AS id,
+     MIN(t) AS first_seen,
+     MAX(t) AS last_seen
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-27 08:29:18, 2019-07-29 14:27:31]'
+    GROUP BY user_id;
+  params:
+  - '''2019-07-27 08:29:18'' AND ''2019-07-29 14:27:31'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.40848885237345 39.967224025746624, 116.51208475991562 39.967224025746624, 116.51208475991562 40.02420731934438, 116.40848885237345 40.02420731934438, 116.40848885237345 39.967224025746624))'::gpolygon))
+    GROUP BY venue_type;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.40848885237345, 39.967224025746624,
+    116.51208475991562, 40.02420731934438), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: |
+    SELECT user_id AS id,
+     MIN(t) AS first_seen,
+     MAX(t) AS last_seen
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-03 15:59:07, 2019-07-06 09:37:38]'
+    GROUP BY user_id;
+  params:
+  - '''2019-07-03 15:59:07'' AND ''2019-07-06 09:37:38'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH user_hour_activity AS (
+      SELECT TS_TRUNC('hour', t) AS hour, user_id
+      FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-24 07:52:29, 2019-07-27 04:20:40]' AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.42983980559023 39.82757726598545, 116.5334357131324 39.82757726598545, 116.5334357131324 39.8845605595832, 116.42983980559023 39.8845605595832, 116.42983980559023 39.82757726598545))'::gpolygon))
+      GROUP BY 1, 2
+    )
+    SELECT hour, COUNT(*) AS users
+    FROM user_hour_activity
+    GROUP BY hour
+    ORDER BY hour;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.42983980559023, 39.82757726598545,
+    116.5334357131324, 39.8845605595832), 4326), 3857)
+  - '''2019-07-24 07:52:29'' AND ''2019-07-27 04:20:40'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: |
+    LET minute_activity =
+      SELECT TS_TRUNC('minute', t) AS minute,
+             COUNT(IF(venue_id <> 0, 1, NULL)) AS venue_updates
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-12 00:25:18, 2019-07-13 00:04:00]'
+        AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.2788372441846 39.935625315610295, 116.38243315172677 39.935625315610295, 116.38243315172677 39.99260860920805, 116.2788372441846 39.99260860920805, 116.2788372441846 39.935625315610295))'::gpolygon))
+      GROUP BY 1;
+    SELECT a.minute, SUM(b.venue_updates) AS updates_in_window
+    FROM minute_activity a
+    JOIN minute_activity b ON b.minute BETWEEN a.minute - TP '10min' AND a.minute + TP '10min'
+    GROUP BY a.minute
+    ORDER BY a.minute;
+  params:
+  - '''2019-07-12 00:25:18'' AND ''2019-07-13 00:04:00'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2788372441846, 39.935625315610295,
+    116.38243315172677, 39.99260860920805), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: |
+    WITH user_day_cnt AS (
+      SELECT user_id, TS_DAYSTART(t) day, COUNT(*) AS day_cnt
+      FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-26 21:10:25, 2019-07-30 16:17:23]'
+      GROUP BY user_id, day
+    )
+    SELECT user_id AS id, SUM(day_cnt)::f64 / COUNT(*) AS avg_points_per_day
+    FROM user_day_cnt
+    GROUP BY user_id;
+  params:
+  - '''2019-07-26 21:10:25'' AND ''2019-07-30 16:17:23'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: |
+    SELECT user_id AS id,
+     MIN(t) AS first_seen,
+     MAX(t) AS last_seen
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-26 17:43:21, 2019-07-30 09:21:45]'
+    GROUP BY user_id;
+  params:
+  - '''2019-07-26 17:43:21'' AND ''2019-07-30 09:21:45'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.51961237336279 39.84967356645507, 116.62320828090496 39.84967356645507, 116.62320828090496 39.90665686005282, 116.51961237336279 39.90665686005282, 116.51961237336279 39.84967356645507))'::gpolygon))
+    GROUP BY venue_type;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51961237336279, 39.84967356645507,
+    116.62320828090496, 39.90665686005282), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.45292447753606 39.81254531291944, 116.55652038507823 39.81254531291944, 116.55652038507823 39.86952860651719, 116.45292447753606 39.86952860651719, 116.45292447753606 39.81254531291944))'::gpolygon))
+    GROUP BY venue_type;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.45292447753606, 39.81254531291944,
+    116.55652038507823, 39.86952860651719), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: |
+    WITH user_day_cnt AS (
+      SELECT user_id, TS_DAYSTART(t) day, COUNT(*) AS day_cnt
+      FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-10 12:16:46, 2019-07-12 13:05:00]'
+      GROUP BY user_id, day
+    )
+    SELECT user_id AS id, SUM(day_cnt)::f64 / COUNT(*) AS avg_points_per_day
+    FROM user_day_cnt
+    GROUP BY user_id;
+  params:
+  - '''2019-07-10 12:16:46'' AND ''2019-07-12 13:05:00'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: |
+    SELECT user_id AS id,
+     MIN(t) AS first_seen,
+     MAX(t) AS last_seen
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-10 14:53:09, 2019-07-14 05:50:15]'
+    GROUP BY user_id;
+  params:
+  - '''2019-07-10 14:53:09'' AND ''2019-07-14 05:50:15'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: |
+    SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
+    FROM geolife_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.46574622826829 39.91364462858925, 116.56934213581046 39.91364462858925, 116.56934213581046 39.970627922187006, 116.46574622826829 39.970627922187006, 116.46574622826829 39.91364462858925))'::gpolygon))
+    GROUP BY venue_type;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46574622826829, 39.91364462858925,
+    116.56934213581046, 39.970627922187006), 4326), 3857)
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT user_id) AS id_count
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-26 15:43:48, 2019-07-26 23:10:12]'
+      AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.57606029859745 39.86019049777052, 116.62238979688847 39.86019049777052, 116.62238979688847 39.8856742013838, 116.57606029859745 39.8856742013838, 116.57606029859745 39.86019049777052))'::gpolygon));
+  params:
+  - '''2019-07-26 15:43:48'' AND ''2019-07-26 23:10:12'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.57606029859745, 39.86019049777052,
+    116.62238979688847, 39.8856742013838), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) as update_count
+    FROM geolife_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.56036613737336 39.9597194033934, 116.60669563566438 39.9597194033934, 116.60669563566438 39.98520310700668, 116.56036613737336 39.98520310700668, 116.56036613737336 39.9597194033934))'::gpolygon))
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.56036613737336, 39.9597194033934,
+    116.60669563566438, 39.98520310700668), 4326), 3857)
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT user_id) AS id_count
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-30 01:07:21, 2019-07-30 08:33:45]';
+  params:
+  - '''2019-07-30 01:07:21'' AND ''2019-07-30 08:33:45'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) as update_count
+    FROM geolife_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.53467400915396 39.95877346949613, 116.58100350744498 39.95877346949613, 116.58100350744498 39.98425717310941, 116.53467400915396 39.98425717310941, 116.53467400915396 39.95877346949613))'::gpolygon))
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.53467400915396, 39.95877346949613,
+    116.58100350744498, 39.98425717310941), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) as update_count
+    FROM geolife_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.49097461609158 39.973022173734364, 116.5373041143826 39.973022173734364, 116.5373041143826 39.99850587734765, 116.49097461609158 39.99850587734765, 116.49097461609158 39.973022173734364))'::gpolygon))
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49097461609158, 39.973022173734364,
+    116.5373041143826, 39.99850587734765), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT user_id as id, ST_Point(x,y) as geom, t AS timestamp
+    FROM geolife_points
+    WHERE ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (116.33578863684798 39.81956404118515)'::gpoint), 502.26989567440677 * 0.766851)
+    ORDER BY ST_Distance(ST_Point(x,y), ST_ToGeom('POINT (116.33578863684798 39.81956404118515)'::gpoint))
+    LIMIT 5;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.33578863684798, 39.81956404118515), 4326),
+    3857)
+  - 5
+  - 502.26989567440677
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count FROM (
+      SELECT user_id as id
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-25 17:44:22, 2019-07-26 01:10:46]'
+        AND (ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.16836803328118 39.92135538978117, 116.2146975315722 39.92135538978117, 116.2146975315722 39.94683909339445, 116.16836803328118 39.94683909339445, 116.16836803328118 39.92135538978117))'::gpolygon))
+          OR ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.37045281073961 39.8651286497845, 116.41678230903062 39.8651286497845, 116.41678230903062 39.890612353397785, 116.37045281073961 39.890612353397785, 116.37045281073961 39.8651286497845))'::gpolygon)))
+      GROUP BY user_id
+      HAVING BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.16836803328118 39.92135538978117, 116.2146975315722 39.92135538978117, 116.2146975315722 39.94683909339445, 116.16836803328118 39.94683909339445, 116.16836803328118 39.92135538978117))'::gpolygon)))
+        AND BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.37045281073961 39.8651286497845, 116.41678230903062 39.8651286497845, 116.41678230903062 39.890612353397785, 116.37045281073961 39.890612353397785, 116.37045281073961 39.8651286497845))'::gpolygon)))
+    )
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.16836803328118, 39.92135538978117,
+    116.2146975315722, 39.94683909339445), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.37045281073961, 39.8651286497845,
+    116.41678230903062, 39.890612353397785), 4326), 3857)
+  - '''2019-07-25 17:44:22'' AND ''2019-07-26 01:10:46'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT user_id) AS id_count
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-31 00:25:56, 2019-07-31 07:52:20]'
+      AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.43908411510394 39.833455070643474, 116.48541361339495 39.833455070643474, 116.48541361339495 39.85893877425676, 116.43908411510394 39.85893877425676, 116.43908411510394 39.833455070643474))'::gpolygon));
+  params:
+  - '''2019-07-31 00:25:56'' AND ''2019-07-31 07:52:20'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.43908411510394, 39.833455070643474,
+    116.48541361339495, 39.85893877425676), 4326), 3857)
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT (t::i64 / 3600 ) * 3600 as hour, user_id as id, count(*) as cnt
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-03 19:52:38, 2019-07-04 03:19:02]'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2019-07-03 19:52:38'' AND ''2019-07-04 03:19:02'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT user_id) AS id_count
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-25 13:28:29, 2019-07-25 20:54:53]'
+      AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.26620836531472 39.93475043497379, 116.31253786360574 39.93475043497379, 116.31253786360574 39.960234138587076, 116.26620836531472 39.960234138587076, 116.26620836531472 39.93475043497379))'::gpolygon));
+  params:
+  - '''2019-07-25 13:28:29'' AND ''2019-07-25 20:54:53'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.26620836531472, 39.93475043497379,
+    116.31253786360574, 39.960234138587076), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count FROM (
+      SELECT user_id as id
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-09 19:59:48, 2019-07-10 03:26:12]'
+        AND (ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.37674383761006 39.833195878977364, 116.42307333590108 39.833195878977364, 116.42307333590108 39.858679582590646, 116.37674383761006 39.858679582590646, 116.37674383761006 39.833195878977364))'::gpolygon))
+          OR ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.2582563604098 39.93090080112566, 116.30458585870082 39.93090080112566, 116.30458585870082 39.95638450473894, 116.2582563604098 39.95638450473894, 116.2582563604098 39.93090080112566))'::gpolygon)))
+      GROUP BY user_id
+      HAVING BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.37674383761006 39.833195878977364, 116.42307333590108 39.833195878977364, 116.42307333590108 39.858679582590646, 116.37674383761006 39.858679582590646, 116.37674383761006 39.833195878977364))'::gpolygon)))
+        AND BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.2582563604098 39.93090080112566, 116.30458585870082 39.93090080112566, 116.30458585870082 39.95638450473894, 116.2582563604098 39.95638450473894, 116.2582563604098 39.93090080112566))'::gpolygon)))
+    )
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.37674383761006, 39.833195878977364,
+    116.42307333590108, 39.858679582590646), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2582563604098, 39.93090080112566,
+    116.30458585870082, 39.95638450473894), 4326), 3857)
+  - '''2019-07-09 19:59:48'' AND ''2019-07-10 03:26:12'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT (t::i64 / 3600 ) * 3600 as hour, user_id as id, count(*) as cnt
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-24 18:54:49, 2019-07-25 02:21:13]'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2019-07-24 18:54:49'' AND ''2019-07-25 02:21:13'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT (t::i64 / 3600 ) * 3600 as hour, user_id as id, count(*) as cnt
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-13 15:33:06, 2019-07-13 22:59:30]'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2019-07-13 15:33:06'' AND ''2019-07-13 22:59:30'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) as update_count
+    FROM geolife_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.50342064751713 39.85479047642523, 116.54975014580815 39.85479047642523, 116.54975014580815 39.88027418003851, 116.50342064751713 39.88027418003851, 116.50342064751713 39.85479047642523))'::gpolygon))
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50342064751713, 39.85479047642523,
+    116.54975014580815, 39.88027418003851), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT user_id as id, ST_Point(x,y) as geom, t AS timestamp
+    FROM geolife_points
+    WHERE ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (116.3129108736583 39.87629327927674)'::gpoint), 1261.4295515414744 * 0.766218)
+    ORDER BY ST_Distance(ST_Point(x,y), ST_ToGeom('POINT (116.3129108736583 39.87629327927674)'::gpoint))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.3129108736583, 39.87629327927674), 4326),
+    3857)
+  - 1
+  - 1261.4295515414744
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count FROM (
+      SELECT user_id as id
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-21 16:20:43, 2019-07-21 23:47:07]'
+        AND (ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.31294756786679 39.872914058519626, 116.3592770661578 39.872914058519626, 116.3592770661578 39.89839776213291, 116.31294756786679 39.89839776213291, 116.31294756786679 39.872914058519626))'::gpolygon))
+          OR ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.41388522280413 39.79929428635283, 116.46021472109514 39.79929428635283, 116.46021472109514 39.824777989966115, 116.41388522280413 39.824777989966115, 116.41388522280413 39.79929428635283))'::gpolygon)))
+      GROUP BY user_id
+      HAVING BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.31294756786679 39.872914058519626, 116.3592770661578 39.872914058519626, 116.3592770661578 39.89839776213291, 116.31294756786679 39.89839776213291, 116.31294756786679 39.872914058519626))'::gpolygon)))
+        AND BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.41388522280413 39.79929428635283, 116.46021472109514 39.79929428635283, 116.46021472109514 39.824777989966115, 116.41388522280413 39.824777989966115, 116.41388522280413 39.79929428635283))'::gpolygon)))
+    )
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.31294756786679, 39.872914058519626,
+    116.3592770661578, 39.89839776213291), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.41388522280413, 39.79929428635283,
+    116.46021472109514, 39.824777989966115), 4326), 3857)
+  - '''2019-07-21 16:20:43'' AND ''2019-07-21 23:47:07'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT user_id) AS id_count
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-11 10:03:03, 2019-07-11 17:29:27]';
+  params:
+  - '''2019-07-11 10:03:03'' AND ''2019-07-11 17:29:27'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT user_id) AS id_count
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-29 11:31:47, 2019-07-29 18:58:11]'
+      AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.2260230700471 39.938835197030826, 116.27235256833812 39.938835197030826, 116.27235256833812 39.96431890064411, 116.2260230700471 39.96431890064411, 116.2260230700471 39.938835197030826))'::gpolygon));
+  params:
+  - '''2019-07-29 11:31:47'' AND ''2019-07-29 18:58:11'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2260230700471, 39.938835197030826,
+    116.27235256833812, 39.96431890064411), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT user_id as id, ST_Point(x,y) as geom, t AS timestamp
+    FROM geolife_points
+    WHERE ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (116.58952147912355 39.95275167546529)'::gpoint), 1299.6623356065177 * 0.765363)
+    ORDER BY ST_Distance(ST_Point(x,y), ST_ToGeom('POINT (116.58952147912355 39.95275167546529)'::gpoint))
+    LIMIT 3;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.58952147912355, 39.95275167546529), 4326),
+    3857)
+  - 3
+  - 1299.6623356065177
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT (t::i64 / 3600 ) * 3600 as hour, user_id as id, count(*) as cnt
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-04 23:53:09, 2019-07-05 07:19:33]'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2019-07-04 23:53:09'' AND ''2019-07-05 07:19:33'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT (t::i64 / 3600 ) * 3600 as hour, user_id as id, count(*) as cnt
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-03 03:45:32, 2019-07-03 11:11:56]'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2019-07-03 03:45:32'' AND ''2019-07-03 11:11:56'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT user_id) AS id_count
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-31 10:53:13, 2019-07-31 18:19:37]'
+      AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.30382808951836 39.845088277604184, 116.35015758780938 39.845088277604184, 116.35015758780938 39.870571981217466, 116.30382808951836 39.870571981217466, 116.30382808951836 39.845088277604184))'::gpolygon));
+  params:
+  - '''2019-07-31 10:53:13'' AND ''2019-07-31 18:19:37'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30382808951836, 39.845088277604184,
+    116.35015758780938, 39.870571981217466), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count FROM (
+      SELECT user_id as id
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-24 07:22:32, 2019-07-24 14:48:56]'
+        AND (ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.54182320838659 39.87307798858803, 116.5881527066776 39.87307798858803, 116.5881527066776 39.89856169220131, 116.54182320838659 39.89856169220131, 116.54182320838659 39.87307798858803))'::gpolygon))
+          OR ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.33269990639081 39.78519077985318, 116.37902940468183 39.78519077985318, 116.37902940468183 39.810674483466464, 116.33269990639081 39.810674483466464, 116.33269990639081 39.78519077985318))'::gpolygon)))
+      GROUP BY user_id
+      HAVING BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.54182320838659 39.87307798858803, 116.5881527066776 39.87307798858803, 116.5881527066776 39.89856169220131, 116.54182320838659 39.89856169220131, 116.54182320838659 39.87307798858803))'::gpolygon)))
+        AND BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.33269990639081 39.78519077985318, 116.37902940468183 39.78519077985318, 116.37902940468183 39.810674483466464, 116.33269990639081 39.810674483466464, 116.33269990639081 39.78519077985318))'::gpolygon)))
+    )
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.54182320838659, 39.87307798858803,
+    116.5881527066776, 39.89856169220131), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33269990639081, 39.78519077985318,
+    116.37902940468183, 39.810674483466464), 4326), 3857)
+  - '''2019-07-24 07:22:32'' AND ''2019-07-24 14:48:56'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT user_id) AS id_count
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-30 06:16:42, 2019-07-30 13:43:06]';
+  params:
+  - '''2019-07-30 06:16:42'' AND ''2019-07-30 13:43:06'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT user_id as id, ST_Point(x,y) as geom, t AS timestamp
+    FROM geolife_points
+    WHERE ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (116.5350465648476 39.93215075307002)'::gpoint), 926.9235362528761 * 0.765594)
+    ORDER BY ST_Distance(ST_Point(x,y), ST_ToGeom('POINT (116.5350465648476 39.93215075307002)'::gpoint))
+    LIMIT 4;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.5350465648476, 39.93215075307002), 4326),
+    3857)
+  - 4
+  - 926.9235362528761
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT user_id) AS id_count
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-15 20:40:19, 2019-07-16 04:06:43]';
+  params:
+  - '''2019-07-15 20:40:19'' AND ''2019-07-16 04:06:43'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT user_id) AS id_count
+    FROM geolife_points
+    WHERE t <@ EPOCHRANGE '[2019-07-06 03:40:30, 2019-07-06 11:06:54]';
+  params:
+  - '''2019-07-06 03:40:30'' AND ''2019-07-06 11:06:54'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) as update_count
+    FROM geolife_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.30068100439543 39.8613199646973, 116.34701050268644 39.8613199646973, 116.34701050268644 39.886803668310584, 116.30068100439543 39.886803668310584, 116.30068100439543 39.8613199646973))'::gpolygon))
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30068100439543, 39.8613199646973,
+    116.34701050268644, 39.886803668310584), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT user_id as id, ST_Point(x,y) as geom, t AS timestamp
+    FROM geolife_points
+    WHERE ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (116.58120934065653 39.91265824790936)'::gpoint), 921.6119454529043 * 0.765812)
+    ORDER BY ST_Distance(ST_Point(x,y), ST_ToGeom('POINT (116.58120934065653 39.91265824790936)'::gpoint))
+    LIMIT 5;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.58120934065653, 39.91265824790936), 4326),
+    3857)
+  - 5
+  - 921.6119454529043
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count FROM (
+      SELECT user_id as id
+      FROM geolife_points
+      WHERE t <@ EPOCHRANGE '[2019-07-28 20:35:57, 2019-07-29 04:02:21]'
+        AND (ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.3245720625218 39.92387921135001, 116.37090156081281 39.92387921135001, 116.37090156081281 39.949362914963295, 116.3245720625218 39.949362914963295, 116.3245720625218 39.92387921135001))'::gpolygon))
+          OR ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.46722614524565 39.82630193588975, 116.51355564353666 39.82630193588975, 116.51355564353666 39.851785639503035, 116.46722614524565 39.851785639503035, 116.46722614524565 39.82630193588975))'::gpolygon)))
+      GROUP BY user_id
+      HAVING BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.3245720625218 39.92387921135001, 116.37090156081281 39.92387921135001, 116.37090156081281 39.949362914963295, 116.3245720625218 39.949362914963295, 116.3245720625218 39.92387921135001))'::gpolygon)))
+        AND BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((116.46722614524565 39.82630193588975, 116.51355564353666 39.82630193588975, 116.51355564353666 39.851785639503035, 116.46722614524565 39.851785639503035, 116.46722614524565 39.82630193588975))'::gpolygon)))
+    )
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3245720625218, 39.92387921135001,
+    116.37090156081281, 39.949362914963295), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46722614524565, 39.82630193588975,
+    116.51355564353666, 39.851785639503035), 4326), 3857)
+  - '''2019-07-28 20:35:57'' AND ''2019-07-29 04:02:21'''

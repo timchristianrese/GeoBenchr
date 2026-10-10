@@ -1,0 +1,880 @@
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id)
+    FROM crossing_points c
+    GLOBAL JOIN islands i ON i.id = 45
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 4146)) FROM islands WHERE id = 45 AND variantType(geom) = 'Polygon' UNION ALL SELECT arrayJoin(h3CoverLine(geom.LineString, 4146)) FROM islands WHERE id = 45 AND variantType(geom) = 'LineString')
+      AND if(variantType(i.geom) = 'LineString',
+             arrayMin(arrayMap((a, b) -> sqrt(pow(c.x - (a.1 + (b.1 - a.1) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)
+                                            + pow(c.y - (a.2 + (b.2 - a.2) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)),
+                               arrayPopBack(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)), arrayPopFront(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)))),
+             polygonsDistanceCartesian(array(array(tuple(c.x, c.y))),
+               arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon))
+         ) <= 4146
+      AND c.timestamp BETWEEN '2024-06-24 05:53:53' AND '2024-07-01 23:33:49'
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - 4146
+  - 45
+  - - '2024-06-24 05:53:53'
+    - '2024-07-01 23:33:49'
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = 'Molengat'
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, 2092)) FROM harbours WHERE name = 'Molengat')
+      AND sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= 2092
+      AND c.timestamp BETWEEN '2025-05-31 18:16:39' AND '2025-06-08 11:31:18'
+      AND c.id > 0 AND c.id < 1000000000000
+    GROUP BY h.name;
+  params:
+  - - '2025-05-31 18:16:39'
+    - '2025-06-08 11:31:18'
+  - 2092
+  - Molengat
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id)
+    FROM crossing_points c
+    GLOBAL JOIN islands i ON i.id = 32
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 3760)) FROM islands WHERE id = 32 AND variantType(geom) = 'Polygon' UNION ALL SELECT arrayJoin(h3CoverLine(geom.LineString, 3760)) FROM islands WHERE id = 32 AND variantType(geom) = 'LineString')
+      AND if(variantType(i.geom) = 'LineString',
+             arrayMin(arrayMap((a, b) -> sqrt(pow(c.x - (a.1 + (b.1 - a.1) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)
+                                            + pow(c.y - (a.2 + (b.2 - a.2) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)),
+                               arrayPopBack(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)), arrayPopFront(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)))),
+             polygonsDistanceCartesian(array(array(tuple(c.x, c.y))),
+               arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon))
+         ) <= 3760
+      AND c.timestamp BETWEEN '2024-01-25 11:37:00' AND '2024-01-31 22:04:39'
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - 3760
+  - 32
+  - - '2024-01-25 11:37:00'
+    - '2024-01-31 22:04:39'
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT toDate(day) AS day, count() AS unique_crossings
+    FROM crossings_summary s
+    ARRAY JOIN arrayMap(i -> toStartOfDay(toDateTime('2025-04-07 12:58:49', 'UTC')) + toIntervalDay(i),
+                        range(toUInt32(dateDiff('day', toStartOfDay(toDateTime('2025-04-07 12:58:49', 'UTC')), toDateTime('2025-04-21 05:14:04', 'UTC')) + 1))) AS day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= toDateTime('2025-04-21 05:14:04', 'UTC') AND s.end_time >= toDateTime('2025-04-07 12:58:49', 'UTC')
+      AND s.start_time < day + toIntervalDay(1) AND s.end_time >= day
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - - '2025-04-07 12:58:49'
+    - '2025-04-21 05:14:04'
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) AS crossing_count
+    FROM crossing_points c
+    GLOBAL JOIN islands i ON i.id = 85
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 4174)) FROM islands WHERE id = 85 AND variantType(geom) = 'Polygon' UNION ALL SELECT arrayJoin(h3CoverLine(geom.LineString, 4174)) FROM islands WHERE id = 85 AND variantType(geom) = 'LineString')
+      AND if(variantType(i.geom) = 'LineString',
+             arrayMin(arrayMap((a, b) -> sqrt(pow(c.x - (a.1 + (b.1 - a.1) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)
+                                            + pow(c.y - (a.2 + (b.2 - a.2) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)),
+                               arrayPopBack(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)), arrayPopFront(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)))),
+             polygonsDistanceCartesian(array(array(tuple(c.x, c.y))),
+               arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon))
+         ) <= 4174
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - 85
+  - 4174
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) AS crossing_count
+    FROM crossing_points c
+    GLOBAL JOIN islands i ON i.id = 36
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 1533)) FROM islands WHERE id = 36 AND variantType(geom) = 'Polygon' UNION ALL SELECT arrayJoin(h3CoverLine(geom.LineString, 1533)) FROM islands WHERE id = 36 AND variantType(geom) = 'LineString')
+      AND if(variantType(i.geom) = 'LineString',
+             arrayMin(arrayMap((a, b) -> sqrt(pow(c.x - (a.1 + (b.1 - a.1) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)
+                                            + pow(c.y - (a.2 + (b.2 - a.2) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)),
+                               arrayPopBack(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)), arrayPopFront(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)))),
+             polygonsDistanceCartesian(array(array(tuple(c.x, c.y))),
+               arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon))
+         ) <= 1533
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - 36
+  - 1533
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = 'Bensersiel'
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, 2097)) FROM harbours WHERE name = 'Bensersiel')
+      AND sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= 2097
+      AND c.timestamp BETWEEN '2025-06-23 18:13:38' AND '2025-07-06 09:00:28'
+      AND c.id > 0 AND c.id < 1000000000000
+    GROUP BY h.name;
+  params:
+  - - '2025-06-23 18:13:38'
+    - '2025-07-06 09:00:28'
+  - 2097
+  - Bensersiel
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id)
+    FROM crossing_points c
+    GLOBAL JOIN islands i ON i.id = 48
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 1032)) FROM islands WHERE id = 48 AND variantType(geom) = 'Polygon' UNION ALL SELECT arrayJoin(h3CoverLine(geom.LineString, 1032)) FROM islands WHERE id = 48 AND variantType(geom) = 'LineString')
+      AND if(variantType(i.geom) = 'LineString',
+             arrayMin(arrayMap((a, b) -> sqrt(pow(c.x - (a.1 + (b.1 - a.1) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)
+                                            + pow(c.y - (a.2 + (b.2 - a.2) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)),
+                               arrayPopBack(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)), arrayPopFront(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)))),
+             polygonsDistanceCartesian(array(array(tuple(c.x, c.y))),
+               arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon))
+         ) <= 1032
+      AND c.timestamp BETWEEN '2024-07-15 21:28:38' AND '2024-07-24 07:10:10'
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - 1032
+  - 48
+  - - '2024-07-15 21:28:38'
+    - '2024-07-24 07:10:10'
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = 'Langendamm'
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, 4004)) FROM harbours WHERE name = 'Langendamm')
+      AND sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= 4004
+      AND c.timestamp BETWEEN '2025-05-25 08:58:01' AND '2025-06-06 05:11:17'
+      AND c.id > 0 AND c.id < 1000000000000
+    GROUP BY h.name;
+  params:
+  - - '2025-05-25 08:58:01'
+    - '2025-06-06 05:11:17'
+  - 4004
+  - Langendamm
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = 'Ön'
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, 4278)) FROM harbours WHERE name = 'Ön')
+      AND sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= 4278
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - Ön
+  - 4278
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = 'Maurholen'
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, 1288)) FROM harbours WHERE name = 'Maurholen')
+      AND sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= 1288
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - Maurholen
+  - 1288
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id)
+    FROM crossing_points c
+    GLOBAL JOIN islands i ON i.id = 96
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 3791)) FROM islands WHERE id = 96 AND variantType(geom) = 'Polygon' UNION ALL SELECT arrayJoin(h3CoverLine(geom.LineString, 3791)) FROM islands WHERE id = 96 AND variantType(geom) = 'LineString')
+      AND if(variantType(i.geom) = 'LineString',
+             arrayMin(arrayMap((a, b) -> sqrt(pow(c.x - (a.1 + (b.1 - a.1) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)
+                                            + pow(c.y - (a.2 + (b.2 - a.2) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)),
+                               arrayPopBack(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)), arrayPopFront(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)))),
+             polygonsDistanceCartesian(array(array(tuple(c.x, c.y))),
+               arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon))
+         ) <= 3791
+      AND c.timestamp BETWEEN '2024-08-07 06:50:03' AND '2024-08-13 13:30:36'
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - 3791
+  - 96
+  - - '2024-08-07 06:50:03'
+    - '2024-08-13 13:30:36'
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT toDate(day) AS day, count() AS unique_crossings
+    FROM crossings_summary s
+    ARRAY JOIN arrayMap(i -> toStartOfDay(toDateTime('2024-04-03 00:31:17', 'UTC')) + toIntervalDay(i),
+                        range(toUInt32(dateDiff('day', toStartOfDay(toDateTime('2024-04-03 00:31:17', 'UTC')), toDateTime('2024-04-17 07:48:58', 'UTC')) + 1))) AS day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= toDateTime('2024-04-17 07:48:58', 'UTC') AND s.end_time >= toDateTime('2024-04-03 00:31:17', 'UTC')
+      AND s.start_time < day + toIntervalDay(1) AND s.end_time >= day
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - - '2024-04-03 00:31:17'
+    - '2024-04-17 07:48:58'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = 'Bramel'
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, 2367)) FROM harbours WHERE name = 'Bramel')
+      AND sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= 2367
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - Bramel
+  - 2367
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT toDate(day) AS day, count() AS unique_crossings
+    FROM crossings_summary s
+    ARRAY JOIN arrayMap(i -> toStartOfDay(toDateTime('2024-09-18 20:32:30', 'UTC')) + toIntervalDay(i),
+                        range(toUInt32(dateDiff('day', toStartOfDay(toDateTime('2024-09-18 20:32:30', 'UTC')), toDateTime('2024-09-25 06:27:40', 'UTC')) + 1))) AS day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= toDateTime('2024-09-25 06:27:40', 'UTC') AND s.end_time >= toDateTime('2024-09-18 20:32:30', 'UTC')
+      AND s.start_time < day + toIntervalDay(1) AND s.end_time >= day
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - - '2024-09-18 20:32:30'
+    - '2024-09-25 06:27:40'
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) AS crossing_count
+    FROM crossing_points c
+    GLOBAL JOIN islands i ON i.id = 7
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 2688)) FROM islands WHERE id = 7 AND variantType(geom) = 'Polygon' UNION ALL SELECT arrayJoin(h3CoverLine(geom.LineString, 2688)) FROM islands WHERE id = 7 AND variantType(geom) = 'LineString')
+      AND if(variantType(i.geom) = 'LineString',
+             arrayMin(arrayMap((a, b) -> sqrt(pow(c.x - (a.1 + (b.1 - a.1) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)
+                                            + pow(c.y - (a.2 + (b.2 - a.2) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)),
+                               arrayPopBack(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)), arrayPopFront(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)))),
+             polygonsDistanceCartesian(array(array(tuple(c.x, c.y))),
+               arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon))
+         ) <= 2688
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - 7
+  - 2688
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = 'Vierverlaten'
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, 2566)) FROM harbours WHERE name = 'Vierverlaten')
+      AND sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= 2566
+      AND c.timestamp BETWEEN '2024-03-02 02:58:04' AND '2024-03-10 00:27:34'
+      AND c.id > 0 AND c.id < 1000000000000
+    GROUP BY h.name;
+  params:
+  - - '2024-03-02 02:58:04'
+    - '2024-03-10 00:27:34'
+  - 2566
+  - Vierverlaten
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT count() FROM (
+      SELECT greatest(s.start_time, toDateTime('2024-05-16 03:48:07', 'UTC')) AS lo,
+             least(s.end_time, toDateTime('2024-05-24 00:50:45', 'UTC')) AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= toDateTime('2024-05-24 00:50:45', 'UTC') AND s.end_time >= toDateTime('2024-05-16 03:48:07', 'UTC')
+    ) w
+    WHERE dateDiff('second', lo, hi) >= 86400
+       OR (dateDiff('second', toStartOfDay(lo), lo) < 3600 * (18 + 1) AND dateDiff('second', toStartOfDay(hi), hi) >= 3600 * 18)
+       OR (toStartOfDay(lo) != toStartOfDay(hi)
+           AND (dateDiff('second', toStartOfDay(lo), lo) < 3600 * (18 + 1) OR dateDiff('second', toStartOfDay(hi), hi) >= 3600 * 18));
+  params:
+  - 18
+  - - '2024-05-16 03:48:07'
+    - '2024-05-24 00:50:45'
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT toDate(day) AS day, count() AS unique_crossings
+    FROM crossings_summary s
+    ARRAY JOIN arrayMap(i -> toStartOfDay(toDateTime('2024-07-23 02:31:34', 'UTC')) + toIntervalDay(i),
+                        range(toUInt32(dateDiff('day', toStartOfDay(toDateTime('2024-07-23 02:31:34', 'UTC')), toDateTime('2024-07-25 07:45:02', 'UTC')) + 1))) AS day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= toDateTime('2024-07-25 07:45:02', 'UTC') AND s.end_time >= toDateTime('2024-07-23 02:31:34', 'UTC')
+      AND s.start_time < day + toIntervalDay(1) AND s.end_time >= day
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - - '2024-07-23 02:31:34'
+    - '2024-07-25 07:45:02'
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) AS crossing_count
+    FROM crossing_points c
+    GLOBAL JOIN islands i ON i.id = 30
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 3758)) FROM islands WHERE id = 30 AND variantType(geom) = 'Polygon' UNION ALL SELECT arrayJoin(h3CoverLine(geom.LineString, 3758)) FROM islands WHERE id = 30 AND variantType(geom) = 'LineString')
+      AND if(variantType(i.geom) = 'LineString',
+             arrayMin(arrayMap((a, b) -> sqrt(pow(c.x - (a.1 + (b.1 - a.1) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)
+                                            + pow(c.y - (a.2 + (b.2 - a.2) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)),
+                               arrayPopBack(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)), arrayPopFront(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)))),
+             polygonsDistanceCartesian(array(array(tuple(c.x, c.y))),
+               arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon))
+         ) <= 3758
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - 30
+  - 3758
+- name: islandOrCoastLineCrossingsInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT c.id)
+    FROM crossing_points c
+    GLOBAL JOIN islands i ON i.id = 52
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 2622)) FROM islands WHERE id = 52 AND variantType(geom) = 'Polygon' UNION ALL SELECT arrayJoin(h3CoverLine(geom.LineString, 2622)) FROM islands WHERE id = 52 AND variantType(geom) = 'LineString')
+      AND if(variantType(i.geom) = 'LineString',
+             arrayMin(arrayMap((a, b) -> sqrt(pow(c.x - (a.1 + (b.1 - a.1) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)
+                                            + pow(c.y - (a.2 + (b.2 - a.2) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)),
+                               arrayPopBack(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)), arrayPopFront(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)))),
+             polygonsDistanceCartesian(array(array(tuple(c.x, c.y))),
+               arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon))
+         ) <= 2622
+      AND c.timestamp BETWEEN '2025-03-31 22:52:11' AND '2025-04-10 06:39:45'
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - 2622
+  - 52
+  - - '2025-03-31 22:52:11'
+    - '2025-04-10 06:39:45'
+- name: countActiveCrossingsNearIsland
+  type: spatial
+  sql: |
+    SELECT COUNT(DISTINCT c.id) AS crossing_count
+    FROM crossing_points c
+    GLOBAL JOIN islands i ON i.id = 72
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), 1287)) FROM islands WHERE id = 72 AND variantType(geom) = 'Polygon' UNION ALL SELECT arrayJoin(h3CoverLine(geom.LineString, 1287)) FROM islands WHERE id = 72 AND variantType(geom) = 'LineString')
+      AND if(variantType(i.geom) = 'LineString',
+             arrayMin(arrayMap((a, b) -> sqrt(pow(c.x - (a.1 + (b.1 - a.1) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)
+                                            + pow(c.y - (a.2 + (b.2 - a.2) * greatest(0., least(1., ((c.x - a.1) * (b.1 - a.1) + (c.y - a.2) * (b.2 - a.2)) / greatest(pow(b.1 - a.1, 2) + pow(b.2 - a.2, 2), 1e-9)))), 2)),
+                               arrayPopBack(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)), arrayPopFront(arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), i.geom.LineString)))),
+             polygonsDistanceCartesian(array(array(tuple(c.x, c.y))),
+               arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), i.geom.Polygon))
+         ) <= 1287
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - 72
+  - 1287
+- name: busiestDayInWeekPeriod
+  type: temporal
+  sql: |
+    SELECT toDate(day) AS day, count() AS unique_crossings
+    FROM crossings_summary s
+    ARRAY JOIN arrayMap(i -> toStartOfDay(toDateTime('2024-09-04 10:05:38', 'UTC')) + toIntervalDay(i),
+                        range(toUInt32(dateDiff('day', toStartOfDay(toDateTime('2024-09-04 10:05:38', 'UTC')), toDateTime('2024-09-10 13:39:58', 'UTC')) + 1))) AS day
+    WHERE s.id > 0 AND s.id < 1000000000000
+      AND s.start_time <= toDateTime('2024-09-10 13:39:58', 'UTC') AND s.end_time >= toDateTime('2024-09-04 10:05:38', 'UTC')
+      AND s.start_time < day + toIntervalDay(1) AND s.end_time >= day
+    GROUP BY day
+    ORDER BY unique_crossings DESC
+    LIMIT 1;
+  params:
+  - - '2024-09-04 10:05:38'
+    - '2024-09-10 13:39:58'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = 'Farsund'
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, 4739)) FROM harbours WHERE name = 'Farsund')
+      AND sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= 4739
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - Farsund
+  - 4739
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT count() FROM (
+      SELECT greatest(s.start_time, toDateTime('2024-06-02 11:48:18', 'UTC')) AS lo,
+             least(s.end_time, toDateTime('2024-06-05 11:40:33', 'UTC')) AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= toDateTime('2024-06-05 11:40:33', 'UTC') AND s.end_time >= toDateTime('2024-06-02 11:48:18', 'UTC')
+    ) w
+    WHERE dateDiff('second', lo, hi) >= 86400
+       OR (dateDiff('second', toStartOfDay(lo), lo) < 3600 * (3 + 1) AND dateDiff('second', toStartOfDay(hi), hi) >= 3600 * 3)
+       OR (toStartOfDay(lo) != toStartOfDay(hi)
+           AND (dateDiff('second', toStartOfDay(lo), lo) < 3600 * (3 + 1) OR dateDiff('second', toStartOfDay(hi), hi) >= 3600 * 3));
+  params:
+  - 3
+  - - '2024-06-02 11:48:18'
+    - '2024-06-05 11:40:33'
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT count() FROM (
+      SELECT greatest(s.start_time, toDateTime('2024-07-16 12:11:48', 'UTC')) AS lo,
+             least(s.end_time, toDateTime('2024-07-22 14:46:59', 'UTC')) AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= toDateTime('2024-07-22 14:46:59', 'UTC') AND s.end_time >= toDateTime('2024-07-16 12:11:48', 'UTC')
+    ) w
+    WHERE dateDiff('second', lo, hi) >= 86400
+       OR (dateDiff('second', toStartOfDay(lo), lo) < 3600 * (10 + 1) AND dateDiff('second', toStartOfDay(hi), hi) >= 3600 * 10)
+       OR (toStartOfDay(lo) != toStartOfDay(hi)
+           AND (dateDiff('second', toStartOfDay(lo), lo) < 3600 * (10 + 1) OR dateDiff('second', toStartOfDay(hi), hi) >= 3600 * 10));
+  params:
+  - 10
+  - - '2024-07-16 12:11:48'
+    - '2024-07-22 14:46:59'
+- name: HarbourActivityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT h.name AS harbour_name, COUNT(DISTINCT c.id) AS unique_crossings_near_harbour
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = 'Baelum'
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, 4160)) FROM harbours WHERE name = 'Baelum')
+      AND sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= 4160
+      AND c.timestamp BETWEEN '2024-10-12 11:36:14' AND '2024-10-22 09:32:52'
+      AND c.id > 0 AND c.id < 1000000000000
+    GROUP BY h.name;
+  params:
+  - - '2024-10-12 11:36:14'
+    - '2024-10-22 09:32:52'
+  - 4160
+  - Baelum
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT count() FROM (
+      SELECT greatest(s.start_time, toDateTime('2025-04-29 07:16:49', 'UTC')) AS lo,
+             least(s.end_time, toDateTime('2025-05-06 02:15:33', 'UTC')) AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= toDateTime('2025-05-06 02:15:33', 'UTC') AND s.end_time >= toDateTime('2025-04-29 07:16:49', 'UTC')
+    ) w
+    WHERE dateDiff('second', lo, hi) >= 86400
+       OR (dateDiff('second', toStartOfDay(lo), lo) < 3600 * (4 + 1) AND dateDiff('second', toStartOfDay(hi), hi) >= 3600 * 4)
+       OR (toStartOfDay(lo) != toStartOfDay(hi)
+           AND (dateDiff('second', toStartOfDay(lo), lo) < 3600 * (4 + 1) OR dateDiff('second', toStartOfDay(hi), hi) >= 3600 * 4));
+  params:
+  - 4
+  - - '2025-04-29 07:16:49'
+    - '2025-05-06 02:15:33'
+- name: crossingsAroundHarbour
+  type: spatial
+  sql: |
+    SELECT DISTINCT c.id
+    FROM crossing_points c
+    GLOBAL JOIN harbours h ON h.name = 'Altenwerder'
+    WHERE c.h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(lon, lat, 1598)) FROM harbours WHERE name = 'Altenwerder')
+      AND sqrt(pow(c.x - h.x, 2) + pow(c.y - h.y, 2)) <= 1598
+      AND c.id > 0 AND c.id < 1000000000000;
+  params:
+  - Altenwerder
+  - 1598
+- name: CrossingsActiveAtGivenHourOfDay
+  type: temporal
+  sql: |
+    SELECT count() FROM (
+      SELECT greatest(s.start_time, toDateTime('2024-01-24 21:12:37', 'UTC')) AS lo,
+             least(s.end_time, toDateTime('2024-02-01 07:02:29', 'UTC')) AS hi
+      FROM crossings_summary s
+      WHERE s.id > 0 AND s.id < 1000000000000
+        AND s.start_time <= toDateTime('2024-02-01 07:02:29', 'UTC') AND s.end_time >= toDateTime('2024-01-24 21:12:37', 'UTC')
+    ) w
+    WHERE dateDiff('second', lo, hi) >= 86400
+       OR (dateDiff('second', toStartOfDay(lo), lo) < 3600 * (9 + 1) AND dateDiff('second', toStartOfDay(hi), hi) >= 3600 * 9)
+       OR (toStartOfDay(lo) != toStartOfDay(hi)
+           AND (dateDiff('second', toStartOfDay(lo), lo) < 3600 * (9 + 1) OR dateDiff('second', toStartOfDay(hi), hi) >= 3600 * 9));
+  params:
+  - 9
+  - - '2024-01-24 21:12:37'
+    - '2024-02-01 07:02:29'
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(array(tuple(16.80776363619747, 54.81020807445127), tuple(18.55119943619747, 54.81020807445127), tuple(18.55119943619747, 55.622136274451265), tuple(16.80776363619747, 55.622136274451265)), 0)))
+      AND id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-04-03 11:41:47' AND '2025-04-09 00:39:23'
+      AND pointInPolygon((lon, lat), array(tuple(16.80776363619747, 54.81020807445127), tuple(18.55119943619747, 54.81020807445127), tuple(18.55119943619747, 55.622136274451265), tuple(16.80776363619747, 55.622136274451265)));
+  params:
+  - '''2025-04-03 11:41:47'' AND ''2025-04-09 00:39:23'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(16.80776363619747, 54.81020807445127,
+    18.55119943619747, 55.622136274451265), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(array(tuple(16.21717311529076, 57.98126697611902), tuple(17.96060891529076, 57.98126697611902), tuple(17.96060891529076, 58.79319517611901), tuple(16.21717311529076, 58.79319517611901)), 0)))
+      AND id > 0 AND id < 1000000000000 AND pointInPolygon((lon, lat), array(tuple(16.21717311529076, 57.98126697611902), tuple(17.96060891529076, 57.98126697611902), tuple(17.96060891529076, 58.79319517611901), tuple(16.21717311529076, 58.79319517611901)));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(16.21717311529076, 57.98126697611902,
+    17.96060891529076, 58.79319517611901), 4326), 3857)
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossings_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= toDateTime('2025-06-03 02:15:31', 'UTC') AND end_time <= toDateTime('2025-06-08 15:13:07', 'UTC');
+  params:
+  - '''2025-06-03 02:15:31'' AND ''2025-06-08 15:13:07'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(array(tuple(15.250346843299917, 57.95112887617158), tuple(16.993782643299916, 57.95112887617158), tuple(16.993782643299916, 58.76305707617158), tuple(15.250346843299917, 58.76305707617158)), 0)))
+      AND id > 0 AND id < 1000000000000 AND pointInPolygon((lon, lat), array(tuple(15.250346843299917, 57.95112887617158), tuple(16.993782643299916, 57.95112887617158), tuple(16.993782643299916, 58.76305707617158), tuple(15.250346843299917, 58.76305707617158)));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(15.250346843299917, 57.95112887617158,
+    16.993782643299916, 58.76305707617158), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(array(tuple(13.605885126389673, 58.405102323675266), tuple(15.349320926389673, 58.405102323675266), tuple(15.349320926389673, 59.21703052367526), tuple(13.605885126389673, 59.21703052367526)), 0)))
+      AND id > 0 AND id < 1000000000000 AND pointInPolygon((lon, lat), array(tuple(13.605885126389673, 58.405102323675266), tuple(15.349320926389673, 58.405102323675266), tuple(15.349320926389673, 59.21703052367526), tuple(13.605885126389673, 59.21703052367526)));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(13.605885126389673, 58.405102323675266,
+    15.349320926389673, 59.21703052367526), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, lon, lat, timestamp
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(7.76604653863176, 53.51582142373925, 14476.695443995899)))
+      AND id > 0 AND id < 1000000000000 AND sqrt(pow(x - 6378137. * radians(7.76604653863176), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(53.51582142373925) / 2)), 2)) <= 14476.695443995899
+    ORDER BY sqrt(pow(x - 6378137. * radians(7.76604653863176), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(53.51582142373925) / 2)), 2))
+    LIMIT 5;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(7.76604653863176, 53.51582142373925), 4326),
+    3857)
+  - 5
+  - 14476.695443995899
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE h3 GLOBAL IN (SELECT arrayJoin(arrayConcat(h3CoverRing(array(tuple(1.4658040433969415, 56.7589633035587), tuple(3.209239843396942, 56.7589633035587), tuple(3.209239843396942, 57.5708915035587), tuple(1.4658040433969415, 57.5708915035587)), 0), h3CoverRing(array(tuple(9.070501884995991, 54.96754096989253), tuple(10.813937684995992, 54.96754096989253), tuple(10.813937684995992, 55.77946916989253), tuple(9.070501884995991, 55.77946916989253)), 0))))
+          AND id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-03-18 02:42:08' AND '2025-03-23 15:39:44'
+        GROUP BY id
+        HAVING countIf(pointInPolygon((lon, lat), array(tuple(1.4658040433969415, 56.7589633035587), tuple(3.209239843396942, 56.7589633035587), tuple(3.209239843396942, 57.5708915035587), tuple(1.4658040433969415, 57.5708915035587)))) > 0
+          AND countIf(pointInPolygon((lon, lat), array(tuple(9.070501884995991, 54.96754096989253), tuple(10.813937684995992, 54.96754096989253), tuple(10.813937684995992, 55.77946916989253), tuple(9.070501884995991, 55.77946916989253)))) > 0
+    );
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(1.4658040433969415, 56.7589633035587,
+    3.209239843396942, 57.5708915035587), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(9.070501884995991, 54.96754096989253,
+    10.813937684995992, 55.77946916989253), 4326), 3857)
+  - '''2025-03-18 02:42:08'' AND ''2025-03-23 15:39:44'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(array(tuple(11.653181979606137, 53.95839910849795), tuple(13.396617779606137, 53.95839910849795), tuple(13.396617779606137, 54.77032730849795), tuple(11.653181979606137, 54.77032730849795)), 0)))
+      AND id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-06-20 10:49:48' AND '2025-06-25 23:47:24'
+      AND pointInPolygon((lon, lat), array(tuple(11.653181979606137, 53.95839910849795), tuple(13.396617779606137, 53.95839910849795), tuple(13.396617779606137, 54.77032730849795), tuple(11.653181979606137, 54.77032730849795)));
+  params:
+  - '''2025-06-20 10:49:48'' AND ''2025-06-25 23:47:24'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(11.653181979606137, 53.95839910849795,
+    13.396617779606137, 54.77032730849795), 4326), 3857)
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT toStartOfHour(timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM crossing_points
+      WHERE id > 0 AND id < 1000000000000 AND timestamp between '2024-02-20 13:01:58' AND '2024-02-26 01:59:34'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-02-20 13:01:58'' AND ''2024-02-26 01:59:34'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(array(tuple(5.147655646444631, 57.18573859090348), tuple(6.891091446444631, 57.18573859090348), tuple(6.891091446444631, 57.99766679090348), tuple(5.147655646444631, 57.99766679090348)), 0)))
+      AND id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-03-14 22:29:23' AND '2025-03-20 11:26:59'
+      AND pointInPolygon((lon, lat), array(tuple(5.147655646444631, 57.18573859090348), tuple(6.891091446444631, 57.18573859090348), tuple(6.891091446444631, 57.99766679090348), tuple(5.147655646444631, 57.99766679090348)));
+  params:
+  - '''2025-03-14 22:29:23'' AND ''2025-03-20 11:26:59'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(5.147655646444631, 57.18573859090348,
+    6.891091446444631, 57.99766679090348), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE h3 GLOBAL IN (SELECT arrayJoin(arrayConcat(h3CoverRing(array(tuple(9.307240936125165, 53.95014108501311), tuple(11.050676736125165, 53.95014108501311), tuple(11.050676736125165, 54.762069285013105), tuple(9.307240936125165, 54.762069285013105)), 0), h3CoverRing(array(tuple(4.848411956259879, 57.063086627577974), tuple(6.591847756259879, 57.063086627577974), tuple(6.591847756259879, 57.87501482757797), tuple(4.848411956259879, 57.87501482757797)), 0))))
+          AND id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2024-06-06 20:35:16' AND '2024-06-12 09:32:52'
+        GROUP BY id
+        HAVING countIf(pointInPolygon((lon, lat), array(tuple(9.307240936125165, 53.95014108501311), tuple(11.050676736125165, 53.95014108501311), tuple(11.050676736125165, 54.762069285013105), tuple(9.307240936125165, 54.762069285013105)))) > 0
+          AND countIf(pointInPolygon((lon, lat), array(tuple(4.848411956259879, 57.063086627577974), tuple(6.591847756259879, 57.063086627577974), tuple(6.591847756259879, 57.87501482757797), tuple(4.848411956259879, 57.87501482757797)))) > 0
+    );
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(9.307240936125165, 53.95014108501311,
+    11.050676736125165, 54.762069285013105), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(4.848411956259879, 57.063086627577974,
+    6.591847756259879, 57.87501482757797), 4326), 3857)
+  - '''2024-06-06 20:35:16'' AND ''2024-06-12 09:32:52'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT toStartOfHour(timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM crossing_points
+      WHERE id > 0 AND id < 1000000000000 AND timestamp between '2025-03-01 02:46:56' AND '2025-03-06 15:44:32'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2025-03-01 02:46:56'' AND ''2025-03-06 15:44:32'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT toStartOfHour(timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM crossing_points
+      WHERE id > 0 AND id < 1000000000000 AND timestamp between '2024-08-14 00:46:05' AND '2024-08-19 13:43:41'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-08-14 00:46:05'' AND ''2024-08-19 13:43:41'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(array(tuple(14.074244542219049, 54.638159706703355), tuple(15.817680342219049, 54.638159706703355), tuple(15.817680342219049, 55.45008790670335), tuple(14.074244542219049, 55.45008790670335)), 0)))
+      AND id > 0 AND id < 1000000000000 AND pointInPolygon((lon, lat), array(tuple(14.074244542219049, 54.638159706703355), tuple(15.817680342219049, 54.638159706703355), tuple(15.817680342219049, 55.45008790670335), tuple(14.074244542219049, 55.45008790670335)));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(14.074244542219049, 54.638159706703355,
+    15.817680342219049, 55.45008790670335), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, lon, lat, timestamp
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(6.905128271866109, 55.32325368986663, 36357.606934021875)))
+      AND id > 0 AND id < 1000000000000 AND sqrt(pow(x - 6378137. * radians(6.905128271866109), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(55.32325368986663) / 2)), 2)) <= 36357.606934021875
+    ORDER BY sqrt(pow(x - 6378137. * radians(6.905128271866109), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(55.32325368986663) / 2)), 2))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(6.905128271866109, 55.32325368986663), 4326),
+    3857)
+  - 1
+  - 36357.606934021875
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE h3 GLOBAL IN (SELECT arrayJoin(arrayConcat(h3CoverRing(array(tuple(6.906509119902678, 55.21558940886748), tuple(8.649944919902678, 55.21558940886748), tuple(8.649944919902678, 56.02751760886748), tuple(6.906509119902678, 56.02751760886748)), 0), h3CoverRing(array(tuple(10.70491677975697, 52.87001319251856), tuple(12.448352579756971, 52.87001319251856), tuple(12.448352579756971, 53.68194139251856), tuple(10.70491677975697, 53.68194139251856)), 0))))
+          AND id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-01-04 14:10:28' AND '2025-01-10 03:08:04'
+        GROUP BY id
+        HAVING countIf(pointInPolygon((lon, lat), array(tuple(6.906509119902678, 55.21558940886748), tuple(8.649944919902678, 55.21558940886748), tuple(8.649944919902678, 56.02751760886748), tuple(6.906509119902678, 56.02751760886748)))) > 0
+          AND countIf(pointInPolygon((lon, lat), array(tuple(10.70491677975697, 52.87001319251856), tuple(12.448352579756971, 52.87001319251856), tuple(12.448352579756971, 53.68194139251856), tuple(10.70491677975697, 53.68194139251856)))) > 0
+    );
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.906509119902678, 55.21558940886748,
+    8.649944919902678, 56.02751760886748), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(10.70491677975697, 52.87001319251856,
+    12.448352579756971, 53.68194139251856), 4326), 3857)
+  - '''2025-01-04 14:10:28'' AND ''2025-01-10 03:08:04'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossings_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= toDateTime('2024-07-05 04:39:20', 'UTC') AND end_time <= toDateTime('2024-07-10 17:36:56', 'UTC');
+  params:
+  - '''2024-07-05 04:39:20'' AND ''2024-07-10 17:36:56'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(array(tuple(3.635433736268631, 57.31588189953412), tuple(5.378869536268631, 57.31588189953412), tuple(5.378869536268631, 58.127810099534116), tuple(3.635433736268631, 58.127810099534116)), 0)))
+      AND id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-05-23 23:20:36' AND '2025-05-29 12:18:12'
+      AND pointInPolygon((lon, lat), array(tuple(3.635433736268631, 57.31588189953412), tuple(5.378869536268631, 57.31588189953412), tuple(5.378869536268631, 58.127810099534116), tuple(3.635433736268631, 58.127810099534116)));
+  params:
+  - '''2025-05-23 23:20:36'' AND ''2025-05-29 12:18:12'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(3.635433736268631, 57.31588189953412,
+    5.378869536268631, 58.127810099534116), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, lon, lat, timestamp
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(17.31432435680017, 57.75927040605165, 37459.57297987162)))
+      AND id > 0 AND id < 1000000000000 AND sqrt(pow(x - 6378137. * radians(17.31432435680017), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(57.75927040605165) / 2)), 2)) <= 37459.57297987162
+    ORDER BY sqrt(pow(x - 6378137. * radians(17.31432435680017), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(57.75927040605165) / 2)), 2))
+    LIMIT 3;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(17.31432435680017, 57.75927040605165), 4326),
+    3857)
+  - 3
+  - 37459.57297987162
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT toStartOfHour(timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM crossing_points
+      WHERE id > 0 AND id < 1000000000000 AND timestamp between '2024-03-12 09:34:27' AND '2024-03-17 22:32:03'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-03-12 09:34:27'' AND ''2024-03-17 22:32:03'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT toStartOfHour(timestamp) AS hour, id, COUNT(*) AS cnt
+      FROM crossing_points
+      WHERE id > 0 AND id < 1000000000000 AND timestamp between '2024-02-08 12:59:00' AND '2024-02-14 01:56:36'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-02-08 12:59:00'' AND ''2024-02-14 01:56:36'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(array(tuple(6.5633319732366555, 54.329041026610426), tuple(8.306767773236656, 54.329041026610426), tuple(8.306767773236656, 55.14096922661042), tuple(6.5633319732366555, 55.14096922661042)), 0)))
+      AND id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-06-28 05:39:49' AND '2025-07-03 18:37:25'
+      AND pointInPolygon((lon, lat), array(tuple(6.5633319732366555, 54.329041026610426), tuple(8.306767773236656, 54.329041026610426), tuple(8.306767773236656, 55.14096922661042), tuple(6.5633319732366555, 55.14096922661042)));
+  params:
+  - '''2025-06-28 05:39:49'' AND ''2025-07-03 18:37:25'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.5633319732366555, 54.329041026610426,
+    8.306767773236656, 55.14096922661042), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE h3 GLOBAL IN (SELECT arrayJoin(arrayConcat(h3CoverRing(array(tuple(15.51937997215473, 55.22081233279502), tuple(17.26281577215473, 55.22081233279502), tuple(17.26281577215473, 56.03274053279502), tuple(15.51937997215473, 56.03274053279502)), 0), h3CoverRing(array(tuple(7.649813826121923, 52.42066584412211), tuple(9.393249626121923, 52.42066584412211), tuple(9.393249626121923, 53.23259404412211), tuple(7.649813826121923, 53.23259404412211)), 0))))
+          AND id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-02-20 12:35:13' AND '2025-02-26 01:32:49'
+        GROUP BY id
+        HAVING countIf(pointInPolygon((lon, lat), array(tuple(15.51937997215473, 55.22081233279502), tuple(17.26281577215473, 55.22081233279502), tuple(17.26281577215473, 56.03274053279502), tuple(15.51937997215473, 56.03274053279502)))) > 0
+          AND countIf(pointInPolygon((lon, lat), array(tuple(7.649813826121923, 52.42066584412211), tuple(9.393249626121923, 52.42066584412211), tuple(9.393249626121923, 53.23259404412211), tuple(7.649813826121923, 53.23259404412211)))) > 0
+    );
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(15.51937997215473, 55.22081233279502,
+    17.26281577215473, 56.03274053279502), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.649813826121923, 52.42066584412211,
+    9.393249626121923, 53.23259404412211), 4326), 3857)
+  - '''2025-02-20 12:35:13'' AND ''2025-02-26 01:32:49'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossings_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= toDateTime('2025-06-06 22:23:53', 'UTC') AND end_time <= toDateTime('2025-06-12 11:21:29', 'UTC');
+  params:
+  - '''2025-06-06 22:23:53'' AND ''2025-06-12 11:21:29'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, lon, lat, timestamp
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(15.264366570638858, 57.10291095012025, 26716.293072247405)))
+      AND id > 0 AND id < 1000000000000 AND sqrt(pow(x - 6378137. * radians(15.264366570638858), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(57.10291095012025) / 2)), 2)) <= 26716.293072247405
+    ORDER BY sqrt(pow(x - 6378137. * radians(15.264366570638858), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(57.10291095012025) / 2)), 2))
+    LIMIT 4;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(15.264366570638858, 57.10291095012025), 4326),
+    3857)
+  - 4
+  - 26716.293072247405
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossings_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= toDateTime('2024-09-22 14:04:35', 'UTC') AND end_time <= toDateTime('2024-09-28 03:02:11', 'UTC');
+  params:
+  - '''2024-09-22 14:04:35'' AND ''2024-09-28 03:02:11'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM crossings_summary
+    WHERE id > 0 AND id < 1000000000000
+      AND start_time >= toDateTime('2024-04-02 02:11:46', 'UTC') AND end_time <= toDateTime('2024-04-07 15:09:22', 'UTC');
+  params:
+  - '''2024-04-02 02:11:46'' AND ''2024-04-07 15:09:22'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing(array(tuple(6.444903303137676, 54.84619366205435), tuple(8.188339103137675, 54.84619366205435), tuple(8.188339103137675, 55.658121862054344), tuple(6.444903303137676, 55.658121862054344)), 0)))
+      AND id > 0 AND id < 1000000000000 AND pointInPolygon((lon, lat), array(tuple(6.444903303137676, 54.84619366205435), tuple(8.188339103137675, 54.84619366205435), tuple(8.188339103137675, 55.658121862054344), tuple(6.444903303137676, 55.658121862054344)));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.444903303137676, 54.84619366205435,
+    8.188339103137675, 55.658121862054344), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, lon, lat, timestamp
+    FROM crossing_points
+    WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverPoint(17.001528399310665, 56.48186642422439, 26563.19952036117)))
+      AND id > 0 AND id < 1000000000000 AND sqrt(pow(x - 6378137. * radians(17.001528399310665), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(56.48186642422439) / 2)), 2)) <= 26563.19952036117
+    ORDER BY sqrt(pow(x - 6378137. * radians(17.001528399310665), 2) + pow(y - 6378137. * log(tan(pi() / 4 + radians(56.48186642422439) / 2)), 2))
+    LIMIT 5;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(17.001528399310665, 56.48186642422439), 4326),
+    3857)
+  - 5
+  - 26563.19952036117
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM crossing_points
+        WHERE h3 GLOBAL IN (SELECT arrayJoin(arrayConcat(h3CoverRing(array(tuple(7.3439531002182425, 56.83937398226577), tuple(9.087388900218242, 56.83937398226577), tuple(9.087388900218242, 57.651302182265766), tuple(7.3439531002182425, 57.651302182265766)), 0), h3CoverRing(array(tuple(12.71220106342008, 53.73049535035192), tuple(14.45563686342008, 53.73049535035192), tuple(14.45563686342008, 54.54242355035192), tuple(12.71220106342008, 54.54242355035192)), 0))))
+          AND id > 0 AND id < 1000000000000 AND timestamp BETWEEN '2025-05-12 20:31:06' AND '2025-05-18 09:28:42'
+        GROUP BY id
+        HAVING countIf(pointInPolygon((lon, lat), array(tuple(7.3439531002182425, 56.83937398226577), tuple(9.087388900218242, 56.83937398226577), tuple(9.087388900218242, 57.651302182265766), tuple(7.3439531002182425, 57.651302182265766)))) > 0
+          AND countIf(pointInPolygon((lon, lat), array(tuple(12.71220106342008, 53.73049535035192), tuple(14.45563686342008, 53.73049535035192), tuple(14.45563686342008, 54.54242355035192), tuple(12.71220106342008, 54.54242355035192)))) > 0
+    );
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.3439531002182425, 56.83937398226577,
+    9.087388900218242, 57.651302182265766), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(12.71220106342008, 53.73049535035192,
+    14.45563686342008, 54.54242355035192), 4326), 3857)
+  - '''2025-05-12 20:31:06'' AND ''2025-05-18 09:28:42'''

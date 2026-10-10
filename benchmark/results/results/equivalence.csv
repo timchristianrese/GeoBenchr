@@ -1,0 +1,289 @@
+scenario,query,system,verdict,acceptable
+ais,CrossingsActiveAtGivenHourOfDay,ClickHouse,SAME,True
+ais,CrossingsActiveAtGivenHourOfDay,DuckDB,SAME,True
+ais,CrossingsActiveAtGivenHourOfDay,MobilityDB,SAME,True
+ais,CrossingsActiveAtGivenHourOfDay,PostGIS,reference,True
+ais,CrossingsActiveAtGivenHourOfDay,Sedona,SAME,True
+ais,CrossingsActiveAtGivenHourOfDay,SpaceTime,SAME,True
+ais,HarbourActivityInPeriod,ClickHouse,SAME,True
+ais,HarbourActivityInPeriod,DuckDB,SAME,True
+ais,HarbourActivityInPeriod,MobilityDB,SAME,True
+ais,HarbourActivityInPeriod,PostGIS,reference,True
+ais,HarbourActivityInPeriod,Sedona,SAME,True
+ais,HarbourActivityInPeriod,SpaceTime,SAME (zero-count row),True
+ais,IDsInsideRegion1Andsecond_region,ClickHouse,SAME,True
+ais,IDsInsideRegion1Andsecond_region,DuckDB,SAME,True
+ais,IDsInsideRegion1Andsecond_region,MobilityDB,SAME,True
+ais,IDsInsideRegion1Andsecond_region,PostGIS,reference,True
+ais,IDsInsideRegion1Andsecond_region,Sedona,SAME,True
+ais,IDsInsideRegion1Andsecond_region,SpaceTime,SAME,True
+ais,SpatialBBox,ClickHouse,SAME,True
+ais,SpatialBBox,DuckDB,SAME,True
+ais,SpatialBBox,MobilityDB,SAME,True
+ais,SpatialBBox,PostGIS,reference,True
+ais,SpatialBBox,Sedona,SAME,True
+ais,SpatialBBox,SpaceTime,SAME,True
+ais,busiestDayInWeekPeriod,ClickHouse,SAME,True
+ais,busiestDayInWeekPeriod,DuckDB,SAME,True
+ais,busiestDayInWeekPeriod,MobilityDB,SAME,True
+ais,busiestDayInWeekPeriod,PostGIS,reference,True
+ais,busiestDayInWeekPeriod,Sedona,SAME,True
+ais,busiestDayInWeekPeriod,SpaceTime,SAME,True
+ais,countActiveCrossingsNearIsland,ClickHouse,SAME,True
+ais,countActiveCrossingsNearIsland,DuckDB,SAME,True
+ais,countActiveCrossingsNearIsland,MobilityDB,SAME,True
+ais,countActiveCrossingsNearIsland,PostGIS,reference,True
+ais,countActiveCrossingsNearIsland,Sedona,SAME,True
+ais,countActiveCrossingsNearIsland,SpaceTime,SAME,True
+ais,crossingsAroundHarbour,ClickHouse,SAME,True
+ais,crossingsAroundHarbour,DuckDB,SAME,True
+ais,crossingsAroundHarbour,MobilityDB,SAME,True
+ais,crossingsAroundHarbour,PostGIS,reference,True
+ais,crossingsAroundHarbour,Sedona,SAME,True
+ais,crossingsAroundHarbour,SpaceTime,SAME,True
+ais,islandOrCoastLineCrossingsInPeriod,ClickHouse,SAME,True
+ais,islandOrCoastLineCrossingsInPeriod,DuckDB,SAME,True
+ais,islandOrCoastLineCrossingsInPeriod,MobilityDB,SAME,True
+ais,islandOrCoastLineCrossingsInPeriod,PostGIS,reference,True
+ais,islandOrCoastLineCrossingsInPeriod,Sedona,SAME,True
+ais,islandOrCoastLineCrossingsInPeriod,SpaceTime,SAME,True
+ais,kNN,ClickHouse,KNN (geometry format / ties at equal distance),True
+ais,kNN,DuckDB,KNN (geometry format / ties at equal distance),True
+ais,kNN,MobilityDB,SAME,True
+ais,kNN,PostGIS,reference,True
+ais,kNN,Sedona,KNN (geometry format / ties at equal distance),True
+ais,kNN,SpaceTime,KNN (geometry format / ties at equal distance),True
+ais,spatioTemporalRange,ClickHouse,SAME,True
+ais,spatioTemporalRange,DuckDB,SAME,True
+ais,spatioTemporalRange,MobilityDB,SAME,True
+ais,spatioTemporalRange,PostGIS,reference,True
+ais,spatioTemporalRange,Sedona,SAME,True
+ais,spatioTemporalRange,SpaceTime,SAME,True
+ais,timeAggregation,ClickHouse,SAME,True
+ais,timeAggregation,DuckDB,SAME,True
+ais,timeAggregation,MobilityDB,SAME,True
+ais,timeAggregation,PostGIS,reference,True
+ais,timeAggregation,Sedona,SAME,True
+ais,timeAggregation,SpaceTime,SAME,True
+ais,timeInterval,ClickHouse,SAME,True
+ais,timeInterval,DuckDB,SAME,True
+ais,timeInterval,MobilityDB,SAME,True
+ais,timeInterval,PostGIS,reference,True
+ais,timeInterval,Sedona,SAME,True
+ais,timeInterval,SpaceTime,SAME,True
+aviation,CityActivityAtInstant,ClickHouse,SAME,True
+aviation,CityActivityAtInstant,DuckDB,SAME,True
+aviation,CityActivityAtInstant,MobilityDB,SAME,True
+aviation,CityActivityAtInstant,PostGIS,reference,True
+aviation,CityActivityAtInstant,Sedona,SAME,True
+aviation,CityActivityAtInstant,SpaceTime,SAME,True
+aviation,FlightsAtLowAltitudeInPeriod,ClickHouse,SAME COUNT,True
+aviation,FlightsAtLowAltitudeInPeriod,DuckDB,SAME COUNT,True
+aviation,FlightsAtLowAltitudeInPeriod,MobilityDB,SAME COUNT,True
+aviation,FlightsAtLowAltitudeInPeriod,PostGIS,reference,True
+aviation,FlightsAtLowAltitudeInPeriod,Sedona,SAME COUNT,True
+aviation,FlightsAtLowAltitudeInPeriod,SpaceTime,CLOSE COUNT 155941 vs 155942 (0.001 %),True
+aviation,FlightsAtNightInPeriod,ClickHouse,SAME COUNT,True
+aviation,FlightsAtNightInPeriod,DuckDB,SAME COUNT,True
+aviation,FlightsAtNightInPeriod,MobilityDB,SAME COUNT,True
+aviation,FlightsAtNightInPeriod,PostGIS,reference,True
+aviation,FlightsAtNightInPeriod,Sedona,SAME COUNT,True
+aviation,FlightsAtNightInPeriod,SpaceTime,SAME COUNT,True
+aviation,IDsInsideRegion1Andsecond_region,ClickHouse,SAME,True
+aviation,IDsInsideRegion1Andsecond_region,DuckDB,SAME,True
+aviation,IDsInsideRegion1Andsecond_region,MobilityDB,SAME,True
+aviation,IDsInsideRegion1Andsecond_region,PostGIS,reference,True
+aviation,IDsInsideRegion1Andsecond_region,Sedona,SAME,True
+aviation,IDsInsideRegion1Andsecond_region,SpaceTime,SAME,True
+aviation,SpatialBBox,ClickHouse,SAME,True
+aviation,SpatialBBox,DuckDB,SAME,True
+aviation,SpatialBBox,MobilityDB,SAME,True
+aviation,SpatialBBox,PostGIS,reference,True
+aviation,SpatialBBox,Sedona,SAME,True
+aviation,SpatialBBox,SpaceTime,SAME,True
+aviation,countFlightsInCounties,ClickHouse,CLOSE (max 0.000 %),True
+aviation,countFlightsInCounties,DuckDB,SAME,True
+aviation,countFlightsInCounties,MobilityDB,SAME,True
+aviation,countFlightsInCounties,PostGIS,reference,True
+aviation,countFlightsInCounties,Sedona,SAME,True
+aviation,countFlightsInCounties,SpaceTime,CLOSE (max 0.000 %),True
+aviation,flightClosestToPoint,ClickHouse,SAME,True
+aviation,flightClosestToPoint,DuckDB,SAME,True
+aviation,flightClosestToPoint,MobilityDB,SAME,True
+aviation,flightClosestToPoint,PostGIS,reference,True
+aviation,flightClosestToPoint,Sedona,SAME,True
+aviation,flightClosestToPoint,SpaceTime,CLOSE (max 0.378 %),True
+aviation,flightsInCountyInPeriod,ClickHouse,SAME COUNT,True
+aviation,flightsInCountyInPeriod,DuckDB,SAME COUNT,True
+aviation,flightsInCountyInPeriod,MobilityDB,SAME COUNT,True
+aviation,flightsInCountyInPeriod,PostGIS,reference,True
+aviation,flightsInCountyInPeriod,Sedona,SAME COUNT,True
+aviation,flightsInCountyInPeriod,SpaceTime,SAME COUNT,True
+aviation,kNN,ClickHouse,KNN (geometry format / ties at equal distance),True
+aviation,kNN,DuckDB,KNN (geometry format / ties at equal distance),True
+aviation,kNN,MobilityDB,SAME,True
+aviation,kNN,PostGIS,reference,True
+aviation,kNN,Sedona,KNN (geometry format / ties at equal distance),True
+aviation,kNN,SpaceTime,KNN (geometry format / ties at equal distance),True
+aviation,spatioTemporalRange,ClickHouse,SAME,True
+aviation,spatioTemporalRange,DuckDB,SAME,True
+aviation,spatioTemporalRange,MobilityDB,SAME,True
+aviation,spatioTemporalRange,PostGIS,reference,True
+aviation,spatioTemporalRange,Sedona,SAME,True
+aviation,spatioTemporalRange,SpaceTime,SAME,True
+aviation,timeAggregation,ClickHouse,SAME,True
+aviation,timeAggregation,DuckDB,SAME,True
+aviation,timeAggregation,MobilityDB,SAME,True
+aviation,timeAggregation,PostGIS,reference,True
+aviation,timeAggregation,Sedona,SAME,True
+aviation,timeAggregation,SpaceTime,CLOSE (max 0.000 %),True
+aviation,timeInterval,ClickHouse,SAME,True
+aviation,timeInterval,DuckDB,SAME,True
+aviation,timeInterval,MobilityDB,SAME,True
+aviation,timeInterval,PostGIS,reference,True
+aviation,timeInterval,Sedona,SAME,True
+aviation,timeInterval,SpaceTime,CLOSE (max 0.001 %),True
+cycling,AverageUpdatesPerRideInDistrictInPeriod,ClickHouse,CLOSE (max 0.006 %),True
+cycling,AverageUpdatesPerRideInDistrictInPeriod,DuckDB,SAME,True
+cycling,AverageUpdatesPerRideInDistrictInPeriod,MobilityDB,SAME,True
+cycling,AverageUpdatesPerRideInDistrictInPeriod,PostGIS,reference,True
+cycling,AverageUpdatesPerRideInDistrictInPeriod,Sedona,SAME,True
+cycling,AverageUpdatesPerRideInDistrictInPeriod,SpaceTime,SAME,True
+cycling,CountRidesFullyInDistrictRadius,ClickHouse,n/a,True
+cycling,CountRidesFullyInDistrictRadius,DuckDB,SAME COUNT,True
+cycling,CountRidesFullyInDistrictRadius,MobilityDB,SAME COUNT,True
+cycling,CountRidesFullyInDistrictRadius,PostGIS,reference,True
+cycling,CountRidesFullyInDistrictRadius,Sedona,SAME COUNT,True
+cycling,CountRidesFullyInDistrictRadius,SpaceTime,CLOSE COUNT 414216 vs 414206 (0.002 %),True
+cycling,IDsInsideRegion1Andsecond_region,ClickHouse,SAME,True
+cycling,IDsInsideRegion1Andsecond_region,DuckDB,SAME,True
+cycling,IDsInsideRegion1Andsecond_region,MobilityDB,SAME,True
+cycling,IDsInsideRegion1Andsecond_region,PostGIS,reference,True
+cycling,IDsInsideRegion1Andsecond_region,Sedona,SAME,True
+cycling,IDsInsideRegion1Andsecond_region,SpaceTime,SAME,True
+cycling,RidesAcrossMultipleHours,ClickHouse,SAME COUNT,True
+cycling,RidesAcrossMultipleHours,DuckDB,SAME COUNT,True
+cycling,RidesAcrossMultipleHours,MobilityDB,SAME COUNT,True
+cycling,RidesAcrossMultipleHours,PostGIS,reference,True
+cycling,RidesAcrossMultipleHours,Sedona,SAME COUNT,True
+cycling,RidesAcrossMultipleHours,SpaceTime,SAME COUNT,True
+cycling,RidesDuringRushHourInPeriod,ClickHouse,SAME,True
+cycling,RidesDuringRushHourInPeriod,DuckDB,SAME,True
+cycling,RidesDuringRushHourInPeriod,MobilityDB,SAME,True
+cycling,RidesDuringRushHourInPeriod,PostGIS,reference,True
+cycling,RidesDuringRushHourInPeriod,Sedona,SAME,True
+cycling,RidesDuringRushHourInPeriod,SpaceTime,SAME,True
+cycling,RidesPastOrToUniversityInPeriod,ClickHouse,CLOSE COUNT 14614 vs 14610 (0.027 %),True
+cycling,RidesPastOrToUniversityInPeriod,DuckDB,SAME COUNT,True
+cycling,RidesPastOrToUniversityInPeriod,MobilityDB,SAME COUNT,True
+cycling,RidesPastOrToUniversityInPeriod,PostGIS,reference,True
+cycling,RidesPastOrToUniversityInPeriod,Sedona,SAME COUNT,True
+cycling,RidesPastOrToUniversityInPeriod,SpaceTime,SAME COUNT,True
+cycling,SpatialBBox,ClickHouse,SAME,True
+cycling,SpatialBBox,DuckDB,SAME,True
+cycling,SpatialBBox,MobilityDB,SAME,True
+cycling,SpatialBBox,PostGIS,reference,True
+cycling,SpatialBBox,Sedona,SAME,True
+cycling,SpatialBBox,SpaceTime,SAME,True
+cycling,countRideInDistrict,ClickHouse,CLOSE (max 0.000 %),True
+cycling,countRideInDistrict,DuckDB,SAME,True
+cycling,countRideInDistrict,MobilityDB,SAME,True
+cycling,countRideInDistrict,PostGIS,reference,True
+cycling,countRideInDistrict,Sedona,SAME,True
+cycling,countRideInDistrict,SpaceTime,CLOSE (max 0.082 %),True
+cycling,kNN,ClickHouse,SAME,True
+cycling,kNN,DuckDB,SAME,True
+cycling,kNN,MobilityDB,SAME,True
+cycling,kNN,PostGIS,reference,True
+cycling,kNN,Sedona,SAME,True
+cycling,kNN,SpaceTime,SAME,True
+cycling,spatioTemporalRange,ClickHouse,SAME,True
+cycling,spatioTemporalRange,DuckDB,SAME,True
+cycling,spatioTemporalRange,MobilityDB,SAME,True
+cycling,spatioTemporalRange,PostGIS,reference,True
+cycling,spatioTemporalRange,Sedona,SAME,True
+cycling,spatioTemporalRange,SpaceTime,SAME,True
+cycling,timeAggregation,ClickHouse,CLOSE (max 0.044 %),True
+cycling,timeAggregation,DuckDB,SAME,True
+cycling,timeAggregation,MobilityDB,SAME,True
+cycling,timeAggregation,PostGIS,reference,True
+cycling,timeAggregation,Sedona,SAME,True
+cycling,timeAggregation,SpaceTime,SAME,True
+cycling,timeInterval,ClickHouse,SAME,True
+cycling,timeInterval,DuckDB,SAME,True
+cycling,timeInterval,MobilityDB,SAME,True
+cycling,timeInterval,PostGIS,reference,True
+cycling,timeInterval,Sedona,SAME,True
+cycling,timeInterval,SpaceTime,SAME,True
+geolife,AverageDailyActivityPerUserInPeriod,ClickHouse,SAME COUNT,True
+geolife,AverageDailyActivityPerUserInPeriod,DuckDB,SAME COUNT,True
+geolife,AverageDailyActivityPerUserInPeriod,MobilityDB,n/a,True
+geolife,AverageDailyActivityPerUserInPeriod,PostGIS,reference,True
+geolife,AverageDailyActivityPerUserInPeriod,Sedona,SAME COUNT,True
+geolife,AverageDailyActivityPerUserInPeriod,SpaceTime,SAME COUNT,True
+geolife,ClosestRestaurantToPoint,ClickHouse,KNN (geometry format / ties at equal distance),True
+geolife,ClosestRestaurantToPoint,DuckDB,KNN (geometry format / ties at equal distance),True
+geolife,ClosestRestaurantToPoint,MobilityDB,n/a,True
+geolife,ClosestRestaurantToPoint,PostGIS,reference,True
+geolife,ClosestRestaurantToPoint,Sedona,KNN (geometry format / ties at equal distance),True
+geolife,ClosestRestaurantToPoint,SpaceTime,KNN (geometry format / ties at equal distance),True
+geolife,CountPOIsByTypeInRegion,ClickHouse,SAME,True
+geolife,CountPOIsByTypeInRegion,DuckDB,SAME,True
+geolife,CountPOIsByTypeInRegion,MobilityDB,n/a,True
+geolife,CountPOIsByTypeInRegion,PostGIS,reference,True
+geolife,CountPOIsByTypeInRegion,Sedona,SAME,True
+geolife,CountPOIsByTypeInRegion,SpaceTime,SAME,True
+geolife,FirstAndLastActivityInPeriod,ClickHouse,SAME COUNT,True
+geolife,FirstAndLastActivityInPeriod,DuckDB,SAME COUNT,True
+geolife,FirstAndLastActivityInPeriod,MobilityDB,n/a,True
+geolife,FirstAndLastActivityInPeriod,PostGIS,reference,True
+geolife,FirstAndLastActivityInPeriod,Sedona,SAME COUNT,True
+geolife,FirstAndLastActivityInPeriod,SpaceTime,SAME COUNT,True
+geolife,IDsInsideRegion1Andsecond_region,ClickHouse,SAME,True
+geolife,IDsInsideRegion1Andsecond_region,DuckDB,SAME,True
+geolife,IDsInsideRegion1Andsecond_region,MobilityDB,n/a,True
+geolife,IDsInsideRegion1Andsecond_region,PostGIS,reference,True
+geolife,IDsInsideRegion1Andsecond_region,Sedona,SAME,True
+geolife,IDsInsideRegion1Andsecond_region,SpaceTime,CLOSE (max 0.033 %),True
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,ClickHouse,SAME,True
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,DuckDB,SAME,True
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,MobilityDB,n/a,True
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,PostGIS,reference,True
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,Sedona,SAME,True
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,SpaceTime,"VALUE DIFF 695/699 rows, e.g. pg=('2019-07-21 10:16:00', '6655') spacetime=('2019-07-21 10:16:00', '6665')",False
+geolife,SpatialBBox,ClickHouse,SAME,True
+geolife,SpatialBBox,DuckDB,SAME,True
+geolife,SpatialBBox,MobilityDB,n/a,True
+geolife,SpatialBBox,PostGIS,reference,True
+geolife,SpatialBBox,Sedona,CLOSE (max 0.265 %),True
+geolife,SpatialBBox,SpaceTime,"VALUE DIFF 1/1 rows, e.g. pg=('2.60908e+06',) spacetime=('2.64235e+06',)",False
+geolife,UniqueUsersPerHourInRegionInPeriod,ClickHouse,SAME,True
+geolife,UniqueUsersPerHourInRegionInPeriod,DuckDB,SAME,True
+geolife,UniqueUsersPerHourInRegionInPeriod,MobilityDB,n/a,True
+geolife,UniqueUsersPerHourInRegionInPeriod,PostGIS,reference,True
+geolife,UniqueUsersPerHourInRegionInPeriod,Sedona,SAME,True
+geolife,UniqueUsersPerHourInRegionInPeriod,SpaceTime,CLOSE (max 0.486 %),True
+geolife,kNN,ClickHouse,KNN (geometry format / ties at equal distance),True
+geolife,kNN,DuckDB,KNN (geometry format / ties at equal distance),True
+geolife,kNN,MobilityDB,n/a,True
+geolife,kNN,PostGIS,reference,True
+geolife,kNN,Sedona,KNN (geometry format / ties at equal distance),True
+geolife,kNN,SpaceTime,KNN (geometry format / ties at equal distance),True
+geolife,spatioTemporalRange,ClickHouse,SAME,True
+geolife,spatioTemporalRange,DuckDB,SAME,True
+geolife,spatioTemporalRange,MobilityDB,n/a,True
+geolife,spatioTemporalRange,PostGIS,reference,True
+geolife,spatioTemporalRange,Sedona,SAME,True
+geolife,spatioTemporalRange,SpaceTime,CLOSE (max 0.314 %),True
+geolife,timeAggregation,ClickHouse,SAME,True
+geolife,timeAggregation,DuckDB,SAME,True
+geolife,timeAggregation,MobilityDB,n/a,True
+geolife,timeAggregation,PostGIS,reference,True
+geolife,timeAggregation,Sedona,SAME,True
+geolife,timeAggregation,SpaceTime,"VALUE DIFF 1/1 rows, e.g. pg=('695667', '3.96047e+07', '296') spacetime=('695653', '4.00004e+07', '309')",False
+geolife,timeInterval,ClickHouse,SAME,True
+geolife,timeInterval,DuckDB,SAME,True
+geolife,timeInterval,MobilityDB,n/a,True
+geolife,timeInterval,PostGIS,reference,True
+geolife,timeInterval,Sedona,SAME,True
+geolife,timeInterval,SpaceTime,SAME,True

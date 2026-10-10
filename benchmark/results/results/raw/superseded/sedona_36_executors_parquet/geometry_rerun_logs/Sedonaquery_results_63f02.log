@@ -1,0 +1,5 @@
+[pool-30-thread-1] [Sedona] [ais] SUCCESS: 'kNN': 53392ms [rep=1 sql=94cfb21e at=2026-10-08T09:30:36.667400661Z]
+[pool-30-thread-1] [Sedona] [ais] SUCCESS: 'kNN': 48612ms [rep=2 sql=169e4f07 at=2026-10-08T09:31:25.279648028Z]
+[pool-30-thread-1] [Sedona] [ais] SUCCESS: 'kNN': 47985ms [rep=3 sql=a795d3f1 at=2026-10-08T09:32:13.264841548Z]
+[pool-30-thread-1] [Sedona] [ais] SUCCESS: 'kNN': 47826ms [rep=4 sql=029f8a74 at=2026-10-08T09:33:01.090779910Z]
+[pool-30-thread-1] [Sedona] [ais] SUCCESS: 'kNN': 47756ms [rep=5 sql=777f1472 at=2026-10-08T09:33:48.846997065Z]

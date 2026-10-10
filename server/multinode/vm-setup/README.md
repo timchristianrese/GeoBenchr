@@ -61,7 +61,7 @@ Set as environment variables before running `setup_local_vms.sh`:
 | `VM_VCPUS`      | `2`                                    | vCPUs per VM                          |
 | `VM_MEM_MB`     | `4096`                                 | RAM per VM in MB                      |
 | `VM_DISK_GB`    | `40`                                   | Disk size per VM in GB                |
-| `DEBIAN_SUITE`  | `bookworm`                             | Debian release (12)                   |
+| `DEBIAN_SUITE`  | `bookworm`                             | Debian codename (e.g. `bookworm`=12, `trixie`=13) |
 | `NET_NAME`      | `geobenchr-net`                        | libvirt network name                  |
 | `SUBNET_PREFIX` | `10.122.0`                             | First 3 octets of the private subnet  |
 | `POOL_DIR`      | `/var/lib/libvirt/images/geobenchr`    | Where VM disks/seed ISOs are stored   |

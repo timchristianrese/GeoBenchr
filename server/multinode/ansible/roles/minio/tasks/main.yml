@@ -1,0 +1,67 @@
+- name: Download MinIO server binary
+  ansible.builtin.get_url:
+    url: "https://dl.min.io/server/minio/release/linux-amd64/archive/minio.{{ minio_version }}"
+    dest: /usr/local/bin/minio
+    mode: '0755'
+
+- name: Download mc (MinIO client) for bucket setup
+  ansible.builtin.get_url:
+    url: "https://dl.min.io/client/mc/release/linux-amd64/mc"
+    dest: /usr/local/bin/mc
+    mode: '0755'
+
+- name: Create MinIO data directory
+  ansible.builtin.file:
+    path: "{{ minio_data_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    mode: '0755'
+
+# Distributed mode -- the exact same command on every node, MinIO figures out which local path
+# it owns from its own hostname matching one of the http://nst-{1...5} expansion members. Needs
+# an odd-ish/sane drive count for erasure coding; 5 nodes x 1 drive each is a supported minimum
+# distributed layout (tolerates node loss depending on the parity MinIO auto-selects for 5 drives).
+- name: Install MinIO systemd service (distributed mode across all 5 nodes)
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/minio.service
+    content: |
+      [Unit]
+      Description=MinIO (DuckLake storage backend)
+      After=network.target
+
+      [Service]
+      User={{ ansible_user }}
+      Environment=MINIO_ROOT_USER={{ minio_root_user }}
+      Environment=MINIO_ROOT_PASSWORD={{ minio_root_password }}
+      ExecStart=/usr/local/bin/minio server {% for h in groups['all'] %}http://{{ hostvars[h].hostname }}:{{ minio_api_port }}{{ minio_data_dir }} {% endfor %}--address :{{ minio_api_port }} --console-address :{{ minio_console_port }}
+      Restart=on-failure
+      RestartSec=5
+
+      [Install]
+      WantedBy=multi-user.target
+    mode: '0644'
+  notify: reload systemd and restart minio
+
+- name: Ensure MinIO is enabled and started
+  ansible.builtin.systemd:
+    name: minio
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Wait for MinIO to become healthy on this node
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ minio_api_port }}/minio/health/live"
+    status_code: 200
+  register: minio_health
+  retries: 12
+  delay: 5
+  until: minio_health.status == 200
+
+# Only needs to run once, from one node -- the bucket is cluster-wide, not per-node.
+- name: Create the DuckLake bucket
+  ansible.builtin.shell: |
+    /usr/local/bin/mc alias set geobenchr http://127.0.0.1:{{ minio_api_port }} {{ minio_root_user }} {{ minio_root_password }}
+    /usr/local/bin/mc mb --ignore-existing geobenchr/{{ minio_bucket }}
+  when: inventory_hostname == groups['masters'][0]
+  changed_when: false

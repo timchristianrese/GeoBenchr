@@ -1,0 +1,119 @@
+import sys
+import time
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import expr
+from sedona.spark import SedonaContext
+
+# One-time export of GeoBenchr's tables out of Postgres into Parquet on HDFS, so Sedona reads its
+# own data instead of scanning Postgres live on every query (see sedona_export_tables in
+# defaults/main.yml for the fairness/performance reasoning). Run once by roles/sedona's "Export
+# GeoBenchr tables to Parquet" task, guarded by the ~/.sedona_tables_exported marker file -- safe
+# to re-run by hand (each table is skipped if its Parquet path already has a _SUCCESS marker), but
+# delete the specific table's HDFS path first if you actually want to redo it.
+# Pass a table name as the one positional arg (e.g. `spark-submit sedona_export_parquet.py
+# ride_points`) to export just that table instead of the full list -- lets one table be re-run by
+# hand (e.g. once its source data is confirmed correct in Postgres) without the run also picking
+# up whichever other tables in POINT_TABLES/REFERENCE_TABLES don't have a _SUCCESS marker yet,
+# which could mean live, not-yet-finished source data (see the 2026-09-17 incident where this
+# script, run to export one just-finished table, silently moved on to a table with an in-progress
+# Postgres reload once it hit the first one that already had a _SUCCESS marker).
+TABLE_FILTER = sys.argv[1] if len(sys.argv) > 1 else None
+# FIX: hardcoded executor.memory=4g + memoryOverhead=1g here overrode spark-defaults.conf's own
+# spark.executor.memory (roles/common computes that from the *actual* smallest worker's RAM, with
+# a 10% margin already held back for overhead -- see roles/common's own FIX comment), and always
+# requested more than this project's own small test VMs (4GB RAM/2 vCPU each) have room for --
+# failing every run with "Required executor memory (4096 MB) ... is above the max threshold (2894
+# MB) of this cluster!" on any cluster smaller than the hardcoded values assumed. Not setting
+# either here lets spark-submit inherit spark-defaults.conf's already-correctly-sized value (and
+# Spark's own default overhead, max(384MB, 10% of executor memory) -- which is what that 10%
+# margin was reserved for in the first place).
+spark = SedonaContext.create(
+    SparkSession.builder
+    .appName("geobenchr-sedona-export")
+    .master("yarn")
+    .config("spark.submit.deployMode", "client")
+    .getOrCreate()
+)
+
+jdbc_url = "jdbc:postgresql://{{ db_host }}:{{ db_port }}/{{ db_name }}"
+props = {"user": "{{ db_user }}", "password": "{{ db_password }}", "driver": "org.postgresql.Driver", "fetchsize": "10000"}
+
+HDFS_BASE = "hdfs:///geobenchr"
+
+hadoop_conf = spark._jsc.hadoopConfiguration()
+FileSystem = spark._jvm.org.apache.hadoop.fs.FileSystem
+Path = spark._jvm.org.apache.hadoop.fs.Path
+
+
+def hdfs_marker_exists(path):
+    fs = FileSystem.get(hadoop_conf)
+    return fs.exists(Path(f"{path}/_SUCCESS"))
+
+
+POINT_TABLES = [
+{% for t in sedona_export_tables %}
+    {"name": "{{ t.name }}", "dbtable": {{ t.dbtable | tojson }}, "id_column": "{{ t.id_column }}",
+     "id_lower": {{ t.id_lower }}, "id_upper": {{ t.id_upper }}, "num_partitions": {{ t.num_partitions }},
+     "order_by": {{ (t.order_by | tojson) if t.order_by is defined else "None" }}},
+{% endfor %}
+]
+
+REFERENCE_TABLES = [
+{% for t in sedona_export_reference_tables %}
+    {"name": "{{ t.name }}", "geom_columns": {{ (t.geom_columns | default(['geom'])) | tojson }}},
+{% endfor %}
+]
+
+if TABLE_FILTER is not None:
+    known_names = {t["name"] for t in POINT_TABLES} | {t["name"] for t in REFERENCE_TABLES}
+    if TABLE_FILTER not in known_names:
+        sys.exit(f"Unknown table '{TABLE_FILTER}' -- expected one of: {sorted(known_names)}")
+    POINT_TABLES = [t for t in POINT_TABLES if t["name"] == TABLE_FILTER]
+    REFERENCE_TABLES = [t for t in REFERENCE_TABLES if t["name"] == TABLE_FILTER]
+
+for t in POINT_TABLES:
+    out_path = f"{HDFS_BASE}/{t['name']}.parquet"
+    if hdfs_marker_exists(out_path):
+        print(f"{t['name']}: already exported, skipping", flush=True)
+        continue
+    t0 = time.time()
+    df = (spark.read
+          .option("partitionColumn", t["id_column"])
+          .option("lowerBound", str(t["id_lower"]))
+          .option("upperBound", str(t["id_upper"]))
+          .option("numPartitions", str(t["num_partitions"]))
+          .jdbc(jdbc_url, t["dbtable"], properties=props))
+    if t["id_column"] != "id":
+        df = df.drop(t["id_column"])
+    # Store geometry as WKB bytes -- SedonaExecutor.java's registerTables() converts it back with
+    # ST_GeomFromWKB on read, sidestepping any GeoParquet-specific write/read version mismatch
+    # between the Sedona build that exported it and whatever reads it back later.
+    df = df.withColumn("geom", expr("ST_AsBinary(ST_GeomFromWKB(geom))"))
+    # FIX: confirmed live -- the JDBC read above already produces exactly num_partitions
+    # partitions (one per partitionColumn range). A subsequent .repartition(num_partitions) is a
+    # full shuffle of the *same* partition count, pure overhead -- for the multi-billion-row point
+    # tables this shuffle was the actual cause of a 4.5-hour run that never finished even the
+    # first table (flight_points, 2.1B rows), with executors repeatedly SIGTERM'd by YARN under
+    # the shuffle's memory pressure. sortWithinPartitions doesn't need a shuffle at all (it sorts
+    # each already-assigned partition locally), so it applies directly to df.
+    writer = df
+    if t["order_by"]:
+        writer = writer.sortWithinPartitions(t["order_by"])
+    writer.write.mode("overwrite").parquet(out_path)
+    print(f"{t['name']}: exported in {time.time()-t0:.1f}s", flush=True)
+
+for t in REFERENCE_TABLES:
+    name = t["name"]
+    out_path = f"{HDFS_BASE}/{name}.parquet"
+    if hdfs_marker_exists(out_path):
+        print(f"{name}: already exported, skipping", flush=True)
+        continue
+    t0 = time.time()
+    df = spark.read.jdbc(jdbc_url, name, properties=props)
+    for col in t["geom_columns"]:
+        df = df.withColumn(col, expr(f"ST_AsBinary(ST_GeomFromWKB({col}))"))
+    df.coalesce(1).write.mode("overwrite").parquet(out_path)
+    print(f"{name}: exported in {time.time()-t0:.1f}s", flush=True)
+
+print("EXPORT COMPLETE", flush=True)
+spark.stop()

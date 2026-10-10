@@ -1,0 +1,5 @@
+[pool-30-thread-1] [Sedona] [cycling] SUCCESS: 'kNN': 21178ms [rep=1 sql=ce552ef7 at=2026-10-08T09:37:53.243224188Z]
+[pool-30-thread-1] [Sedona] [cycling] SUCCESS: 'kNN': 15798ms [rep=2 sql=e9cc864e at=2026-10-08T09:38:09.042096153Z]
+[pool-30-thread-1] [Sedona] [cycling] SUCCESS: 'kNN': 15789ms [rep=3 sql=afc546ae at=2026-10-08T09:38:24.831161697Z]
+[pool-30-thread-1] [Sedona] [cycling] SUCCESS: 'kNN': 15997ms [rep=4 sql=214242d8 at=2026-10-08T09:38:40.828804222Z]
+[pool-30-thread-1] [Sedona] [cycling] SUCCESS: 'kNN': 15337ms [rep=5 sql=109f8ffd at=2026-10-08T09:38:56.165410021Z]

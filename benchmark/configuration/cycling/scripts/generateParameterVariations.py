@@ -8,22 +8,98 @@ from dataclasses import dataclass
 import re
 import shutil
 import psycopg2
+import sys as _sys
+_sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
+import spacetime_units  # noqa: E402  (shared EPSG:3857 -> SpaceTime radius conversion)
+import sedona_crs  # noqa: E402
 # Example usage:
 # convert_st_points_in_yaml("queries.yaml"
 
 class LiteralString(str): pass
 
-def get_random_id(rnd):
-    return rnd.randint(1_000_000_000, 2_000_000_000)
+class ScratchIdPool:
+    """
+    Mints ids for write-benchmark rows (insert/update/delete/bulk_insert) from a negative id
+    space, so they're guaranteed disjoint from every dataset's real (non-negative) ids no matter
+    how large real data grows -- the previous fixed positive band (1_000_000_000-2_000_000_000)
+    already collided with real data (crossing_id on the live cluster runs up to ~13.05B). Negative
+    ids also make cleanup between repeated experiments a single cheap, targeted
+    "DELETE ... WHERE id < 0" per table instead of a full reload.
+
+    update/delete draw from ids this same run already minted via insert/bulk_insert, so they
+    exercise a real row instead of (almost always) matching nothing. Best-effort: a pipeline that
+    reshuffles the full task list after generation (e.g. ais's index shuffle in __main__) can still
+    place a delete before its paired insert; that's a harmless no-op, and the negative-id purge
+    cleans up regardless of execution order.
+
+    Each live entry is an (id, timestamp) pair, not just an id: ride_points has no per-row primary
+    key, so "id" alone identifies a ride (every point of it), not a single point. The *_single
+    update/delete queries need the exact timestamp their scratch row was inserted with too, so
+    pick_existing_pair/pop_existing_pair hand back both -- see updateridePointSingle/
+    deleteridePointSingle in combinedBenchConf.yaml.
+    """
+    def __init__(self):
+        self._next_id = -1
+        self._live = []  # list of [id, timestamp] pairs
+
+    def mint(self, ts=None):
+        id_val = self._next_id
+        self._next_id -= 1
+        self._live.append([id_val, ts])
+        return id_val
+
+    def pick_existing(self, rnd):
+        return rnd.choice(self._live)[0] if self._live else self.mint()
+
+    def pop_existing(self, rnd):
+        if not self._live:
+            return self.mint()
+        return self._live.pop(rnd.randrange(len(self._live)))[0]
+
+    def pick_existing_pair(self, rnd):
+        if not self._live:
+            return self.mint(), None
+        return tuple(rnd.choice(self._live))
+
+    def pop_existing_pair(self, rnd):
+        if not self._live:
+            return self.mint(), None
+        return tuple(self._live.pop(rnd.randrange(len(self._live))))
+
+
+_SCRATCH_IDS = ScratchIdPool()
+
+
+def get_scratch_id(rnd, query_type):
+    # update_single/delete_single normally resolve id+instant together as a pair before this is
+    # ever called (see return_param_values) -- these two branches are just a defensive fallback
+    # for a *_single query that (misconfigured) omits "instant" from its parameters.
+    if query_type in ("update", "update_single"):
+        return _SCRATCH_IDS.pick_existing(rnd)
+    if query_type in ("delete", "delete_single"):
+        return _SCRATCH_IDS.pop_existing(rnd)
+    return _SCRATCH_IDS.mint()
+
+def generate_random_rider_id(rnd):
+    return rnd.randint(1, 100000)
 
 def generate_bulk_values(rnd, bbox, lower, upper, batch_size=10):
-    rows = []
+    # Returns (postgis_rows, clickhouse_rows): the same id/rider_id/timestamp/location per row,
+    # formatted for each dialect's real columns -- ride_points has "geom" in postgis/mobilitydb/
+    # duckdb but only plain "lat"/"lon" columns in ClickHouse (see insertSingleridePoint's FIX
+    # note in combinedBenchConf.yaml).
+    # FIX: rows didn't include "rider_id" -- ride_points has a rider_id column (see
+    # insertSingleridePoint's FIX note) that every row needs.
+    postgis_rows = []
+    clickhouse_rows = []
     for _ in range(batch_size):
-        point = get_random_point(rnd, bbox)
+        lon, lat = get_random_lonlat(rnd, bbox)
         ts = generate_random_timestamp_in_bounds(rnd, lower, upper)
-        id_val = get_random_id(rnd)
-        rows.append(f"({id_val}, {point}, TIMESTAMP '{ts}')")
-    return ", ".join(rows)
+        rider_id = generate_random_rider_id(rnd)
+        id_val = _SCRATCH_IDS.mint(ts)
+        postgis_rows.append(f"({id_val}, {rider_id}, ST_Transform(ST_SetSRID(ST_Point({lon}, {lat}), 4326), 3857), TIMESTAMP '{ts}')")
+        clickhouse_rows.append(f"({id_val}, {rider_id}, TIMESTAMP '{ts}', {lat}, {lon})")
+    return ", ".join(postgis_rows), ", ".join(clickhouse_rows)
 
 
 
@@ -113,11 +189,41 @@ def strip_comment_lines(text: str) -> str:
     return "\n".join(lines)
 
 
-def return_param_values(bbox, lower, upper, sql1, sql2, sql3, sql4, sql5, sql6, params, rnd) -> List[Any]:
+
+def duckdb_spatial_literal(value):
+    """FIX (2026-10-01): :point/:region values are rendered in PostGIS syntax
+    (ST_Transform(ST_SetSRID(..., 4326), 3857)), but DuckDB's spatial extension has no ST_SetSRID
+    and its ST_Transform takes explicit CRS strings -- every DuckDB query using one of these params
+    failed with "st_setsrid does not exist". always_xy keeps lon/lat axis order (verified: output
+    matches PostGIS's ST_Transform exactly)."""
+    if not isinstance(value, str):
+        return value
+    value = re.sub(r"ST_Transform\(ST_SetSRID\((ST_(?:Point|MakeEnvelope)\([^()]*\)),\s*4326\),\s*3857\)",
+                   r"ST_Transform(\1, 'EPSG:4326', 'EPSG:3857', true)", value)
+    return re.sub(r"ST_SetSRID\((ST_Point\([^()]*\)),\s*\d+\)", r"\1", value)
+
+def return_param_values(bbox, lower, upper, sql1, sql2, sql3, sql4, sql5, sql6, params, rnd, query_type) -> List[Any]:
     parsedSQL1, parsedSQL2, parsedSQL3, parsedSQL4 = sql1, sql2, sql3, sql4
     parsedSQL5, parsedSQL6 = sql5, sql6  # clickhouse, duckdb
     values = []
     formatter = "%Y-%m-%d %H:%M:%S"
+
+    # "id" alone doesn't identify a single point (see ScratchIdPool's docstring) -- update_single/
+    # delete_single queries also declare "instant" and need it to be the *exact* timestamp their
+    # target row was inserted with, not an independently-generated random one, or "WHERE id = :id
+    # AND timestamp = :instant" would almost always match nothing. Resolve id+instant together as
+    # a pair here, before the per-param loop below, so it doesn't matter which order "id"/"instant"
+    # appear in this query's parameters: list. Plain insert pairs a freshly minted id with the
+    # instant it's about to be written with, so a later update_single/delete_single can find it.
+    shared_id = None
+    shared_instant = None
+    if "id" in params and "instant" in params:
+        if query_type in ("update_single", "delete_single"):
+            picker = _SCRATCH_IDS.pick_existing_pair if query_type == "update_single" else _SCRATCH_IDS.pop_existing_pair
+            shared_id, shared_instant = picker(rnd)
+        elif query_type == "insert":
+            shared_instant = generate_random_timestamp_in_bounds(rnd, lower, upper)
+            shared_id = _SCRATCH_IDS.mint(shared_instant)
 
     for param in params:
         replacement = {
@@ -125,26 +231,41 @@ def return_param_values(bbox, lower, upper, sql1, sql2, sql3, sql4, sql5, sql6, 
             "period_medium": lambda: generate_random_time_span_in_bounds(rnd, lower, upper, mode=2),
             "period_long": lambda: generate_random_time_span_in_bounds(rnd, lower, upper, mode=3),
             "period": lambda: generate_random_time_span_in_bounds(rnd, lower, upper),
-            "instant": lambda: generate_random_timestamp_in_bounds(rnd, lower, upper),
+            "instant": lambda: shared_instant if shared_instant is not None else generate_random_timestamp_in_bounds(rnd, lower, upper),
             "day": lambda: get_random_day(rnd, lower, upper),
             "university": lambda: get_random_place("universities", rnd),
             "district": lambda: get_random_place("berlin-districts", rnd),
             "point": lambda: get_random_point(rnd, [[6.212909, 52.241256], [8.752841, 50.53438]]),
             "radius": lambda: rnd.randint(100,1000), #in meters
             "distance": lambda: rnd.randint(100,1000),
-            "id": lambda: get_random_id(rnd),
+            "rider_id": lambda: generate_random_rider_id(rnd),
+            "id": lambda: shared_id if shared_id is not None else get_scratch_id(rnd, query_type),
             "bulk_values": lambda: generate_bulk_values(rnd, bbox, lower, upper, batch_size=10)
         }.get(param, lambda: "")()
 
         if replacement is not None:
             if param == "bulk_values":
-                quoted = replacement
+                # generate_bulk_values now returns (postgis_rows, clickhouse_rows) -- see its own
+                # comment. `quoted` (used for :bulk_values, shared by postgis/mobilitydb/duckdb/
+                # sedona/spacetime) stays the postgis-shaped rows; :bulk_values_clickhouse is
+                # substituted directly below rather than derived from `quoted` by regex.
+                quoted = replacement[0]
+                parsedSQL5 = substitute_outside_comments(parsedSQL5, ":bulk_values_clickhouse", replacement[1])
             elif isinstance(replacement, str):
                 # Detect SQL expressions like ST_*, SELECT, or functions with parentheses
                 if replacement.strip().upper().startswith(("ST_", "SELECT", "POINT(", "POLYGON(", "LINESTRING(")):
                     quoted = replacement  # leave unquoted (SQL expression)
+                elif param.startswith("period"):
+                    # FIX: generate_random_time_span_in_bounds() already returns a fully-quoted,
+                    # ready-to-use "'ts1' AND 'ts2'" fragment for postgis/sedona/clickhouse/
+                    # duckdb's "BETWEEN :period_x" -- wrapping it in one more layer of quotes here
+                    # produced "''ts1' AND 'ts2''", an unterminated-string syntax error the moment
+                    # any dialect actually ran it (confirmed live). Only the bare place names
+                    # (city/county/district/...) that also come through this branch need quoting.
+                    quoted = replacement
                 else:
-                    quoted = f"'{replacement}'"
+                    # (2026-10-09) names such as the harbour "'t Waar" contain a quote; doubled, as SQL escapes it
+                    quoted = "'" + replacement.replace("'", "''") + "'"
            
             elif isinstance(replacement, list):
                 # Keep your old list quoting (used for time spans)
@@ -162,13 +283,71 @@ def return_param_values(bbox, lower, upper, sql1, sql2, sql3, sql4, sql5, sql6, 
                     parsedSQL5 = substitute_outside_comments(parsedSQL5, ":point_lon", point_coords.group(1))
                     parsedSQL5 = substitute_outside_comments(parsedSQL5, ":point_lat", point_coords.group(2))
 
-            values.append(replacement)
-            parsedSQL1 = substitute_outside_comments(parsedSQL1, f":{param}", quoted)
+            # FIX: ClickHouse (and, less certainly, DuckDB) have no OVERLAPS operator -- queries
+            # that need "(start, end) OVERLAPS :period_x" have to be rewritten as an explicit
+            # "start_time < :period_x_end AND :period_x_start < end_time" boolean instead, which
+            # needs the period's two bounds as separate scalars. :period_x itself only ever
+            # arrives as one opaque packed "'ts1' AND 'ts2'" string (see
+            # generate_random_time_span_in_bounds above), so combinedBenchConf.yaml's
+            # clickhouse/duckdb blocks couldn't actually use :period_x_start/:period_x_end
+            # despite ais's copy of this script's equivalent query already anticipating that
+            # exact naming. Decomposing here, before the generic :{param} substitution below,
+            # the same way :point is split into :point_lon/:point_lat above.
+            if param.startswith("period") and isinstance(replacement, str):
+                span_match = re.match(r"'([^']+)' AND '([^']+)'", replacement)
+                if span_match:
+                    ts1, ts2 = span_match.group(1), span_match.group(2)
+                    parsedSQL5 = substitute_outside_comments(parsedSQL5, f":{param}_start", f"'{ts1}'")
+                    parsedSQL5 = substitute_outside_comments(parsedSQL5, f":{param}_end", f"'{ts2}'")
+                    parsedSQL6 = substitute_outside_comments(parsedSQL6, f":{param}_start", f"'{ts1}'")
+                    parsedSQL6 = substitute_outside_comments(parsedSQL6, f":{param}_end", f"'{ts2}'")
+
+            # FIX: replacement is now a (postgis_rows, clickhouse_rows) tuple for "bulk_values" --
+            # PyYAML would serialize a bare tuple with its own "!!python/tuple" tag, which Java's
+            # SnakeYAML (the client's actual YAML reader) doesn't recognize (confirmed live for the
+            # equivalent aviation/scripts case). params: is only ever informational documentation
+            # of what was substituted (not read back by the client), so the postgis-shaped half is
+            # fine here.
+            values.append(quoted if param == "bulk_values" else replacement)
+            # FIX: same as aviation/ais's generateParameterVariations.py -- generate_random_time_
+            # span_in_bounds() returns "'ts1' AND 'ts2'" for postgis/sedona/clickhouse/duckdb's
+            # BETWEEN usage, but mobilitydb's templates use the same :period_x as an operand to
+            # && or inside attime(), needing a real tstzspan literal instead. Give mobilitydb its
+            # own substitution here, before the shared one below runs unchanged for the other
+            # five dialects.
+            if param.startswith("period"):
+                span_match = re.match(r"'([^']+)' AND '([^']+)'", replacement)
+                if span_match:
+                    parsedSQL1 = substitute_outside_comments(
+                        parsedSQL1, f":{param}",
+                        f"tstzspan '[{span_match.group(1)}, {span_match.group(2)}]'"
+                    )
+                    # FIX: confirmed live against the SpaceTime engine -- EPOCHRANGE takes a single
+                    # bracketed range literal ("EPOCHRANGE '[t1, t2]'"), not the "'t1' AND 't2'"
+                    # fragment built for the other five dialects' "BETWEEN :period_x"
+                    # (EPOCHRANGE('t1','t2') -> "unknown function: epochrange"; EPOCHRANGE 't1' AND
+                    # 't2' -> "no matching overload for: and"; the bracketed form succeeds).
+                    parsedSQL4 = substitute_outside_comments(
+                        parsedSQL4, f":{param}",
+                        f"'[{span_match.group(1)}, {span_match.group(2)}]'"
+                    )
+                else:
+                    parsedSQL1 = substitute_outside_comments(parsedSQL1, f":{param}", quoted)
+                    parsedSQL4 = substitute_outside_comments(parsedSQL4, f":{param}", quoted)
+            elif param == "instant":
+                parsedSQL1 = substitute_outside_comments(parsedSQL1, f":{param}", quoted)
+                # FIX: confirmed live -- a bare quoted timestamp in SpaceTime arithmetic (e.g.
+                # CityActivityAtInstant's "(:instant - TP '10s')") fails ("no matching overload
+                # for: -"); needs the same explicit type prefix TP already needs for durations
+                # ("TS 'ts' - TP '10s'" succeeds).
+                parsedSQL4 = substitute_outside_comments(parsedSQL4, f":{param}", f"TS {quoted}")
+            else:
+                parsedSQL1 = substitute_outside_comments(parsedSQL1, f":{param}", quoted)
+                parsedSQL4 = substitute_outside_comments(parsedSQL4, f":{param}", quoted)
             parsedSQL2 = substitute_outside_comments(parsedSQL2, f":{param}", quoted)
             parsedSQL3 = substitute_outside_comments(parsedSQL3, f":{param}", quoted)
-            parsedSQL4 = substitute_outside_comments(parsedSQL4, f":{param}", quoted)
             parsedSQL5 = substitute_outside_comments(parsedSQL5, f":{param}", quoted)
-            parsedSQL6 = substitute_outside_comments(parsedSQL6, f":{param}", quoted)
+            parsedSQL6 = substitute_outside_comments(parsedSQL6, f":{param}", duckdb_spatial_literal(quoted))
 
     return parsedSQL1, parsedSQL2, parsedSQL3, parsedSQL4, parsedSQL5, parsedSQL6, values
 
@@ -203,13 +382,16 @@ def get_spatial_bounds(table, geom_col="geom"):
         f.write(f"{xmin},{ymin},{xmax},{ymax}")
     return [[xmin, ymax], [xmax, ymin]]
 
-def get_random_point(rnd, rect):
+def get_random_lonlat(rnd, rect):
     ul_lon, ul_lat = rect[0]
     br_lon, br_lat = rect[1]
 
     lon = ul_lon + rnd.random() * (br_lon - ul_lon)
     lat = br_lat + rnd.random() * (ul_lat - br_lat)
+    return lon, lat
 
+def get_random_point(rnd, rect):
+    lon, lat = get_random_lonlat(rnd, rect)
     return f"ST_Transform(ST_SetSRID(ST_Point({lon}, {lat}), 4326), 3857)"
 
 
@@ -278,7 +460,25 @@ def convert_to_tstzspan(match): return f"tstzspan '[{match.group(1)}, {match.gro
 
 def convert_to_tsrange(match): return f"tsrange '[{match.group(1)}, {match.group(2)}]'"
 
-def convert_to_timestamptz(match): return f"timestamptz '[{match.group(1)}]'"
+def convert_to_timestamptz(match):
+    ts = match.group(1)
+    # FIX: this used to wrap every bare timestamp literal indiscriminately, causing two
+    # distinct bugs found during the 2026-09-29/30 smoke test (see
+    # benchmark_client/docs/smoke-test-2026-09-29.md, Fix 1/Fix 2):
+    #  1) `<col> = timestamptz '[...]'` (a cast literal compared directly against a column)
+    #     trips Citus's "STABLE functions used in UPDATE queries cannot be called with
+    #     column references" restriction on this project's distributed+partitioned tables --
+    #     confirmed live the identical comparison works fine left as a bare quoted string
+    #     relying on implicit coercion. Skipped for exactly this shape.
+    #  2) bulk_insert's row-building pass already emits complete `TIMESTAMP '...'` casts;
+    #     re-wrapping those here produced `TIMESTAMP timestamptz '[...]'` -- two type
+    #     keywords back to back, a syntax error. Skipped when already cast. (This subsumes
+    #     the old negative-lookbehind on pattern_single below -- reverted to a plain pattern
+    #     so the fix lives in one place, matching every other scenario's generator script.)
+    preceding = match.string[:match.start()]
+    if re.search(r"=\s*$", preceding) or re.search(r"TIMESTAMP\s*$", preceding, re.IGNORECASE):
+        return f"'{ts}'"
+    return f"timestamptz '[{ts}]'"
 
 def fix_between_clause(sql_fragment: str) -> str:
     pattern = r"BETWEEN\s*\[\s*'([^']+)'\s*,\s*'([^']+)'\s*\]"
@@ -318,9 +518,14 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
                     query_config['duckdb'],
                     query_config['parameters'],
                     rnd,
+                    query_config['type'],
                 )
+                spacetime_sql = spacetime_units.apply(spacetime_sql, dict(zip(query_config['parameters'], values)), 52.5)
 
                 pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"
+                # See convert_to_timestamptz()'s FIX comment above -- it now handles the
+                # already-cast (bulk_insert) and column-equality cases itself, so this stays a
+                # plain pattern (same as every other scenario's generator script).
                 pattern_single = r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'"
 
                 mobilitydb_sql = re.sub(pattern, convert_to_tstzspan, mobilitydb_sql)
@@ -383,17 +588,9 @@ if __name__ == "__main__":
     with open("../queries/mobilitydb_queries.yaml", "w") as f:
         yaml.dump([q.__dict__ for q in mobilityDB_queries], f, sort_keys=False, allow_unicode=True)
 
-    #partitioned 
-    with open("../queries/mobilitydb_queries_space_partitioned.yaml", "w") as file:
-        with open("../queries/mobilitydb_queries.yaml", "r") as original_file:
-            content = original_file.read()
-            content = content.replace('rides', 'rides_adaptgrid')
-            file.write(content)
-    with open("../queries/mobilitydb_queries_time_partitioned.yaml", "w") as f:
-        with open("../queries/mobilitydb_queries.yaml", "r") as original_file:
-            content = original_file.read()
-            content = content.replace('rides', 'rides_adapttimegrid')
-            f.write(content)
+    # (2026-10-02) the *_space/_time_partitioned MobilityDB variants are deprecated (moved to
+    # resources/<scenario>/deprecated/, since 2026-10-10 kept locally in
+    # single-node/paper/deprecated-queries/, outside git) and no longer generated.
     # PostGIS
     with open("../queries/postgisSQL_queries_unprocess.yaml", "w") as f:
         yaml.dump([q.__dict__ for q in postgisSQL_queries], f, sort_keys=False, allow_unicode=True)
@@ -454,10 +651,9 @@ if __name__ == "__main__":
 
     resource_path = "/Users/gov/Prog/git/GeoBenchr/benchmark/client/benchmark_client/src/main/resources/cycling"
     shutil.copy("../queries/mobilitydb_queries.yaml", os.path.join(resource_path, "mobilitydb_queries.yaml"))
-    shutil.copy("../queries/mobilitydb_queries_space_partitioned.yaml", os.path.join(resource_path, "mobilitydb_queries_space_partitioned.yaml"))
-    shutil.copy("../queries/mobilitydb_queries_time_partitioned.yaml", os.path.join(resource_path, "mobilitydb_queries_time_partitioned.yaml"))
     shutil.copy("../queries/postgisSQL_queries.yaml", os.path.join(resource_path, "postgisSQL_queries.yaml"))
     shutil.copy("../queries/tsdb_queries.yaml", os.path.join(resource_path, "tsdb_queries.yaml"))
+    sedona_crs.fix_file("../queries/sedonaSQL_queries.yaml")  # explicit CRS strings for ST_Transform (scripts/sedona_crs.py)
     shutil.copy("../queries/sedonaSQL_queries.yaml", os.path.join(resource_path, "sedonaSQL_queries.yaml"))
     shutil.copy("../queries/spaceTimeSQL_queries.yaml", os.path.join(resource_path, "spaceTimeSQL_queries.yaml"))
     shutil.copy("../queries/clickhouse_queries.yaml", os.path.join(resource_path, "clickhouse_queries.yaml"))

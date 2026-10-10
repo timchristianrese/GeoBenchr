@@ -33,13 +33,27 @@
 # FIX: this was commented out (and, even uncommented, used local_parquet_dir -- the cycling data
 # generator's own output directory, not aviation's) so nothing ever actually put a parquet file on
 # the target machine; "Find parquet files" below always found zero, silently no-opping the rest of
-# this role. Syncing one real file (aviation_sample_parquet_file) rather than the whole
-# data_generator_aviation/parquet_flights directory (~676 files, ~70GB) -- see that variable's
-# comment in group_vars/all/all.yml.
-- name: Sync sample aviation parquet file to target machine
+# this role. Syncing aviation_sample_file_count real files (sorted by filename, so a rerun with a
+# larger count is additive) rather than the whole data_generators/aviation/parquet_flights
+# directory (~676 files, ~70GB) -- see those variables' comments in group_vars/all/all.yml.
+- name: Enumerate aviation sample parquet files on the control machine
+  ansible.builtin.find:
+    paths: "{{ aviation_sample_parquet_dir }}"
+    patterns: "*.parquet"
+  delegate_to: localhost
+  connection: local
+  become: false
+  run_once: true
+  register: aviation_local_parquet_files
+  when: inventory_hostname in groups['masters']
+
+- name: Sync sample aviation parquet files to target machine
   ansible.posix.synchronize:
-    src: "{{ aviation_sample_parquet_file }}"
+    src: "{{ item.path }}"
     dest: "{{ aviation_data_dir }}/"
+  loop: "{{ (aviation_local_parquet_files.files | sort(attribute='path'))[:aviation_sample_file_count] }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
   when: inventory_hostname in groups['masters']
 
 - name: Install build dependencies for pg_parquet
@@ -86,6 +100,44 @@
     creates: "/home/{{ ansible_user }}/.duckdb/cli/latest/duckdb"
   when: not duckdb_installed.stat.exists and inventory_hostname in groups['masters']
 
+# FIX: process_parquet.yml's "LOAD postgres;" expects DuckDB's Postgres scanner extension under
+# its old name -- the version install.duckdb.org ships now calls it "postgres_scanner" (renamed
+# upstream; the on-disk/LOAD name and the extension repository's filename diverged). Worse, even
+# the correct name auto-installs over the network on first LOAD, which hangs indefinitely on
+# nst-cluster hardware specifically (DNS for extensions.duckdb.org returns a working IPv4 address
+# alongside an IPv6 one whose route is black-holed there -- SYNs vanish instead of being rejected;
+# DuckDB's installer, unlike curl, never falls back to IPv4). Pre-fetch it explicitly over IPv4
+# into the exact cache path DuckDB's own INSTALL would use, matching roles/duckdb's identical fix
+# for the quack extension -- harmless/no-op anywhere this network problem doesn't exist.
+- name: Determine installed DuckDB CLI version (extension cache path is versioned by it)
+  become: false
+  ansible.builtin.command: "/home/{{ ansible_user }}/.duckdb/cli/latest/duckdb --version"
+  register: duckdb_cli_version_output
+  changed_when: false
+  when: inventory_hostname in groups['masters']
+
+- name: Check whether the postgres_scanner extension is already cached locally
+  become: false
+  ansible.builtin.stat:
+    path: "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/postgres_scanner.duckdb_extension"
+  register: postgres_scanner_extension_cached
+  when: inventory_hostname in groups['masters']
+
+- name: Ensure the DuckDB extension cache directory exists
+  become: false
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64"
+    state: directory
+    mode: '0755'
+  when: inventory_hostname in groups['masters'] and not postgres_scanner_extension_cached.stat.exists
+
+- name: Fetch the postgres_scanner extension over IPv4 into the local DuckDB extension cache
+  become: false
+  ansible.builtin.shell: >-
+    curl -4 -fsSL "http://extensions.duckdb.org/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/postgres_scanner.duckdb_extension.gz"
+    | gunzip > "/home/{{ ansible_user }}/.duckdb/extensions/{{ duckdb_cli_version_output.stdout.split()[0] }}/linux_amd64/postgres_scanner.duckdb_extension"
+  when: inventory_hostname in groups['masters'] and not postgres_scanner_extension_cached.stat.exists
+
 - name: Ensure duckdb is in PATH by checking if it already is, and if not, adding it to .bashrc
   become: false
   ansible.builtin.shell: |
@@ -118,10 +170,14 @@
   args:
     creates: "{{ venv_dir }}/bin/activate"
   when: inventory_hostname in groups['masters']
+# FIX: plain "psycopg2" has no prebuilt wheel matching this venv's Python and falls back to
+# compiling from source, which fails outright without python3-dev installed ("fatal error:
+# Python.h: No such file or directory") -- psycopg2-binary ships prebuilt wheels and needs no
+# compiler/headers at all (the upstream-recommended alternative for exactly this situation).
 - name: Install deps with bash
   ansible.builtin.shell: |
     source {{ venv_dir }}/bin/activate
-    pip install pandas pyarrow psycopg2
+    pip install pandas pyarrow psycopg2-binary
   args:
     executable: /bin/bash
   when: inventory_hostname in groups['masters']
@@ -143,6 +199,20 @@
 # ---------------------------------------
 # 3. Ensure table exists
 # ---------------------------------------
+# FIX: added after "Build MobilityDB flights trajectory view" (below) started failing this
+# task on every re-run -- the materialized view depends on flight_points, so Postgres refuses to
+# drop the table until the view is gone too. Must run before "Drop final PostGIS table".
+- name: Drop MobilityDB flights trajectory view
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      DROP MATERIALIZED VIEW IF EXISTS flights;
+  when: inventory_hostname in groups['masters']
+
 - name: Drop final PostGIS table
   community.postgresql.postgresql_query:
     login_host: "{{ db_host }}"
@@ -310,6 +380,67 @@
 #       CREATE INDEX IF NOT EXISTS flight_points_geom_idx
 #       ON flight_points
 #       USING GIST (geom);
+
+# FIX: MobilityDB's read queries (countFlightsInCounties, CityActivityAtInstant,
+# flightClosestToPoint, FlightsAtLowAltitudeInPeriod/FlightsAtNightInPeriod,
+# flightsInCountyInPeriod -- see benchmark/configuration/aviation/config/combinedBenchConf.yaml)
+# all read from "flights", a one-row-per-trajectory table (trip tgeompoint, altitude tfloat) --
+# nothing built it, so every one of those queries failed with "relation flights does not exist".
+# A plain VIEW would recompute this aggregation (tens of millions of rows) on every single read
+# query, so this is a MATERIALIZED VIEW instead, rebuilt once per data load.
+# Two real data issues had to be worked around to get here:
+#  1. flight_points.timestamp is a naive `timestamp` column; casting it to timestamptz through
+#     this session's Europe/Berlin default silently reorders values across a DST transition
+#     (2024-03-31), which MobilityDB's sequence constructor rejects ("Timestamps ... must be
+#     increasing"). `AT TIME ZONE 'UTC'` treats the naive value as already being UTC, which has
+#     no DST and is always order-preserving. NOTE (2026-10-01): this stores the naive wall-clock
+#     digits as UTC instants, so MobilityDB queries read them back with AT TIME ZONE 'UTC' (in
+#     the query itself -- Citus evaluates on the workers, so a session SET TIME ZONE can't) to
+#     compare like-for-like with flight_points. Converting via Europe/Berlin instead is lossy:
+#     the data has points inside the spring-forward gap.
+#  2. A handful of (id, timestamp) pairs repeat with identical geom/altitude (a small, apparently
+#     natural amount of noise in the synthetic data, ~110 groups out of ~80M rows) -- MobilityDB
+#     requires strictly increasing timestamps per trajectory, so these are deduplicated first.
+#     Some points also have a NULL altitude (left by the benchmark's own write-queries, which
+#     insert id/geom/timestamp only) -- excluded from the altitude sequence specifically via
+#     FILTER, since a NULL element isn't valid inside a temporal sequence either.
+- name: Build MobilityDB flights trajectory view
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      DROP MATERIALIZED VIEW IF EXISTS flights;
+      CREATE MATERIALIZED VIEW flights AS
+      WITH deduped AS (
+        SELECT DISTINCT ON (id, timestamp) id, geom, timestamp AT TIME ZONE 'UTC' AS ts, altitude
+        FROM flight_points
+        ORDER BY id, timestamp
+      )
+      SELECT id,
+             tgeompointseq(array_agg(tgeompoint(geom, ts) ORDER BY ts)) AS trip,
+             tfloatseq(array_agg(tfloat(altitude, ts) ORDER BY ts) FILTER (WHERE altitude IS NOT NULL)) AS altitude
+      FROM deduped
+      GROUP BY id;
+  when: inventory_hostname in groups['masters']
+
+# FIX: confirmed live -- a functionality test's eintersects(r.trip, d.geom)-style spatial join
+# against "flights"/"rides" (the same pattern countyFlightsAggregation, flightsNearAirport etc.
+# use) sequentially scanned the whole trajectory table with no index at all, taking 10+ minutes
+# on "rides" alone (50M rows) where an indexed lookup should take well under a second. MobilityDB
+# supports a plain GiST index on a tgeompoint column exactly like PostGIS does on geometry.
+- name: Build spatiotemporal index on flights trajectory view
+  community.postgresql.postgresql_query:
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_port: "{{ db_port }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    query: |
+      CREATE INDEX IF NOT EXISTS flights_trip_gist_idx ON flights USING gist (trip);
+  when: inventory_hostname in groups['masters']
 
 - name: Swap python interpreter back to system Python
   ansible.builtin.set_fact:

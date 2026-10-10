@@ -43,6 +43,11 @@
     url: https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.18%2B8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
     dest: /opt/java/OpenJDK17U-jdk_x64_linux_hotspot_17.0.18_8.tar.gz
     mode: '0644'
+    # FIX: get_url's default timeout (10s) is a connect+read timeout on the whole transfer, not
+    # just connection setup -- easily exceeded by a ~180MB download when 5 nodes pull large
+    # binaries concurrently over one shared NAT'd uplink (confirmed: a plain `curl` from the same
+    # guest, run alone, fetched a byte range instantly -- the *server* side isn't the bottleneck).
+    timeout: 180
 
 # - name: Upload OpenJDK 17 tarball
 #   copy:
@@ -107,6 +112,9 @@
     url: https://dlcdn.apache.org/hadoop/common/hadoop-{{ hadoop_version }}/hadoop-{{ hadoop_version }}.tar.gz
     dest: /opt/hadoop-{{ hadoop_version }}.tar.gz
     mode: '0644'
+    # FIX: see the matching FIX comment on the OpenJDK get_url above -- same cause, bigger file
+    # (~400MB), so an even larger margin over the 10s default.
+    timeout: 300
 
 # - name: Copy Hadoop to all nodes
 #   copy:
@@ -262,8 +270,20 @@
   become_user: "{{ ansible_user }}"
   become: true
 
+# FIX: confirmed live -- start-dfs.sh starts NameNode (and SecondaryNameNode) locally on master,
+# exactly like start-yarn.sh's local ResourceManager (see that task's own FIX comment below for
+# the full story: remote daemons spawned over their own separate SSH/pdsh session survive fine,
+# but a *local* daemon stays a member of whichever session launched it and gets SIGHUP'd whenever
+# that session's connection eventually tears down -- not necessarily right away, so this can look
+# fine for a while, running the same as always, and only die a good deal later). Caught this
+# directly: NameNode and ResourceManager both received "SIGNAL 15: SIGTERM" and shut down cleanly
+# within the same few seconds, over an hour after this task had returned "changed" -- consistent
+# with an ansible SSH connection torn down elsewhere in a much later, unrelated play (a different
+# playbook run entirely) rather than anything actually going wrong with HDFS/YARN themselves.
+# Same setsid fix as start-yarn.sh below detaches it into its own session so it doesn't matter
+# when this task's own SSH connection eventually closes.
 - name: Start HDFS
-  command: /opt/hadoop/sbin/start-dfs.sh
+  shell: setsid /opt/hadoop/sbin/start-dfs.sh > /tmp/start-dfs.log 2>&1 < /dev/null &
   become: true
   become_user: "{{ ansible_user }}"
   environment:
@@ -299,3 +319,74 @@
   retries: 6
   delay: 5
   until: hdfs_check.rc == 0
+
+# -------------------------
+# RE-REGISTER SPARK'S SHUFFLE SERVICE, IF ALREADY INSTALLED (SELF-HEAL)
+# -------------------------
+# "Configure yarn-site.xml" above regenerates this file from scratch from this role's own
+# template on every run -- silently wiping out the spark_shuffle aux-service registration that
+# roles/spark's own tasks patch into this same file, if Spark was already installed by a
+# previous, separate playbook run. Hit for real: an unrelated HDFS namenode-format fix re-ran
+# hadoop.yml standalone on an already-provisioned cluster, and that alone was enough to break
+# every Spark/Sedona job on YARN for the rest of the day (spark-defaults.conf turns on
+# spark.shuffle.service.enabled and dynamic allocation by default, both of which need this
+# aux-service; without it every executor container gets allocated by YARN and then silently
+# released again within seconds, with no error anywhere -- see benchmark_client's
+# docs/sample-queries.md for the full debugging trail). Detecting via the shuffle jar's presence
+# (rather than referencing spark_version, a roles/spark-only default) keeps hadoop.yml fully
+# standalone-safe: on a node where Spark was never installed, this block is a no-op.
+- name: Check whether Spark's YARN shuffle service jar is already installed (roles/spark ran previously)
+  ansible.builtin.find:
+    paths: "{{ hadoop_home }}/share/hadoop/yarn/lib"
+    patterns: "spark-*-yarn-shuffle.jar"
+  register: spark_shuffle_jar_present
+
+- name: Re-apply the Spark shuffle service registration in yarn-site.xml
+  when: spark_shuffle_jar_present.matched > 0
+  become: true
+  block:
+    - name: Add spark_shuffle to yarn.nodemanager.aux-services
+      ansible.builtin.lineinfile:
+        path: "{{ hadoop_home }}/etc/hadoop/yarn-site.xml"
+        regexp: '^\s*<value>mapreduce_shuffle</value>\s*$'
+        line: "    <value>mapreduce_shuffle,spark_shuffle</value>"
+      register: spark_shuffle_aux_services_patched
+
+    - name: Register the Spark shuffle service's implementation class in yarn-site.xml
+      ansible.builtin.blockinfile:
+        path: "{{ hadoop_home }}/etc/hadoop/yarn-site.xml"
+        marker: "  <!-- {mark} SPARK SHUFFLE SERVICE -->"
+        insertbefore: '</configuration>'
+        block: |
+          <property>
+            <name>yarn.nodemanager.aux-services.spark_shuffle.class</name>
+            <value>org.apache.spark.network.yarn.YarnShuffleService</value>
+          </property>
+      register: spark_shuffle_class_patched
+
+    # aux-services are only loaded at NodeManager startup, so this only matters (and only needs
+    # to pay for a YARN bounce) when one of the two patches above actually changed something --
+    # i.e. the config really had been wiped, not just re-run against an already-correct file.
+    #
+    # FIX: confirmed live -- this block's become: true with no become_user runs this task as
+    # root, and start-yarn.sh/stop-yarn.sh both refuse that outright ("Attempting to operate on
+    # yarn nodemanager as root but there is no YARN_NODEMANAGER_USER defined. Aborting
+    # operation.") -- exactly the reason every *other* YARN start/stop task in this file already
+    # sets become_user: "{{ ansible_user }}" (and the matching handler in roles/spark/handlers).
+    # Worse, that failure was invisible: stop-yarn.sh's synchronous half still exits 0 despite
+    # printing those errors to stderr, so Ansible reported "changed": true with no indication
+    # anything was wrong, while YARN silently never actually restarted -- the re-patched
+    # yarn-site.xml sat on disk unused, and NodeManagers kept running (or came back up, on a
+    # separate unrelated restart) with the *previous*, un-patched config. Caught this because a
+    # Spark job's executors then failed to launch with "InvalidAuxServiceException: The
+    # auxService:spark_shuffle does not exist" on the specific node this had actually happened on.
+    - name: Restart YARN to pick up the re-applied shuffle service registration
+      delegate_to: "{{ groups['masters'][0] }}"
+      run_once: true
+      become_user: "{{ ansible_user }}"
+      environment:
+        PDSH_RCMD_TYPE: ssh
+      ansible.builtin.shell: |
+        {{ hadoop_home }}/sbin/stop-yarn.sh
+        setsid {{ hadoop_home }}/sbin/start-yarn.sh > /tmp/start-yarn.log 2>&1 < /dev/null &
+      when: spark_shuffle_aux_services_patched.changed or spark_shuffle_class_patched.changed

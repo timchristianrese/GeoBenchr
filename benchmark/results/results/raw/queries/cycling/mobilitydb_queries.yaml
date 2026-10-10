@@ -1,0 +1,799 @@
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(instants(atTime(r.trip, tstzspan '[2026-06-02 17:45:41, 2026-06-02 19:43:42]'))) AS inst
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-02 17:45:41, 2026-06-02 19:43:42]'
+    ),
+    filtered AS (
+      SELECT ts_table.id
+      FROM ts_table
+      JOIN berlin_districts d ON d.name = 'Reinickendorf'
+      WHERE ST_Intersects(getValue(inst)::geometry, d.geom)
+    )
+    SELECT 'Reinickendorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT id, COUNT(*) AS num_updates
+      FROM filtered
+      GROUP BY id
+    ) AS ri;
+  params:
+  - Reinickendorf
+  - '''2026-06-02 17:45:41'' AND ''2026-06-02 19:43:42'''
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN rides r ON eintersects(r.trip, d.geom) WHERE d.name = 'Neukölln' GROUP BY d.name;
+  params:
+  - Neukölln
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    FROM rides r
+    JOIN universities u ON edwithin(attime(r.trip, tstzspan '[2026-06-02 07:57:59, 2026-06-02 09:22:02]'), u.geom, 778)
+    WHERE u.name = 'Freie-Universität-Berlin' AND r.trip && tstzspan '[2026-06-02 07:57:59, 2026-06-02 09:22:02]';
+  params:
+  - Freie-Universität-Berlin
+  - 778
+  - '''2026-06-02 07:57:59'' AND ''2026-06-02 09:22:02'''
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(timestamps(atTime(r.trip, tstzspan '[2026-06-01 15:45:12, 2026-06-01 16:59:29]'))) AS ts
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-01 15:45:12, 2026-06-01 16:59:29]'
+    )
+    SELECT id
+    FROM ts_table
+    GROUP BY id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM ts)) > 1;
+  params:
+  - '''2026-06-01 15:45:12'' AND ''2026-06-01 16:59:29'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(timestamps(atTime(r.trip, tstzspan '[2026-06-02 11:14:37, 2026-06-02 12:57:39]'))) AS ts
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-02 11:14:37, 2026-06-02 12:57:39]'
+    )
+    SELECT COUNT(DISTINCT id) AS ride_count
+    FROM ts_table
+    WHERE EXTRACT(HOUR FROM ts) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM ts) BETWEEN 16 AND 18;
+  params:
+  - '''2026-06-02 11:14:37'' AND ''2026-06-02 12:57:39'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(timestamps(atTime(r.trip, tstzspan '[2026-06-04 13:35:53, 2026-06-04 14:17:04]'))) AS ts
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-04 13:35:53, 2026-06-04 14:17:04]'
+    )
+    SELECT COUNT(DISTINCT id) AS ride_count
+    FROM ts_table
+    WHERE EXTRACT(HOUR FROM ts) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM ts) BETWEEN 16 AND 18;
+  params:
+  - '''2026-06-04 13:35:53'' AND ''2026-06-04 14:17:04'''
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    FROM rides r
+    JOIN universities u ON edwithin(attime(r.trip, tstzspan '[2026-06-02 22:16:11, 2026-06-02 23:10:39]'), u.geom, 877)
+    WHERE u.name = 'Technische-Universität-Berlin' AND r.trip && tstzspan '[2026-06-02 22:16:11, 2026-06-02 23:10:39]';
+  params:
+  - Technische-Universität-Berlin
+  - 877
+  - '''2026-06-02 22:16:11'' AND ''2026-06-02 23:10:39'''
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(timestamps(atTime(r.trip, tstzspan '[2026-06-04 06:58:13, 2026-06-04 08:49:03]'))) AS ts
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-04 06:58:13, 2026-06-04 08:49:03]'
+    )
+    SELECT id
+    FROM ts_table
+    GROUP BY id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM ts)) > 1;
+  params:
+  - '''2026-06-04 06:58:13'' AND ''2026-06-04 08:49:03'''
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN rides r ON eintersects(r.trip, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf' GROUP BY d.name;
+  params:
+  - Charlottenburg-Wilmersdorf
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    FROM rides r
+    JOIN universities u ON edwithin(attime(r.trip, tstzspan '[2026-06-04 12:41:44, 2026-06-04 13:12:21]'), u.geom, 875)
+    WHERE u.name = 'European-School-of-Management-and-Technology-Berlin' AND r.trip && tstzspan '[2026-06-04 12:41:44, 2026-06-04 13:12:21]';
+  params:
+  - European-School-of-Management-and-Technology-Berlin
+  - 875
+  - '''2026-06-04 12:41:44'' AND ''2026-06-04 13:12:21'''
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(instants(atTime(r.trip, tstzspan '[2026-06-04 13:12:53, 2026-06-04 14:43:48]'))) AS inst
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-04 13:12:53, 2026-06-04 14:43:48]'
+    ),
+    filtered AS (
+      SELECT ts_table.id
+      FROM ts_table
+      JOIN berlin_districts d ON d.name = 'Charlottenburg-Wilmersdorf'
+      WHERE ST_Intersects(getValue(inst)::geometry, d.geom)
+    )
+    SELECT 'Charlottenburg-Wilmersdorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT id, COUNT(*) AS num_updates
+      FROM filtered
+      GROUP BY id
+    ) AS ri;
+  params:
+  - Charlottenburg-Wilmersdorf
+  - '''2026-06-04 13:12:53'' AND ''2026-06-04 14:43:48'''
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    FROM rides r
+    JOIN universities u ON edwithin(attime(r.trip, tstzspan '[2026-06-02 03:41:05, 2026-06-02 05:05:54]'), u.geom, 463)
+    WHERE u.name = 'Charité-Campus-Klinik' AND r.trip && tstzspan '[2026-06-02 03:41:05, 2026-06-02 05:05:54]';
+  params:
+  - Charité-Campus-Klinik
+  - 463
+  - '''2026-06-02 03:41:05'' AND ''2026-06-02 05:05:54'''
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(timestamps(atTime(r.trip, tstzspan '[2026-06-02 15:53:40, 2026-06-02 16:25:10]'))) AS ts
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-02 15:53:40, 2026-06-02 16:25:10]'
+    )
+    SELECT id
+    FROM ts_table
+    GROUP BY id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM ts)) > 1;
+  params:
+  - '''2026-06-02 15:53:40'' AND ''2026-06-02 16:25:10'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(timestamps(atTime(r.trip, tstzspan '[2026-06-04 01:02:05, 2026-06-04 02:51:52]'))) AS ts
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-04 01:02:05, 2026-06-04 02:51:52]'
+    )
+    SELECT COUNT(DISTINCT id) AS ride_count
+    FROM ts_table
+    WHERE EXTRACT(HOUR FROM ts) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM ts) BETWEEN 16 AND 18;
+  params:
+  - '''2026-06-04 01:02:05'' AND ''2026-06-04 02:51:52'''
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(instants(atTime(r.trip, tstzspan '[2026-06-04 02:35:51, 2026-06-04 04:05:09]'))) AS inst
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-04 02:35:51, 2026-06-04 04:05:09]'
+    ),
+    filtered AS (
+      SELECT ts_table.id
+      FROM ts_table
+      JOIN berlin_districts d ON d.name = 'Charlottenburg-Wilmersdorf'
+      WHERE ST_Intersects(getValue(inst)::geometry, d.geom)
+    )
+    SELECT 'Charlottenburg-Wilmersdorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT id, COUNT(*) AS num_updates
+      FROM filtered
+      GROUP BY id
+    ) AS ri;
+  params:
+  - Charlottenburg-Wilmersdorf
+  - '''2026-06-04 02:35:51'' AND ''2026-06-04 04:05:09'''
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN rides r ON eintersects(r.trip, d.geom) WHERE d.name = 'Steglitz-Zehlendorf' GROUP BY d.name;
+  params:
+  - Steglitz-Zehlendorf
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    SELECT r.id
+    FROM rides r
+    JOIN berlin_districts d ON d.name = 'Spandau'
+    GROUP BY r.id
+    HAVING BOOL_AND(adwithin(r.trip, d.geom, 433));
+  params:
+  - Spandau
+  - 433
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(timestamps(atTime(r.trip, tstzspan '[2026-06-02 04:20:48, 2026-06-02 05:57:41]'))) AS ts
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-02 04:20:48, 2026-06-02 05:57:41]'
+    )
+    SELECT id
+    FROM ts_table
+    GROUP BY id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM ts)) > 1;
+  params:
+  - '''2026-06-02 04:20:48'' AND ''2026-06-02 05:57:41'''
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    SELECT r.id
+    FROM rides r
+    JOIN berlin_districts d ON d.name = 'Lichtenberg'
+    GROUP BY r.id
+    HAVING BOOL_AND(adwithin(r.trip, d.geom, 393));
+  params:
+  - Lichtenberg
+  - 393
+- name: RidesPastOrToUniversityInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT r.id
+    FROM rides r
+    JOIN universities u ON edwithin(attime(r.trip, tstzspan '[2026-06-03 12:07:20, 2026-06-03 13:25:26]'), u.geom, 842)
+    WHERE u.name = 'Bard-College' AND r.trip && tstzspan '[2026-06-03 12:07:20, 2026-06-03 13:25:26]';
+  params:
+  - Bard-College
+  - 842
+  - '''2026-06-03 12:07:20'' AND ''2026-06-03 13:25:26'''
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(timestamps(atTime(r.trip, tstzspan '[2026-06-01 16:32:41, 2026-06-01 17:35:46]'))) AS ts
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-01 16:32:41, 2026-06-01 17:35:46]'
+    )
+    SELECT COUNT(DISTINCT id) AS ride_count
+    FROM ts_table
+    WHERE EXTRACT(HOUR FROM ts) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM ts) BETWEEN 16 AND 18;
+  params:
+  - '''2026-06-01 16:32:41'' AND ''2026-06-01 17:35:46'''
+- name: RidesAcrossMultipleHours
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(timestamps(atTime(r.trip, tstzspan '[2026-06-02 22:36:11, 2026-06-02 23:34:54]'))) AS ts
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-02 22:36:11, 2026-06-02 23:34:54]'
+    )
+    SELECT id
+    FROM ts_table
+    GROUP BY id
+    HAVING COUNT(DISTINCT EXTRACT(HOUR FROM ts)) > 1;
+  params:
+  - '''2026-06-02 22:36:11'' AND ''2026-06-02 23:34:54'''
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(instants(atTime(r.trip, tstzspan '[2026-06-03 22:19:58, 2026-06-03 23:20:47]'))) AS inst
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-03 22:19:58, 2026-06-03 23:20:47]'
+    ),
+    filtered AS (
+      SELECT ts_table.id
+      FROM ts_table
+      JOIN berlin_districts d ON d.name = 'Mitte'
+      WHERE ST_Intersects(getValue(inst)::geometry, d.geom)
+    )
+    SELECT 'Mitte' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT id, COUNT(*) AS num_updates
+      FROM filtered
+      GROUP BY id
+    ) AS ri;
+  params:
+  - Mitte
+  - '''2026-06-03 22:19:58'' AND ''2026-06-03 23:20:47'''
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN rides r ON eintersects(r.trip, d.geom) WHERE d.name = 'Tempelhof-Schöneberg' GROUP BY d.name;
+  params:
+  - Tempelhof-Schöneberg
+- name: countRideInDistrict
+  type: spatial
+  sql: |
+    SELECT d.name, COUNT(DISTINCT r.id) AS ride_count FROM berlin_districts d JOIN rides r ON eintersects(r.trip, d.geom) WHERE d.name = 'Charlottenburg-Wilmersdorf' GROUP BY d.name;
+  params:
+  - Charlottenburg-Wilmersdorf
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    SELECT r.id
+    FROM rides r
+    JOIN berlin_districts d ON d.name = 'Charlottenburg-Wilmersdorf'
+    GROUP BY r.id
+    HAVING BOOL_AND(adwithin(r.trip, d.geom, 785));
+  params:
+  - Charlottenburg-Wilmersdorf
+  - 785
+- name: RidesDuringRushHourInPeriod
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(timestamps(atTime(r.trip, tstzspan '[2026-06-04 14:39:49, 2026-06-04 16:24:09]'))) AS ts
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-04 14:39:49, 2026-06-04 16:24:09]'
+    )
+    SELECT COUNT(DISTINCT id) AS ride_count
+    FROM ts_table
+    WHERE EXTRACT(HOUR FROM ts) BETWEEN 7 AND 9 OR EXTRACT(HOUR FROM ts) BETWEEN 16 AND 18;
+  params:
+  - '''2026-06-04 14:39:49'' AND ''2026-06-04 16:24:09'''
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    SELECT r.id
+    FROM rides r
+    JOIN berlin_districts d ON d.name = 'Treptow-Köpenick'
+    GROUP BY r.id
+    HAVING BOOL_AND(adwithin(r.trip, d.geom, 123));
+  params:
+  - Treptow-Köpenick
+  - 123
+- name: CountRidesFullyInDistrictRadius
+  type: spatial
+  sql: |
+    SELECT r.id
+    FROM rides r
+    JOIN berlin_districts d ON d.name = 'Spandau'
+    GROUP BY r.id
+    HAVING BOOL_AND(adwithin(r.trip, d.geom, 508));
+  params:
+  - Spandau
+  - 508
+- name: AverageUpdatesPerRideInDistrictInPeriod
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT r.id, unnest(instants(atTime(r.trip, tstzspan '[2026-06-04 20:05:21, 2026-06-04 20:43:53]'))) AS inst
+      FROM rides r
+      WHERE r.trip && tstzspan '[2026-06-04 20:05:21, 2026-06-04 20:43:53]'
+    ),
+    filtered AS (
+      SELECT ts_table.id
+      FROM ts_table
+      JOIN berlin_districts d ON d.name = 'Reinickendorf'
+      WHERE ST_Intersects(getValue(inst)::geometry, d.geom)
+    )
+    SELECT 'Reinickendorf' AS name, AVG(num_updates) AS avg_updates
+    FROM (
+      SELECT id, COUNT(*) AS num_updates
+      FROM filtered
+      GROUP BY id
+    ) AS ri;
+  params:
+  - Reinickendorf
+  - '''2026-06-04 20:05:21'' AND ''2026-06-04 20:43:53'''
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(instants(atTime(trip, tstzspan '[2026-06-04 00:02:48, 2026-06-04 00:52:48]'))) AS inst
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-04 00:02:48, 2026-06-04 00:52:48]'
+    )
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ts_table
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.75294999725026, 51.10743603222556, 9.152949959284653, 51.33743599273672), 4326), 3857)))
+           AND BOOL_OR(ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.947419699180056, 50.31422108807133, 7.347419661214449, 50.54422104858249), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.75294999725026, 51.10743603222556, 9.152949959284653,
+    51.33743599273672), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.947419699180056, 50.31422108807133,
+    7.347419661214449, 50.54422104858249), 4326), 3857)
+  - '''2026-06-04 00:02:48'' AND ''2026-06-04 00:52:48'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.691225188497384, 51.88086981265046, 9.091225150531777, 52.110869773161625), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.691225188497384, 51.88086981265046,
+    9.091225150531777, 52.110869773161625), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(instants(atTime(trip, tstzspan '[2026-06-03 16:59:06, 2026-06-03 17:49:06]'))) AS inst
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-03 16:59:06, 2026-06-03 17:49:06]'
+    )
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ts_table
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.776881814006605, 51.10595650201945, 7.1768817760409975, 51.33595646253062), 4326), 3857)))
+           AND BOOL_OR(ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.648358079282827, 50.44151051143041, 8.04835804131722, 50.67151047194157), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.776881814006605, 51.10595650201945,
+    7.1768817760409975, 51.33595646253062), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.648358079282827, 50.44151051143041,
+    8.04835804131722, 50.67151047194157), 4326), 3857)
+  - '''2026-06-03 16:59:06'' AND ''2026-06-03 17:49:06'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.313933048269961, 52.00946969992986, 8.713933010304354, 52.239469660441024), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.313933048269961, 52.00946969992986,
+    8.713933010304354, 52.239469660441024), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(instants(atTime(trip, tstzspan '[2026-06-04 03:53:48, 2026-06-04 04:43:48]'))) AS inst
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-04 03:53:48, 2026-06-04 04:43:48]'
+    )
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ts_table
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(5.5286099682394, 51.54315764225937, 5.928609930273793, 51.77315760277053), 4326), 3857)))
+           AND BOOL_OR(ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.27337100155227, 51.03569027506848, 7.673370963586663, 51.26569023557965), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(5.5286099682394, 51.54315764225937, 5.928609930273793,
+    51.77315760277053), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.27337100155227, 51.03569027506848, 7.673370963586663,
+    51.26569023557965), 4326), 3857)
+  - '''2026-06-04 03:53:48'' AND ''2026-06-04 04:43:48'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(instants(atTime(trip, tstzspan '[2026-06-04 13:57:23, 2026-06-04 14:47:24]'))) AS inst
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-04 13:57:23, 2026-06-04 14:47:24]'
+    )
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ts_table
+    WHERE ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.026392447397719, 51.70091944321945, 6.426392409432112, 51.93091940373061), 4326), 3857));
+  params:
+  - '''2026-06-04 13:57:23'' AND ''2026-06-04 14:47:24'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.026392447397719, 51.70091944321945,
+    6.426392409432112, 51.93091940373061), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.670974668368746, 51.00131546703629, 7.070974630403139, 51.23131542754746), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.670974668368746, 51.00131546703629,
+    7.070974630403139, 51.23131542754746), 4326), 3857)
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM rides
+    WHERE trip && tstzspan '[2026-06-01 23:13:56, 2026-06-02 00:03:56]';
+  params:
+  - '''2026-06-01 23:13:56'' AND ''2026-06-02 00:03:56'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(6.974087202847865, 50.62445263325663), 4326), 3857), 3895.709651106112)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(6.974087202847865, 50.62445263325663), 4326), 3857)
+    LIMIT 5;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(6.974087202847865, 50.62445263325663), 4326),
+    3857)
+  - 5
+  - 3895.709651106112
+- name: timeAggregation
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(timestamps(atTime(trip, tstzspan '[2026-06-01 16:58:51, 2026-06-01 17:48:51]'))) AS ts
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-01 16:58:51, 2026-06-01 17:48:51]'
+    )
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', ts AT TIME ZONE 'Europe/Berlin') AS hour, id, COUNT(*) AS cnt
+      FROM ts_table
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2026-06-01 16:58:51'' AND ''2026-06-01 17:48:51'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(instants(atTime(trip, tstzspan '[2026-06-04 18:05:27, 2026-06-04 18:55:28]'))) AS inst
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-04 18:05:27, 2026-06-04 18:55:28]'
+    )
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ts_table
+    WHERE ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.865920460380085, 50.74982437181384, 8.265920422414478, 50.979824332325), 4326), 3857));
+  params:
+  - '''2026-06-04 18:05:27'' AND ''2026-06-04 18:55:28'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.865920460380085, 50.74982437181384,
+    8.265920422414478, 50.979824332325), 4326), 3857)
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(instants(atTime(trip, tstzspan '[2026-06-04 06:21:37, 2026-06-04 07:11:38]'))) AS inst
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-04 06:21:37, 2026-06-04 07:11:38]'
+    )
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ts_table
+    WHERE ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(9.048546437740256, 50.99112160540213, 9.44854639977465, 51.22112156591329), 4326), 3857));
+  params:
+  - '''2026-06-04 06:21:37'' AND ''2026-06-04 07:11:38'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(9.048546437740256, 50.99112160540213,
+    9.44854639977465, 51.22112156591329), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(9.093002274822918, 51.464662682600796), 4326), 3857), 7148.2137022262805)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(9.093002274822918, 51.464662682600796), 4326), 3857)
+    LIMIT 5;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(9.093002274822918, 51.464662682600796), 4326),
+    3857)
+  - 5
+  - 7148.2137022262805
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM rides
+    WHERE trip && tstzspan '[2026-06-04 15:28:45, 2026-06-04 16:18:46]';
+  params:
+  - '''2026-06-04 15:28:45'' AND ''2026-06-04 16:18:46'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM rides
+    WHERE trip && tstzspan '[2026-06-02 13:23:27, 2026-06-02 14:13:28]';
+  params:
+  - '''2026-06-02 13:23:27'' AND ''2026-06-02 14:13:28'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(timestamps(atTime(trip, tstzspan '[2026-06-01 15:10:30, 2026-06-01 16:00:30]'))) AS ts
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-01 15:10:30, 2026-06-01 16:00:30]'
+    )
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', ts AT TIME ZONE 'Europe/Berlin') AS hour, id, COUNT(*) AS cnt
+      FROM ts_table
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2026-06-01 15:10:30'' AND ''2026-06-01 16:00:30'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(9.164767676864287, 51.826520868308684), 4326), 3857), 10080.451063472752)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(9.164767676864287, 51.826520868308684), 4326), 3857)
+    LIMIT 3;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(9.164767676864287, 51.826520868308684), 4326),
+    3857)
+  - 3
+  - 10080.451063472752
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.91304607349366, 51.88940722001947, 9.313046035528053, 52.11940718053064), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.91304607349366, 51.88940722001947, 9.313046035528053,
+    52.11940718053064), 4326), 3857)
+- name: timeAggregation
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(timestamps(atTime(trip, tstzspan '[2026-06-01 20:07:07, 2026-06-01 20:57:08]'))) AS ts
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-01 20:07:07, 2026-06-01 20:57:08]'
+    )
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', ts AT TIME ZONE 'Europe/Berlin') AS hour, id, COUNT(*) AS cnt
+      FROM ts_table
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2026-06-01 20:07:07'' AND ''2026-06-01 20:57:08'''
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(instants(atTime(trip, tstzspan '[2026-06-02 09:07:39, 2026-06-02 09:57:39]'))) AS inst
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-02 09:07:39, 2026-06-02 09:57:39]'
+    )
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ts_table
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.327686515472385, 50.74748507004379, 7.7276864775067775, 50.97748503055495), 4326), 3857)))
+           AND BOOL_OR(ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.304688466066743, 51.629308551311375, 6.704688428101136, 51.85930851182254), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.327686515472385, 50.74748507004379,
+    7.7276864775067775, 50.97748503055495), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.304688466066743, 51.629308551311375,
+    6.704688428101136, 51.85930851182254), 4326), 3857)
+  - '''2026-06-02 09:07:39'' AND ''2026-06-02 09:57:39'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(6.77656500328022, 51.1364552337771), 4326), 3857), 9783.909647884117)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(6.77656500328022, 51.1364552337771), 4326), 3857)
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(6.77656500328022, 51.1364552337771), 4326), 3857)
+  - 1
+  - 9783.909647884117
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) AS update_count
+    FROM ride_points
+    WHERE ST_Intersects(geom, ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.421389685646686, 50.94238439220023, 8.821389647681078, 51.1723843527114), 4326), 3857));
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.421389685646686, 50.94238439220023,
+    8.821389647681078, 51.1723843527114), 4326), 3857)
+- name: timeAggregation
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(timestamps(atTime(trip, tstzspan '[2026-06-04 01:20:21, 2026-06-04 02:10:22]'))) AS ts
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-04 01:20:21, 2026-06-04 02:10:22]'
+    )
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', ts AT TIME ZONE 'Europe/Berlin') AS hour, id, COUNT(*) AS cnt
+      FROM ts_table
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2026-06-04 01:20:21'' AND ''2026-06-04 02:10:22'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM rides
+    WHERE trip && tstzspan '[2026-06-04 16:03:25, 2026-06-04 16:53:26]';
+  params:
+  - '''2026-06-04 16:03:25'' AND ''2026-06-04 16:53:26'''
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(instants(atTime(trip, tstzspan '[2026-06-04 12:17:01, 2026-06-04 13:07:02]'))) AS inst
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-04 12:17:01, 2026-06-04 13:07:02]'
+    )
+    SELECT COUNT(*) AS id_count
+    FROM (
+        SELECT id
+        FROM ts_table
+        GROUP BY id
+        HAVING BOOL_OR(ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.877245461190172, 51.56593607627275, 7.2772454232245645, 51.795936036783914), 4326), 3857)))
+           AND BOOL_OR(ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.108893326555757, 50.68526465412706, 8.50889328859015, 50.915264614638225), 4326), 3857)))
+    ) AS matching_ids;
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.877245461190172, 51.56593607627275,
+    7.2772454232245645, 51.795936036783914), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.108893326555757, 50.68526465412706,
+    8.50889328859015, 50.915264614638225), 4326), 3857)
+  - '''2026-06-04 12:17:01'' AND ''2026-06-04 13:07:02'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM rides
+    WHERE trip && tstzspan '[2026-06-03 01:20:11, 2026-06-03 02:10:12]';
+  params:
+  - '''2026-06-03 01:20:11'' AND ''2026-06-03 02:10:12'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(timestamps(atTime(trip, tstzspan '[2026-06-02 19:23:06, 2026-06-02 20:13:07]'))) AS ts
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-02 19:23:06, 2026-06-02 20:13:07]'
+    )
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT date_trunc('hour', ts AT TIME ZONE 'Europe/Berlin') AS hour, id, COUNT(*) AS cnt
+      FROM ts_table
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2026-06-02 19:23:06'' AND ''2026-06-02 20:13:07'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(instants(atTime(trip, tstzspan '[2026-06-04 19:15:44, 2026-06-04 20:05:45]'))) AS inst
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-04 19:15:44, 2026-06-04 20:05:45]'
+    )
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ts_table
+    WHERE ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.6981459949776045, 50.85481841750612, 7.098145957011997, 51.08481837801728), 4326), 3857));
+  params:
+  - '''2026-06-04 19:15:44'' AND ''2026-06-04 20:05:45'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.6981459949776045, 50.85481841750612,
+    7.098145957011997, 51.08481837801728), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT id, geom, timestamp
+    FROM ride_points
+    WHERE ST_DWithin(geom, ST_Transform(ST_SetSRID(ST_Point(8.694441762576744, 51.64058983531174), 4326), 3857), 7189.411503887064)
+    ORDER BY geom <-> ST_Transform(ST_SetSRID(ST_Point(8.694441762576744, 51.64058983531174), 4326), 3857)
+    LIMIT 4;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(8.694441762576744, 51.64058983531174), 4326),
+    3857)
+  - 4
+  - 7189.411503887064
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    WITH ts_table AS (
+      SELECT id, unnest(instants(atTime(trip, tstzspan '[2026-06-04 03:25:08, 2026-06-04 04:15:08]'))) AS inst
+      FROM rides
+      WHERE trip && tstzspan '[2026-06-04 03:25:08, 2026-06-04 04:15:08]'
+    )
+    SELECT COUNT(DISTINCT id) AS id_count
+    FROM ts_table
+    WHERE ST_Intersects(getValue(inst)::geometry, ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.373344544319199, 51.66405293723304, 6.773344506353592, 51.8940528977442), 4326), 3857));
+  params:
+  - '''2026-06-04 03:25:08'' AND ''2026-06-04 04:15:08'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.373344544319199, 51.66405293723304,
+    6.773344506353592, 51.8940528977442), 4326), 3857)

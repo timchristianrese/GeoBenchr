@@ -34,6 +34,11 @@
     url: "https://dlcdn.apache.org/spark/spark-{{ spark_version }}/spark-{{ spark_version }}-bin-hadoop3.tgz"
     dest: /opt/spark-{{ spark_version }}-bin-hadoop3.tgz
     mode: '0644'
+    # FIX: see roles/hadoop's matching FIX comment -- get_url's default 10s timeout covers the
+    # whole transfer, not just connection setup, and 5 nodes downloading a ~400MB tarball at once
+    # over one shared NAT'd uplink routinely exceeds it even though the server itself responds
+    # instantly to a single uncontended request.
+    timeout: 300
 
 # - name: Upload Spark tarball
 #   copy:

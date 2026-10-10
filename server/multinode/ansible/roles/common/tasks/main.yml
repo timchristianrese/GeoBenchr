@@ -64,6 +64,27 @@
 # meant to fix (confirmed on-target: the block still landed at the end of /etc/hosts after this
 # "fix", still losing to Hetzner's pre-existing public-IP line). `insertbefore: BOF` is the
 # parameter/value pair that actually means what both of these comments intended.
+#
+# FIX: putting our block first still isn't enough on its own -- Hetzner's own installimage entries
+# for these same hostnames (a public IPv4 *and* a public IPv6 address, under a
+# "### Hetzner Online GmbH installimage" marker further down the file) stay in the file either
+# way, and glibc's resolver prefers IPv6 candidates over IPv4 by default (RFC 6724) regardless of
+# which line comes first -- confirmed on-target: even with our block at the very top, `psql -h
+# nst-1` and the real JDBC drivers (benchmark_client's aviation run) both actually connected out
+# over Hetzner's public IPv6 address, which pg_hba.conf correctly has no rule for ("no pg_hba.conf
+# entry for host ...", i.e. every PostGIS/MobilityDB/ClickHouse query in that run failed before
+# ever reaching the query itself). Removing any preexisting single-line "<addr> <hostname>" entry
+# for each cluster hostname first -- Hetzner's format, and also our own from a previous run, both
+# harmlessly idempotent to strip and re-add -- guarantees exactly one entry per hostname after the
+# block below goes back in, with no IPv6 candidate left to be preferred.
+- name: Remove any pre-existing /etc/hosts entries for cluster hostnames (see next task's comment)
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^\S+\s+{{ item }}\s*$'
+    state: absent
+  loop: "{{ groups['all'] }}"
+
 - name: Add cluster hosts to /etc/hosts for private-network name resolution
   ansible.builtin.blockinfile:
     path: /etc/hosts

@@ -14,6 +14,100 @@ spark_version: 4.0
 scala_version: 2.13
 sedona_version: 1.8.1
 geotools_version: 33.1
+# FIX: Sedona's distributed spatial-join code (org.apache.sedona.core.joinJudgement.DuplicatesFilter)
+# still imports the legacy "commons-collections" package (org.apache.commons.collections.iterators.
+# FilterIterator) -- confirmed live, every ST_Intersects/ST_DWithin join query failed with
+# NoClassDefFoundError even though commons-collections4 (a different package, not a superset) is
+# already on Spark's classpath. Sedona's own shaded jar doesn't bundle it.
+commons_collections_version: 3.2.2
+
+# FIX: SedonaExecutor.java used to run every query straight against a live Postgres connection via
+# JDBC -- confirmed live, every query with no pushable filter took over a minute (up to 87s)
+# regardless of what the query itself was doing, since every row crossed that wire on every single
+# request; SedonaExecutor also never registered the tables the query set references by bare name
+# in the first place ("table or view not found" -- Spark's in-memory catalog starts empty every
+# session, there's no persistent Hive metastore here). Each table now gets a one-time export to
+# Parquet on HDFS instead (see roles/sedona's "Export GeoBenchr tables to Parquet" task and
+# templates/sedona-export-parquet.py.j2); SedonaExecutor reads and registers those on session
+# init, a cheap Parquet read rather than a live database scan.
+#
+# `order_by` mirrors wherever Postgres has a btree index on that column (Parquet's own row-group
+# min/max stats give the same practical pruning benefit a physical sort gives DuckDB).
+# `id_lower`/`id_upper` bound the JDBC partitioned read (`num_partitions` parallel range scans
+# instead of one) -- refresh these (and crossing_points' explicit BIGINT cast below, needed
+# because its "id" column is Postgres `character varying`, confirmed live via
+# information_schema.columns, unlike the other three point tables' real bigint id) if the dataset
+# is reloaded with a different id range.
+sedona_export_tables:
+  # FIX: confirmed live -- every point table's "id" is a reused/clustered identifier (flight
+  # number, geolife trajectory id, ride id, AIS vessel id), not a uniformly-spread row key.
+  # `width_bucket(id, id_lower, id_upper, 10)` on flight_points showed 100% of a live sample
+  # landing in the *first* of 10 equal-width buckets -- the real id values are packed into a
+  # sliver of the declared range. A JDBC range-partitioned read divides that declared RANGE
+  # evenly, not the actual ROWS, so this silently dumped ~all rows into the first few of 128
+  # partitions and left the rest of them ~empty (confirmed live: flight_points.parquet ended up
+  # as one ~33GB file plus dozens of ~2KB near-empty ones) -- one massive partition doing all the
+  # work while 100+ executors sat idle, and a skewed compression comparison from one giant file
+  # getting better dictionary reuse than evenly-sized ones would. `(id % num_partitions)` as the
+  # partition column is immune to this regardless of the underlying id distribution -- every
+  # partition gets exactly one modulo bucket, so row counts land even by construction.
+  # FIX: confirmed live -- id_upper was set to num_partitions-1 (127/255), making the JDBC
+  # partitioning stride (upperBound-lowerBound)/numPartitions a non-integer (127/128, 255/256).
+  # Spark rounds each partition boundary independently, so a fractional stride lets adjacent
+  # boundaries round to the same integer (dropping the modulo bucket in between from every
+  # partition's range) or leave a gap (putting it in two partitions' ranges) -- silently
+  # duplicating some rows and dropping others while leaving the *total* row count unchanged
+  # (confirmed on flight_points: exact row count match against Postgres, but 6,444 rows
+  # duplicated with 6,444 different real rows missing). id_upper must equal num_partitions so
+  # the stride is exactly 1.0 and every modulo bucket gets its own non-overlapping partition.
+  - name: flight_points
+    dbtable: "(SELECT *, (CAST(id AS BIGINT) % 128) AS partition_col FROM flight_points) t"
+    id_column: partition_col
+    id_lower: 0
+    id_upper: 128
+    num_partitions: 128
+    order_by: timestamp
+  - name: geolife_points
+    dbtable: "(SELECT *, (CAST(id AS BIGINT) % 128) AS partition_col FROM geolife_points) t"
+    id_column: partition_col
+    id_lower: 0
+    id_upper: 128
+    num_partitions: 128
+    order_by: timestamp
+  - name: crossing_points
+    dbtable: "(SELECT *, (CAST(id AS BIGINT) % 256) AS partition_col FROM crossing_points) t"
+    id_column: partition_col
+    id_lower: 0
+    id_upper: 256
+    num_partitions: 256
+  - name: ride_points
+    dbtable: "(SELECT *, (CAST(id AS BIGINT) % 256) AS partition_col FROM ride_points) t"
+    id_column: partition_col
+    id_lower: 0
+    id_upper: 256
+    num_partitions: 256
+    order_by: timestamp
+
+sedona_export_reference_tables:
+  - name: counties
+  - name: cities
+  - name: berlin_districts
+  - name: universities
+  - name: harbours
+  - name: islands
+  # Generic, engine-portable trip-summary tables (millions of rows, not billions -- one row per
+  # trip -- so a plain unpartitioned JDBC read is fine, like the reference tables above). See
+  # duckdb_materialize_tables in roles/duckdb/defaults/main.yml for the fuller rationale: these
+  # stay separate from the MobilityDB-native tgeompoint "flights"/"rides"/"crossings" tables,
+  # which only MobilityDB understands and which this Sedona/Parquet path never touches.
+  # geom_columns overrides the default single "geom" column -- these three have two geometry
+  # columns each (start_location/end_location), not one.
+  - name: flights_summary
+    geom_columns: [start_location, end_location]
+  - name: rides_summary
+    geom_columns: [start_location, end_location]
+  - name: crossings_summary
+    geom_columns: [start_location, end_location]
 
 
 # sedona_jar: sedona-spark-shaded-{{spark_version}}_{{scala_version}}-{{sedona_version}}.jar
