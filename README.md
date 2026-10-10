@@ -59,9 +59,8 @@ specific to it.
 | Cycling | `countRideInDistrict`, `CountRidesFullyInDistrictRadius`, `RidesPastOrToUniversityInPeriod`, `AverageUpdatesPerRideInDistrictInPeriod`, `RidesDuringRushHourInPeriod`, `RidesAcrossMultipleHours` |
 | Geolife | `ClosestRestaurantToPoint`, `CountPOIsByTypeInRegion`, `UniqueUsersPerHourInRegionInPeriod`, `SlidingWindowActivityInRegionPerMinuteWithNonZeroID`, `FirstAndLastActivityInPeriod`, `AverageDailyActivityPerUserInPeriod` |
 
-The query templates and every query's description are in [`docs/query-templates.md`](docs/query-templates.md)
-and [`docs/query-catalog.md`](docs/query-catalog.md); each scenario's queries, in every system's
-dialect, are defined in `benchmark/configuration/<scenario>/config/combinedBenchConf.yaml`.
+Every query's description and parameters are in [`docs/query-catalog.md`](docs/query-catalog.md);
+each scenario's queries, in every system's dialect, are defined in `benchmark/configuration/<scenario>/config/combinedBenchConf.yaml`.
 
 **What differs between systems:**
 
@@ -92,9 +91,9 @@ Details, results and plots are in [`benchmark/results/`](benchmark/results/READM
 | Folder | Content |
 |---|---|
 | [`data_generators/`](data_generators/README.md) | generators for the point data of each scenario |
-| [`server/`](server/readme.md) | installing the systems on the cluster (ansible) |
-| [`data/`](data/readme.md) | preparing and loading the data |
-| [`benchmark/`](benchmark/readme.md) | the benchmark client, the query configuration, the isolated run setup, and the results |
+| [`server/`](server/README.md) | installing the systems on the cluster (ansible) |
+| [`data/`](data/README.md) | preparing and loading the data |
+| [`benchmark/`](benchmark/README.md) | the benchmark client, the query configuration, the isolated run setup, and the results |
 | [`translation/`](translation/README.md) | describe a query once in YAML and generate it for each system |
 | [`docs/`](docs/) | query templates and catalog, database state |
 

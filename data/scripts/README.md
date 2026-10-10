@@ -14,4 +14,4 @@ systems load and load it into one server. The five-node cluster is loaded by the
 | `createGraph.ipynb`, `visualize.ipynb` | plots of the data |
 | `trajectory.pdf`, `trajectory_representation_options.pdf` | notes on how trajectories are represented |
 
-Usage is described in [`../readme.md`](../readme.md).
+Usage is described in [`../README.md`](../README.md).
