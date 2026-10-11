@@ -1,0 +1,7 @@
+system,wins,queries_with_query,queries_complete,queries_ranked,geomean_slowdown_vs_best,median_slowdown_vs_best,total_runtime_s
+PostGIS,3,48,48,48,11.63,11.57,2568.2
+MobilityDB,1,36,36,36,27.59,28.85,2807.8
+ClickHouse,24,47,47,47,1.38,1.0,79.3
+DuckDB,2,48,48,48,24.47,23.71,1738.0
+SpaceTime,18,48,48,45,1.63,1.42,175.3
+Sedona,0,48,48,48,131.32,185.1,6745.1

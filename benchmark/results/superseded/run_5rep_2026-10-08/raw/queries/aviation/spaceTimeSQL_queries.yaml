@@ -1,0 +1,664 @@
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flight_id AS id
+    FROM flight_points f
+    JOIN counties k ON ST_Point(f.x, f.y) <@ ST_ToGeom(k.geom::gpolygon)
+    WHERE k.name = 'Krs Coesfeld' AND f.t <@ EPOCHRANGE '[2024-04-24 18:44:35, 2024-05-01 20:26:37]';
+  params:
+  - '''2024-04-24 18:44:35'' AND ''2024-05-01 20:26:37'''
+  - Krs Coesfeld
+- name: FlightsAtNightInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flight_id AS id
+      FROM flights f
+      WHERE f.t <@ EPOCHRANGE '[2024-11-30 08:55:43, 2024-12-13 02:35:16]'
+      AND (TS_DAYSTART(f.t[0]) <> TS_DAYSTART(f.t[1])
+      OR TS_TIMEOFDAY(f.t[0]) <  TP '7h'
+      OR TS_TIMEOFDAY(f.t[1]) >= TP '22h');
+  params:
+  - '''2024-11-30 08:55:43'' AND ''2024-12-13 02:35:16'''
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT 'Krs Herne' as name, COUNT(DISTINCT f.flight_id) AS flight_count
+    FROM counties k
+    JOIN flight_points f ON ST_Point(f.x, f.y) <@ ST_ToGeom(k.geom::gpolygon)
+    WHERE k.name = 'Krs Herne';
+  params:
+  - Krs Herne
+- name: FlightsAtNightInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flight_id AS id
+      FROM flights f
+      WHERE f.t <@ EPOCHRANGE '[2024-11-30 04:31:06, 2024-12-03 19:19:31]'
+      AND (TS_DAYSTART(f.t[0]) <> TS_DAYSTART(f.t[1])
+      OR TS_TIMEOFDAY(f.t[0]) <  TP '7h'
+      OR TS_TIMEOFDAY(f.t[1]) >= TP '22h');
+  params:
+  - '''2024-11-30 04:31:06'' AND ''2024-12-03 19:19:31'''
+- name: FlightsAtNightInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flight_id AS id
+      FROM flights f
+      WHERE f.t <@ EPOCHRANGE '[2024-10-06 14:36:23, 2024-10-20 03:10:45]'
+      AND (TS_DAYSTART(f.t[0]) <> TS_DAYSTART(f.t[1])
+      OR TS_TIMEOFDAY(f.t[0]) <  TP '7h'
+      OR TS_TIMEOFDAY(f.t[1]) >= TP '22h');
+  params:
+  - '''2024-10-06 14:36:23'' AND ''2024-10-20 03:10:45'''
+- name: FlightsAtLowAltitudeInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT f.flight_id AS id FROM flight_points f
+    WHERE f.altitude BETWEEN 9110 AND 10180 AND f.t <@ EPOCHRANGE '[2024-01-29 00:16:32, 2024-02-06 09:45:32]';
+  params:
+  - '''2024-01-29 00:16:32'' AND ''2024-02-06 09:45:32'''
+  - 9110
+  - 10180
+- name: CityActivityAtInstant
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT f.flight_id) as flight_count
+    FROM flight_points f
+    JOIN cities c ON ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(c.geom::gpoint), 4414 * 0.624703)
+    WHERE c.name = 'Werdohl'
+      AND f.t <@ RANGE ((TS '2024-09-03 17:13:48' - TP '10s')::epoch, (TS '2024-09-03 17:13:48' + TP '10s')::epoch);
+  params:
+  - Werdohl
+  - '2024-09-03 17:13:48'
+  - 4414
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flight_id AS id
+    FROM flight_points f
+    JOIN counties k ON ST_Point(f.x, f.y) <@ ST_ToGeom(k.geom::gpolygon)
+    WHERE k.name = 'Krs Rheinisch-Bergischer Kreis' AND f.t <@ EPOCHRANGE '[2024-10-25 23:25:34, 2024-10-28 07:51:30]';
+  params:
+  - '''2024-10-25 23:25:34'' AND ''2024-10-28 07:51:30'''
+  - Krs Rheinisch-Bergischer Kreis
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flight_id AS id, ST_Distance(ST_ToGeom(ST_GeogPoint(6.020722910375, 50.461624006814)), ST_Point(f.x, f.y)) / 0.635589 as min_distance
+    FROM flight_points f
+    WHERE ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(ST_GeogPoint(6.020722910375, 50.461624006814)), 2688 * 0.635589)
+    ORDER BY min_distance ASC
+    LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(670223.8085903159, 6526608.145482452), 3857)
+  - 2688
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flight_id AS id
+    FROM flight_points f
+    JOIN counties k ON ST_Point(f.x, f.y) <@ ST_ToGeom(k.geom::gpolygon)
+    WHERE k.name = 'Krs Warendorf' AND f.t <@ EPOCHRANGE '[2024-08-14 14:47:33, 2024-08-23 13:09:13]';
+  params:
+  - '''2024-08-14 14:47:33'' AND ''2024-08-23 13:09:13'''
+  - Krs Warendorf
+- name: CityActivityAtInstant
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT f.flight_id) as flight_count
+    FROM flight_points f
+    JOIN cities c ON ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(c.geom::gpoint), 2807 * 0.611862)
+    WHERE c.name = 'Ochtrup'
+      AND f.t <@ RANGE ((TS '2024-04-25 19:32:42' - TP '10s')::epoch, (TS '2024-04-25 19:32:42' + TP '10s')::epoch);
+  params:
+  - Ochtrup
+  - '2024-04-25 19:32:42'
+  - 2807
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flight_id AS id, ST_Distance(ST_ToGeom(ST_GeogPoint(6.447334037515, 51.849021359341)), ST_Point(f.x, f.y)) / 0.616760 as min_distance
+    FROM flight_points f
+    WHERE ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(ST_GeogPoint(6.447334037515, 51.849021359341)), 4739 * 0.616760)
+    ORDER BY min_distance ASC
+    LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(717713.9420302683, 6772872.481129131), 3857)
+  - 4739
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flight_id AS id, ST_Distance(ST_ToGeom(ST_GeogPoint(7.031816507868, 50.494084654288)), ST_Point(f.x, f.y)) / 0.635153 as min_distance
+    FROM flight_points f
+    WHERE ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(ST_GeogPoint(7.031816507868, 50.494084654288)), 3699 * 0.635153)
+    ORDER BY min_distance ASC
+    LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(782778.2330075987, 6532286.39319997), 3857)
+  - 3699
+- name: FlightsAtNightInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flight_id AS id
+      FROM flights f
+      WHERE f.t <@ EPOCHRANGE '[2024-04-23 14:50:46, 2024-05-06 04:01:59]'
+      AND (TS_DAYSTART(f.t[0]) <> TS_DAYSTART(f.t[1])
+      OR TS_TIMEOFDAY(f.t[0]) <  TP '7h'
+      OR TS_TIMEOFDAY(f.t[1]) >= TP '22h');
+  params:
+  - '''2024-04-23 14:50:46'' AND ''2024-05-06 04:01:59'''
+- name: FlightsAtLowAltitudeInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT f.flight_id AS id FROM flight_points f
+    WHERE f.altitude BETWEEN 9210 AND 10040 AND f.t <@ EPOCHRANGE '[2024-12-12 12:26:00, 2024-12-26 21:54:43]';
+  params:
+  - '''2024-12-12 12:26:00'' AND ''2024-12-26 21:54:43'''
+  - 9210
+  - 10040
+- name: CityActivityAtInstant
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT f.flight_id) as flight_count
+    FROM flight_points f
+    JOIN cities c ON ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(c.geom::gpoint), 1899 * 0.624255)
+    WHERE c.name = 'Altena'
+      AND f.t <@ RANGE ((TS '2024-05-19 11:52:14' - TP '10s')::epoch, (TS '2024-05-19 11:52:14' + TP '10s')::epoch);
+  params:
+  - Altena
+  - '2024-05-19 11:52:14'
+  - 1899
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT 'Krs Maerkischer Kreis' as name, COUNT(DISTINCT f.flight_id) AS flight_count
+    FROM counties k
+    JOIN flight_points f ON ST_Point(f.x, f.y) <@ ST_ToGeom(k.geom::gpolygon)
+    WHERE k.name = 'Krs Maerkischer Kreis';
+  params:
+  - Krs Maerkischer Kreis
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flight_id AS id
+    FROM flight_points f
+    JOIN counties k ON ST_Point(f.x, f.y) <@ ST_ToGeom(k.geom::gpolygon)
+    WHERE k.name = 'Krs Viersen' AND f.t <@ EPOCHRANGE '[2024-05-27 04:52:21, 2024-06-08 01:49:08]';
+  params:
+  - '''2024-05-27 04:52:21'' AND ''2024-06-08 01:49:08'''
+  - Krs Viersen
+- name: FlightsAtLowAltitudeInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT f.flight_id AS id FROM flight_points f
+    WHERE f.altitude BETWEEN 8900 AND 10070 AND f.t <@ EPOCHRANGE '[2024-07-28 02:18:07, 2024-08-03 00:20:03]';
+  params:
+  - '''2024-07-28 02:18:07'' AND ''2024-08-03 00:20:03'''
+  - 8900
+  - 10070
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flight_id AS id, ST_Distance(ST_ToGeom(ST_GeogPoint(8.128800509606, 52.222694135835)), ST_Point(f.x, f.y)) / 0.611626 as min_distance
+    FROM flight_points f
+    WHERE ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(ST_GeogPoint(8.128800509606, 52.222694135835)), 2367 * 0.611626)
+    ORDER BY min_distance ASC
+    LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(904893.9334894583, 6840492.003414064), 3857)
+  - 2367
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.flight_id AS id, ST_Distance(ST_ToGeom(ST_GeogPoint(6.553204095766, 50.461863810378)), ST_Point(f.x, f.y)) / 0.635586 as min_distance
+    FROM flight_points f
+    WHERE ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(ST_GeogPoint(6.553204095766, 50.461863810378)), 3772 * 0.635586)
+    ORDER BY min_distance ASC
+    LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(729499.3430050573, 6526650.079337496), 3857)
+  - 3772
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.flight_id AS id
+    FROM flight_points f
+    JOIN counties k ON ST_Point(f.x, f.y) <@ ST_ToGeom(k.geom::gpolygon)
+    WHERE k.name = 'Krs Duisburg' AND f.t <@ EPOCHRANGE '[2024-06-24 12:40:16, 2024-07-04 21:01:50]';
+  params:
+  - '''2024-06-24 12:40:16'' AND ''2024-07-04 21:01:50'''
+  - Krs Duisburg
+- name: CityActivityAtInstant
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT f.flight_id) as flight_count
+    FROM flight_points f
+    JOIN cities c ON ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(c.geom::gpoint), 1627 * 0.630801)
+    WHERE c.name = 'Lohmar'
+      AND f.t <@ RANGE ((TS '2024-04-07 14:53:02' - TP '10s')::epoch, (TS '2024-04-07 14:53:02' + TP '10s')::epoch);
+  params:
+  - Lohmar
+  - '2024-04-07 14:53:02'
+  - 1627
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT 'Krs Bielefeld' as name, COUNT(DISTINCT f.flight_id) AS flight_count
+    FROM counties k
+    JOIN flight_points f ON ST_Point(f.x, f.y) <@ ST_ToGeom(k.geom::gpolygon)
+    WHERE k.name = 'Krs Bielefeld';
+  params:
+  - Krs Bielefeld
+- name: FlightsAtLowAltitudeInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT f.flight_id AS id FROM flight_points f
+    WHERE f.altitude BETWEEN 9270 AND 10250 AND f.t <@ EPOCHRANGE '[2024-09-15 09:49:28, 2024-09-29 02:11:38]';
+  params:
+  - '''2024-09-15 09:49:28'' AND ''2024-09-29 02:11:38'''
+  - 9270
+  - 10250
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT 'Krs Warendorf' as name, COUNT(DISTINCT f.flight_id) AS flight_count
+    FROM counties k
+    JOIN flight_points f ON ST_Point(f.x, f.y) <@ ST_ToGeom(k.geom::gpolygon)
+    WHERE k.name = 'Krs Warendorf';
+  params:
+  - Krs Warendorf
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT 'Krs Maerkischer Kreis' as name, COUNT(DISTINCT f.flight_id) AS flight_count
+    FROM counties k
+    JOIN flight_points f ON ST_Point(f.x, f.y) <@ ST_ToGeom(k.geom::gpolygon)
+    WHERE k.name = 'Krs Maerkischer Kreis';
+  params:
+  - Krs Maerkischer Kreis
+- name: CityActivityAtInstant
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT f.flight_id) as flight_count
+    FROM flight_points f
+    JOIN cities c ON ST_DWithin(ST_Point(f.x, f.y), ST_ToGeom(c.geom::gpoint), 2594 * 0.624703)
+    WHERE c.name = 'Werdohl'
+      AND f.t <@ RANGE ((TS '2024-08-10 23:39:01' - TP '10s')::epoch, (TS '2024-08-10 23:39:01' + TP '10s')::epoch);
+  params:
+  - Werdohl
+  - '2024-08-10 23:39:01'
+  - 2594
+- name: FlightsAtNightInPeriod
+  type: temporal
+  sql: |
+    SELECT f.flight_id AS id
+      FROM flights f
+      WHERE f.t <@ EPOCHRANGE '[2024-02-01 11:41:29, 2024-02-08 06:21:47]'
+      AND (TS_DAYSTART(f.t[0]) <> TS_DAYSTART(f.t[1])
+      OR TS_TIMEOFDAY(f.t[0]) <  TP '7h'
+      OR TS_TIMEOFDAY(f.t[1]) >= TP '22h');
+  params:
+  - '''2024-02-01 11:41:29'' AND ''2024-02-08 06:21:47'''
+- name: FlightsAtLowAltitudeInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT f.flight_id AS id FROM flight_points f
+    WHERE f.altitude BETWEEN 9010 AND 9630 AND f.t <@ EPOCHRANGE '[2024-05-14 03:13:52, 2024-05-16 08:27:20]';
+  params:
+  - '''2024-05-14 03:13:52'' AND ''2024-05-16 08:27:20'''
+  - 9010
+  - 9630
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT flight_id) AS id_count
+    FROM flight_points
+    WHERE t <@ EPOCHRANGE '[2024-10-29 23:59:42, 2024-11-02 15:51:50]'
+      AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((9.048546437740256 50.99112160540213, 9.44854639977465 50.99112160540213, 9.44854639977465 51.22112156591329, 9.048546437740256 51.22112156591329, 9.048546437740256 50.99112160540213))'::gpolygon));
+  params:
+  - '''2024-10-29 23:59:42'' AND ''2024-11-02 15:51:50'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(9.048546437740256, 50.99112160540213,
+    9.44854639977465, 51.22112156591329), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) as update_count
+    FROM flight_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((8.91304607349366 51.88940722001947, 9.313046035528053 51.88940722001947, 9.313046035528053 52.11940718053064, 8.91304607349366 52.11940718053064, 8.91304607349366 51.88940722001947))'::gpolygon))
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.91304607349366, 51.88940722001947, 9.313046035528053,
+    52.11940718053064), 4326), 3857)
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT flight_id) AS id_count
+    FROM flight_points
+    WHERE t <@ EPOCHRANGE '[2024-12-09 01:16:08, 2024-12-12 17:08:17]';
+  params:
+  - '''2024-12-09 01:16:08'' AND ''2024-12-12 17:08:17'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) as update_count
+    FROM flight_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((8.691225188497384 51.88086981265046, 9.091225150531777 51.88086981265046, 9.091225150531777 52.110869773161625, 8.691225188497384 52.110869773161625, 8.691225188497384 51.88086981265046))'::gpolygon))
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.691225188497384, 51.88086981265046,
+    9.091225150531777, 52.110869773161625), 4326), 3857)
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) as update_count
+    FROM flight_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((8.313933048269961 52.00946969992986, 8.713933010304354 52.00946969992986, 8.713933010304354 52.239469660441024, 8.313933048269961 52.239469660441024, 8.313933048269961 52.00946969992986))'::gpolygon))
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.313933048269961, 52.00946969992986,
+    8.713933010304354, 52.239469660441024), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT flight_id as id, ST_Point(x,y) as geom, t AS timestamp
+    FROM flight_points
+    WHERE ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (6.974087202847865 50.62445263325663)'::gpoint), 3895.709651106112 * 0.633398)
+    ORDER BY ST_Distance(ST_Point(x,y), ST_ToGeom('POINT (6.974087202847865 50.62445263325663)'::gpoint))
+    LIMIT 5;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(6.974087202847865, 50.62445263325663), 4326),
+    3857)
+  - 5
+  - 3895.709651106112
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count FROM (
+      SELECT flight_id as id
+      FROM flight_points
+      WHERE t <@ EPOCHRANGE '[2024-10-19 04:16:39, 2024-10-22 20:08:47]'
+        AND (ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((5.5286099682394 51.54315764225937, 5.928609930273793 51.54315764225937, 5.928609930273793 51.77315760277053, 5.5286099682394 51.77315760277053, 5.5286099682394 51.54315764225937))'::gpolygon))
+          OR ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((7.27337100155227 51.03569027506848, 7.673370963586663 51.03569027506848, 7.673370963586663 51.26569023557965, 7.27337100155227 51.26569023557965, 7.27337100155227 51.03569027506848))'::gpolygon)))
+      GROUP BY flight_id
+      HAVING BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((5.5286099682394 51.54315764225937, 5.928609930273793 51.54315764225937, 5.928609930273793 51.77315760277053, 5.5286099682394 51.77315760277053, 5.5286099682394 51.54315764225937))'::gpolygon)))
+        AND BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((7.27337100155227 51.03569027506848, 7.673370963586663 51.03569027506848, 7.673370963586663 51.26569023557965, 7.27337100155227 51.26569023557965, 7.27337100155227 51.03569027506848))'::gpolygon)))
+    )
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(5.5286099682394, 51.54315764225937, 5.928609930273793,
+    51.77315760277053), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.27337100155227, 51.03569027506848, 7.673370963586663,
+    51.26569023557965), 4326), 3857)
+  - '''2024-10-19 04:16:39'' AND ''2024-10-22 20:08:47'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT flight_id) AS id_count
+    FROM flight_points
+    WHERE t <@ EPOCHRANGE '[2024-12-20 12:34:04, 2024-12-24 04:26:13]'
+      AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((7.865920460380085 50.74982437181384, 8.265920422414478 50.74982437181384, 8.265920422414478 50.979824332325, 7.865920460380085 50.979824332325, 7.865920460380085 50.74982437181384))'::gpolygon));
+  params:
+  - '''2024-12-20 12:34:04'' AND ''2024-12-24 04:26:13'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.865920460380085, 50.74982437181384,
+    8.265920422414478, 50.979824332325), 4326), 3857)
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT (t::i64 / 3600 ) * 3600 as hour, flight_id as id, count(*) as cnt
+      FROM flight_points
+      WHERE t <@ EPOCHRANGE '[2024-02-03 09:39:19, 2024-02-07 01:31:27]'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-02-03 09:39:19'' AND ''2024-02-07 01:31:27'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT flight_id) AS id_count
+    FROM flight_points
+    WHERE t <@ EPOCHRANGE '[2024-10-17 01:54:40, 2024-10-20 17:46:48]'
+      AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((6.373344544319199 51.66405293723304, 6.773344506353592 51.66405293723304, 6.773344506353592 51.8940528977442, 6.373344544319199 51.8940528977442, 6.373344544319199 51.66405293723304))'::gpolygon));
+  params:
+  - '''2024-10-17 01:54:40'' AND ''2024-10-20 17:46:48'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.373344544319199, 51.66405293723304,
+    6.773344506353592, 51.8940528977442), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count FROM (
+      SELECT flight_id as id
+      FROM flight_points
+      WHERE t <@ EPOCHRANGE '[2024-04-14 07:45:29, 2024-04-17 23:37:37]'
+        AND (ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((7.327686515472385 50.74748507004379, 7.7276864775067775 50.74748507004379, 7.7276864775067775 50.97748503055495, 7.327686515472385 50.97748503055495, 7.327686515472385 50.74748507004379))'::gpolygon))
+          OR ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((6.304688466066743 51.629308551311375, 6.704688428101136 51.629308551311375, 6.704688428101136 51.85930851182254, 6.304688466066743 51.85930851182254, 6.304688466066743 51.629308551311375))'::gpolygon)))
+      GROUP BY flight_id
+      HAVING BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((7.327686515472385 50.74748507004379, 7.7276864775067775 50.74748507004379, 7.7276864775067775 50.97748503055495, 7.327686515472385 50.97748503055495, 7.327686515472385 50.74748507004379))'::gpolygon)))
+        AND BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((6.304688466066743 51.629308551311375, 6.704688428101136 51.629308551311375, 6.704688428101136 51.85930851182254, 6.304688466066743 51.85930851182254, 6.304688466066743 51.629308551311375))'::gpolygon)))
+    )
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.327686515472385, 50.74748507004379,
+    7.7276864775067775, 50.97748503055495), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.304688466066743, 51.629308551311375,
+    6.704688428101136, 51.85930851182254), 4326), 3857)
+  - '''2024-04-14 07:45:29'' AND ''2024-04-17 23:37:37'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT (t::i64 / 3600 ) * 3600 as hour, flight_id as id, count(*) as cnt
+      FROM flight_points
+      WHERE t <@ EPOCHRANGE '[2024-10-07 22:41:46, 2024-10-11 14:33:54]'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-10-07 22:41:46'' AND ''2024-10-11 14:33:54'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT (t::i64 / 3600 ) * 3600 as hour, flight_id as id, count(*) as cnt
+      FROM flight_points
+      WHERE t <@ EPOCHRANGE '[2024-05-29 09:03:28, 2024-06-02 00:55:36]'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-05-29 09:03:28'' AND ''2024-06-02 00:55:36'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) as update_count
+    FROM flight_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((8.421389685646686 50.94238439220023, 8.821389647681078 50.94238439220023, 8.821389647681078 51.1723843527114, 8.421389685646686 51.1723843527114, 8.421389685646686 50.94238439220023))'::gpolygon))
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.421389685646686, 50.94238439220023,
+    8.821389647681078, 51.1723843527114), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT flight_id as id, ST_Point(x,y) as geom, t AS timestamp
+    FROM flight_points
+    WHERE ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (6.77656500328022 51.1364552337771)'::gpoint), 9783.909647884117 * 0.626476)
+    ORDER BY ST_Distance(ST_Point(x,y), ST_ToGeom('POINT (6.77656500328022 51.1364552337771)'::gpoint))
+    LIMIT 1;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(6.77656500328022, 51.1364552337771), 4326), 3857)
+  - 1
+  - 9783.909647884117
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count FROM (
+      SELECT flight_id as id
+      FROM flight_points
+      WHERE t <@ EPOCHRANGE '[2024-09-01 06:01:04, 2024-09-04 21:53:13]'
+        AND (ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((6.776881814006605 51.10595650201945, 7.1768817760409975 51.10595650201945, 7.1768817760409975 51.33595646253062, 6.776881814006605 51.33595646253062, 6.776881814006605 51.10595650201945))'::gpolygon))
+          OR ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((7.648358079282827 50.44151051143041, 8.04835804131722 50.44151051143041, 8.04835804131722 50.67151047194157, 7.648358079282827 50.67151047194157, 7.648358079282827 50.44151051143041))'::gpolygon)))
+      GROUP BY flight_id
+      HAVING BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((6.776881814006605 51.10595650201945, 7.1768817760409975 51.10595650201945, 7.1768817760409975 51.33595646253062, 6.776881814006605 51.33595646253062, 6.776881814006605 51.10595650201945))'::gpolygon)))
+        AND BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((7.648358079282827 50.44151051143041, 8.04835804131722 50.44151051143041, 8.04835804131722 50.67151047194157, 7.648358079282827 50.67151047194157, 7.648358079282827 50.44151051143041))'::gpolygon)))
+    )
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.776881814006605, 51.10595650201945,
+    7.1768817760409975, 51.33595646253062), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(7.648358079282827, 50.44151051143041,
+    8.04835804131722, 50.67151047194157), 4326), 3857)
+  - '''2024-09-01 06:01:04'' AND ''2024-09-04 21:53:13'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT flight_id) AS id_count
+    FROM flight_points
+    WHERE t <@ EPOCHRANGE '[2024-05-03 01:11:36, 2024-05-06 17:03:44]';
+  params:
+  - '''2024-05-03 01:11:36'' AND ''2024-05-06 17:03:44'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT flight_id) AS id_count
+    FROM flight_points
+    WHERE t <@ EPOCHRANGE '[2024-12-02 08:44:02, 2024-12-06 00:36:11]'
+      AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((6.026392447397719 51.70091944321945, 6.426392409432112 51.70091944321945, 6.426392409432112 51.93091940373061, 6.026392447397719 51.93091940373061, 6.026392447397719 51.70091944321945))'::gpolygon));
+  params:
+  - '''2024-12-02 08:44:02'' AND ''2024-12-06 00:36:11'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.026392447397719, 51.70091944321945,
+    6.426392409432112, 51.93091940373061), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT flight_id as id, ST_Point(x,y) as geom, t AS timestamp
+    FROM flight_points
+    WHERE ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (9.164767676864287 51.826520868308684)'::gpoint), 10080.451063472752 * 0.617068)
+    ORDER BY ST_Distance(ST_Point(x,y), ST_ToGeom('POINT (9.164767676864287 51.826520868308684)'::gpoint))
+    LIMIT 3;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(9.164767676864287, 51.826520868308684), 4326),
+    3857)
+  - 3
+  - 10080.451063472752
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT (t::i64 / 3600 ) * 3600 as hour, flight_id as id, count(*) as cnt
+      FROM flight_points
+      WHERE t <@ EPOCHRANGE '[2024-02-17 04:26:49, 2024-02-20 20:18:58]'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-02-17 04:26:49'' AND ''2024-02-20 20:18:58'''
+- name: timeAggregation
+  type: temporal
+  sql: |
+    SELECT COUNT(*) AS hour_id_groups, SUM(cnt) AS points, MAX(cnt) AS max_group FROM (
+      SELECT (t::i64 / 3600 ) * 3600 as hour, flight_id as id, count(*) as cnt
+      FROM flight_points
+      WHERE t <@ EPOCHRANGE '[2024-01-26 11:17:33, 2024-01-30 03:09:42]'
+      GROUP BY hour, id
+    ) g;
+  params:
+  - '''2024-01-26 11:17:33'' AND ''2024-01-30 03:09:42'''
+- name: spatioTemporalRange
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(DISTINCT flight_id) AS id_count
+    FROM flight_points
+    WHERE t <@ EPOCHRANGE '[2024-12-25 16:02:25, 2024-12-29 07:54:33]'
+      AND ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((6.6981459949776045 50.85481841750612, 7.098145957011997 50.85481841750612, 7.098145957011997 51.08481837801728, 6.6981459949776045 51.08481837801728, 6.6981459949776045 50.85481841750612))'::gpolygon));
+  params:
+  - '''2024-12-25 16:02:25'' AND ''2024-12-29 07:54:33'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.6981459949776045, 50.85481841750612,
+    7.098145957011997, 51.08481837801728), 4326), 3857)
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count FROM (
+      SELECT flight_id as id
+      FROM flight_points
+      WHERE t <@ EPOCHRANGE '[2024-10-02 06:25:41, 2024-10-05 22:17:50]'
+        AND (ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((8.75294999725026 51.10743603222556, 9.152949959284653 51.10743603222556, 9.152949959284653 51.33743599273672, 8.75294999725026 51.33743599273672, 8.75294999725026 51.10743603222556))'::gpolygon))
+          OR ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((6.947419699180056 50.31422108807133, 7.347419661214449 50.31422108807133, 7.347419661214449 50.54422104858249, 6.947419699180056 50.54422104858249, 6.947419699180056 50.31422108807133))'::gpolygon)))
+      GROUP BY flight_id
+      HAVING BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((8.75294999725026 51.10743603222556, 9.152949959284653 51.10743603222556, 9.152949959284653 51.33743599273672, 8.75294999725026 51.33743599273672, 8.75294999725026 51.10743603222556))'::gpolygon)))
+        AND BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((6.947419699180056 50.31422108807133, 7.347419661214449 50.31422108807133, 7.347419661214449 50.54422104858249, 6.947419699180056 50.54422104858249, 6.947419699180056 50.31422108807133))'::gpolygon)))
+    )
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.75294999725026, 51.10743603222556, 9.152949959284653,
+    51.33743599273672), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.947419699180056, 50.31422108807133,
+    7.347419661214449, 50.54422104858249), 4326), 3857)
+  - '''2024-10-02 06:25:41'' AND ''2024-10-05 22:17:50'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT flight_id) AS id_count
+    FROM flight_points
+    WHERE t <@ EPOCHRANGE '[2024-12-11 14:09:39, 2024-12-15 06:01:48]';
+  params:
+  - '''2024-12-11 14:09:39'' AND ''2024-12-15 06:01:48'''
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT flight_id as id, ST_Point(x,y) as geom, t AS timestamp
+    FROM flight_points
+    WHERE ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (8.694441762576744 51.64058983531174)'::gpoint), 7189.411503887064 * 0.619612)
+    ORDER BY ST_Distance(ST_Point(x,y), ST_ToGeom('POINT (8.694441762576744 51.64058983531174)'::gpoint))
+    LIMIT 4;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(8.694441762576744, 51.64058983531174), 4326),
+    3857)
+  - 4
+  - 7189.411503887064
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT flight_id) AS id_count
+    FROM flight_points
+    WHERE t <@ EPOCHRANGE '[2024-06-24 12:25:32, 2024-06-28 04:17:41]';
+  params:
+  - '''2024-06-24 12:25:32'' AND ''2024-06-28 04:17:41'''
+- name: timeInterval
+  type: temporal
+  sql: |
+    SELECT COUNT(DISTINCT flight_id) AS id_count
+    FROM flight_points
+    WHERE t <@ EPOCHRANGE '[2024-03-01 20:38:56, 2024-03-05 12:31:04]';
+  params:
+  - '''2024-03-01 20:38:56'' AND ''2024-03-05 12:31:04'''
+- name: SpatialBBox
+  type: spatial
+  sql: |
+    SELECT COUNT(*) as update_count
+    FROM flight_points
+    WHERE ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((6.670974668368746 51.00131546703629, 7.070974630403139 51.00131546703629, 7.070974630403139 51.23131542754746, 6.670974668368746 51.23131542754746, 6.670974668368746 51.00131546703629))'::gpolygon))
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.670974668368746, 51.00131546703629,
+    7.070974630403139, 51.23131542754746), 4326), 3857)
+- name: kNN
+  type: spatial
+  sql: |
+    SELECT flight_id as id, ST_Point(x,y) as geom, t AS timestamp
+    FROM flight_points
+    WHERE ST_DWithin(ST_Point(x, y), ST_ToGeom('POINT (9.093002274822918 51.464662682600796)'::gpoint), 7148.2137022262805 * 0.622013)
+    ORDER BY ST_Distance(ST_Point(x,y), ST_ToGeom('POINT (9.093002274822918 51.464662682600796)'::gpoint))
+    LIMIT 5;
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(9.093002274822918, 51.464662682600796), 4326),
+    3857)
+  - 5
+  - 7148.2137022262805
+- name: IDsInsideRegion1Andsecond_region
+  type: spatiotemporal
+  sql: |
+    SELECT COUNT(*) AS id_count FROM (
+      SELECT flight_id as id
+      FROM flight_points
+      WHERE t <@ EPOCHRANGE '[2024-11-25 00:23:52, 2024-11-28 16:16:01]'
+        AND (ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((6.877245461190172 51.56593607627275, 7.2772454232245645 51.56593607627275, 7.2772454232245645 51.795936036783914, 6.877245461190172 51.795936036783914, 6.877245461190172 51.56593607627275))'::gpolygon))
+          OR ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((8.108893326555757 50.68526465412706, 8.50889328859015 50.68526465412706, 8.50889328859015 50.915264614638225, 8.108893326555757 50.915264614638225, 8.108893326555757 50.68526465412706))'::gpolygon)))
+      GROUP BY flight_id
+      HAVING BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((6.877245461190172 51.56593607627275, 7.2772454232245645 51.56593607627275, 7.2772454232245645 51.795936036783914, 6.877245461190172 51.795936036783914, 6.877245461190172 51.56593607627275))'::gpolygon)))
+        AND BOOL_OR(ST_Intersects(ST_Point(x, y), ST_ToGeom('POLYGON ((8.108893326555757 50.68526465412706, 8.50889328859015 50.68526465412706, 8.50889328859015 50.915264614638225, 8.108893326555757 50.915264614638225, 8.108893326555757 50.68526465412706))'::gpolygon)))
+    )
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(6.877245461190172, 51.56593607627275,
+    7.2772454232245645, 51.795936036783914), 4326), 3857)
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(8.108893326555757, 50.68526465412706,
+    8.50889328859015, 50.915264614638225), 4326), 3857)
+  - '''2024-11-25 00:23:52'' AND ''2024-11-28 16:16:01'''

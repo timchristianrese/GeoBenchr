@@ -1,0 +1,270 @@
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.id FROM tsdb_flight_points f, counties k WHERE k.name = 'Krs Coesfeld' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN '2024-04-24 18:44:35' AND '2024-05-01 20:26:37';
+  params:
+  - '''2024-04-24 18:44:35'' AND ''2024-05-01 20:26:37'''
+  - Krs Coesfeld
+- name: FlightsAtNightInPeriod
+  type: temporal
+  sql: |
+    SELECT s.id FROM flights_summary s
+    WHERE s.start_time >= TIMESTAMP '2024-11-30 08:55:43' AND s.end_time <= TIMESTAMP '2024-12-13 02:35:16'
+      AND (date_trunc('day', s.start_time) <> date_trunc('day', s.end_time)
+           OR s.start_time - date_trunc('day', s.start_time) < INTERVAL '7 hours'
+           OR s.end_time - date_trunc('day', s.end_time) >= INTERVAL '22 hours');
+  params:
+  - '''2024-11-30 08:55:43'' AND ''2024-12-13 02:35:16'''
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.id) as flight_count FROM counties k JOIN tsdb_flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Herne' GROUP BY k.name;
+  params:
+  - Krs Herne
+- name: FlightsAtNightInPeriod
+  type: temporal
+  sql: |
+    SELECT s.id FROM flights_summary s
+    WHERE s.start_time >= TIMESTAMP '2024-11-30 04:31:06' AND s.end_time <= TIMESTAMP '2024-12-03 19:19:31'
+      AND (date_trunc('day', s.start_time) <> date_trunc('day', s.end_time)
+           OR s.start_time - date_trunc('day', s.start_time) < INTERVAL '7 hours'
+           OR s.end_time - date_trunc('day', s.end_time) >= INTERVAL '22 hours');
+  params:
+  - '''2024-11-30 04:31:06'' AND ''2024-12-03 19:19:31'''
+- name: FlightsAtNightInPeriod
+  type: temporal
+  sql: |
+    SELECT s.id FROM flights_summary s
+    WHERE s.start_time >= TIMESTAMP '2024-10-06 14:36:23' AND s.end_time <= TIMESTAMP '2024-10-20 03:10:45'
+      AND (date_trunc('day', s.start_time) <> date_trunc('day', s.end_time)
+           OR s.start_time - date_trunc('day', s.start_time) < INTERVAL '7 hours'
+           OR s.end_time - date_trunc('day', s.end_time) >= INTERVAL '22 hours');
+  params:
+  - '''2024-10-06 14:36:23'' AND ''2024-10-20 03:10:45'''
+- name: FlightsAtLowAltitudeInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT f.id FROM tsdb_flight_points f
+    WHERE f.altitude BETWEEN 9110 AND 10180 AND f.timestamp BETWEEN '2024-01-29 00:16:32' AND '2024-02-06 09:45:32';
+  params:
+  - '''2024-01-29 00:16:32'' AND ''2024-02-06 09:45:32'''
+  - 9110
+  - 10180
+- name: CityActivityAtInstant
+  type: spatiotemporal
+  sql: |
+    WITH filtered_flights AS (
+       SELECT f.id, f.geom
+       FROM tsdb_flight_points f
+       WHERE f.timestamp BETWEEN '2024-09-03 17:13:48'::timestamp - INTERVAL '10 seconds' AND '2024-09-03 17:13:48'::timestamp + INTERVAL '10 seconds')
+     SELECT COUNT(DISTINCT ff.id) AS flight_count
+     FROM filtered_flights ff
+     JOIN cities c ON ST_DWithin(ff.geom, c.geom, 4414)
+     WHERE c.name = 'Werdohl';
+  params:
+  - Werdohl
+  - '2024-09-03 17:13:48'
+  - 4414
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.id FROM tsdb_flight_points f, counties k WHERE k.name = 'Krs Rheinisch-Bergischer Kreis' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN '2024-10-25 23:25:34' AND '2024-10-28 07:51:30';
+  params:
+  - '''2024-10-25 23:25:34'' AND ''2024-10-28 07:51:30'''
+  - Krs Rheinisch-Bergischer Kreis
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.id, ST_Distance(f.geom, ST_SetSRID(ST_Point(670223.8085903159, 6526608.145482452), 3857)) AS min_distance FROM tsdb_flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(670223.8085903159, 6526608.145482452), 3857), 2688) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(670223.8085903159, 6526608.145482452), 3857)
+  - 2688
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.id FROM tsdb_flight_points f, counties k WHERE k.name = 'Krs Warendorf' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN '2024-08-14 14:47:33' AND '2024-08-23 13:09:13';
+  params:
+  - '''2024-08-14 14:47:33'' AND ''2024-08-23 13:09:13'''
+  - Krs Warendorf
+- name: CityActivityAtInstant
+  type: spatiotemporal
+  sql: |
+    WITH filtered_flights AS (
+       SELECT f.id, f.geom
+       FROM tsdb_flight_points f
+       WHERE f.timestamp BETWEEN '2024-04-25 19:32:42'::timestamp - INTERVAL '10 seconds' AND '2024-04-25 19:32:42'::timestamp + INTERVAL '10 seconds')
+     SELECT COUNT(DISTINCT ff.id) AS flight_count
+     FROM filtered_flights ff
+     JOIN cities c ON ST_DWithin(ff.geom, c.geom, 2807)
+     WHERE c.name = 'Ochtrup';
+  params:
+  - Ochtrup
+  - '2024-04-25 19:32:42'
+  - 2807
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.id, ST_Distance(f.geom, ST_SetSRID(ST_Point(717713.9420302683, 6772872.481129131), 3857)) AS min_distance FROM tsdb_flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(717713.9420302683, 6772872.481129131), 3857), 4739) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(717713.9420302683, 6772872.481129131), 3857)
+  - 4739
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.id, ST_Distance(f.geom, ST_SetSRID(ST_Point(782778.2330075987, 6532286.39319997), 3857)) AS min_distance FROM tsdb_flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(782778.2330075987, 6532286.39319997), 3857), 3699) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(782778.2330075987, 6532286.39319997), 3857)
+  - 3699
+- name: FlightsAtNightInPeriod
+  type: temporal
+  sql: |
+    SELECT s.id FROM flights_summary s
+    WHERE s.start_time >= TIMESTAMP '2024-04-23 14:50:46' AND s.end_time <= TIMESTAMP '2024-05-06 04:01:59'
+      AND (date_trunc('day', s.start_time) <> date_trunc('day', s.end_time)
+           OR s.start_time - date_trunc('day', s.start_time) < INTERVAL '7 hours'
+           OR s.end_time - date_trunc('day', s.end_time) >= INTERVAL '22 hours');
+  params:
+  - '''2024-04-23 14:50:46'' AND ''2024-05-06 04:01:59'''
+- name: FlightsAtLowAltitudeInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT f.id FROM tsdb_flight_points f
+    WHERE f.altitude BETWEEN 9210 AND 10040 AND f.timestamp BETWEEN '2024-12-12 12:26:00' AND '2024-12-26 21:54:43';
+  params:
+  - '''2024-12-12 12:26:00'' AND ''2024-12-26 21:54:43'''
+  - 9210
+  - 10040
+- name: CityActivityAtInstant
+  type: spatiotemporal
+  sql: |
+    WITH filtered_flights AS (
+       SELECT f.id, f.geom
+       FROM tsdb_flight_points f
+       WHERE f.timestamp BETWEEN '2024-05-19 11:52:14'::timestamp - INTERVAL '10 seconds' AND '2024-05-19 11:52:14'::timestamp + INTERVAL '10 seconds')
+     SELECT COUNT(DISTINCT ff.id) AS flight_count
+     FROM filtered_flights ff
+     JOIN cities c ON ST_DWithin(ff.geom, c.geom, 1899)
+     WHERE c.name = 'Altena';
+  params:
+  - Altena
+  - '2024-05-19 11:52:14'
+  - 1899
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.id) as flight_count FROM counties k JOIN tsdb_flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Maerkischer Kreis' GROUP BY k.name;
+  params:
+  - Krs Maerkischer Kreis
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.id FROM tsdb_flight_points f, counties k WHERE k.name = 'Krs Viersen' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN '2024-05-27 04:52:21' AND '2024-06-08 01:49:08';
+  params:
+  - '''2024-05-27 04:52:21'' AND ''2024-06-08 01:49:08'''
+  - Krs Viersen
+- name: FlightsAtLowAltitudeInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT f.id FROM tsdb_flight_points f
+    WHERE f.altitude BETWEEN 8900 AND 10070 AND f.timestamp BETWEEN '2024-07-28 02:18:07' AND '2024-08-03 00:20:03';
+  params:
+  - '''2024-07-28 02:18:07'' AND ''2024-08-03 00:20:03'''
+  - 8900
+  - 10070
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.id, ST_Distance(f.geom, ST_SetSRID(ST_Point(904893.9334894583, 6840492.003414064), 3857)) AS min_distance FROM tsdb_flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(904893.9334894583, 6840492.003414064), 3857), 2367) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(904893.9334894583, 6840492.003414064), 3857)
+  - 2367
+- name: flightClosestToPoint
+  type: spatial
+  sql: |
+    SELECT f.id, ST_Distance(f.geom, ST_SetSRID(ST_Point(729499.3430050573, 6526650.079337496), 3857)) AS min_distance FROM tsdb_flight_points f WHERE ST_DWithin(f.geom, ST_SetSRID(ST_Point(729499.3430050573, 6526650.079337496), 3857), 3772) ORDER BY min_distance ASC LIMIT 1;
+  params:
+  - ST_SetSRID(ST_Point(729499.3430050573, 6526650.079337496), 3857)
+  - 3772
+- name: flightsInCountyInPeriod
+  type: spatiotemporal
+  sql: |
+    SELECT DISTINCT f.id FROM tsdb_flight_points f, counties k WHERE k.name = 'Krs Duisburg' AND ST_Intersects(f.geom,k.geom) AND f.timestamp BETWEEN '2024-06-24 12:40:16' AND '2024-07-04 21:01:50';
+  params:
+  - '''2024-06-24 12:40:16'' AND ''2024-07-04 21:01:50'''
+  - Krs Duisburg
+- name: CityActivityAtInstant
+  type: spatiotemporal
+  sql: |
+    WITH filtered_flights AS (
+       SELECT f.id, f.geom
+       FROM tsdb_flight_points f
+       WHERE f.timestamp BETWEEN '2024-04-07 14:53:02'::timestamp - INTERVAL '10 seconds' AND '2024-04-07 14:53:02'::timestamp + INTERVAL '10 seconds')
+     SELECT COUNT(DISTINCT ff.id) AS flight_count
+     FROM filtered_flights ff
+     JOIN cities c ON ST_DWithin(ff.geom, c.geom, 1627)
+     WHERE c.name = 'Lohmar';
+  params:
+  - Lohmar
+  - '2024-04-07 14:53:02'
+  - 1627
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.id) as flight_count FROM counties k JOIN tsdb_flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Bielefeld' GROUP BY k.name;
+  params:
+  - Krs Bielefeld
+- name: FlightsAtLowAltitudeInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT f.id FROM tsdb_flight_points f
+    WHERE f.altitude BETWEEN 9270 AND 10250 AND f.timestamp BETWEEN '2024-09-15 09:49:28' AND '2024-09-29 02:11:38';
+  params:
+  - '''2024-09-15 09:49:28'' AND ''2024-09-29 02:11:38'''
+  - 9270
+  - 10250
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.id) as flight_count FROM counties k JOIN tsdb_flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Warendorf' GROUP BY k.name;
+  params:
+  - Krs Warendorf
+- name: countFlightsInCounties
+  type: spatial
+  sql: |
+    SELECT k.name, COUNT(DISTINCT f.id) as flight_count FROM counties k JOIN tsdb_flight_points f ON ST_Intersects(f.geom, k.geom) WHERE k.name = 'Krs Maerkischer Kreis' GROUP BY k.name;
+  params:
+  - Krs Maerkischer Kreis
+- name: CityActivityAtInstant
+  type: spatiotemporal
+  sql: |
+    WITH filtered_flights AS (
+       SELECT f.id, f.geom
+       FROM tsdb_flight_points f
+       WHERE f.timestamp BETWEEN '2024-08-10 23:39:01'::timestamp - INTERVAL '10 seconds' AND '2024-08-10 23:39:01'::timestamp + INTERVAL '10 seconds')
+     SELECT COUNT(DISTINCT ff.id) AS flight_count
+     FROM filtered_flights ff
+     JOIN cities c ON ST_DWithin(ff.geom, c.geom, 2594)
+     WHERE c.name = 'Werdohl';
+  params:
+  - Werdohl
+  - '2024-08-10 23:39:01'
+  - 2594
+- name: FlightsAtNightInPeriod
+  type: temporal
+  sql: |
+    SELECT s.id FROM flights_summary s
+    WHERE s.start_time >= TIMESTAMP '2024-02-01 11:41:29' AND s.end_time <= TIMESTAMP '2024-02-08 06:21:47'
+      AND (date_trunc('day', s.start_time) <> date_trunc('day', s.end_time)
+           OR s.start_time - date_trunc('day', s.start_time) < INTERVAL '7 hours'
+           OR s.end_time - date_trunc('day', s.end_time) >= INTERVAL '22 hours');
+  params:
+  - '''2024-02-01 11:41:29'' AND ''2024-02-08 06:21:47'''
+- name: FlightsAtLowAltitudeInPeriod
+  type: temporal
+  sql: |
+    SELECT DISTINCT f.id FROM tsdb_flight_points f
+    WHERE f.altitude BETWEEN 9010 AND 9630 AND f.timestamp BETWEEN '2024-05-14 03:13:52' AND '2024-05-16 08:27:20';
+  params:
+  - '''2024-05-14 03:13:52'' AND ''2024-05-16 08:27:20'''
+  - 9010
+  - 9630

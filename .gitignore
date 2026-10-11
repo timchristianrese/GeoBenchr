@@ -28,7 +28,7 @@ benchmark/client/benchmark_client/docs/reply-ante-*.md
 
 # raw client stdout of benchmark runs (archives of ~60 MB each, mostly printed result rows; the
 # per-query logs under raw/logs/ are what build_results.py reads)
-benchmark/results/results/raw/stdout/
+benchmark/results/**/raw/stdout/
 
 # verified sample-query notes per SUT - embeds cluster-internal hostnames/ports, same reason as
 # spacetime-cluster-access.md above; not for publication

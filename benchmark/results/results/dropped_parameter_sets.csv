@@ -1,0 +1,6 @@
+scenario,query,repetition,reason
+ais,HarbourActivityInPeriod,4,broken parameters (unescaped quote)
+ais,countActiveCrossingsNearIsland,8,every system timed out
+ais,countActiveCrossingsNearIsland,15,every system timed out
+ais,countActiveCrossingsNearIsland,20,every system timed out
+ais,countActiveCrossingsNearIsland,46,every system timed out

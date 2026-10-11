@@ -56,8 +56,9 @@ COLORS = {"PostGIS": "#336791", "MobilityDB": "#5b9bd5", "ClickHouse": "#f2b705"
 EXCLUDED = {("geolife", "MobilityDB")}
 
 # Repetitions 1..WARMUP_REPS of every query are warm-up: kept in executions.csv (warmup=True), left out of
-# every statistic. 0 for the 5-repetition run of 2026-10-07/08, 2 for the 52-repetition run of 2026-10-09.
-WARMUP_REPS = int(os.environ.get("WARMUP_REPS", "0"))
+# every statistic. 2 for the 52-repetition run of 2026-10-09/11 (results/); 0 for the superseded
+# 5-repetition run of 2026-10-07/08 (superseded/run_5rep_2026-10-08/).
+WARMUP_REPS = int(os.environ.get("WARMUP_REPS", "2"))
 
 LINE = re.compile(r"^\[[^\]]*\] \[(\w+)\] \[(\w+)\] (SUCCESS|ERROR|TIMEOUT): '([^']+)':\s?(.*)$")
 TAG = re.compile(r"\s\[(?:rep=(\d+) sql=([0-9a-f]{8}) )?at=([^\]]+)\]$")
@@ -296,8 +297,10 @@ def h3_rows():
 def write_csv(name, rows):
     if not rows:
         return
+    # rows may differ in their columns (e.g. hardware phases without a DuckDB process): union, in order
+    fields = list(dict.fromkeys(k for r in rows for k in r))
     with open(os.path.join(RES, name), "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
         w.writerows(rows)
 
@@ -514,9 +517,13 @@ def hardware_plot(data):
     import matplotlib.pyplot as plt
     from datetime import datetime, timezone
     hosts = sorted({r["host"] for r in data["hw"]})
+    # only the benchmark's own phases (+10 min): the samplers may have run longer, e.g. through an
+    # earlier attempt that was set aside
+    lo_all = min(lo for lo, hi in data["phases"].values()) - 600 if data["phases"] else float("-inf")
+    hi_all = max(hi for lo, hi in data["phases"].values()) + 600 if data["phases"] else float("inf")
     fig, axes = plt.subplots(2, 1, figsize=(16, 8), sharex=True)
     for host in hosts:
-        xs = sorted((r for r in data["hw"] if r["host"] == host), key=lambda r: r["t"])
+        xs = sorted((r for r in data["hw"] if r["host"] == host and lo_all <= r["t"] <= hi_all), key=lambda r: r["t"])
         t = [datetime.fromtimestamp(r["t"], timezone.utc) for r in xs]
         axes[0].plot(t, [float(r["cpu_user_pct"]) + float(r["cpu_system_pct"]) for r in xs], lw=0.6, label=host)
         axes[1].plot(t, [int(r["mem_used_mb"]) / 1024 for r in xs], lw=0.8, label=host)

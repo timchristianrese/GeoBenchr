@@ -31,11 +31,18 @@ RES = os.environ.get("RESULTS_DIR", "results")
 SYSTEMS = ["PostGIS", "MobilityDB", "ClickHouse", "DuckDB", "SpaceTime", "Sedona"]
 COLORS = {"PostGIS": "#336791", "MobilityDB": "#5b9bd5", "ClickHouse": "#f2b705", "DuckDB": "#7f7f7f",
           "SpaceTime": "#c0392b", "Sedona": "#27ae60"}
-ex = pd.read_csv(f"{RES}/executions.csv")
+ex_all = pd.read_csv(f"{RES}/executions.csv")
+# measured executions: without the warm-up repetitions and the parameter sets left out for every system
+dropped = pd.read_csv(f"{RES}/dropped_parameter_sets.csv") if os.path.exists(f"{RES}/dropped_parameter_sets.csv") else pd.DataFrame(columns=["scenario", "query", "repetition"])
+drop_keys = set(zip(dropped.scenario, dropped["query"], dropped.repetition))
+ex = ex_all[~ex_all.warmup.fillna(False).astype(bool)]
+ex = ex[[k not in drop_keys for k in zip(ex.scenario, ex["query"], ex.repetition)]]
 summary = pd.read_csv(f"{RES}/summary.csv")
 winners = pd.read_csv(f"{RES}/winners.csv")
 scores = pd.read_csv(f"{RES}/system_scores.csv")
-print(len(ex), "executions;", ex.status.value_counts().to_dict())"""),
+print(len(ex_all), "executions,", len(ex), "measured;", ex.status.value_counts().to_dict())"""),
+("md", "## Left out for every system\n\nParameter sets with broken parameters, or on which every system hit the timeout. The first repetitions of every query are warm-up and are left out as well."),
+("code", """dropped"""),
 ("md", "## Overall: wins and relative speed per system"),
 ("code", """scores.set_index("system")"""),
 ("code", """fig, axes = plt.subplots(1, 2, figsize=(12, 4))
@@ -81,6 +88,17 @@ plt.tight_layout()"""),
 
 first = winners.iloc[0]
 plot_query(first.scenario, first["query"])"""),
+("md", "## Warm-up vs measured repetitions\n\nMedian runtime of the warm-up repetitions divided by the median of the measured ones, per system (above 1: the first queries were slower)."),
+("code", """ok = ex_all[ex_all.status == "success"]
+w = ok.groupby(["system", "warmup"]).duration_ms.median().unstack()
+(w[True] / w[False]).round(2).rename("warm-up / measured median") if True in w and False in w else "no warm-up repetitions\""""),
+("md", "## Hardware per system\n\nMean CPU busy (user+system, %) and memory used (GB) per node while each system ran, from `hardware_by_phase.csv` (5 s samples)."),
+("code", """hw = pd.read_csv(f"{RES}/hardware_by_phase.csv") if os.path.exists(f"{RES}/hardware_by_phase.csv") else pd.DataFrame()
+if len(hw):
+    nodes = ["nst-1", "nst-2", "nst-3", "nst-4", "nst-5"]
+    cols = {f"{n} cpu %": f"{n}_cpu_busy_mean_pct" for n in nodes} | {f"{n} mem GB": f"{n}_mem_used_mean_gb" for n in nodes}
+    t = hw[["scenario", "system", "minutes"] + list(cols.values())].rename(columns={v: k for k, v in cols.items()})
+    display(t.round(1)) if "display" in globals() else print(t.round(1))"""),
 ("md", "## Failures (errors and timeouts)"),
 ("code", """fails = ex[ex.status != "success"]
 fails.groupby(["system", "status"]).size().unstack(fill_value=0) if len(fails) else "no failures\""""),

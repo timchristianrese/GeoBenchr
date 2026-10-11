@@ -4,12 +4,12 @@
 
 | System | Queries won | Queries with a query | Completed (all reps) | Ranked | Geo-mean slowdown vs fastest | Median slowdown |
 |---|---:|---:|---:|---:|---:|---:|
-| PostGIS | 3 | 48 | 48 | 48 | 11.63× | 11.57× |
-| MobilityDB | 1 | 36 | 36 | 36 | 27.59× | 28.85× |
-| ClickHouse | 24 | 47 | 47 | 47 | 1.38× | 1.0× |
-| DuckDB | 2 | 48 | 48 | 48 | 24.47× | 23.71× |
-| SpaceTime | 18 | 48 | 48 | 45 | 1.63× | 1.42× |
-| Sedona | 0 | 48 | 48 | 48 | 131.32× | 185.1× |
+| PostGIS | 5 | 48 | 47 | 47 | 14.28× | 15.88× |
+| MobilityDB | 0 | 36 | 35 | 35 | 28.95× | 28.01× |
+| ClickHouse | 17 | 47 | 47 | 47 | 1.55× | 1.29× |
+| DuckDB | 9 | 48 | 48 | 48 | 11.3× | 7.12× |
+| SpaceTime | 17 | 48 | 47 | 44 | 1.91× | 1.56× |
+| Sedona | 0 | 48 | 48 | 48 | 159.34× | 213.81× |
 
 ## ais: mean runtime per query
 
@@ -17,18 +17,18 @@ Mean over the repetitions (each with different parameters). **Bold** = fastest r
 
 | Query | Type | PostGIS | MobilityDB | ClickHouse | DuckDB | SpaceTime | Sedona | Fastest | Margin |
 |---|---|---:|---:|---:|---:|---:|---:|---|---:|
-| CrossingsActiveAtGivenHourOfDay | temporal | 29 ms | 42 ms | 24 ms | **19 ms** | 27 ms | 278 ms | DuckDB | 1.26× |
-| HarbourActivityInPeriod | spatiotemporal | 195 ms | 23.07 s | 52 ms | 1.70 s | **36 ms** | 21.78 s | SpaceTime | 1.43× |
-| IDsInsideRegion1Andsecond_region | spatiotemporal | 1.47 s | 20.47 s | 147 ms | 1.18 s | **123 ms** | 22.11 s | SpaceTime | 1.19× |
-| SpatialBBox | spatial | 42.30 s | 43.31 s | **218 ms** | 23.27 s | 354 ms | 79.07 s | ClickHouse | 1.63× |
-| busiestDayInWeekPeriod | temporal | 71 ms | 77 ms | 28 ms | **19 ms** | 40 ms | 569 ms | DuckDB | 1.45× |
-| countActiveCrossingsNearIsland | spatial | 17.52 s | 66.01 s | 1.61 s | 24.90 s | **330 ms** | 73.23 s | SpaceTime | 4.87× |
-| crossingsAroundHarbour | spatial | 127 ms | 30.69 s | **56 ms** | 24.79 s | 100 ms | 71.93 s | ClickHouse | 1.79× |
-| islandOrCoastLineCrossingsInPeriod | spatiotemporal | 245 ms | 36.41 s | 119 ms | 1.61 s | **49 ms** | 23.20 s | SpaceTime | 2.42× |
-| kNN | spatial | 87 ms | 99 ms | **82 ms ≈** | 20.60 s ≈ | 135 ms ≈ | 77.62 s ≈ | ClickHouse | 1.06× |
-| spatioTemporalRange | spatiotemporal | 4.49 s | 17.20 s | 88 ms | 1.18 s | **72 ms** | 22.80 s | SpaceTime | 1.22× |
-| timeAggregation | temporal | 1.25 s | 28.45 s | **181 ms** | 354 ms | 627 ms | 9.80 s | ClickHouse | 1.95× |
-| timeInterval | temporal | 33 ms | 48 ms | **15 ms** | 15 ms | 23 ms | 274 ms | ClickHouse | 1.03× |
+| CrossingsActiveAtGivenHourOfDay | temporal | 30 ms | 52 ms | 18 ms | **14 ms** | 24 ms | 200 ms | DuckDB | 1.35× |
+| HarbourActivityInPeriod | spatiotemporal | 181 ms | 28.87 s | 36 ms | 1.24 s | **35 ms** | 21.61 s | SpaceTime | 1.05× |
+| IDsInsideRegion1Andsecond_region | spatiotemporal | 3.64 s | 21.36 s | 130 ms | 1.26 s | **56 ms** | 21.38 s | SpaceTime | 2.31× |
+| SpatialBBox | spatial | 56.28 s (49/50) | 56.99 s (49/50) | **133 ms** | 23.75 s | 310 ms | 79.56 s | ClickHouse | 2.34× |
+| busiestDayInWeekPeriod | temporal | 62 ms | 84 ms | 21 ms | **14 ms** | 34 ms | 286 ms | DuckDB | 1.51× |
+| countActiveCrossingsNearIsland | spatial | 14.40 s | 54.27 s | 9.15 s | 25.29 s | **358 ms** | 78.73 s | SpaceTime | 25.53× |
+| crossingsAroundHarbour | spatial | 216 ms | 27.59 s | **50 ms** | 23.98 s | 120 ms | 72.60 s | ClickHouse | 2.42× |
+| islandOrCoastLineCrossingsInPeriod | spatiotemporal | 6.93 s | 30.50 s | **2.67 s** | 3.67 s | 3.63 s | 32.54 s | ClickHouse | 1.36× |
+| kNN | spatial | 331 ms | 430 ms | **97 ms ≈** | 20.41 s ≈ | 110 ms ≈ | 78.51 s ≈ | ClickHouse | 1.13× |
+| spatioTemporalRange | spatiotemporal | 2.14 s | 21.23 s | 74 ms | 1.17 s | **32 ms** | 26.93 s | SpaceTime | 2.32× |
+| timeAggregation | temporal | 4.14 s | 22.25 s | **121 ms** | 442 ms | 474 ms | 10.51 s | ClickHouse | 3.66× |
+| timeInterval | temporal | 40 ms | 53 ms | 14 ms | **12 ms** | 22 ms | 216 ms | DuckDB | 1.19× |
 
 ## aviation: mean runtime per query
 
@@ -36,18 +36,18 @@ Mean over the repetitions (each with different parameters). **Bold** = fastest r
 
 | Query | Type | PostGIS | MobilityDB | ClickHouse | DuckDB | SpaceTime | Sedona | Fastest | Margin |
 |---|---|---:|---:|---:|---:|---:|---:|---|---:|
-| CityActivityAtInstant | spatiotemporal | 58 ms | 595 ms | 41 ms | 1.88 s | **34 ms** | 27.30 s | SpaceTime | 1.19× |
-| FlightsAtLowAltitudeInPeriod | temporal | 802 ms | 10.03 s | **485 ms** | 4.41 s | 547 ms ≈ | 11.56 s | ClickHouse | 1.13× |
-| FlightsAtNightInPeriod | temporal | 173 ms | 128 ms | 43 ms | 688 ms | **26 ms** | 266 ms | SpaceTime | 1.63× |
-| IDsInsideRegion1Andsecond_region | spatiotemporal | 722 ms | 2.23 s | 86 ms | 9.71 s | **40 ms** | 27.31 s | SpaceTime | 2.16× |
-| SpatialBBox | spatial | 4.21 s | 6.54 s | **72 ms** | 13.79 s | 261 ms | 37.37 s | ClickHouse | 3.6× |
-| countFlightsInCounties | spatial | 11.80 s | 30.16 s | **677 ms ≈** | 27.52 s | 814 ms ≈ | 34.71 s | ClickHouse | 1.2× |
-| flightClosestToPoint | spatial | 394 ms | 12.74 s | **35 ms** | 12.58 s | 178 ms ≈ | 30.84 s | ClickHouse | 5.07× |
-| flightsInCountyInPeriod | spatiotemporal | 1.68 s | 2.42 s | 149 ms | 11.75 s | **69 ms** | 29.12 s | SpaceTime | 2.15× |
-| kNN | spatial | 50 ms | **46 ms** | 47 ms ≈ | 11.89 s ≈ | 85 ms ≈ | 40.34 s ≈ | MobilityDB | 1.02× |
-| spatioTemporalRange | spatiotemporal | 634 ms | 1.70 s | 47 ms | 9.74 s | **34 ms** | 28.71 s | SpaceTime | 1.39× |
-| timeAggregation | temporal | 388 ms | 2.18 s | 277 ms | 2.04 s | **265 ms ≈** | 9.06 s | SpaceTime | 1.04× |
-| timeInterval | temporal | 387 ms | 2.07 s | **117 ms** | 2.04 s | 227 ms ≈ | 8.96 s | ClickHouse | 1.94× |
+| CityActivityAtInstant | spatiotemporal | 54 ms | 446 ms | **31 ms** | 31 ms | 31 ms | 26.30 s | ClickHouse | 1.01× |
+| FlightsAtLowAltitudeInPeriod | temporal | 896 ms | 6.25 s | 222 ms | 807 ms | **170 ms ≈** | 10.94 s | SpaceTime | 1.3× |
+| FlightsAtNightInPeriod | temporal | 95 ms | 104 ms | 26 ms | 540 ms | **19 ms** | 133 ms | SpaceTime | 1.37× |
+| IDsInsideRegion1Andsecond_region | spatiotemporal | 713 ms | 2.06 s | 50 ms | 202 ms | **30 ms** | 26.50 s | SpaceTime | 1.63× |
+| SpatialBBox | spatial | 4.06 s | 5.04 s | **43 ms** | 11.05 s | 166 ms | 36.94 s | ClickHouse | 3.87× |
+| countFlightsInCounties | spatial | 8.03 s | 22.41 s | **366 ms ≈** | 19.42 s | 642 ms ≈ | 33.73 s | ClickHouse | 1.75× |
+| flightClosestToPoint | spatial | 257 ms | 8.17 s | **40 ms** | 11.44 s | 106 ms ≈ | 30.23 s | ClickHouse | 2.63× |
+| flightsInCountyInPeriod | spatiotemporal | 1.06 s | 1.02 s | 93 ms | 614 ms | **43 ms** | 26.93 s | SpaceTime | 2.16× |
+| kNN | spatial | **43 ms** | 48 ms | 49 ms ≈ | 10.94 s ≈ | 67 ms ≈ | 39.80 s ≈ | PostGIS | 1.13× |
+| spatioTemporalRange | spatiotemporal | 487 ms | 1.56 s | 30 ms | 153 ms | **24 ms** | 27.95 s | SpaceTime | 1.27× |
+| timeAggregation | temporal | 351 ms | 1.93 s | 111 ms | **85 ms** | 197 ms ≈ | 8.45 s | DuckDB | 1.31× |
+| timeInterval | temporal | 371 ms | 1.59 s | 87 ms | **64 ms** | 119 ms ≈ | 8.36 s | DuckDB | 1.36× |
 
 ## cycling: mean runtime per query
 
@@ -55,18 +55,18 @@ Mean over the repetitions (each with different parameters). **Bold** = fastest r
 
 | Query | Type | PostGIS | MobilityDB | ClickHouse | DuckDB | SpaceTime | Sedona | Fastest | Margin |
 |---|---|---:|---:|---:|---:|---:|---:|---|---:|
-| AverageUpdatesPerRideInDistrictInPeriod | spatiotemporal | 2.32 s | 2.02 s | 191 ms ≈ | 1.83 s | **89 ms** | 13.10 s | SpaceTime | 2.15× |
-| CountRidesFullyInDistrictRadius | spatial | 25.78 s | 171.58 s | n/a | 26.15 s | **14.20 s ≈** | 31.33 s | SpaceTime | 1.82× |
-| IDsInsideRegion1Andsecond_region | spatiotemporal | 935 ms | 1.45 s | 30 ms | 1.09 s | **20 ms** | 11.60 s | SpaceTime | 1.53× |
-| RidesAcrossMultipleHours | temporal | 680 ms | 8.64 s | **240 ms** | 1.16 s | 411 ms | 5.12 s | ClickHouse | 1.72× |
-| RidesDuringRushHourInPeriod | temporal | 1.21 s | 2.19 s | **125 ms** | 354 ms | 244 ms | 4.69 s | ClickHouse | 1.95× |
-| RidesPastOrToUniversityInPeriod | spatiotemporal | 858 ms | 3.43 s | 1.25 s ≈ | 2.70 s | **64 ms** | 12.36 s | SpaceTime | 13.32× |
-| SpatialBBox | spatial | **18 ms** | 24 ms | 24 ms | 3.64 s | 23 ms | 207 ms | PostGIS | 1.29× |
-| countRideInDistrict | spatial | 23.85 s | 32.12 s | 5.14 s ≈ | 33.03 s | **1.88 s ≈** | 17.09 s | SpaceTime | 2.74× |
-| kNN | spatial | **12 ms** | 16 ms | 19 ms | 3.73 s | 20 ms | 192 ms | PostGIS | 1.34× |
-| spatioTemporalRange | spatiotemporal | **10 ms** | 656 ms | 23 ms | 1.05 s | 17 ms | 363 ms | PostGIS | 1.67× |
-| timeAggregation | temporal | 503 ms | 938 ms | **162 ms ≈** | 191 ms | 218 ms | 4.65 s | ClickHouse | 1.18× |
-| timeInterval | temporal | 805 ms | 1.76 s | **148 ms** | 176 ms | 281 ms | 4.60 s | ClickHouse | 1.19× |
+| AverageUpdatesPerRideInDistrictInPeriod | spatiotemporal | 1.15 s | 1.53 s | 135 ms ≈ | 534 ms | **95 ms** | 11.57 s | SpaceTime | 1.43× |
+| CountRidesFullyInDistrictRadius | spatial | **23.78 s** | 175.43 s | n/a | 32.73 s | 22.06 s (47/50) | 32.31 s | PostGIS | 1.36× |
+| IDsInsideRegion1Andsecond_region | spatiotemporal | 786 ms | 836 ms | 26 ms | 86 ms | **22 ms** | 11.50 s | SpaceTime | 1.2× |
+| RidesAcrossMultipleHours | temporal | 1.03 s | 12.16 s | **209 ms** | 509 ms | 495 ms | 4.73 s | ClickHouse | 2.37× |
+| RidesDuringRushHourInPeriod | temporal | 1.04 s | 1.54 s | 151 ms | **34 ms** | 190 ms | 4.51 s | DuckDB | 4.46× |
+| RidesPastOrToUniversityInPeriod | spatiotemporal | 387 ms | 2.20 s | 522 ms ≈ | 211 ms | **56 ms** | 11.56 s | SpaceTime | 3.8× |
+| SpatialBBox | spatial | **13 ms** | 13 ms | 16 ms | 3.56 s | 14 ms | 159 ms | PostGIS | 1.01× |
+| countRideInDistrict | spatial | 11.92 s | 24.51 s | 2.86 s ≈ | 28.95 s | **1.43 s ≈** | 16.31 s | SpaceTime | 2.0× |
+| kNN | spatial | **10 ms** | 12 ms | 17 ms | 3.55 s | 16 ms | 138 ms | PostGIS | 1.14× |
+| spatioTemporalRange | spatiotemporal | **7 ms** | 481 ms | 17 ms | 71 ms | 15 ms | 179 ms | PostGIS | 2.03× |
+| timeAggregation | temporal | 654 ms | 1.15 s | 164 ms ≈ | **41 ms** | 336 ms | 4.44 s | DuckDB | 3.99× |
+| timeInterval | temporal | 600 ms | 592 ms | 136 ms | **33 ms** | 230 ms | 4.51 s | DuckDB | 4.07× |
 
 ## geolife: mean runtime per query
 
@@ -74,15 +74,15 @@ Mean over the repetitions (each with different parameters). **Bold** = fastest r
 
 | Query | Type | PostGIS | MobilityDB | ClickHouse | DuckDB | SpaceTime | Sedona | Fastest | Margin |
 |---|---|---:|---:|---:|---:|---:|---:|---|---:|
-| AverageDailyActivityPerUserInPeriod | temporal | 13.08 s | n/a | **1.07 s** | 3.51 s | 4.30 s | 32.63 s | ClickHouse | 3.28× |
-| ClosestRestaurantToPoint | spatial | 104.15 s | n/a | **78 ms ≈** | 5.59 s ≈ | 211 ms ≈ | 54.27 s ≈ | ClickHouse | 2.69× |
-| CountPOIsByTypeInRegion | spatial | 121.22 s | n/a | **213 ms** | 19.49 s | 1.15 s | 51.95 s | ClickHouse | 5.43× |
-| FirstAndLastActivityInPeriod | temporal | 8.40 s | n/a | **813 ms** | 2.55 s | 3.53 s | 32.44 s | ClickHouse | 3.14× |
-| IDsInsideRegion1Andsecond_region | spatiotemporal | 5.99 s | n/a | 300 ms | 1.71 s | **94 ms ≈** | 38.04 s | SpaceTime | 3.18× |
-| SlidingWindowActivityInRegionPerMinuteWithNonZeroID | spatiotemporal | 25.84 s | n/a | **158 ms** | 2.89 s | 150 ms ≠ | 78.32 s | ClickHouse | 18.26× |
-| SpatialBBox | spatial | 33.15 s | n/a | **33 ms** | 11.67 s | 184 ms ≠ | 49.61 s ≈ | ClickHouse | 358.12× |
-| UniqueUsersPerHourInRegionInPeriod | spatiotemporal | 39.83 s | n/a | **331 ms** | 4.46 s | 1.82 s ≈ | 63.18 s | ClickHouse | 5.49× |
-| kNN | spatial | 474 ms | n/a | **26 ms ≈** | 10.64 s ≈ | 158 ms ≈ | 51.86 s ≈ | ClickHouse | 6.03× |
-| spatioTemporalRange | spatiotemporal | 943 ms | n/a | 95 ms | 918 ms | **43 ms ≈** | 38.81 s | SpaceTime | 2.18× |
-| timeAggregation | temporal | 7.65 s | n/a | **403 ms** | 805 ms | 853 ms ≠ | 32.63 s | ClickHouse | 2.0× |
-| timeInterval | temporal | 6.83 s | n/a | **300 ms** | 597 ms | 594 ms | 31.78 s | ClickHouse | 1.98× |
+| AverageDailyActivityPerUserInPeriod | temporal | 10.86 s | n/a | **282 ms** | 2.15 s | 2.14 s | 32.38 s | ClickHouse | 7.56× |
+| ClosestRestaurantToPoint | spatial | 92.60 s | n/a | 356 ms ≈ | 7.55 s ≈ | **115 ms ≈** | 54.47 s ≈ | SpaceTime | 3.1× |
+| CountPOIsByTypeInRegion | spatial | 115.38 s | n/a | **135 ms** | 20.70 s | 2.08 s | 51.60 s | ClickHouse | 15.36× |
+| FirstAndLastActivityInPeriod | temporal | 8.29 s | n/a | **227 ms** | 1.77 s | 2.02 s | 31.94 s | ClickHouse | 7.8× |
+| IDsInsideRegion1Andsecond_region | spatiotemporal | 6.56 s | n/a | 122 ms | 228 ms | **64 ms ≈** | 37.72 s | SpaceTime | 1.93× |
+| SlidingWindowActivityInRegionPerMinuteWithNonZeroID | spatiotemporal | 8.20 s | n/a | **128 ms** | 679 ms | 145 ms ≠ | 76.96 s | ClickHouse | 5.32× |
+| SpatialBBox | spatial | 45.25 s | n/a | **80 ms** | 10.87 s | 253 ms ≠ | 49.38 s ≈ | ClickHouse | 135.57× |
+| UniqueUsersPerHourInRegionInPeriod | spatiotemporal | 36.98 s | n/a | **229 ms** | 1.77 s | 1.40 s ≈ | 62.52 s | ClickHouse | 6.08× |
+| kNN | spatial | 709 ms | n/a | 111 ms ≈ | 10.59 s ≈ | **102 ms ≈** | 51.83 s ≈ | SpaceTime | 1.09× |
+| spatioTemporalRange | spatiotemporal | 1.13 s | n/a | 56 ms | 137 ms | **40 ms ≈** | 39.31 s | SpaceTime | 1.39× |
+| timeAggregation | temporal | 6.81 s | n/a | **186 ms** | 193 ms | 573 ms ≠ | 32.00 s | ClickHouse | 1.04× |
+| timeInterval | temporal | 6.29 s | n/a | 143 ms | **107 ms** | 452 ms | 31.71 s | DuckDB | 1.33× |
