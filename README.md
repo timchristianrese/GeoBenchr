@@ -84,7 +84,7 @@ each scenario's queries, in every system's dialect, are defined in `benchmark/co
   no system finishes within the limit is left out for every system (and reported).
 - **Hardware:** CPU, memory, disk and network of all nodes are sampled every 5 s.
 
-Details, results and plots are in [`benchmark/results/`](benchmark/results/README.md).
+Details, preliminary results and plots are in [`benchmark/results/`](benchmark/results/README.md).
 
 ## Repository
 

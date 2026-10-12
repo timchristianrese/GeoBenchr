@@ -1,5 +1,11 @@
 # GeoBenchr results — 52-repetition run (2026-10-09 to 2026-10-11)
 
+> **Preliminary results — not final.** These numbers come from a run whose setup is still being
+> revised for fairness across the systems: Sedona is being measured again on all five nodes with all
+> four point tables as GeoParquet, DuckDB's AIS scenario again after a change to its table order,
+> and further adjustments (equal resource settings and tuning for every system) are under
+> consideration. Rankings and timings may change; please do not cite them as final.
+
 Six systems answered the same 48 read queries over the same data on a five-node cluster, each system
 alone on the cluster, each query 52 times with different parameters. This page describes how the
 run was done and what came out of it. All numbers come from the files in [`results/`](results/),

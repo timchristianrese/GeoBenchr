@@ -7,9 +7,14 @@
 # nodes past YARN's 90 % disk limit, which marks them unhealthy and kills the executors.
 # Runs in the benchmark client's own Sedona session (GeoParquetBuild.java), where the table views exist.
 #   build_geoparquet.sh <table> "<other columns>"   writes hdfs:///geobenchr/<table>.geoparquet (original stays)
+# Environment (2026-10-11): EXECUTORS (default 36), EXCLUDE_NODES (YARN nodes without executors, default
+# nst-1; empty = all), REPLICATION (HDFS replication of the new files, default 2).
 set -euo pipefail
 T=$1
 COLS=$2
+EXECUTORS=${EXECUTORS:-36}
+EXCLUDE_NODES=${EXCLUDE_NODES-nst-1}
+REPLICATION=${REPLICATION:-2}
 D=$HOME/sedona_geoparquet
 B=$HOME/bench_sedona
 LOG=$D/build.log
@@ -17,7 +22,7 @@ echo "$(date -Is) [$T] build start" >> $LOG
 /opt/hadoop/bin/hdfs dfs -rm -r -f -skipTrash /geobenchr/$T.geoparquet >/dev/null 2>&1 || true
 cd $D
 env SUT_HOST=nst-1 SPARK_MASTER=yarn SPARK_HOME=/opt/spark HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop \
-    SPARK_CONF="spark.sql.session.timeZone=UTC;spark.dynamicAllocation.enabled=false;spark.executor.instances=36;spark.executor.cores=1;spark.executor.memory=2g;spark.yarn.exclude.nodes=nst-1;spark.sql.shuffle.partitions=400;spark.hadoop.dfs.replication=2" \
+    SPARK_CONF="spark.sql.session.timeZone=UTC;spark.dynamicAllocation.enabled=false;spark.executor.instances=$EXECUTORS;spark.executor.cores=1;spark.executor.memory=2g;${EXCLUDE_NODES:+spark.yarn.exclude.nodes=$EXCLUDE_NODES;}spark.sql.shuffle.partitions=400;spark.hadoop.dfs.replication=$REPLICATION" \
   /opt/java/latest/bin/java -Xmx6g \
     --add-exports=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED \
     --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED \

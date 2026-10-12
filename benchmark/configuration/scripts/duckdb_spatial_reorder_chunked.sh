@@ -7,10 +7,16 @@
 # for one global sort, which would have filled the disk Postgres and ClickHouse share). Row groups are
 # still spatially tight within each month, so ST_Intersects_Extent can skip the ones outside an area.
 #
-#   duckdb_spatial_reorder_chunked.sh <table> <check.sql>
+# With a bucket (2026-10-11; hour or day -- the months stay the chunks), each month is sorted by
+# (bucket, Hilbert) instead, so the table ends up ordered by (bucket, Hilbert): the rule for all DuckDB
+# point tables is the calendar unit whose buckets hold closest to 10 million rows.
+#
+#   duckdb_spatial_reorder_chunked.sh <table> <check.sql> [hour|day]
 set -euo pipefail
 T=$1
 CHECK=$(cat "$2")
+BUCKET=${3:-}
+TIMEKEY="${BUCKET:+date_trunc('$BUCKET', timestamp), }"
 DUCKDB=/home/tim/.duckdb/cli/latest/duckdb
 LOG=$HOME/duckdb_reorder/reorder.log
 MIN_FREE_GB=150
@@ -36,7 +42,7 @@ for m in $months; do
   [ "$(free_gb)" -ge "$MIN_FREE_GB" ] || die "only $(free_gb) GB free before month $m -- original kept, ${T}_hilbert incomplete"
   duck "INSERT INTO ${T}_hilbert SELECT * FROM $T
           WHERE timestamp >= TIMESTAMP '$m' AND timestamp < TIMESTAMP '$m' + INTERVAL 1 MONTH
-          ORDER BY $HILBERT, timestamp" >/dev/null
+          ORDER BY ${TIMEKEY}$HILBERT, timestamp" >/dev/null
   duck "FORCE CHECKPOINT" >/dev/null
   log "month $m done ($(free_gb) GB free)"
 done
@@ -52,4 +58,4 @@ log "check query on the reordered table: result ${after%|*}, ${after##*|} ms"
 duck "DROP TABLE $T" >/dev/null
 duck "ALTER TABLE ${T}_hilbert RENAME TO $T" >/dev/null
 duck "FORCE CHECKPOINT" >/dev/null
-log "swapped: $T is now in (month, Hilbert) order; check query ${before##*|} ms -> ${after##*|} ms; $(free_gb) GB free"
+log "swapped: $T is now in (${BUCKET:-month}, Hilbert) order; check query ${before##*|} ms -> ${after##*|} ms; $(free_gb) GB free"
