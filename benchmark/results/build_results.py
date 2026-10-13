@@ -272,8 +272,30 @@ def system_scores(summary, winners):
             "queries_ranked": sum(r["eligible"] for r in rs),
             "geomean_slowdown_vs_best": round(math.exp(statistics.mean(math.log(x) for x in sd)), 2) if sd else None,
             "median_slowdown_vs_best": round(statistics.median(sd), 2) if sd else None,
-            "total_runtime_s": round(sum((r["mean_ms"] or 0) * (r["succeeded"] or 0) for r in rs) / 1000, 1),
         })
+    return out
+
+
+def pairwise_times(summary):
+    """(2026-10-13) Total runtime compared pair by pair, over only the queries both systems completed
+    (every repetition): a per-system total over all its own queries compares different query sets."""
+    present = [s for s in SYSTEMS if any(r["system"] == s and r["planned"] for r in summary)]
+    done = {}
+    for r in summary:
+        if r["complete"] and r["mean_ms"] is not None:
+            done.setdefault(r["system"], {})[(r["scenario"], r["query"])] = r
+    out = []
+    for i, a in enumerate(present):
+        for b in present[i + 1:]:
+            common = sorted(set(done.get(a, {})) & set(done.get(b, {})))
+            if not common:
+                continue
+            # the same number of measured repetitions on both sides (both completed every one)
+            ta = sum(done[a][k]["mean_ms"] * done[a][k]["succeeded"] for k in common) / 1000
+            tb = sum(done[b][k]["mean_ms"] * done[b][k]["succeeded"] for k in common) / 1000
+            out.append({"system_a": a, "system_b": b, "common_queries": len(common),
+                        "total_a_s": round(ta, 1), "total_b_s": round(tb, 1),
+                        "ratio_a_over_b": round(ta / tb, 2) if tb else None})
     return out
 
 
@@ -443,6 +465,12 @@ def markdown_tables(summary, winners, scores):
                 cells.append(f"**{v}**" if s == w["winner"] else v)
             out.append(f"| {w['query']} | {w['query_type']} | " + " | ".join(cells) +
                        f" | {w['winner'] or '-'} | {str(w['margin_x']) + '×' if w['margin_x'] else '-'} |")
+    out += ["\n## Total runtime, pair by pair\n",
+            "Sum of the measured repetitions' runtimes over only the queries both systems completed.\n",
+            "| System A | System B | Common queries | A | B | A / B |", "|---|---|---:|---:|---:|---:|"]
+    for p in pairwise_times(summary):
+        out.append(f"| {p['system_a']} | {p['system_b']} | {p['common_queries']} | {p['total_a_s'] / 60:.1f} min | "
+                   f"{p['total_b_s'] / 60:.1f} min | {p['ratio_a_over_b']} |")
     open(os.path.join(RES, "tables.md"), "w").write("\n".join(out) + "\n")
 
 
@@ -563,6 +591,7 @@ def main():
     write_csv("summary.csv", summary)
     write_csv("winners.csv", winners)
     write_csv("system_scores.csv", scores)
+    write_csv("pairwise_total_time.csv", pairwise_times(summary))
     write_csv("equivalence.csv", [{"scenario": k[0], "query": k[1], "system": k[2], "verdict": v,
                                    "acceptable": acceptable(v)} for k, v in sorted(equiv.items())])
     write_csv("h3_vs_scan.csv", h3_rows())

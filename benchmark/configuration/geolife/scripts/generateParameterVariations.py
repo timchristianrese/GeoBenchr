@@ -956,8 +956,8 @@ if __name__ == "__main__":
         yaml.dump(duckdbSQL_data, file, sort_keys=False, allow_unicode=True)
 
     #rep
-    #copy all files to /Users/gov/Prog/git/GeoBenchr/benchmark/client/benchmark_client/src/main/resources/geolife
-    resource_path = "/Users/gov/Prog/git/GeoBenchr/benchmark/client/benchmark_client/src/main/resources/geolife"
+    #copy all files to benchmark/client/benchmark_client/src/main/resources/geolife
+    resource_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "client", "benchmark_client", "src", "main", "resources", "geolife")
     shutil.copy("../queries/mobilitydb_queries.yaml", os.path.join(resource_path, "mobilitydb_queries.yaml"))
     shutil.copy("../queries/postgisSQL_queries.yaml", os.path.join(resource_path, "postgisSQL_queries.yaml"))
     shutil.copy("../queries/tsdb_queries.yaml", os.path.join(resource_path, "tsdb_queries.yaml"))

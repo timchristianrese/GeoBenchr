@@ -183,11 +183,11 @@ queryConfigs:
     WITH p AS (SELECT EPOCHRANGE :period_week AS r)
     SELECT TO_CHAR(d.day::ts, '%Y-%m-%d') AS day, COUNT(*) AS unique_crossings
     FROM crossings c
-    STRAIGHT JOIN (
+    JOIN (
       SELECT
         (TS_DAYSTART(p.r[0]) + TP '1d' *  s.num)      ::epoch AS day,
         (TS_DAYSTART(p.r[0]) + TP '1d' * (s.num + 1)) ::epoch AS next_day
-    FROM p, const.sequence(0, 9) s
+    FROM p, const.sequence(0, 32) s
     WHERE (TS_DAYSTART(p.r[0]) + TP '1d' *  s.num)      ::epoch < p.r[1]
       AND (TS_DAYSTART(p.r[0]) + TP '1d' * (s.num + 1)) ::epoch > p.r[0]
     ) d ON c.t && RANGE(d.day, d.next_day)
@@ -248,8 +248,7 @@ queryConfigs:
     SELECT COUNT(DISTINCT c.crossing_id)
     FROM crossing_points c
     JOIN islands i ON ST_DWithin(ST_Point(c.x, c.y), ST_ToGeom(i.geom::gpolygon), :distance * :st_scale)
-    WHERE i.id = :island and c.crossing_id > 0
-      AND c.t && CCRANGE(EPOCH '2024-01-01', EPOCH '2025-07-07 23:59:59');
+    WHERE i.id = :island and c.crossing_id > 0;
   clickhouse: |
     -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
     -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
@@ -378,7 +377,7 @@ queryConfigs:
   spacetime: |
     -- (2026-10-02) radius in EPSG:3857 units like every other dialect, converted to SpaceTime's
     -- local meters by :st_scale = cos(lat) * 0.99842 (see scripts/spacetime_units.py)
-    SELECT DISTINCT c.crossing_id AS id FROM crossing_points c JOIN harbours h ON ST_DWithin(ST_Point(c.x, c.y), ST_ToGeom(h.geom::gpoint), :radius * :st_scale) WHERE crossing_id > 0 AND h.name = :harbour AND c.t && CCRANGE(EPOCH '2024-01-01', EPOCH '2025-07-07 23:59:59');
+    SELECT DISTINCT c.crossing_id AS id FROM crossing_points c JOIN harbours h ON ST_DWithin(ST_Point(c.x, c.y), ST_ToGeom(h.geom::gpoint), :radius * :st_scale) WHERE crossing_id > 0 AND h.name = :harbour;
   clickhouse: |
     -- (2026-10-07) H3: the h3 GLOBAL IN (...) condition lets ClickHouse use the table's H3 primary
     -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
@@ -744,7 +743,6 @@ queryConfigs:
     SELECT c.crossing_id AS id
     FROM crossings c, harbours h1, harbours h2
     WHERE h1.name = :harbour AND h2.name = :port
-    AND c.t && CCRANGE(EPOCH '2024-01-01', EPOCH '2025-07-07 23:59:59')
     AND ST_DWithin(ST_Point(c.x0, c.y0), ST_ToGeom(h1.geom::gpoint), :distance)
     AND ST_DWithin(ST_Point(c.x1, c.y1), ST_ToGeom(h2.geom::gpoint), :distance);
   clickhouse: |

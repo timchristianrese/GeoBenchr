@@ -105,8 +105,14 @@ def generate_for_app(app_key: str, config: dict, rnd: random.Random):
     clickhouse_queries = [clickhouse_queries[i] for i in other_indices]
     duckdb_queries = [duckdb_queries[i] for i in other_indices]
 
-    mob_indices = list(range(len(mobilitydb_queries)))
-    rnd.shuffle(mob_indices)
+    # (2026-10-13) MobilityDB takes the same permutation as the other dialects whenever its list is as
+    # long as theirs (every scenario but geolife). It used to get a permutation of its own, so it ran
+    # the same parameter sets in a different order, and its two warm-up repetitions were different ones.
+    if len(mobilitydb_queries) == other_len:
+        mob_indices = other_indices
+    else:
+        mob_indices = list(range(len(mobilitydb_queries)))
+        rnd.shuffle(mob_indices)
     mobilitydb_queries = [mobilitydb_queries[i] for i in mob_indices]
     # (2026-10-09) MobilityDB is a trajectory system and geolife has no trajectories: it runs no geolife
     # queries at all, including these general point-table ones. Cleared after the shuffle so the random

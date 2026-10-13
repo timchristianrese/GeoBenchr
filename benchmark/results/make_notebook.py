@@ -20,6 +20,7 @@ else is derived from it.
 | `summary.csv` | (scenario, query, system): runs, failures, mean/median/min/max/std, equivalence, rank |
 | `winners.csv` | (scenario, query): fastest ranked system, runner-up, margin |
 | `system_scores.csv` | system: wins, completed queries, geometric-mean slowdown vs the fastest |
+| `pairwise_total_time.csv` | pair of systems: total runtime over the queries both completed |
 | `equivalence.csv` | (scenario, query, system): result compared with PostGIS |
 | `h3_vs_scan.csv` | ClickHouse query repetition: H3 version vs scan-only version |"""),
 ("code", """import os
@@ -54,6 +55,9 @@ axes[1].set_yscale("log")
 for ax in axes:
     ax.tick_params(axis="x", rotation=30)
 plt.tight_layout()"""),
+("md", "## Total runtime, pair by pair\n\nSum of the measured repetitions' runtimes over only the queries both systems completed (a per-system total over each system's own queries would compare different query sets)."),
+("code", """pw = pd.read_csv(f"{RES}/pairwise_total_time.csv") if os.path.exists(f"{RES}/pairwise_total_time.csv") else pd.DataFrame()
+pw.assign(total_a_min=(pw.total_a_s / 60).round(1), total_b_min=(pw.total_b_s / 60).round(1))[["system_a", "system_b", "common_queries", "total_a_min", "total_b_min", "ratio_a_over_b"]] if len(pw) else None"""),
 ("md", "## Wins per scenario and per query type"),
 ("code", """pd.crosstab(winners.scenario, winners.winner, margins=True)"""),
 ("code", """pd.crosstab(winners.query_type, winners.winner, margins=True)"""),

@@ -51,14 +51,11 @@ public class DuckDBExecutor implements QueryExecutor {
             boolean hasResultSet = stmt.execute();
             int count = 0;
             if (hasResultSet) {
+                // (2026-10-13) every row is read, as in the other executors; the values used to be
+                // printed to stdout here, inside the timed window, which only DuckDB paid for
                 try (ResultSet rs = stmt.getResultSet()) {
-                    int columnCount = rs.getMetaData().getColumnCount();
                     while (rs.next()) {
                         count++;
-                        for (int i = 1; i <= columnCount; i++) {
-                            System.out.print(rs.getString(i) + " ");
-                        }
-                        System.out.println();
                     }
                 }
             } else {

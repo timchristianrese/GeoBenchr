@@ -86,3 +86,25 @@ Mean over the repetitions (each with different parameters). **Bold** = fastest r
 | spatioTemporalRange | spatiotemporal | 1.13 s | n/a | 56 ms | 137 ms | **40 ms ≈** | 39.31 s | SpaceTime | 1.39× |
 | timeAggregation | temporal | 6.81 s | n/a | **186 ms** | 193 ms | 573 ms ≠ | 32.00 s | ClickHouse | 1.04× |
 | timeInterval | temporal | 6.29 s | n/a | 143 ms | **107 ms** | 452 ms | 31.71 s | DuckDB | 1.33× |
+
+## Total runtime, pair by pair
+
+Sum of the measured repetitions' runtimes over only the queries both systems completed.
+
+| System A | System B | Common queries | A | B | A / B |
+|---|---|---:|---:|---:|---:|
+| PostGIS | MobilityDB | 35 | 74.0 min | 394.0 min | 0.19 |
+| PostGIS | ClickHouse | 46 | 336.7 min | 15.9 min | 21.13 |
+| PostGIS | DuckDB | 47 | 356.5 min | 214.9 min | 1.66 |
+| PostGIS | SpaceTime | 46 | 336.7 min | 15.6 min | 21.53 |
+| PostGIS | Sedona | 47 | 356.5 min | 1055.7 min | 0.34 |
+| MobilityDB | ClickHouse | 34 | 247.8 min | 14.2 min | 17.43 |
+| MobilityDB | DuckDB | 35 | 394.0 min | 167.6 min | 2.35 |
+| MobilityDB | SpaceTime | 34 | 247.8 min | 7.8 min | 31.68 |
+| MobilityDB | Sedona | 35 | 394.0 min | 595.8 min | 0.66 |
+| ClickHouse | DuckDB | 47 | 16.0 min | 207.4 min | 0.08 |
+| ClickHouse | SpaceTime | 47 | 16.0 min | 15.9 min | 1.01 |
+| ClickHouse | Sedona | 47 | 16.0 min | 1095.0 min | 0.01 |
+| DuckDB | SpaceTime | 47 | 207.4 min | 15.9 min | 13.05 |
+| DuckDB | Sedona | 48 | 234.7 min | 1122.0 min | 0.21 |
+| SpaceTime | Sedona | 47 | 15.9 min | 1095.0 min | 0.01 |

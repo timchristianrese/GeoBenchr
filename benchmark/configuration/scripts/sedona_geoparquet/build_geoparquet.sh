@@ -8,13 +8,17 @@
 # Runs in the benchmark client's own Sedona session (GeoParquetBuild.java), where the table views exist.
 #   build_geoparquet.sh <table> "<other columns>"   writes hdfs:///geobenchr/<table>.geoparquet (original stays)
 # Environment (2026-10-11): EXECUTORS (default 36), EXCLUDE_NODES (YARN nodes without executors, default
-# nst-1; empty = all), REPLICATION (HDFS replication of the new files, default 2).
+# nst-1; empty = all), REPLICATION (HDFS replication of the new files, default 2), BUCKET (hour or day:
+# sort by time bucket first, then geohash -- without it, each file is sorted by geohash alone, which
+# scatters time over every row group and makes time filters read everything; 2026-10-12).
 set -euo pipefail
 T=$1
 COLS=$2
 EXECUTORS=${EXECUTORS:-36}
 EXCLUDE_NODES=${EXCLUDE_NODES-nst-1}
 REPLICATION=${REPLICATION:-2}
+BUCKET=${BUCKET:-}
+TIMEKEY="${BUCKET:+date_trunc('$BUCKET', timestamp), }"
 D=$HOME/sedona_geoparquet
 B=$HOME/bench_sedona
 LOG=$D/build.log
@@ -35,6 +39,6 @@ env SUT_HOST=nst-1 SPARK_MASTER=yarn SPARK_HOME=/opt/spark HADOOP_CONF_DIR=/opt/
       SELECT $COLS, geom,
              named_struct('xmin', ST_XMin(geom), 'ymin', ST_YMin(geom), 'xmax', ST_XMax(geom), 'ymax', ST_YMax(geom)) AS geom_bbox
       FROM $T
-      SORT BY ST_GeoHash(ST_Transform(geom, 'EPSG:3857', 'EPSG:4326'), 10)" > $D/$T.out 2>&1 \
+      SORT BY ${TIMEKEY}ST_GeoHash(ST_Transform(geom, 'EPSG:3857', 'EPSG:4326'), 10)" > $D/$T.out 2>&1 \
   || { echo "$(date -Is) [$T] build failed, see $T.out" >> $LOG; exit 1; }
 echo "$(date -Is) [$T] built ($(grep 'done in' $D/$T.out)): $(/opt/hadoop/bin/hdfs dfs -du -s -h /geobenchr/$T.geoparquet)" >> $LOG

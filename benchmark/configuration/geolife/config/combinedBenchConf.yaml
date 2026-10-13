@@ -303,29 +303,23 @@ queryConfigs:
     -- key (h3, timestamp, id) and read only the cells that can contain a match -- a superset built
     -- by the h3Cover* functions (scripts/clickhouse_functions.sql). The exact predicate below is
     -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
-    -- FIX: ClickHouse has no ST_MakeEnvelope/ST_SetSRID/ST_Transform (PostGIS-only, Code 46
-    -- UNKNOWN_FUNCTION, confirmed live) -- :region_medium decomposes into
-    -- :region_medium_lon_min/_lat_min/_lon_max/_lat_max for this dialect only (see
-    -- generateParameterVariations.py's region_* decomposition, same pattern as :point_lon/
-    -- :point_lat), used here as a plain bbox check instead of pointInPolygon against a geometry
-    -- expression.
+    -- (2026-10-13) :region_medium decomposes into :region_medium_lon_min/_lat_min/_lon_max/_lat_max
+    -- (ClickHouse has no ST_MakeEnvelope), rebuilt here into a polygon ring and tested with
+    -- pointInPolygon like every other region in the ClickHouse queries -- not as a lon/lat BETWEEN
+    -- box test, which would exploit that the generated regions happen to be rectangles.
     SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
     FROM geolife_points
     WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing([(:region_medium_lon_min, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_max), (:region_medium_lon_min, :region_medium_lat_max)], 0)))
-      AND lon BETWEEN :region_medium_lon_min AND :region_medium_lon_max
-      AND lat BETWEEN :region_medium_lat_min AND :region_medium_lat_max
+      AND pointInPolygon((lon, lat), [(:region_medium_lon_min, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_max), (:region_medium_lon_min, :region_medium_lat_max)])
     GROUP BY venue_type;
   clickhouse_scan: |
-    -- FIX: ClickHouse has no ST_MakeEnvelope/ST_SetSRID/ST_Transform (PostGIS-only, Code 46
-    -- UNKNOWN_FUNCTION, confirmed live) -- :region_medium decomposes into
-    -- :region_medium_lon_min/_lat_min/_lon_max/_lat_max for this dialect only (see
-    -- generateParameterVariations.py's region_* decomposition, same pattern as :point_lon/
-    -- :point_lat), used here as a plain bbox check instead of pointInPolygon against a geometry
-    -- expression.
+    -- (2026-10-13) :region_medium decomposes into :region_medium_lon_min/_lat_min/_lon_max/_lat_max
+    -- (ClickHouse has no ST_MakeEnvelope), rebuilt here into a polygon ring and tested with
+    -- pointInPolygon like every other region in the ClickHouse queries -- not as a lon/lat BETWEEN
+    -- box test, which would exploit that the generated regions happen to be rectangles.
     SELECT venue_type, COUNT(DISTINCT venue_id) AS poi_count
     FROM geolife_points
-    WHERE lon BETWEEN :region_medium_lon_min AND :region_medium_lon_max
-      AND lat BETWEEN :region_medium_lat_min AND :region_medium_lat_max
+    WHERE pointInPolygon((lon, lat), [(:region_medium_lon_min, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_max), (:region_medium_lon_min, :region_medium_lat_max)])
     GROUP BY venue_type;
   duckdb: |
     -- (2026-10-08) ST_Intersects_Extent(geom, <area's bounding box>) in front of the exact predicate: the point
@@ -457,12 +451,10 @@ queryConfigs:
     -- FIX: "COUNTIf" -> "countIf". ClickHouse function names are case-sensitive; the built-in
     -- combinator is lowercase-c "countIf", not "COUNTIf" -- as written this would fail with an
     -- unknown-function error.
-    -- FIX: ClickHouse has no ST_MakeEnvelope/ST_SetSRID/ST_Transform (PostGIS-only, Code 46
-    -- UNKNOWN_FUNCTION, confirmed live) -- :region_medium decomposes into
-    -- :region_medium_lon_min/_lat_min/_lon_max/_lat_max for this dialect only (see
-    -- generateParameterVariations.py's region_* decomposition, same pattern as :point_lon/
-    -- :point_lat), used here as a plain bbox check instead of pointInPolygon against a geometry
-    -- expression.
+    -- (2026-10-13) :region_medium decomposes into :region_medium_lon_min/_lat_min/_lon_max/_lat_max
+    -- (ClickHouse has no ST_MakeEnvelope), rebuilt here into a polygon ring and tested with
+    -- pointInPolygon like every other region in the ClickHouse queries -- not as a lon/lat BETWEEN
+    -- box test, which would exploit that the generated regions happen to be rectangles.
     WITH minute_activity AS (
         SELECT
             toStartOfMinute(timestamp) AS minute,
@@ -471,8 +463,7 @@ queryConfigs:
         FROM geolife_points
         WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing([(:region_medium_lon_min, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_max), (:region_medium_lon_min, :region_medium_lat_max)], 0)))
           AND timestamp BETWEEN :period_short
-          AND lon BETWEEN :region_medium_lon_min AND :region_medium_lon_max
-          AND lat BETWEEN :region_medium_lat_min AND :region_medium_lat_max
+          AND pointInPolygon((lon, lat), [(:region_medium_lon_min, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_max), (:region_medium_lon_min, :region_medium_lat_max)])
         GROUP BY minute
     ),
     minute_windows AS (
@@ -494,12 +485,10 @@ queryConfigs:
     -- FIX: "COUNTIf" -> "countIf". ClickHouse function names are case-sensitive; the built-in
     -- combinator is lowercase-c "countIf", not "COUNTIf" -- as written this would fail with an
     -- unknown-function error.
-    -- FIX: ClickHouse has no ST_MakeEnvelope/ST_SetSRID/ST_Transform (PostGIS-only, Code 46
-    -- UNKNOWN_FUNCTION, confirmed live) -- :region_medium decomposes into
-    -- :region_medium_lon_min/_lat_min/_lon_max/_lat_max for this dialect only (see
-    -- generateParameterVariations.py's region_* decomposition, same pattern as :point_lon/
-    -- :point_lat), used here as a plain bbox check instead of pointInPolygon against a geometry
-    -- expression.
+    -- (2026-10-13) :region_medium decomposes into :region_medium_lon_min/_lat_min/_lon_max/_lat_max
+    -- (ClickHouse has no ST_MakeEnvelope), rebuilt here into a polygon ring and tested with
+    -- pointInPolygon like every other region in the ClickHouse queries -- not as a lon/lat BETWEEN
+    -- box test, which would exploit that the generated regions happen to be rectangles.
     WITH minute_activity AS (
         SELECT
             toStartOfMinute(timestamp) AS minute,
@@ -507,8 +496,7 @@ queryConfigs:
             countIf(venue_id <> 0) AS venue_updates
         FROM geolife_points
         WHERE timestamp BETWEEN :period_short
-          AND lon BETWEEN :region_medium_lon_min AND :region_medium_lon_max
-          AND lat BETWEEN :region_medium_lat_min AND :region_medium_lat_max
+          AND pointInPolygon((lon, lat), [(:region_medium_lon_min, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_max), (:region_medium_lon_min, :region_medium_lat_max)])
         GROUP BY minute
     ),
     minute_windows AS (
@@ -648,35 +636,29 @@ queryConfigs:
     -- unchanged and decides the result. The scan-only version is kept as clickhouse_scan (not run).
     -- FIX: uniq() is an APPROXIMATE distinct count in ClickHouse; switched to uniqExact() so
     -- this matches postgis/sedona's exact COUNT(DISTINCT id) above rather than an estimate.
-    -- FIX: ClickHouse has no ST_MakeEnvelope/ST_SetSRID/ST_Transform (PostGIS-only, Code 46
-    -- UNKNOWN_FUNCTION, confirmed live) -- :region_medium decomposes into
-    -- :region_medium_lon_min/_lat_min/_lon_max/_lat_max for this dialect only (see
-    -- generateParameterVariations.py's region_* decomposition, same pattern as :point_lon/
-    -- :point_lat), used here as a plain bbox check instead of pointInPolygon against a geometry
-    -- expression.
+    -- (2026-10-13) :region_medium decomposes into :region_medium_lon_min/_lat_min/_lon_max/_lat_max
+    -- (ClickHouse has no ST_MakeEnvelope), rebuilt here into a polygon ring and tested with
+    -- pointInPolygon like every other region in the ClickHouse queries -- not as a lon/lat BETWEEN
+    -- box test, which would exploit that the generated regions happen to be rectangles.
     SELECT toStartOfHour(timestamp) AS hour,
        uniqExact(id) AS users
     FROM geolife_points
     WHERE h3 GLOBAL IN (SELECT arrayJoin(h3CoverRing([(:region_medium_lon_min, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_max), (:region_medium_lon_min, :region_medium_lat_max)], 0)))
-      AND lon BETWEEN :region_medium_lon_min AND :region_medium_lon_max
-      AND lat BETWEEN :region_medium_lat_min AND :region_medium_lat_max
+      AND pointInPolygon((lon, lat), [(:region_medium_lon_min, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_max), (:region_medium_lon_min, :region_medium_lat_max)])
       AND timestamp BETWEEN :period_medium
     GROUP BY hour
     ORDER BY hour;
   clickhouse_scan: |
     -- FIX: uniq() is an APPROXIMATE distinct count in ClickHouse; switched to uniqExact() so
     -- this matches postgis/sedona's exact COUNT(DISTINCT id) above rather than an estimate.
-    -- FIX: ClickHouse has no ST_MakeEnvelope/ST_SetSRID/ST_Transform (PostGIS-only, Code 46
-    -- UNKNOWN_FUNCTION, confirmed live) -- :region_medium decomposes into
-    -- :region_medium_lon_min/_lat_min/_lon_max/_lat_max for this dialect only (see
-    -- generateParameterVariations.py's region_* decomposition, same pattern as :point_lon/
-    -- :point_lat), used here as a plain bbox check instead of pointInPolygon against a geometry
-    -- expression.
+    -- (2026-10-13) :region_medium decomposes into :region_medium_lon_min/_lat_min/_lon_max/_lat_max
+    -- (ClickHouse has no ST_MakeEnvelope), rebuilt here into a polygon ring and tested with
+    -- pointInPolygon like every other region in the ClickHouse queries -- not as a lon/lat BETWEEN
+    -- box test, which would exploit that the generated regions happen to be rectangles.
     SELECT toStartOfHour(timestamp) AS hour,
        uniqExact(id) AS users
     FROM geolife_points
-    WHERE lon BETWEEN :region_medium_lon_min AND :region_medium_lon_max
-      AND lat BETWEEN :region_medium_lat_min AND :region_medium_lat_max
+    WHERE pointInPolygon((lon, lat), [(:region_medium_lon_min, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_min), (:region_medium_lon_max, :region_medium_lat_max), (:region_medium_lon_min, :region_medium_lat_max)])
       AND timestamp BETWEEN :period_medium
     GROUP BY hour
     ORDER BY hour;

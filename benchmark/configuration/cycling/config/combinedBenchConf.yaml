@@ -149,20 +149,14 @@ queryConfigs:
   use: true
   description: "Find rides that are fully contained within a specified distance of the district's geometry."
   type: spatial
-  # EQUIVALENCE NOTE: clickhouse cannot express "every point of the trajectory stays within
-  # :radius of the district" at all (left unimplemented below) -- it has no BOOL_AND-style
-  # per-group aggregate over a spatial predicate and no trajectory/containment type. Every other
-  # dialect here (mobilitydb via adwithin(), postgis/sedona/duckdb via
-  # BOOL_AND(ST_DWithin(...))) can express it. Not 1-1 across all systems -- this is a genuine
-  # capability gap for clickhouse, not a translation oversight.
-  # FIX (2026-10-01): adwithin() is MobilityDB's "always within distance" predicate -- the exact
-  # counterpart of BOOL_AND(ST_DWithin(...)) over every point, since rides.trip uses Discrete
-  # interpolation (no interpolated positions between samples). Replaces two broken attempts:
-  # `trip <@ ST_Buffer(...)` errors (no tgeompoint <@ geometry operator), and
-  # acontains(ST_Buffer(...), trip) returns false positives on discrete trips (e.g. ride 503514:
-  # two instants 530m/577m out, buffer 470m, acontains still true). GROUP BY + BOOL_AND because
-  # rides holds several trajectory rows per id. Verified live: 1,027,129 for Reinickendorf/470,
-  # exact match with postgis.
+  # (2026-10-13) Every dialect first narrows the rides to those whose first and last point
+  # (rides_summary.start_location / end_location) lie within :radius of the district -- a ride that
+  # stays within :radius has both -- and then checks every point of only those rides. The SpaceTime
+  # developers proposed this for SpaceTime (it needs less memory); it is applied to every system so
+  # all of them get the same plan. ClickHouse runs the query too now: countIf(NOT cond) = 0 is its
+  # per-group "all" aggregate (the earlier note here, that ClickHouse could not express it, was wrong).
+  # MobilityDB keeps its trajectory form: one row per ride, adwithin() = "always within distance"
+  # (rides.trip uses discrete interpolation, so this is BOOL_AND(ST_DWithin) over every point).
   mobilitydb: |
     SELECT r.id
     FROM rides r
@@ -174,75 +168,98 @@ queryConfigs:
       SELECT geom
       FROM berlin_districts
       WHERE name = :district
+    ),
+    candidates AS (
+      SELECT s.id
+      FROM rides_summary s, d
+      WHERE ST_DWithin(s.start_location, d.geom, :radius)
+        AND ST_DWithin(s.end_location, d.geom, :radius)
     )
     SELECT r.id
     FROM ride_points r
-    JOIN d ON true
+    JOIN candidates c ON r.id = c.id
+    CROSS JOIN d
     GROUP BY r.id
     HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, :radius));
-  sample_postgis: |
-    WITH d AS (
-      SELECT geom
-      FROM berlin_districts
-      WHERE name = 'Reinickendorf'
-    )
-    SELECT r.id
-    FROM ride_points r
-    JOIN d ON true
-    GROUP BY r.id
-    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, 500));
   sedona: |
-    SELECT r.id
-    FROM ride_points r
-    JOIN berlin_districts d
-      ON d.name = :district
-    GROUP BY r.id
-    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, :radius));
-  spacetime: |
-    -- (2026-10-02) radius in EPSG:3857 units like every other dialect, converted to SpaceTime's
-    -- local meters by :st_scale = cos(lat) * 0.99842 (see scripts/spacetime_units.py)
     WITH d AS (
       SELECT geom
       FROM berlin_districts
       WHERE name = :district
     ),
     candidates AS (
-      SELECT DISTINCT r.trip_id
-      FROM ride_points r, d
-      WHERE ST_DWithin(ST_Point(r.x, r.y), ST_ToGeom(d.geom::gpolygon), :radius * :st_scale)
+      SELECT s.id
+      FROM rides_summary s, d
+      WHERE ST_DWithin(s.start_location, d.geom, :radius)
+        AND ST_DWithin(s.end_location, d.geom, :radius)
     )
-    SELECT r.trip_id AS id
+    SELECT r.id
     FROM ride_points r
-    STRAIGHT JOIN candidates c ON r.trip_id = c.trip_id
+    JOIN candidates c ON r.id = c.id
     CROSS JOIN d
-    GROUP BY r.trip_id
-    HAVING BOOL_AND(ST_DWithin(ST_Point(r.x, r.y), ST_ToGeom(d.geom::gpolygon), :radius * :st_scale));
-  clickhouse: |
-    -- INCOMPATIBLE, permanently (decided 2026-09-30, not a TODO): ClickHouse has no
-    -- BOOL_AND-style per-group aggregate over a spatial predicate and no trajectory/containment
-    -- type, so "every point of the trajectory stays within :radius of the district" cannot be
-    -- expressed here at all -- see the EQUIVALENCE NOTE above. This is a genuine capability
-    -- gap, not a translation left undone; do not re-open without a real ClickHouse feature that
-    -- changes this (matching the precedent set for the islands/universities distance gap,
-    -- before that one *was* resolved by finding
-    -- polygonsDistanceSpherical -- if a similar function is ever found for per-group spatial
-    -- BOOL_AND, this should be revisited the same way).
-
-  duckdb: |
-    -- BOOL_AND(...) over a per-group spatial predicate is supported directly, so this mirrors
-    -- the postgis/sedona translation -- one of the queries clickhouse cannot express at all
-    -- (see the equivalence note above).
+    GROUP BY r.id
+    HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, :radius));
+  spacetime: |
+    -- (2026-10-13) the SpaceTime developers' version (needs less memory); radius in EPSG:3857 units
+    -- like every other dialect, converted to SpaceTime's local meters by :st_scale = cos(lat) * 0.99842
+    -- (see scripts/spacetime_units.py)
     WITH d AS (
       SELECT geom
       FROM berlin_districts
       WHERE name = :district
+    ),
+    candidates AS (
+      SELECT r.trip_id
+      FROM rides r, d
+      WHERE ST_DWithin(ST_Point(r.x0, r.y0), ST_ToGeom(d.geom::gpolygon), :radius * :st_scale)
+        AND ST_DWithin(ST_Point(r.x1, r.y1), ST_ToGeom(d.geom::gpolygon), :radius * :st_scale)
+    )
+    SELECT r.trip_id AS id
+    FROM ride_points r
+    JOIN candidates c ON r.trip_id = c.trip_id
+    CROSS JOIN d
+    GROUP BY r.trip_id
+    HAVING BOOL_AND(ST_DWithin(ST_Point(r.x, r.y), ST_ToGeom(d.geom::gpolygon), :radius * :st_scale));
+  clickhouse: |
+    -- (2026-10-13) countIf(NOT cond) = 0 is the per-group "all" aggregate (BOOL_AND elsewhere).
+    -- Distances in EPSG:3857 like every other dialect: r.x/r.y are Web Mercator, the district's
+    -- vertices (lon/lat) and the summary's start/end lon/lat are projected the same way. The H3 cells
+    -- covering the district plus :radius decide nothing on their own: a point outside them is farther
+    -- than :radius, so it fails the condition exactly as the distance test would.
+    WITH candidates AS (
+      SELECT s.id
+      FROM rides_summary s
+      GLOBAL JOIN berlin_districts d ON d.name = :district
+      WHERE polygonsDistanceCartesian(array(array(tuple(6378137. * radians(s.start_lon), 6378137. * log(tan(pi() / 4 + radians(s.start_lat) / 2))))), arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), d.geom.Polygon)) <= :radius
+        AND polygonsDistanceCartesian(array(array(tuple(6378137. * radians(s.end_lon), 6378137. * log(tan(pi() / 4 + radians(s.end_lat) / 2))))), arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), d.geom.Polygon)) <= :radius
     )
     SELECT r.id
     FROM ride_points r
-    JOIN d ON true
+    GLOBAL JOIN berlin_districts d ON d.name = :district
+    WHERE r.id GLOBAL IN (SELECT id FROM candidates)
+    GROUP BY r.id
+    HAVING countIf(
+      r.h3 GLOBAL NOT IN (SELECT arrayJoin(h3CoverRing(arrayElement(geom.Polygon, 1), :radius)) FROM berlin_districts WHERE name = :district)
+      OR polygonsDistanceCartesian(array(array(tuple(r.x, r.y))), arrayMap(ring -> arrayMap(pt -> tuple(6378137. * radians(pt.1), 6378137. * log(tan(pi() / 4 + radians(pt.2) / 2))), ring), d.geom.Polygon)) > :radius
+    ) = 0;
+  duckdb: |
+    WITH d AS (
+      SELECT geom
+      FROM berlin_districts
+      WHERE name = :district
+    ),
+    candidates AS (
+      SELECT s.id
+      FROM rides_summary s, d
+      WHERE ST_DWithin(s.start_location, d.geom, :radius)
+        AND ST_DWithin(s.end_location, d.geom, :radius)
+    )
+    SELECT r.id
+    FROM ride_points r
+    JOIN candidates c ON r.id = c.id
+    CROSS JOIN d
     GROUP BY r.id
     HAVING BOOL_AND(ST_DWithin(r.geom, d.geom, :radius));
-
   repetition: 50
   parameters:
   - district

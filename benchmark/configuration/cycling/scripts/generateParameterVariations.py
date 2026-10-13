@@ -647,9 +647,9 @@ if __name__ == "__main__":
         yaml.dump([q.__dict__ for q in duckdbSQL_queries], f, sort_keys=False, allow_unicode=True)
     process_file("../queries/duckdb_queries_unprocess.yaml", "../queries/duckdb_queries.yaml")
 
-    #copy all created files to /Users/gov/Prog/git/GeoBenchr/benchmark/client/benchmark_client/src/main/resources/cycling
+    #copy all created files to benchmark/client/benchmark_client/src/main/resources/cycling
 
-    resource_path = "/Users/gov/Prog/git/GeoBenchr/benchmark/client/benchmark_client/src/main/resources/cycling"
+    resource_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "client", "benchmark_client", "src", "main", "resources", "cycling")
     shutil.copy("../queries/mobilitydb_queries.yaml", os.path.join(resource_path, "mobilitydb_queries.yaml"))
     shutil.copy("../queries/postgisSQL_queries.yaml", os.path.join(resource_path, "postgisSQL_queries.yaml"))
     shutil.copy("../queries/tsdb_queries.yaml", os.path.join(resource_path, "tsdb_queries.yaml"))

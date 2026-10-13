@@ -68,7 +68,6 @@ each scenario's queries, in every system's dialect, are defined in `benchmark/co
   ClickHouse SQL, DuckDB spatial SQL, SpaceTime SQL, Spark SQL with Sedona). All systems get the same
   parameters: a seeded generator draws them once per repetition.
 - MobilityDB runs no Geolife queries: Geolife is check-in data, not trips, so it has no trajectories.
-- ClickHouse has no form of `CountRidesFullyInDistrictRadius` (it has no per-group spatial aggregate).
 - Distances are planar EPSG:3857 (Web Mercator) everywhere, as in PostGIS. SpaceTime measures in local
   meters, so its radii are converted per query.
 

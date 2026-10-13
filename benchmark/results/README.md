@@ -1,10 +1,25 @@
 # GeoBenchr results — 52-repetition run (2026-10-09 to 2026-10-11)
 
-> **Preliminary results — not final.** These numbers come from a run whose setup is still being
-> revised for fairness across the systems: Sedona is being measured again on all five nodes with all
-> four point tables as GeoParquet, DuckDB's AIS scenario again after a change to its table order,
-> and further adjustments (equal resource settings and tuning for every system) are under
-> consideration. Rankings and timings may change; please do not cite them as final.
+> **Preliminary results — not final, and superseded by a re-run in preparation.** Known problems with
+> this run, all fixed for the re-run (2026-10-13):
+> - Cycling: the general queries (`SpatialBBox`, `kNN`, `spatioTemporalRange`,
+>   `IDsInsideRegion1Andsecond_region`) used regions in North Rhine-Westphalia instead of Berlin, so
+>   they searched areas without data.
+> - Geolife: Postgres, ClickHouse and DuckDB held 3,949,479,382 points, 10.6 million fewer than Sedona and
+>   the source data (3,960,126,695); SpaceTime's copy was deduplicated wrongly as well.
+> - Client: DuckDB's client printed every result row inside the timed window; the other clients only read
+>   the rows.
+> - MobilityDB got the general queries' parameter sets in a different order, so its two warm-up
+>   repetitions were different ones.
+> - Queries: ClickHouse did not run `CountRidesFullyInDistrictRadius` (it can); three ClickHouse Geolife
+>   queries tested regions as lon/lat boxes instead of polygons; SpaceTime's `busiestDayInWeekPeriod`
+>   was wrong for periods longer than a week, and three SpaceTime AIS queries kept an outdated time filter.
+> - Tuning: the PostGIS worker on nst-3 ran with Postgres' default settings (128 MB shared buffers),
+>   unlike the other four workers.
+> - The per-system "time to run all its queries" compared different query sets; the re-run compares
+>   total time pair by pair, over the queries both systems completed.
+>
+> Please do not cite these numbers.
 
 Six systems answered the same 48 read queries over the same data on a five-node cluster, each system
 alone on the cluster, each query 52 times with different parameters. This page describes how the
@@ -13,17 +28,38 @@ built by `build_results.py`; [`analysis.ipynb`](analysis.ipynb) explores them.
 
 ## Summary
 
-| System | Queries won | Ranked on | Geo-mean slowdown vs fastest | Median slowdown | Time to run all its queries |
-|---|---:|---:|---:|---:|---:|
-| ClickHouse | 17 | 47 of 47 | 1.55× | 1.29× | 16 min |
-| SpaceTime | 17 | 44 of 48 | 1.91× | 1.56× | 33 min |
-| DuckDB | 9 | 48 of 48 | 11.3× | 7.12× | 3.9 h |
-| PostGIS | 5 | 47 of 48 | 14.3× | 15.9× | 6.7 h |
-| MobilityDB | 0 | 35 of 36 | 29.0× | 28.0× | 7.3 h |
-| Sedona | 0 | 48 of 48 | 159× | 214× | 18.7 h |
+| System | Queries won | Ranked on | Geo-mean slowdown vs fastest | Median slowdown |
+|---|---:|---:|---:|---:|
+| ClickHouse | 17 | 47 of 47 | 1.55× | 1.29× |
+| SpaceTime | 17 | 44 of 48 | 1.91× | 1.56× |
+| DuckDB | 9 | 48 of 48 | 11.3× | 7.12× |
+| PostGIS | 5 | 47 of 48 | 14.3× | 15.9× |
+| MobilityDB | 0 | 35 of 36 | 29.0× | 28.0× |
+| Sedona | 0 | 48 of 48 | 159× | 214× |
 
 *Slowdown*: a system's mean runtime on a query divided by the fastest ranked system's, over the
-queries the system is ranked on. *Time*: sum of the measured repetitions' runtimes.
+queries the system is ranked on.
+
+**Total runtime, pair by pair** (sum of the measured repetitions' runtimes over only the queries
+both systems completed; a per-system total over all of a system's own queries would compare different query sets):
+
+| System A | System B | Common queries | A | B | A / B |
+|---|---|---:|---:|---:|---:|
+| PostGIS | MobilityDB | 35 | 74.0 min | 394.0 min | 0.19 |
+| PostGIS | ClickHouse | 46 | 336.7 min | 15.9 min | 21.13 |
+| PostGIS | DuckDB | 47 | 356.5 min | 214.9 min | 1.66 |
+| PostGIS | SpaceTime | 46 | 336.7 min | 15.6 min | 21.53 |
+| PostGIS | Sedona | 47 | 356.5 min | 1055.7 min | 0.34 |
+| MobilityDB | ClickHouse | 34 | 247.8 min | 14.2 min | 17.43 |
+| MobilityDB | DuckDB | 35 | 394.0 min | 167.6 min | 2.35 |
+| MobilityDB | SpaceTime | 34 | 247.8 min | 7.8 min | 31.68 |
+| MobilityDB | Sedona | 35 | 394.0 min | 595.8 min | 0.66 |
+| ClickHouse | DuckDB | 47 | 16.0 min | 207.4 min | 0.08 |
+| ClickHouse | SpaceTime | 47 | 16.0 min | 15.9 min | 1.01 |
+| ClickHouse | Sedona | 47 | 16.0 min | 1095.0 min | 0.01 |
+| DuckDB | SpaceTime | 47 | 207.4 min | 15.9 min | 13.05 |
+| DuckDB | Sedona | 48 | 234.7 min | 1122.0 min | 0.21 |
+| SpaceTime | Sedona | 47 | 15.9 min | 1095.0 min | 0.01 |
 
 **Wins by scenario and by query type:**
 
@@ -250,7 +286,8 @@ disk, I/O wait and CPU per process group):
 | `results/executions.csv` | every execution: scenario, system, query, repetition, warm-up flag, status, duration, parameters, SQL |
 | `results/summary.csv` | per (scenario, query, system): runs, failures, mean/median/min/max/std/cv, equivalence, rank, slowdown |
 | `results/winners.csv` | per query: fastest system, runner-up, margin, full ranking, systems not ranked and why |
-| `results/system_scores.csv` | per system: wins, completed and ranked queries, slowdowns, total runtime |
+| `results/system_scores.csv` | per system: wins, completed and ranked queries, slowdowns |
+| `results/pairwise_total_time.csv` | per pair of systems: total runtime over the queries both completed |
 | `results/dropped_parameter_sets.csv` | parameter sets left out for every system, with the reason |
 | `results/equivalence.csv` | per (scenario, query, system): result compared with PostGIS |
 | `results/h3_vs_scan.csv` | ClickHouse H3 vs scan-only queries, every parameter set |
