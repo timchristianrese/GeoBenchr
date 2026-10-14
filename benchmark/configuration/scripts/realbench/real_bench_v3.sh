@@ -18,6 +18,8 @@
 # plus n warm-up repetitions (one per client thread), so the results are built with WARMUP_REPS=n. With several
 # threads, a query that times out is stopped on its own; only DuckDB, which can only be stopped by a server
 # restart, interrupts the other threads' queries too (logged as INTERRUPTED).
+# EQUIVALENCE_JSON=<file>: the pre-run check against PostGIS (configuration/scripts/pipeline/equivalence_verdicts.py),
+# copied into the results so build_results.py can rank the systems; e.g. ~/realbench/equivalence_compare.json.
 # Before starting: this host's benchmark key must be in nst-1's ~/.ssh/authorized_keys (finish() removes it
 # unless KEEP_KEY=1), and the jar must be in ~/realbench on this host and on nst-1.
 #   THREADS=n real_bench_v3.sh   log: ~/realbench/run3_t<n>.log, client logs: ~/realbench/out3_t<n>/<system>/,
@@ -61,7 +63,9 @@ finish() {
   mkdir -p $A/logs/$TAG $A/hardware $A/queries $OUT3/Sedona
   scp -q -o LogLevel=ERROR "$N1:realbench/$OUTNAME/Sedona/*" $OUT3/Sedona/ 2>/dev/null
   cp -r $OUT3/. $A/logs/$TAG/
-  (cd $A/queries && unzip -q -o $JAR '*/*_queries.yaml')
+  # the query files the run used (python's zipfile: nst-inserter has no unzip/jar)
+  python3 -c "import sys, zipfile; z = zipfile.ZipFile(sys.argv[1]); [z.extract(n, sys.argv[2]) for n in z.namelist() if n.count('/') == 1 and n.endswith('_queries.yaml')]" $JAR $A/queries
+  [ -n "${EQUIVALENCE_JSON:-}" ] && mkdir -p $A/equivalence && cp "$EQUIVALENCE_JSON" $A/equivalence/compare.json   # pre-run check vs PostGIS
   n1 "HW=$HW; TAG=$TAG; "'rm -rf ~/realbench/hw_all_$TAG && mkdir -p ~/realbench/hw_all_$TAG && for h in nst-1 nst-2 nst-3 nst-4 nst-5; do scp -q -o LogLevel=ERROR "$h:$HW/*.csv" ~/realbench/hw_all_$TAG/; done'
   scp -q -o LogLevel=ERROR "$N1:realbench/hw_all_$TAG/*.csv" $A/hardware/
   cp $R/$HW/*.csv $A/hardware/ 2>/dev/null
