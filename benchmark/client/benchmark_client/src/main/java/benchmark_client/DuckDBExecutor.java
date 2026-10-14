@@ -39,6 +39,7 @@ public class DuckDBExecutor implements QueryExecutor {
             QueryLogger.logError(dbType, application, queryName, runID, e);
             return;
         }
+        long epoch = restarts.get();
         long start = System.currentTimeMillis();
         boolean ok = false;
         PreparedStatement registered = null;
@@ -69,6 +70,10 @@ public class DuckDBExecutor implements QueryExecutor {
             ok = true;
 
         } catch (Exception e) {
+            if (restarts.get() != epoch) {
+                e = new RuntimeException("INTERRUPTED: the DuckDB server was restarted to stop another query that timed out ("
+                        + e.getMessage() + ")", e);
+            }
             QueryLogger.logError(dbType, application, queryName, runID, e);
         } finally {
             if (registered != null) {
@@ -82,8 +87,13 @@ public class DuckDBExecutor implements QueryExecutor {
         }
     }
 
+    // (2026-10-14) DuckDB can only be stopped by restarting the server, which also ends every other client
+    // thread's query; those are logged as interrupted (not as errors of the query itself), see execute()
+    private final java.util.concurrent.atomic.AtomicLong restarts = new java.util.concurrent.atomic.AtomicLong();
+
     @Override
     public void cancel() {
+        restarts.incrementAndGet();
         sessions.cancelRunning();
         if (cancelCommand == null || cancelCommand.isBlank()) {
             System.err.println("DUCKDB_CANCEL_CMD not set: the timed-out query keeps running on the server");

@@ -9,4 +9,12 @@ public interface QueryExecutor {
      */
     default void cancel() {
     }
+
+    /**
+     * Stops only the query that the given worker thread is running (2026-10-14, for runs with several client
+     * threads). Default: cancel(), for executors that cannot stop a single query.
+     */
+    default void cancel(Thread worker) {
+        cancel();
+    }
 }

@@ -98,8 +98,10 @@ each scenario's queries, in every system's dialect, are defined in `benchmark/co
 
 - **One system at a time:** before each system's run, every other benchmarked system is stopped on
   all five nodes and the system under test is restarted (SpaceTime, run by its developers, stays up but idle).
-- **One query at a time** from a single client; each query runs **52 times with different
-  parameters**, and the first two repetitions are warm-up.
+- **Clients:** each system is run three times, with 1, 4 and 8 client threads. The threads take the
+  queries from one shared queue, so with n threads n queries run at the same time.
+- **Repetitions:** every query runs with **128 measured parameter sets**, the same in all three runs,
+  plus one warm-up repetition per client thread (1, 4 or 8) before them.
 - **A timing** covers sending the query, executing it, and reading every result row on the client
   (the client only reads the rows; nothing is printed or stored inside the timed window). Each system keeps
   one open session for the whole run, so connecting is not timed. PostgreSQL results are streamed through

@@ -34,6 +34,8 @@ public class SpaceTimeExecutor implements QueryExecutor {
     private final String scriptPath;
     private final ConcurrentLinkedQueue<Worker> idle = new ConcurrentLinkedQueue<>();
     private final List<Worker> all = new CopyOnWriteArrayList<>();
+    // the worker each client thread is using right now, so a timeout stops only that thread's query
+    private final java.util.Map<Thread, Worker> busy = new java.util.concurrent.ConcurrentHashMap<>();
 
     public SpaceTimeExecutor(String host, int port, String pythonBin, String scriptPath) {
         this.host = host;
@@ -127,6 +129,15 @@ public class SpaceTimeExecutor implements QueryExecutor {
         }
     }
 
+    /** Kills only the worker the given client thread is using. */
+    @Override
+    public void cancel(Thread thread) {
+        Worker worker = busy.get(thread);
+        if (worker != null) {
+            worker.process.destroyForcibly();
+        }
+    }
+
     private void discard(Worker worker) {
         all.remove(worker);
         worker.stop();
@@ -143,6 +154,7 @@ public class SpaceTimeExecutor implements QueryExecutor {
             return;
         }
 
+        busy.put(Thread.currentThread(), worker);
         long start = System.currentTimeMillis();
         try {
             String reply = worker.call(sql.trim());
@@ -158,6 +170,8 @@ public class SpaceTimeExecutor implements QueryExecutor {
         } catch (Exception e) {
             discard(worker);
             QueryLogger.logError("SpaceTime", application, queryName, runID, e);
+        } finally {
+            busy.remove(Thread.currentThread());
         }
     }
 }

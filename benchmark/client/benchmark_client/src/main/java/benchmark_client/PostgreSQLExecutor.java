@@ -105,4 +105,9 @@ public class PostgreSQLExecutor implements QueryExecutor {
     public void cancel() {
         sessions.cancelRunning();
     }
+
+    @Override
+    public void cancel(Thread worker) {
+        sessions.cancelRunning(worker);
+    }
 }

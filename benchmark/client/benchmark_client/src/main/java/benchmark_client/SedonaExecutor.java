@@ -314,6 +314,8 @@ public class SedonaExecutor implements QueryExecutor {
             // and plans -- Spark executes lazily, so the query itself ran afterwards, untimed, inside
             // result.count(). Now timed like every other system: until every result row has reached
             // the client (collected to the driver; count() alone would also let Spark prune columns).
+            // each client thread runs its queries in its own job group, so a timeout cancels only its query
+            sedona.sparkContext().setJobGroup(jobGroup(Thread.currentThread()), queryName, true);
             long start = System.currentTimeMillis();
             Dataset<Row> result = sedona.sql(sql);
             // (2026-10-08) geometry columns go to the client as WKB, like PostGIS sends them: collecting
@@ -343,6 +345,18 @@ public class SedonaExecutor implements QueryExecutor {
         if (sedona != null) {
             sedona.sparkContext().cancelAllJobs();
         }
+    }
+
+    /** Cancels only the Spark jobs of the given client thread's query. */
+    @Override
+    public void cancel(Thread worker) {
+        if (sedona != null && worker != null) {
+            sedona.sparkContext().cancelJobGroup(jobGroup(worker));
+        }
+    }
+
+    private static String jobGroup(Thread worker) {
+        return "geobenchr-client-" + worker.getId();
     }
 
     // (2026-10-08) With RESULTS_OUT=<file>, every query's result is appended there as one JSON line

@@ -25,7 +25,7 @@ final class JdbcSessions {
 
     private final Opener opener;
     private final ConcurrentLinkedQueue<Connection> idle = new ConcurrentLinkedQueue<>();
-    private final Set<Statement> running = ConcurrentHashMap.newKeySet();
+    private final java.util.Map<Statement, Thread> running = new ConcurrentHashMap<>();
 
     JdbcSessions(Opener opener) {
         this.opener = opener;
@@ -56,7 +56,7 @@ final class JdbcSessions {
 
     /** Registers a statement as running, so cancelRunning() can stop it; unregister with finished(). */
     void started(Statement stmt) {
-        running.add(stmt);
+        running.put(stmt, Thread.currentThread());
     }
 
     void finished(Statement stmt) {
@@ -65,11 +65,19 @@ final class JdbcSessions {
 
     /** Statement.cancel() on every running statement (the driver stops the query on the server). */
     void cancelRunning() {
-        for (Statement stmt : running) {
+        cancelRunning(null);
+    }
+
+    /** Statement.cancel() on the statements the given thread is running (all threads if null). */
+    void cancelRunning(Thread worker) {
+        for (java.util.Map.Entry<Statement, Thread> e : running.entrySet()) {
+            if (worker != null && e.getValue() != worker) {
+                continue;
+            }
             try {
-                stmt.cancel();
-            } catch (SQLException e) {
-                System.err.println("Statement.cancel failed: " + e.getMessage());
+                e.getKey().cancel();
+            } catch (SQLException ex) {
+                System.err.println("Statement.cancel failed: " + ex.getMessage());
             }
         }
     }

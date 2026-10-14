@@ -144,7 +144,11 @@ def load_executions(queries):
                 duration = int(ms.group(1)) if ms else None
             rows.append({
                 "scenario": sc, "system": system, "query": q, "query_type": meta.get("type"),
-                "repetition": rep, "warmup": rep <= WARMUP_REPS, "status": status.lower(), "duration_ms": duration,
+                # (2026-10-14) with several client threads, DuckDB's server restart for one timed-out query
+                # also ends the other threads' queries: logged as INTERRUPTED, not counted as their failure
+                "repetition": rep, "warmup": rep <= WARMUP_REPS,
+                "status": "interrupted" if status == "ERROR" and body.strip().startswith("INTERRUPTED") else status.lower(),
+                "duration_ms": duration,
                 "error": body.strip() if status != "SUCCESS" else "",
                 "sql_hash": sqlhash or "", "sql_hash_matches": (sqlhash == meta.get("hash")) if sqlhash else "",
                 "logged_at": at or "", "log_file": os.path.relpath(f, RAW),
@@ -199,12 +203,14 @@ def summarize(execs, equiv, queries):
         rs = by.get(k, [])
         ok = [r["duration_ms"] for r in rs if r["status"] == "success" and r["duration_ms"] is not None]
         v = equiv.get(k)
-        n_plan = planned.get(k, 0)
+        interrupted = sum(r["status"] == "interrupted" and not r["warmup"] for r in rs)
+        n_plan = planned.get(k, 0) - interrupted
         row = {
             "scenario": k[0], "query": k[1], "system": k[2],
             "query_type": next((r["query_type"] for r in rs if r["query_type"]), ""),
             "planned": n_plan, "succeeded": len(ok),
             "errors": sum(r["status"] == "error" for r in rs), "timeouts": sum(r["status"] == "timeout" for r in rs),
+            "interrupted": interrupted,
             "mean_ms": round(statistics.mean(ok), 1) if ok else None,
             "median_ms": statistics.median(ok) if ok else None,
             "min_ms": min(ok) if ok else None, "max_ms": max(ok) if ok else None,

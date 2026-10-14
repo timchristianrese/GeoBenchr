@@ -220,13 +220,20 @@ These are two different systems, easy to confuse:
 | Script | Where | Purpose |
 |---|---|---|
 | `build_jar.sh OUT.jar [REPS]` | any machine with Maven | generates the query files for a run (every read query `REPS` times, 52 by default, each with its own parameters; write queries off) on a copy of `benchmark/` and builds the client jar with them |
+| `make_thread_jars.sh OUT_DIR [threads...]` | any machine with Maven | one jar per client-thread count (default 1, 4, 8): per query the same 128 measured parameter sets plus one warm-up repetition per thread |
 | `pg_tuning.sh`, `mem_tuning.sh` | nst-1 | apply the memory and parallelism settings described in the [main README](../../../../README.md#configuration) to PostgreSQL, ClickHouse and YARN on all nodes |
 | `svc.sh only <System>` / `svc.sh all` | nst-1 | stops every benchmarked system except the one under test on all five nodes, restarts that one so it starts on otherwise idle nodes, and waits until it is healthy; `all` starts everything again |
-| `real_bench_v3.sh` | nst-inserter | runs each system that way through all four scenarios, samples CPU/memory/disk/network on every node ([`hw_sampler.py`](../../../configuration/scripts/hw_sampler.py)), starts everything again at the end and builds the result tables ([`benchmark/results/`](../../../results/)) |
+| `real_bench_threads.sh [threads...]` | nst-inserter | runs `real_bench_v3.sh` with 1, 4 and 8 client threads, one after the other |
+| `THREADS=n real_bench_v3.sh` | nst-inserter | runs each system that way through all four scenarios with n client threads, samples CPU/memory/disk/network on every node ([`hw_sampler.py`](../../../configuration/scripts/hw_sampler.py)), starts everything again at the end and builds the result tables ([`benchmark/results/`](../../../results/)) |
 
 Sedona's point tables are built with
 [`sedona_geoparquet/build_geoparquet_layout.sh`](../../../configuration/scripts/sedona_geoparquet/build_geoparquet_layout.sh)
-and read with `SEDONA_GEOPARQUET=crossing_points,flight_points,ride_points,geolife_points`. The other scripts
+and read with `SEDONA_GEOPARQUET=crossing_points,flight_points,ride_points,geolife_points`.
+
+With several client threads (`NUM_THREADS`), a query that runs past the timeout is stopped on its own
+(`Statement.cancel` for PostgreSQL and ClickHouse, its own worker process for SpaceTime, its own Spark job
+group for Sedona) while the other threads' queries continue. DuckDB can only be stopped by restarting its
+server, which ends the other threads' running queries too; those are logged as `INTERRUPTED`. The other scripts
 in `realbench/` are the setups of earlier runs.
 
 The earlier single-node paper setup (`run_benchmark.sh`, which restarted the

@@ -53,6 +53,7 @@ public class BenchmarkRunner {
     List<QueryConfig> queryByFuture = new ArrayList<>();
     List<String> tagByFuture = new ArrayList<>();
     List<AtomicLong> startByFuture = new ArrayList<>();
+    List<java.util.concurrent.atomic.AtomicReference<Thread>> threadByFuture = new ArrayList<>();
     // held by the waiting thread while it cancels a query, so the next query cannot start before the
     // system has been brought back (DuckDB's cancel restarts the server)
     Object gate = new Object();
@@ -70,8 +71,10 @@ public class BenchmarkRunner {
         int rep = repetitions.merge(query.getName(), 1, Integer::sum);
         String tag = String.format("rep=%d sql=%08x", rep, query.getSql().hashCode());
         AtomicLong started = new AtomicLong();
+        java.util.concurrent.atomic.AtomicReference<Thread> worker = new java.util.concurrent.atomic.AtomicReference<>();
         Future<?> future = pool.submit(() -> {
             synchronized (gate) {
+                worker.set(Thread.currentThread());
                 started.set(System.nanoTime());
             }
             QueryLogger.setTag(tag);
@@ -91,6 +94,7 @@ public class BenchmarkRunner {
         queryByFuture.add(query);
         tagByFuture.add(tag);
         startByFuture.add(started);
+        threadByFuture.add(worker);
     }
 
     System.out.println("All queries submitted to the executor.");
@@ -120,7 +124,8 @@ public class BenchmarkRunner {
                         QueryLogger.logTimeout(dbType, application, query.getName(), runID, timeoutSeconds * 1000, tagByFuture.get(i));
                         synchronized (gate) {
                             try {
-                                executor.cancel();
+                                // only this query: with several client threads the others keep running
+                                executor.cancel(threadByFuture.get(i).get());
                             } catch (Throwable t) {
                                 System.err.println("Cancelling " + query.getName() + " failed: " + t);
                             }
