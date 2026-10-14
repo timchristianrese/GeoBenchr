@@ -97,7 +97,7 @@ partner-hosted one) needs no source edits.
 | `SPACETIME_RUNNER_SCRIPT` | `~/bench/spacetime_query_runner.py` | SpaceTime | Path to the bridge script (see below). |
 | `SYSTEMS` | all six | all | Comma-separated subset to run, e.g. `PostGIS,ClickHouse`. |
 | `SPARK_CONF` | — | Sedona | Extra Spark settings, `key=value;key=value` (executors, `spark.sql.session.timeZone=UTC`, ...). |
-| `SEDONA_GEOPARQUET` | — | Sedona | Point tables to read from their GeoParquet copies (`hdfs:///geobenchr/<table>.geoparquet`). |
+| `SEDONA_GEOPARQUET` | — | Sedona | Point tables to read as GeoParquet (`hdfs:///geobenchr/<table>.geoparquet`); all four point tables in the current setup. |
 | `RESULTS_OUT` | — | Sedona | Append every result as one JSON line to this file (equivalence checks). |
 | `DUCKDB_CANCEL_CMD` | — | DuckDB | Shell command that restarts the DuckDB server; run when a DuckDB query times out (see below). |
 
@@ -215,14 +215,19 @@ These are two different systems, easy to confuse:
 
 ## Isolated benchmark runs
 
-[`configuration/scripts/realbench/`](../../../configuration/scripts/realbench/) holds the
-setup of the 52-repetition run (2026-10-09): `svc.sh` (on nst-1) stops every
-benchmarked system except the one under test on all five nodes and waits until
-that one is healthy; `real_bench.sh` (on nst-inserter) runs each system that
-way through all four scenarios, samples CPU/memory/disk/network on every node
-([`hw_sampler.py`](../../../configuration/scripts/hw_sampler.py)), starts
-everything again at the end and builds the result tables
-([`benchmark/results/`](../../../results/)).
+[`configuration/scripts/realbench/`](../../../configuration/scripts/realbench/) holds the run setup:
+
+| Script | Where | Purpose |
+|---|---|---|
+| `build_jar.sh OUT.jar [REPS]` | any machine with Maven | generates the query files for a run (every read query `REPS` times, 52 by default, each with its own parameters; write queries off) on a copy of `benchmark/` and builds the client jar with them |
+| `pg_tuning.sh`, `mem_tuning.sh` | nst-1 | apply the memory and parallelism settings described in the [main README](../../../../README.md#configuration) to PostgreSQL, ClickHouse and YARN on all nodes |
+| `svc.sh only <System>` / `svc.sh all` | nst-1 | stops every benchmarked system except the one under test on all five nodes, restarts that one so it starts on otherwise idle nodes, and waits until it is healthy; `all` starts everything again |
+| `real_bench_v3.sh` | nst-inserter | runs each system that way through all four scenarios, samples CPU/memory/disk/network on every node ([`hw_sampler.py`](../../../configuration/scripts/hw_sampler.py)), starts everything again at the end and builds the result tables ([`benchmark/results/`](../../../results/)) |
+
+Sedona's point tables are built with
+[`sedona_geoparquet/build_geoparquet_layout.sh`](../../../configuration/scripts/sedona_geoparquet/build_geoparquet_layout.sh)
+and read with `SEDONA_GEOPARQUET=crossing_points,flight_points,ride_points,geolife_points`. The other scripts
+in `realbench/` are the setups of earlier runs.
 
 The earlier single-node paper setup (`run_benchmark.sh`, which restarted the
 local Postgres and recorded `sar` samples), the distributed manager/worker mode

@@ -131,6 +131,21 @@ connection -- if a scenario's real data footprint changes, regenerate these by h
 at the new extent) before regenerating queries, or generated queries may target areas/periods with
 little or no real data.
 
+Each file holds the minimum and maximum of that scenario's own point table (longitude/latitude, and the
+timestamp as stored, i.e. the wall-clock values the queries compare against). The general queries read
+`general/scripts/spatial_bounds_<scenario>.txt` / `time_bounds_<scenario>.txt`, the scenario-specific ones
+`<scenario>/scripts/spatial_bounds.txt` / `time_bounds.txt`; both must hold the same extent.
+
+| Scenario | Longitude | Latitude | Time |
+|---|---|---|---|
+| AIS | 1.341 – 18.775 | 52.370 – 60.490 | 2024-01-01 00:00:00 – 2025-07-07 23:59:59 |
+| Aviation | 5.500 – 9.500 | 50.300 – 52.600 | 2024-01-01 00:00:01 – 2025-01-01 02:54:20 |
+| Cycling | 13.121 – 13.573 | 52.386 – 52.595 | 2026-06-01 09:22:34 – 2026-06-04 20:43:53 |
+| Geolife | 116.165 – 116.628 | 39.784 – 40.038 | 2019-06-30 22:00:00 – 2019-07-31 21:59:59 |
+
+For a benchmark run, the query files are built on a copy of this folder with
+[`scripts/realbench/build_jar.sh`](scripts/realbench/build_jar.sh), which sets the number of repetitions.
+
 ### Running the generator
 
 From inside a scenario's `scripts/` folder (paths in the script are relative to it):

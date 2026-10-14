@@ -1,30 +1,8 @@
 # GeoBenchr results — 52-repetition run (2026-10-09 to 2026-10-11)
 
-> **Preliminary results — superseded; please do not cite these numbers.** A partner review and the checks
-> that followed found the problems below. All are fixed for the re-run (2026-10-14); the setup of that run
-> is described in [Setup for the re-run](#setup-for-the-re-run).
-> - **Data.** Geolife: Postgres, ClickHouse and DuckDB lacked the first two hours (10,647,313 points) because
->   Postgres had no partition for them. Cycling: all systems except SpaceTime held 20 test rides (ids 1–20,
->   500 points) that are not part of the generated data.
-> - **Parameters.** The cycling general queries (`SpatialBBox`, `kNN`, `spatioTemporalRange`,
->   `IDsInsideRegion1Andsecond_region`) used regions in North Rhine-Westphalia, where there are no rides.
->   The Geolife time window missed the first two hours of data.
-> - **Queries.** ClickHouse did not run `CountRidesFullyInDistrictRadius` (it can); three ClickHouse Geolife
->   queries tested regions as lon/lat boxes instead of polygons; SpaceTime's `busiestDayInWeekPeriod` was wrong
->   for periods longer than a week; three SpaceTime AIS queries kept an outdated time filter. MobilityDB got the
->   general queries' parameter sets in a different order, so its warm-up repetitions were different ones.
-> - **Client.** DuckDB's client printed every result row inside the timed window.
-> - **Postgres.** The worker on nst-3 ran with Postgres' default settings (128 MB shared buffers) and its
->   point-table shards were not partitioned by time, unlike the other three workers'.
-> - **DuckDB.** The database file used the v1.0.0 storage format, which does not keep the geometry columns'
->   bounding boxes: `ST_Intersects_Extent` could not skip any row group (an empty-area query read the whole table).
-> - **Sedona.** Three of the four plain Parquet tables stored timestamps as INT96 without statistics, so time
->   filters could not skip anything, and the GeoParquet files each covered the whole area, so Sedona (which
->   skips GeoParquet only per file) could not skip anything spatially either.
-> - **ClickHouse.** Every query was limited to 10 GB of memory, and the server cap was computed while the other
->   systems were running.
-> - **Presentation.** The per-system "time to run all its queries" compared different query sets; total time is
->   now compared pair by pair over the queries both systems completed.
+> **Preliminary results from an earlier configuration — please do not cite.** These numbers will be
+> replaced by a run with the current configuration (data layout, indexes and memory settings as described
+> in the [main README](../../README.md#configuration)).
 
 Six systems answered the same 48 read queries over the same data on a five-node cluster, each system
 alone on the cluster, each query 52 times with different parameters. This page describes how the
@@ -185,24 +163,6 @@ SpaceTime's three differences are Geolife queries: its `geolife_points` has 50.5
 | Geolife `SlidingWindowActivityInRegionPerMinuteWithNonZeroID`, `SpatialBBox`, `timeAggregation` | SpaceTime | results differ from PostGIS (extra rows, above) |
 
 Of the 13,720 measured executions, 13,715 succeeded; the five failures are the ones above.
-
-## Setup for the re-run
-
-Prepared 2026-10-14 (run script [`real_bench_v3.sh`](../configuration/scripts/realbench/real_bench_v3.sh),
-jar built with [`build_jar.sh`](../configuration/scripts/realbench/build_jar.sh)). The procedure is the
-one above; what changed:
-
-| System | Data layout and indexes | Memory and parallelism |
-|---|---|---|
-| PostGIS / MobilityDB | Citus, 32 shards per table on nst-2..5, all partitioned by time; point tables clustered on their GiST index | same on every node: `shared_buffers` 16 GB, `effective_cache_size` 46 GB, `work_mem` 256 MB, `maintenance_work_mem` 2 GB, 6 parallel workers per gather, `random_page_cost` 1.1, `effective_io_concurrency` 200 |
-| ClickHouse | sorted by `(h3, timestamp, id)`; H3 cell filters ([`clickhouse_additions.md`](clickhouse_additions.md)) | no per-query limit; server cap 90 % of RAM (54 GiB), computed after a restart on otherwise idle nodes |
-| DuckDB | v1.5.0 storage format; point tables sorted by (time bucket of ~10 million rows, Hilbert curve) | `memory_limit` 80 % of RAM (49.9 GiB), 20 threads (defaults) |
-| SpaceTime | run by its developers | set by its developers |
-| Sedona | GeoParquet, one rule for all four point tables: equal-count time slabs × 64 spatial cells (Z-order), ~128 MB files sorted by timestamp, 4 MB row groups, `TIMESTAMP_MICROS` with statistics ([`GeoParquetLayout.java`](../configuration/scripts/sedona_geoparquet/GeoParquetLayout.java)) | YARN: 54 of 62 GB and 20 vcores per node; 20 executors × 5 cores × 11 GB |
-
-Every system's memory follows the vendor's recommended production values for a node with 62 GB of RAM and
-20 cores; the system under test is restarted after the others are stopped. All 48 queries were checked on
-five parameter sets each against PostGIS before the run.
 
 ## Results per scenario
 

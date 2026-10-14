@@ -34,6 +34,29 @@ which we define functions of our own (the H3 cell covers); see
 [`benchmark/results/clickhouse_additions.md`](benchmark/results/clickhouse_additions.md).
 SedonaDB is benchmarked separately with [`benchmark/sedonadb.ipynb`](benchmark/sedonadb.ipynb).
 
+## Configuration
+
+Five nodes (nst-1..5), each with 20 cores, 62 GB of RAM and two NVMe SSDs; the benchmark client runs
+on a separate host. Every system is configured with its vendor's recommended production values for
+such a node, and holds the same rows.
+
+| System | Data layout and indexes | Memory and parallelism |
+|---|---|---|
+| PostGIS / MobilityDB | Citus: coordinator on nst-1, 32 hash shards per table on nst-2..5; point tables partitioned by time and clustered on their GiST index; MobilityDB: one `tgeompoint` trajectory per trip | identical on every node: `shared_buffers` 16 GB, `effective_cache_size` 46 GB, `work_mem` 256 MB, `maintenance_work_mem` 2 GB, up to 6 parallel workers per query node, `random_page_cost` 1.1, `effective_io_concurrency` 200 |
+| ClickHouse | `ReplicatedMergeTree` on 5 shards, point tables sorted by `(h3, timestamp, id)` with min/max skip indexes on lon, lat and timestamp | server memory cap 90 % of RAM, no separate per-query limit; all cores per query |
+| DuckDB | one database file on nst-1 (storage format v1.5.0, which keeps each row group's bounding box); point tables sorted by time bucket (the calendar unit closest to 10 million rows per bucket), then Hilbert curve | `memory_limit` 80 % of RAM, 20 threads |
+| SpaceTime | operated by its developers on nst-1..5 | set by its developers |
+| Sedona | GeoParquet on HDFS (replication 2); every point table cut into time slabs of equal row counts × 64 spatial cells (Z-order), one ~128 MB file per slab and cell, sorted by timestamp, 4 MB row groups, timestamps as `TIMESTAMP_MICROS` with statistics: Sedona skips files by their bounding box and row groups by time ([`GeoParquetLayout.java`](benchmark/configuration/scripts/sedona_geoparquet/GeoParquetLayout.java)) | YARN: 54 GB and 20 vcores per node; 20 executors × 5 cores × 11 GB |
+
+**Query parameters** are drawn by a seeded generator from each scenario's own data: regions, points and
+time windows lie within the extent of that scenario's point table, and each scenario's queries use only
+its own tables. All systems receive the same parameter values.
+
+**Equivalent results.** Before a run, every query is executed on five parameter sets on every system and
+compared with PostGIS (values for results up to 2,000 rows, row counts above). Accepted differences:
+ties at equal distance in nearest-neighbour queries, numbers within 1 %, and an empty aggregate returned
+as no row or as a row with 0.
+
 ## Queries
 
 48 read queries, 12 per scenario. Six of them are the same in every scenario; the other six are
@@ -77,8 +100,10 @@ each scenario's queries, in every system's dialect, are defined in `benchmark/co
   all five nodes and the system under test is restarted (SpaceTime, run by its developers, stays up but idle).
 - **One query at a time** from a single client; each query runs **52 times with different
   parameters**, and the first two repetitions are warm-up.
-- **A timing** covers sending the query, executing it, and reading every result row on the client.
-  Each system keeps one open session for the whole run, so connecting is not timed.
+- **A timing** covers sending the query, executing it, and reading every result row on the client
+  (the client only reads the rows; nothing is printed or stored inside the timed window). Each system keeps
+  one open session for the whole run, so connecting is not timed. PostgreSQL results are streamed through
+  a cursor whose batch size adapts to the row size.
 - **Timeout:** 600 s per query, after which the query is stopped on the server. A parameter set that
   no system finishes within the limit is left out for every system (and reported).
 - **Hardware:** CPU, memory, disk and network of all nodes are sampled every 5 s.
