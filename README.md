@@ -42,7 +42,7 @@ such a node, and holds the same rows.
 
 | System | Data layout and indexes | Memory and parallelism |
 |---|---|---|
-| PostGIS / MobilityDB | Citus: coordinator on nst-1, 32 hash shards per table on nst-2..5; point tables partitioned by time and clustered on their GiST index; MobilityDB: one `tgeompoint` trajectory per trip | identical on every node: `shared_buffers` 16 GB, `effective_cache_size` 46 GB, `work_mem` 256 MB, `maintenance_work_mem` 2 GB, up to 6 parallel workers per query node, `random_page_cost` 1.1, `effective_io_concurrency` 200 |
+| PostGIS / MobilityDB | Citus: coordinator on nst-1, 32 hash shards per table on nst-2..5; point tables partitioned by time and clustered on their GiST index; MobilityDB: one `tgeompoint` trajectory per trip | identical on every node: `shared_buffers` 16 GB, `effective_cache_size` 46 GB, `work_mem` 256 MB, `maintenance_work_mem` 2 GB, up to 6 parallel workers per query node, `random_page_cost` 1.1, `effective_io_concurrency` 200, JIT off; point tables vacuumed (`VACUUM (FREEZE, ANALYZE)`) after clustering |
 | ClickHouse | `ReplicatedMergeTree` on 5 shards, point tables sorted by `(h3, timestamp, id)` with min/max skip indexes on lon, lat and timestamp | server memory cap 90 % of RAM, no separate per-query limit; all cores per query |
 | DuckDB | one database file on nst-1 (storage format v1.5.0, which keeps each row group's bounding box); point tables sorted by time bucket (the calendar unit closest to 10 million rows per bucket), then Hilbert curve | `memory_limit` 80 % of RAM, 20 threads |
 | SpaceTime | operated by its developers on nst-1..5 | set by its developers |
@@ -105,7 +105,7 @@ each scenario's queries, in every system's dialect, are defined in `benchmark/co
 - **A timing** covers sending the query, executing it, and reading every result row on the client
   (the client only reads the rows; nothing is printed or stored inside the timed window). Each system keeps
   one open session for the whole run, so connecting is not timed. PostgreSQL results are streamed through
-  a cursor whose batch size adapts to the row size.
+  a cursor, 100,000 rows per round trip.
 - **Timeout:** 600 s per query, after which the query is stopped on the server. A parameter set that
   no system finishes within the limit is left out for every system (and reported).
 - **Hardware:** CPU, memory, disk and network of all nodes are sampled every 5 s.
