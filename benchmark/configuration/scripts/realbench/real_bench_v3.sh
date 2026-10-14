@@ -21,18 +21,20 @@
 # Before starting: this host's benchmark key must be in nst-1's ~/.ssh/authorized_keys (finish() removes it
 # unless KEEP_KEY=1), and the jar must be in ~/realbench on this host and on nst-1.
 #   THREADS=n real_bench_v3.sh   log: ~/realbench/run3_t<n>.log, client logs: ~/realbench/out3_t<n>/<system>/,
-#                                results: ~/realbench/analysis3_t<n>/results/ (+ ~/realbench/realbench_results3_t<n>.tgz)
+#                                results: ~/realbench/analysis3_t<n>/results/ (+ ~/realbench/realbench_results_run3_t<n>.tgz)
 set -u
 R=$HOME/realbench
 THREADS=${THREADS:-1}
 KEEP_KEY=${KEEP_KEY:-0}
-TAG=run3_t$THREADS
-JAR=$R/benchmark_client-t$THREADS.jar
+# RUN_TAG / JAR_NAME: a separate run (e.g. a trial) with its own jar and its own output directories
+TAG=${RUN_TAG:-run3_t$THREADS}
+JAR=$R/${JAR_NAME:-benchmark_client-t$THREADS.jar}
 DEPS=$HOME/benchmark_client_deps
 LOG=$R/$TAG.log
-OUT3=$R/out3_t$THREADS
-PHASES=$R/phases3_t$THREADS.csv
-AN=$R/analysis3_t$THREADS
+OUTNAME=$([ -n "${RUN_TAG:-}" ] && echo "out_$RUN_TAG" || echo "out3_t$THREADS")
+OUT3=$R/$OUTNAME
+PHASES=$R/phases_$TAG.csv
+AN=$R/$([ -n "${RUN_TAG:-}" ] && echo "analysis_$RUN_TAG" || echo "analysis3_t$THREADS")
 HW=hw_$TAG
 N1=tim@10.1.0.11
 log() { echo "$(date -Is) $*" | tee -a "$LOG"; }
@@ -57,7 +59,7 @@ finish() {
   # collect: client logs (Sedona's from nst-1), query files of the jar, hardware samples, phase times
   A=$AN/results/raw
   mkdir -p $A/logs/$TAG $A/hardware $A/queries $OUT3/Sedona
-  scp -q -o LogLevel=ERROR "$N1:realbench/out3_t$THREADS/Sedona/*" $OUT3/Sedona/ 2>/dev/null
+  scp -q -o LogLevel=ERROR "$N1:realbench/$OUTNAME/Sedona/*" $OUT3/Sedona/ 2>/dev/null
   cp -r $OUT3/. $A/logs/$TAG/
   (cd $A/queries && unzip -q -o $JAR '*/*_queries.yaml')
   n1 "HW=$HW; TAG=$TAG; "'rm -rf ~/realbench/hw_all_$TAG && mkdir -p ~/realbench/hw_all_$TAG && for h in nst-1 nst-2 nst-3 nst-4 nst-5; do scp -q -o LogLevel=ERROR "$h:$HW/*.csv" ~/realbench/hw_all_$TAG/; done'
@@ -69,7 +71,7 @@ finish() {
   cp $R/build_results.py $AN/
   (cd $AN && RESULTS_DIR=$AN/results WARMUP_REPS=$THREADS python3 build_results.py > build.out 2>&1)
   log "results built (rc=$?): $(tail -8 $AN/build.out | tr '\n' ' ')"
-  tar -czf $R/realbench_results3_t$THREADS.tgz -C $AN results build_results.py
+  tar -czf $R/realbench_results_$TAG.tgz -C $AN results build_results.py
   log "ALL DONE"
 }
 trap finish EXIT
@@ -94,7 +96,7 @@ for SYS in "${SYSTEMS_ORDER[@]}"; do
   for SC in ais aviation cycling geolife; do
     s0=$(date -u +%Y-%m-%dT%H:%M:%SZ); log "$SYS $SC start"
     if [ "$SYS" = Sedona ]; then
-      n1 "cd ~/realbench && mkdir -p out3_t$THREADS/Sedona && cd out3_t$THREADS/Sedona && env SUT_HOST=nst-1 NUM_THREADS=$THREADS SYSTEMS=Sedona SPARK_MASTER=yarn \
+      n1 "cd ~/realbench && mkdir -p $OUTNAME/Sedona && cd $OUTNAME/Sedona && env SUT_HOST=nst-1 NUM_THREADS=$THREADS SYSTEMS=Sedona SPARK_MASTER=yarn \
           SPARK_HOME=/opt/spark HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop SEDONA_GEOPARQUET=crossing_points,flight_points,ride_points,geolife_points \
           SPARK_CONF='$SEDONA_CONF' \
           /opt/java/latest/bin/java -Xmx6g ${JAVA_OPTS[*]} -cp ~/realbench/$(basename $JAR):\$HOME/bench_sedona/deps/'*' \
