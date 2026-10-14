@@ -71,7 +71,9 @@ public class DuckDBExecutor implements QueryExecutor {
 
         } catch (Exception e) {
             if (restarts.get() != epoch) {
-                e = new RuntimeException("INTERRUPTED: the DuckDB server was restarted to stop another query that timed out ("
+                // (2026-10-14) not logged here: BenchmarkRunner retries the query once the server is back
+                // and logs only the final attempt (this message, if it was interrupted again)
+                throw new InterruptedByRestart("INTERRUPTED: the DuckDB server was restarted to stop another query that timed out ("
                         + e.getMessage() + ")", e);
             }
             QueryLogger.logError(dbType, application, queryName, runID, e);
@@ -92,10 +94,23 @@ public class DuckDBExecutor implements QueryExecutor {
     private final java.util.concurrent.atomic.AtomicLong restarts = new java.util.concurrent.atomic.AtomicLong();
 
     @Override
+    public long restarts() {
+        return restarts.get();
+    }
+
+    // (2026-10-14) BenchmarkRunner calls this while holding its gate, which no attempt (first or retry) can
+    // start without, and DUCKDB_CANCEL_CMD returns only once the server answers again: a retried query
+    // therefore always starts on the restarted server, never on the old one or during the restart.
+    @Override
     public void cancel() {
-        restarts.incrementAndGet();
+        boolean restart = cancelCommand != null && !cancelCommand.isBlank();
+        // (2026-10-14) counted only when the server is actually restarted: without a restart the other
+        // queries keep running, so they must not be taken for interrupted (and retried)
+        if (restart) {
+            restarts.incrementAndGet();
+        }
         sessions.cancelRunning();
-        if (cancelCommand == null || cancelCommand.isBlank()) {
+        if (!restart) {
             System.err.println("DUCKDB_CANCEL_CMD not set: the timed-out query keeps running on the server");
             return;
         }

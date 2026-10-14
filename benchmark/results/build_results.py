@@ -7,6 +7,7 @@ Inputs (all under results/raw/, copied there from the servers):
         [thread] [System] [scenario] SUCCESS: 'query': 123ms [rep=3 sql=1a2b3c4d at=2026-...]
         [thread] [System] [scenario] ERROR: 'query': <message> [rep=... ]
         [thread] [System] [scenario] TIMEOUT: 'query': exceeded 600000ms cutoff [rep=... ]
+        [thread] [System] [scenario] RETRIED: 'query': attempt 1 INTERRUPTED: ... [rep=... ]   (ignored)
   queries/<scenario>/<dialect>_queries.yaml   the exact queries the run executed (from the jar)
   equivalence/compare.json      cross-system comparison against PostGIS (compare_all.py)
   equivalence/h3_pairs.jsonl    ClickHouse H3 vs scan-only queries, all repetitions
@@ -60,6 +61,8 @@ EXCLUDED = {("geolife", "MobilityDB")}
 # 5-repetition run of 2026-10-07/08 (superseded/run_5rep_2026-10-08/).
 WARMUP_REPS = int(os.environ.get("WARMUP_REPS", "2"))
 
+# (2026-10-14) RETRIED lines (an attempt ended by DuckDB's server restart for another query's timeout, which the
+# client ran again) are deliberately not matched: the attempt after them, with the same rep= tag, is the execution
 LINE = re.compile(r"^\[[^\]]*\] \[(\w+)\] \[(\w+)\] (SUCCESS|ERROR|TIMEOUT): '([^']+)':\s?(.*)$")
 TAG = re.compile(r"\s\[(?:rep=(\d+) sql=([0-9a-f]{8}) )?at=([^\]]+)\]$")
 

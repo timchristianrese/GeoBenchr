@@ -20,6 +20,11 @@ public class BenchmarkRunner {
     public static final long DEFAULT_TIMEOUT_SECONDS = 600;
     // after cancelling a query, how long to wait for its execute() to return before moving on
     static final long CANCEL_GRACE_SECONDS = 300;
+    // (2026-10-14) with several client threads, DuckDB's server restart for one timed-out query also ends the
+    // other threads' queries (17 of them for 3 timeouts in an 8-thread trial), which lost those samples. Such
+    // a query is run again once the server is back, as a new execution with its own timing and timeout;
+    // at most MAX_ATTEMPTS attempts in total, so a query that keeps being interrupted cannot hold its thread for long.
+    static final int MAX_ATTEMPTS = 2;
 
     private final QueryExecutor executor;
     private final List<QueryConfig> queries;
@@ -54,6 +59,8 @@ public class BenchmarkRunner {
     List<String> tagByFuture = new ArrayList<>();
     List<AtomicLong> startByFuture = new ArrayList<>();
     List<java.util.concurrent.atomic.AtomicReference<Thread>> threadByFuture = new ArrayList<>();
+    List<AtomicLong> epochByFuture = new ArrayList<>();
+    List<java.util.concurrent.atomic.AtomicBoolean> timedOutByFuture = new ArrayList<>();
     // held by the waiting thread while it cancels a query, so the next query cannot start before the
     // system has been brought back (DuckDB's cancel restarts the server)
     Object gate = new Object();
@@ -72,22 +79,40 @@ public class BenchmarkRunner {
         String tag = String.format("rep=%d sql=%08x", rep, query.getSql().hashCode());
         AtomicLong started = new AtomicLong();
         java.util.concurrent.atomic.AtomicReference<Thread> worker = new java.util.concurrent.atomic.AtomicReference<>();
+        // (2026-10-14) executor.restarts() when the current attempt started; set with `started`, under the gate
+        AtomicLong epoch = new AtomicLong();
+        // set (under the gate) before this query is cancelled for running past the timeout: it is not retried
+        java.util.concurrent.atomic.AtomicBoolean timedOut = new java.util.concurrent.atomic.AtomicBoolean();
         Future<?> future = pool.submit(() -> {
-            synchronized (gate) {
-                worker.set(Thread.currentThread());
-                started.set(System.nanoTime());
-            }
-            QueryLogger.setTag(tag);
-            try {
-                executor.execute(query.getSql(), query.getName(), dbType, application, runID);
-            } catch (Throwable e) {
-                // the executors log their own Exceptions; anything that escapes them (an Error such
-                // as OutOfMemoryError) is logged here, so no execution can go missing from the results
-                System.err.println("Error executing query " + query.getName() + ": " + e +
-                                   " in thread " + Thread.currentThread().getName());
-                QueryLogger.logError(dbType, application, query.getName(), runID, new RuntimeException(e.toString(), e));
-            } finally {
-                QueryLogger.clearTag();
+            for (int attempt = 1; ; attempt++) {
+                // (2026-10-14) a retry waits here like any new query: the gate is held while the server
+                // restarts, so it starts on the restarted server, with its own start time and epoch
+                synchronized (gate) {
+                    worker.set(Thread.currentThread());
+                    epoch.set(executor.restarts());
+                    started.set(System.nanoTime());
+                }
+                QueryLogger.setTag(tag);
+                try {
+                    executor.execute(query.getSql(), query.getName(), dbType, application, runID);
+                } catch (QueryExecutor.InterruptedByRestart e) {
+                    // (2026-10-14) ended by a restart for another query's timeout: run it again, logging
+                    // this attempt only as RETRIED; the timed-out query itself stays a TIMEOUT
+                    if (!timedOut.get() && attempt < MAX_ATTEMPTS) {
+                        QueryLogger.logRetried(dbType, application, query.getName(), runID, e.getMessage(), attempt);
+                        continue;
+                    }
+                    QueryLogger.logError(dbType, application, query.getName(), runID, e);
+                } catch (Throwable e) {
+                    // the executors log their own Exceptions; anything that escapes them (an Error such
+                    // as OutOfMemoryError) is logged here, so no execution can go missing from the results
+                    System.err.println("Error executing query " + query.getName() + ": " + e +
+                                       " in thread " + Thread.currentThread().getName());
+                    QueryLogger.logError(dbType, application, query.getName(), runID, new RuntimeException(e.toString(), e));
+                } finally {
+                    QueryLogger.clearTag();
+                }
+                break;
             }
         });
         futures.add(future);
@@ -95,6 +120,8 @@ public class BenchmarkRunner {
         tagByFuture.add(tag);
         startByFuture.add(started);
         threadByFuture.add(worker);
+        epochByFuture.add(epoch);
+        timedOutByFuture.add(timedOut);
     }
 
     System.out.println("All queries submitted to the executor.");
@@ -113,16 +140,22 @@ public class BenchmarkRunner {
         Future<?> future = futures.get(i);
         QueryConfig query = queryByFuture.get(i);
         AtomicLong started = startByFuture.get(i);
+        AtomicLong epoch = epochByFuture.get(i);
         try {
             while (true) {
                 try {
                     future.get(1, TimeUnit.SECONDS);
                     break;
                 } catch (TimeoutException e) {
-                    long t0 = started.get();
-                    if (t0 != 0 && System.nanoTime() - t0 >= TimeUnit.SECONDS.toNanos(timeoutSeconds)) {
-                        QueryLogger.logTimeout(dbType, application, query.getName(), runID, timeoutSeconds * 1000, tagByFuture.get(i));
+                    if (pastTimeout(started, epoch)) {
                         synchronized (gate) {
+                            // (2026-10-14) checked again under the gate, where no attempt can start: an
+                            // attempt ended by a restart is being retried, and its time counts from the retry
+                            if (!pastTimeout(started, epoch)) {
+                                continue;
+                            }
+                            QueryLogger.logTimeout(dbType, application, query.getName(), runID, timeoutSeconds * 1000, tagByFuture.get(i));
+                            timedOutByFuture.get(i).set(true);
                             try {
                                 // only this query: with several client threads the others keep running
                                 executor.cancel(threadByFuture.get(i).get());
@@ -156,4 +189,15 @@ public class BenchmarkRunner {
     System.out.println("Benchmark completed. All threads finished execution.");
     System.out.println("Exiting BenchmarkRunner.");
 }
+
+    // (2026-10-14) whether the running attempt has passed the timeout. An attempt that started before the last
+    // server restart is not: the restart ended it, and it is about to fail and be retried (or logged), so the
+    // first attempt's time and the restart wait never count against the retry. Executors without restarts
+    // always report 0, so for them this is the plain check it was before.
+    private boolean pastTimeout(AtomicLong started, AtomicLong epoch) {
+        long e = epoch.get();
+        long t0 = started.get();
+        return t0 != 0 && e == executor.restarts()
+                && System.nanoTime() - t0 >= TimeUnit.SECONDS.toNanos(timeoutSeconds);
+    }
 }
