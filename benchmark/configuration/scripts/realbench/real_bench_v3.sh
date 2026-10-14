@@ -45,7 +45,7 @@ JAVA_OPTS=(-Dfile.encoding=UTF-8 --add-exports=java.base/sun.nio.ch=ALL-UNNAMED 
   --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED
   --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/sun.nio.cs=ALL-UNNAMED
   --add-opens=java.base/sun.security.action=ALL-UNNAMED --add-opens=java.base/sun.util.calendar=ALL-UNNAMED)
-SYSTEMS_ORDER=(ClickHouse SpaceTime DuckDB PostGIS MobilityDB Sedona)
+SYSTEMS_ORDER=(${SYSTEMS_LIST:-ClickHouse SpaceTime DuckDB PostGIS MobilityDB Sedona})   # SYSTEMS_LIST: a subset, in this order
 SEDONA_CONF='spark.sql.session.timeZone=UTC;spark.dynamicAllocation.enabled=false;spark.executor.instances=20;spark.executor.cores=5;spark.executor.memory=11g;spark.scheduler.mode=FAIR'
 
 DONE=0
