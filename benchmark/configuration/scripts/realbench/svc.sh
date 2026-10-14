@@ -68,11 +68,15 @@ case "${1:-status}" in
     [ "$sys" = ClickHouse ] || ch_stop
     [ "$sys" = DuckDB ] || duck_stop
     [ "$sys" = Sedona ] || hdp_stop
+    # (2026-10-14) the system under test is restarted once the others are stopped, so it starts on otherwise
+    # idle nodes: ClickHouse sizes its server memory cap (90 % of RAM) from the memory available at start-up,
+    # and kept a cap computed while every other system was running.
     case "$sys" in
-      PostGIS|MobilityDB) pg_start || { log "FATAL: postgres not healthy"; exit 1; } ;;
-      ClickHouse) ch_start || { log "FATAL: clickhouse not healthy"; exit 1; } ;;
-      DuckDB) duck_start || { log "FATAL: duckdb not healthy"; exit 1; } ;;
-      Sedona) hdp_start || { log "FATAL: hadoop/yarn not healthy"; exit 1; } ;;
+      PostGIS|MobilityDB) pg_stop; pg_start || { log "FATAL: postgres not healthy"; exit 1; } ;;
+      ClickHouse) ch_stop; ch_start || { log "FATAL: clickhouse not healthy"; exit 1; }
+                  log "clickhouse max_server_memory_usage: $(clickhouse-client --port 9500 --query "SELECT formatReadableSize(toUInt64(value)) FROM system.server_settings WHERE name = 'max_server_memory_usage'")" ;;
+      DuckDB) duck_stop; duck_start || { log "FATAL: duckdb not healthy"; exit 1; } ;;
+      Sedona) hdp_stop; hdp_start || { log "FATAL: hadoop/yarn not healthy"; exit 1; } ;;
       SpaceTime) : ;;
       *) log "FATAL: unknown system $sys"; exit 1 ;;
     esac
