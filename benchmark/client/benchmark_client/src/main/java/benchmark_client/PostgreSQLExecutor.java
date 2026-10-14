@@ -17,11 +17,11 @@ public class PostgreSQLExecutor implements QueryExecutor {
     // need another zone say so explicitly with AT TIME ZONE: Citus evaluates most expressions on the
     // workers, which never see a coordinator-side SET TIME ZONE.)
     public static final String DEFAULT_SESSION_TIME_ZONE = "Europe/Berlin";
-    // (2026-10-13) the cursor's batch size adapts to the rows (pgjdbc adaptiveFetch): as many rows per
-    // round trip as fit in MAX_RESULT_BUFFER, instead of a fixed 10,000 rows. FETCH_SIZE is only the
-    // first batch's size.
-    static final int FETCH_SIZE = 10000;
-    static final String MAX_RESULT_BUFFER = "25p";   // a quarter of the client's heap
+    // (2026-10-14) the cursor fetches 100,000 rows per round trip (was 10,000). Not pgjdbc's adaptiveFetch: it
+    // sizes batches by the rows' size on the wire, while a row held in the client takes several times that (Java
+    // object overhead), so with 8 client threads its batches of over a million small rows ran the client out of
+    // memory. 100,000 rows of a few columns are a few MB per connection; a 5-million-row result needs 50 round trips.
+    static final int FETCH_SIZE = 100000;
 
     public PostgreSQLExecutor(String url, String user, String password, String application) {
         this(url, user, password, application, DEFAULT_SESSION_TIME_ZONE);
@@ -35,8 +35,6 @@ public class PostgreSQLExecutor implements QueryExecutor {
             java.util.Properties props = new java.util.Properties();
             props.setProperty("user", user);
             if (password != null) props.setProperty("password", password);
-            props.setProperty("adaptiveFetch", "true");
-            props.setProperty("maxResultBuffer", MAX_RESULT_BUFFER);
             Connection conn = DriverManager.getConnection(url, props);
             try (Statement tz = conn.createStatement()) {
                 tz.execute("SET TIME ZONE '" + this.sessionTimeZone + "'");

@@ -158,18 +158,29 @@ queryConfigs:
   # MobilityDB keeps its trajectory form: one row per ride, adwithin() = "always within distance"
   # (rides.trip uses discrete interpolation, so this is BOOL_AND(ST_DWithin) over every point).
   mobilitydb: |
+    -- (2026-10-14) the same first/last-point prefilter as every other dialect; IN (...) so Citus plans the
+    -- candidate subquery first (rides is distributed by spatial tile, rides_summary by id)
     SELECT r.id
     FROM rides r
     JOIN berlin_districts d ON d.name = :district
+    WHERE r.id IN (
+      SELECT s.id
+      FROM rides_summary s
+      JOIN berlin_districts d2 ON d2.name = :district
+      WHERE ST_DWithin(s.start_location, d2.geom, :radius)
+        AND ST_DWithin(s.end_location, d2.geom, :radius)
+    )
     GROUP BY r.id
     HAVING BOOL_AND(adwithin(r.trip, d.geom, :radius));
   postgis: |
-    WITH d AS (
+    -- (2026-10-14) NOT MATERIALIZED: a CTE used twice is otherwise materialized as a Citus intermediate result
+    -- estimated at 1,000 rows (it is one), which made the planner sort every shard on disk for a merge join
+    WITH d AS NOT MATERIALIZED (
       SELECT geom
       FROM berlin_districts
       WHERE name = :district
     ),
-    candidates AS (
+    candidates AS NOT MATERIALIZED (
       SELECT s.id
       FROM rides_summary s, d
       WHERE ST_DWithin(s.start_location, d.geom, :radius)
