@@ -191,6 +191,17 @@ def acceptable(verdict):
     return verdict in (None, "", "reference") or verdict.startswith(("SAME", "CLOSE", "KNN", "n/a"))
 
 
+def pct(values, p):
+    """p-th percentile with linear interpolation between the closest ranks (numpy's default method)."""
+    v = sorted(values)
+    if len(v) == 1:
+        return float(v[0])
+    k = (len(v) - 1) * p / 100
+    lo = int(k)
+    hi = min(lo + 1, len(v) - 1)
+    return v[lo] + (v[hi] - v[lo]) * (k - lo)
+
+
 def summarize(execs, equiv, queries):
     planned = defaultdict(int)
     for (sc, system, q, rep) in queries:
@@ -218,6 +229,10 @@ def summarize(execs, equiv, queries):
             "median_ms": statistics.median(ok) if ok else None,
             "min_ms": min(ok) if ok else None, "max_ms": max(ok) if ok else None,
             "std_ms": round(statistics.stdev(ok), 1) if len(ok) > 1 else None,
+            # (2026-10-15) tail latency and variance over the measured repetitions (interpolated percentiles)
+            "p95_ms": round(pct(ok, 95), 1) if ok else None,
+            "p99_ms": round(pct(ok, 99), 1) if ok else None,
+            "var_ms2": round(statistics.variance(ok), 1) if len(ok) > 1 else None,
             "cv": round(statistics.stdev(ok) / statistics.mean(ok), 3) if len(ok) > 1 and statistics.mean(ok) > 0 else None,
             "equivalence": v if v is not None else ("no query" if n_plan == 0 else "not checked"),
         }
@@ -474,6 +489,17 @@ def markdown_tables(summary, winners, scores):
                 cells.append(f"**{v}**" if s == w["winner"] else v)
             out.append(f"| {w['query']} | {w['query_type']} | " + " | ".join(cells) +
                        f" | {w['winner'] or '-'} | {str(w['margin_x']) + '×' if w['margin_x'] else '-'} |")
+    # (2026-10-15) latency distribution per query and system: mean, median, p95, p99, standard deviation
+    for sc in SCENARIOS:
+        rs = [r for r in summary if r["scenario"] == sc and r["succeeded"]]
+        if not rs:
+            continue
+        out += [f"\n## {sc}: latency distribution\n",
+                "Over the measured repetitions that succeeded (n). Variance = standard deviation squared, in `summary.csv` (`var_ms2`).\n",
+                "| Query | System | n | Mean | Median | p95 | p99 | Std dev |", "|---|---|---:|---:|---:|---:|---:|---:|"]
+        for r in sorted(rs, key=lambda r: (r["query"], SYSTEMS.index(r["system"]) if r["system"] in SYSTEMS else 9)):
+            out.append(f"| {r['query']} | {r['system']} | {r['succeeded']} | {fmt_ms(r['mean_ms'])} | {fmt_ms(r['median_ms'])} | "
+                       f"{fmt_ms(r['p95_ms'])} | {fmt_ms(r['p99_ms'])} | {fmt_ms(r['std_ms'])} |")
     out += ["\n## Total runtime, pair by pair\n",
             "Sum of the measured repetitions' runtimes over only the queries both systems completed.\n",
             "| System A | System B | Common queries | A | B | A / B |", "|---|---|---:|---:|---:|---:|"]
