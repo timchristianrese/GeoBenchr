@@ -76,16 +76,18 @@ def java_hash(s):
     return "%08x" % h
 
 
-def broken_params(params):
+def broken_params(params, sql=""):
     """A parameter with an unescaped quote (the harbour "'t Waar" before the generator fix of 2026-10-09)
-    makes the query a syntax error on every system; such parameter sets are left out for all systems."""
+    makes the query a syntax error on every system; such parameter sets are left out for all systems.
+    (2026-10-16) Only when the value reaches the SQL unescaped; since the fix, the quote is doubled in the SQL."""
     def strings(p):
         if isinstance(p, list):
             for x in p:
                 yield from strings(x)
         elif isinstance(p, str):
             yield p
-    return any(v.count("'") % 2 == 1 for v in strings(params or []))
+    # the correctly escaped literal, quotes included: "'''t Waar'" (the broken SQL had "''t Waar'")
+    return any(v.count("'") % 2 == 1 and "'" + v.replace("'", "''") + "'" not in (sql or "") for v in strings(params or []))
 
 
 INVALID = set()   # (scenario, query, rep) with broken parameters, filled by load_queries
@@ -115,7 +117,7 @@ def load_queries():
                 if not (e.get("sql") or "").strip() or (sc, system) in EXCLUDED:
                     continue
                 reps[e["name"]] += 1
-                if broken_params(e.get("params")):
+                if broken_params(e.get("params"), e.get("sql")):
                     INVALID.add((sc, e["name"], reps[e["name"]]))
                 out[(sc, system, e["name"], reps[e["name"]])] = {
                     "sql": e["sql"], "params": e.get("params"), "type": e.get("type"), "hash": java_hash(e["sql"])}

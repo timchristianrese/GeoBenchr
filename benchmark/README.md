@@ -6,7 +6,7 @@ The benchmark client, the query configuration it reads, and the results.
 |---|---|
 | [`client/`](client/README.md) | the Java benchmark client: one executor per system, repetitions, timeouts, logging ([full documentation](client/benchmark_client/docs/README.md)) |
 | [`configuration/`](configuration/README.md) | the queries of each scenario in every system's dialect (`<scenario>/config/combinedBenchConf.yaml`), the generators that draw their parameters, and the scripts used to prepare the systems and run the benchmark (`scripts/`; the isolated benchmark runs are in `scripts/realbench/`) |
-| [`results/`](results/README.md) | methodology and results: `build_results.py` turns the raw client logs, query files and hardware samples into CSV tables and plots; `analysis.ipynb` explores them |
+| [`results/`](results/README.md) | methodology and results, one folder per run (read-only with 1, 4 and 8 client threads; read-write): `build_results.py` turns the raw client logs, query files and hardware samples into CSV tables and plots |
 | `sedonadb.ipynb` | SedonaDB (separate from Apache Sedona): data loading and benchmark in one notebook |
 
 A run in short: generate the queries (`configuration/<scenario>/scripts/generateParameterVariations.py`),

@@ -1,0 +1,434 @@
+# Read-only, 1 client thread
+
+Run of 2026-10-14 to 2026-10-16. Every system alone on the five-node cluster, one system after the other; 1 client thread taking the queries from one shared queue. Each of the 48 read queries runs with **128 measured parameter sets** (the same sets in every client-thread run) after 1 warm-up repetition. Timeout 600 s per query. The configuration of every system is described in the [main README](../../../../README.md#configuration). All numbers below come from the CSV files in this folder (`build_results.py`, `empty_results.py`); [`tables.md`](tables.md) has every table in full.
+
+## Summary
+
+| System | Queries won | Ranked on | Geo-mean slowdown vs fastest | Median slowdown | Measured executions | Failed |
+|---|---:|---:|---:|---:|---:|---:|
+| ClickHouse | 16 | 48 of 48 | 1.74× | 1.44× | 6,144 | 2 |
+| DuckDB | 16 | 48 of 48 | 3.22× | 2.64× | 6,144 | 2 |
+| SpaceTime | 12 | 42 of 48 | 2.18× | 2.03× | 6,144 | 2 |
+| PostGIS | 4 | 48 of 48 | 4.67× | 4.88× | 6,144 | 2 |
+| Sedona | 0 | 48 of 48 | 21.89× | 17.44× | 6,144 | 2 |
+| MobilityDB | 0 | 36 of 36 | 30.45× | 22.99× | 4,608 | 2 |
+
+*Slowdown*: a system's mean runtime on a query divided by the fastest ranked system's, over the queries the system is ranked on. A system is ranked on a query when every measured repetition succeeded and its results match PostGIS (pre-run equivalence check; accepted: nearest-neighbour ties, numbers within 1 %, an empty answer as no row or one row of zeros).
+
+**Wins by scenario and by query type:**
+
+| | PostGIS | ClickHouse | DuckDB | SpaceTime |
+|---|---:|---:|---:|---:|
+| AIS | 2 | 3 | 4 | 3 |
+| Aviation | 1 | 3 | 4 | 4 |
+| Cycling | 1 | 1 | 7 | 3 |
+| Geolife | – | 9 | 1 | 2 |
+| spatial | 3 | 9 | 1 | 3 |
+| temporal | – | 4 | 11 | 1 |
+| spatiotemporal | 1 | 3 | 4 | 8 |
+
+## Total runtime, pair by pair
+
+Sum of the measured repetitions' runtimes over only the queries both systems completed.
+
+| System A | System B | Common queries | A | B | A / B |
+|---|---|---:|---:|---:|---:|
+| PostGIS | MobilityDB | 36 | 56.3 min | 638.7 min | 0.09 |
+| PostGIS | ClickHouse | 48 | 102.9 min | 30.2 min | 3.41 |
+| PostGIS | DuckDB | 48 | 102.9 min | 182.3 min | 0.56 |
+| PostGIS | SpaceTime | 48 | 102.9 min | 54.9 min | 1.87 |
+| PostGIS | Sedona | 48 | 102.9 min | 554.2 min | 0.19 |
+| MobilityDB | ClickHouse | 36 | 638.7 min | 25.4 min | 25.13 |
+| MobilityDB | DuckDB | 36 | 638.7 min | 119.8 min | 5.33 |
+| MobilityDB | SpaceTime | 36 | 638.7 min | 35.4 min | 18.03 |
+| MobilityDB | Sedona | 36 | 638.7 min | 458.5 min | 1.39 |
+| ClickHouse | DuckDB | 48 | 30.2 min | 182.3 min | 0.17 |
+| ClickHouse | SpaceTime | 48 | 30.2 min | 54.9 min | 0.55 |
+| ClickHouse | Sedona | 48 | 30.2 min | 554.2 min | 0.05 |
+| DuckDB | SpaceTime | 48 | 182.3 min | 54.9 min | 3.32 |
+| DuckDB | Sedona | 48 | 182.3 min | 554.2 min | 0.33 |
+| SpaceTime | Sedona | 48 | 54.9 min | 554.2 min | 0.1 |
+
+## Failures
+
+Parameter sets left out for every system:
+
+| Scenario | Query | Repetition | Reason |
+|---|---|---:|---|
+| ais | countActiveCrossingsNearIsland | 14 | every system timed out |
+| ais | countActiveCrossingsNearIsland | 118 | every system timed out |
+
+Measured executions that did not succeed (including those in the parameter sets above):
+
+| System | Scenario | Query | Status | Count |
+|---|---|---|---|---:|
+| ClickHouse | ais | countActiveCrossingsNearIsland | timeout | 2 |
+| DuckDB | ais | countActiveCrossingsNearIsland | timeout | 2 |
+| MobilityDB | ais | countActiveCrossingsNearIsland | timeout | 2 |
+| PostGIS | ais | countActiveCrossingsNearIsland | timeout | 2 |
+| Sedona | ais | countActiveCrossingsNearIsland | timeout | 2 |
+| SpaceTime | ais | countActiveCrossingsNearIsland | timeout | 2 |
+
+## Not ranked
+
+| Scenario | Query | System | Reason |
+|---|---|---|---|
+| cycling | kNN | SpaceTime | DIFF 0 vs 5 rows, e.g. postgis=[('18', '0101000020110F0000001C475B298A36412932E34001475A41 |
+| geolife | ClosestRestaurantToPoint | SpaceTime | DIFF 1 vs 1 rows, e.g. postgis=[('0', '2019-07-10 11:29:06', '8099', 'Restaurant', '', '', |
+| geolife | IDsInsideRegion1Andsecond_region | SpaceTime | DIFF 1 vs 1 rows, e.g. postgis=[('43234',)] spacetime=[('43687',)] [2/5 parameter sets] |
+| geolife | SlidingWindowActivityInRegionPerMinuteWithNonZeroID | SpaceTime | DIFF 1720 vs 1720 rows, e.g. postgis=[('2019-07-23 02:25:00', '46448')] spacetime=[('2019- |
+| geolife | UniqueUsersPerHourInRegionInPeriod | SpaceTime | DIFF 91 vs 91 rows, e.g. postgis=[('2019-07-10 15:00:00', '68485')] spacetime=[('2019-07-1 |
+| geolife | timeAggregation | SpaceTime | DIFF 1 vs 1 rows, e.g. postgis=[('685388', '3.96089e+07', '297')] spacetime=[('685151', '4 |
+
+## Latency per query
+
+Mean, median, 95th and 99th percentile and standard deviation over the measured repetitions that succeeded (n); the variance (standard deviation squared, ms²) is in `summary.csv` (`var_ms2`). **Bold**: fastest ranked system on the query (by mean).
+
+### AIS
+
+| Query | System | n | Mean | Median | p95 | p99 | Std dev |
+|---|---|---:|---:|---:|---:|---:|---:|
+| CrossingsActiveAtGivenHourOfDay | PostGIS | 128 | 34 ms | 30 ms | 52 ms | 54 ms | 13 ms |
+| CrossingsActiveAtGivenHourOfDay | MobilityDB | 128 | 56 ms | 52 ms | 103 ms | 125 ms | 27 ms |
+| CrossingsActiveAtGivenHourOfDay | ClickHouse | 128 | 17 ms | 16 ms | 23 ms | 26 ms | 3 ms |
+| CrossingsActiveAtGivenHourOfDay | **DuckDB** | 128 | **6 ms** | 5 ms | 11 ms | 16 ms | 4 ms |
+| CrossingsActiveAtGivenHourOfDay | SpaceTime | 128 | 24 ms | 24 ms | 28 ms | 30 ms | 2 ms |
+| CrossingsActiveAtGivenHourOfDay | Sedona | 128 | 133 ms | 126 ms | 192 ms | 274 ms | 31 ms |
+| HarbourActivityInPeriod | **PostGIS** | 128 | **29 ms** | 16 ms | 93 ms | 138 ms | 28 ms |
+| HarbourActivityInPeriod | MobilityDB | 128 | 21.58 s | 20.09 s | 37.11 s | 42.81 s | 8.90 s |
+| HarbourActivityInPeriod | ClickHouse | 128 | 35 ms | 33 ms | 49 ms | 67 ms | 8 ms |
+| HarbourActivityInPeriod | DuckDB | 128 | 34 ms | 30 ms | 48 ms | 75 ms | 38 ms |
+| HarbourActivityInPeriod | SpaceTime | 128 | 34 ms | 33 ms | 49 ms | 53 ms | 6 ms |
+| HarbourActivityInPeriod | Sedona | 128 | 1.53 s | 1.53 s | 2.26 s | 2.48 s | 458 ms |
+| IDsInsideRegion1Andsecond_region | PostGIS | 128 | 1.47 s | 1.43 s | 1.93 s | 2.15 s | 285 ms |
+| IDsInsideRegion1Andsecond_region | MobilityDB | 128 | 18.60 s | 17.19 s | 35.95 s | 41.48 s | 7.83 s |
+| IDsInsideRegion1Andsecond_region | ClickHouse | 128 | 126 ms | 125 ms | 144 ms | 166 ms | 12 ms |
+| IDsInsideRegion1Andsecond_region | DuckDB | 128 | 306 ms | 264 ms | 584 ms | 712 ms | 129 ms |
+| IDsInsideRegion1Andsecond_region | **SpaceTime** | 128 | **55 ms** | 44 ms | 123 ms | 138 ms | 31 ms |
+| IDsInsideRegion1Andsecond_region | Sedona | 128 | 1.38 s | 1.36 s | 1.74 s | 2.10 s | 211 ms |
+| SpatialBBox | PostGIS | 128 | 2.34 s | 1.61 s | 7.19 s | 9.21 s | 2.57 s |
+| SpatialBBox | MobilityDB | 128 | 2.56 s | 1.75 s | 7.41 s | 10.05 s | 2.76 s |
+| SpatialBBox | **ClickHouse** | 128 | **130 ms** | 100 ms | 242 ms | 554 ms | 85 ms |
+| SpatialBBox | DuckDB | 128 | 3.57 s | 675 ms | 13.97 s | 19.46 s | 5.33 s |
+| SpatialBBox | SpaceTime | 128 | 286 ms | 192 ms | 771 ms | 905 ms | 256 ms |
+| SpatialBBox | Sedona | 128 | 5.33 s | 4.11 s | 12.41 s | 15.43 s | 3.52 s |
+| busiestDayInWeekPeriod | PostGIS | 128 | 40 ms | 32 ms | 84 ms | 94 ms | 19 ms |
+| busiestDayInWeekPeriod | MobilityDB | 128 | 65 ms | 62 ms | 113 ms | 131 ms | 29 ms |
+| busiestDayInWeekPeriod | ClickHouse | 128 | 18 ms | 17 ms | 25 ms | 28 ms | 4 ms |
+| busiestDayInWeekPeriod | **DuckDB** | 128 | **6 ms** | 5 ms | 11 ms | 16 ms | 4 ms |
+| busiestDayInWeekPeriod | SpaceTime | 128 | 33 ms | 33 ms | 37 ms | 39 ms | 2 ms |
+| busiestDayInWeekPeriod | Sedona | 128 | 178 ms | 169 ms | 237 ms | 286 ms | 29 ms |
+| countActiveCrossingsNearIsland | PostGIS | 126 | 290 ms | 53 ms | 1.44 s | 3.10 s | 828 ms |
+| countActiveCrossingsNearIsland | MobilityDB | 126 | 35.71 s | 36.08 s | 80.63 s | 115.66 s | 26.53 s |
+| countActiveCrossingsNearIsland | ClickHouse | 126 | 1.27 s | 142 ms | 4.46 s | 11.81 s | 5.53 s |
+| countActiveCrossingsNearIsland | DuckDB | 126 | 534 ms | 312 ms | 1.63 s | 2.44 s | 701 ms |
+| countActiveCrossingsNearIsland | **SpaceTime** | 126 | **181 ms** | 120 ms | 447 ms | 876 ms | 171 ms |
+| countActiveCrossingsNearIsland | Sedona | 126 | 46.97 s | 46.70 s | 49.48 s | 50.14 s | 1.42 s |
+| crossingsAroundHarbour | PostGIS | 128 | 60 ms | 38 ms | 181 ms | 334 ms | 73 ms |
+| crossingsAroundHarbour | MobilityDB | 128 | 29.19 s | 24.04 s | 69.28 s | 100.15 s | 23.46 s |
+| crossingsAroundHarbour | **ClickHouse** | 128 | **51 ms** | 45 ms | 78 ms | 143 ms | 20 ms |
+| crossingsAroundHarbour | DuckDB | 128 | 333 ms | 256 ms | 695 ms | 956 ms | 191 ms |
+| crossingsAroundHarbour | SpaceTime | 128 | 124 ms | 106 ms | 219 ms | 252 ms | 48 ms |
+| crossingsAroundHarbour | Sedona | 128 | 46.86 s | 46.44 s | 49.40 s | 49.84 s | 1.13 s |
+| islandOrCoastLineCrossingsInPeriod | PostGIS | 128 | 45 ms | 16 ms | 128 ms | 230 ms | 51 ms |
+| islandOrCoastLineCrossingsInPeriod | MobilityDB | 128 | 21.86 s | 20.96 s | 38.97 s | 46.46 s | 9.59 s |
+| islandOrCoastLineCrossingsInPeriod | ClickHouse | 128 | 121 ms | 100 ms | 218 ms | 386 ms | 57 ms |
+| islandOrCoastLineCrossingsInPeriod | **DuckDB** | 128 | **33 ms** | 30 ms | 53 ms | 88 ms | 12 ms |
+| islandOrCoastLineCrossingsInPeriod | SpaceTime | 128 | 36 ms | 33 ms | 52 ms | 92 ms | 13 ms |
+| islandOrCoastLineCrossingsInPeriod | Sedona | 128 | 1.47 s | 1.47 s | 2.23 s | 2.40 s | 452 ms |
+| kNN | **PostGIS** | 128 | **52 ms** | 50 ms | 90 ms | 164 ms | 26 ms |
+| kNN | MobilityDB | 128 | 82 ms | 76 ms | 129 ms | 195 ms | 33 ms |
+| kNN | ClickHouse | 128 | 110 ms | 98 ms | 229 ms | 348 ms | 64 ms |
+| kNN | DuckDB | 128 | 388 ms | 266 ms | 986 ms | 1.33 s | 282 ms |
+| kNN | SpaceTime | 128 | 113 ms | 109 ms | 187 ms | 221 ms | 42 ms |
+| kNN | Sedona | 128 | 3.05 s | 2.33 s | 6.54 s | 7.38 s | 1.53 s |
+| spatioTemporalRange | PostGIS | 128 | 176 ms | 134 ms | 451 ms | 833 ms | 172 ms |
+| spatioTemporalRange | MobilityDB | 128 | 17.88 s | 16.41 s | 31.88 s | 41.91 s | 7.95 s |
+| spatioTemporalRange | ClickHouse | 128 | 71 ms | 69 ms | 86 ms | 92 ms | 9 ms |
+| spatioTemporalRange | DuckDB | 128 | 59 ms | 32 ms | 190 ms | 285 ms | 59 ms |
+| spatioTemporalRange | **SpaceTime** | 128 | **34 ms** | 26 ms | 83 ms | 96 ms | 19 ms |
+| spatioTemporalRange | Sedona | 128 | 526 ms | 524 ms | 697 ms | 782 ms | 109 ms |
+| timeAggregation | PostGIS | 128 | 510 ms | 480 ms | 779 ms | 1.11 s | 146 ms |
+| timeAggregation | MobilityDB | 128 | 19.06 s | 18.57 s | 33.95 s | 38.69 s | 7.86 s |
+| timeAggregation | **ClickHouse** | 128 | **126 ms** | 112 ms | 172 ms | 524 ms | 75 ms |
+| timeAggregation | DuckDB | 128 | 130 ms | 128 ms | 163 ms | 174 ms | 18 ms |
+| timeAggregation | SpaceTime | 128 | 432 ms | 424 ms | 670 ms | 722 ms | 129 ms |
+| timeAggregation | Sedona | 128 | 764 ms | 736 ms | 993 ms | 1.07 s | 127 ms |
+| timeInterval | PostGIS | 128 | 33 ms | 32 ms | 47 ms | 49 ms | 7 ms |
+| timeInterval | MobilityDB | 128 | 51 ms | 47 ms | 78 ms | 91 ms | 17 ms |
+| timeInterval | ClickHouse | 128 | 12 ms | 12 ms | 16 ms | 17 ms | 2 ms |
+| timeInterval | **DuckDB** | 128 | **7 ms** | 7 ms | 12 ms | 17 ms | 3 ms |
+| timeInterval | SpaceTime | 128 | 23 ms | 23 ms | 26 ms | 31 ms | 4 ms |
+| timeInterval | Sedona | 128 | 141 ms | 138 ms | 164 ms | 184 ms | 12 ms |
+
+### Aviation
+
+| Query | System | n | Mean | Median | p95 | p99 | Std dev |
+|---|---|---:|---:|---:|---:|---:|---:|
+| CityActivityAtInstant | PostGIS | 128 | 27 ms | 30 ms | 39 ms | 41 ms | 9 ms |
+| CityActivityAtInstant | MobilityDB | 128 | 424 ms | 292 ms | 1.22 s | 1.59 s | 334 ms |
+| CityActivityAtInstant | ClickHouse | 128 | 29 ms | 28 ms | 36 ms | 46 ms | 5 ms |
+| CityActivityAtInstant | **DuckDB** | 128 | **14 ms** | 13 ms | 21 ms | 28 ms | 3 ms |
+| CityActivityAtInstant | SpaceTime | 128 | 31 ms | 31 ms | 36 ms | 38 ms | 3 ms |
+| CityActivityAtInstant | Sedona | 128 | 312 ms | 282 ms | 476 ms | 530 ms | 73 ms |
+| FlightsAtLowAltitudeInPeriod | PostGIS | 128 | 2.07 s | 1.98 s | 4.17 s | 4.91 s | 1.32 s |
+| FlightsAtLowAltitudeInPeriod | MobilityDB | 128 | 7.13 s | 7.29 s | 11.93 s | 13.43 s | 3.06 s |
+| FlightsAtLowAltitudeInPeriod | ClickHouse | 128 | 215 ms | 193 ms | 333 ms | 500 ms | 77 ms |
+| FlightsAtLowAltitudeInPeriod | **DuckDB** | 128 | **132 ms** | 137 ms | 215 ms | 254 ms | 54 ms |
+| FlightsAtLowAltitudeInPeriod | SpaceTime | 128 | 211 ms | 180 ms | 477 ms | 826 ms | 154 ms |
+| FlightsAtLowAltitudeInPeriod | Sedona | 128 | 924 ms | 721 ms | 1.94 s | 2.84 s | 553 ms |
+| FlightsAtNightInPeriod | PostGIS | 128 | 87 ms | 73 ms | 155 ms | 245 ms | 42 ms |
+| FlightsAtNightInPeriod | MobilityDB | 128 | 93 ms | 82 ms | 171 ms | 220 ms | 38 ms |
+| FlightsAtNightInPeriod | ClickHouse | 128 | 26 ms | 24 ms | 40 ms | 43 ms | 7 ms |
+| FlightsAtNightInPeriod | DuckDB | 128 | 77 ms | 76 ms | 105 ms | 125 ms | 15 ms |
+| FlightsAtNightInPeriod | **SpaceTime** | 128 | **19 ms** | 19 ms | 23 ms | 24 ms | 3 ms |
+| FlightsAtNightInPeriod | Sedona | 128 | 133 ms | 130 ms | 160 ms | 174 ms | 14 ms |
+| IDsInsideRegion1Andsecond_region | PostGIS | 128 | 1.13 s | 1.19 s | 1.67 s | 1.86 s | 265 ms |
+| IDsInsideRegion1Andsecond_region | MobilityDB | 128 | 889 ms | 682 ms | 1.96 s | 2.10 s | 494 ms |
+| IDsInsideRegion1Andsecond_region | ClickHouse | 128 | 48 ms | 48 ms | 59 ms | 64 ms | 8 ms |
+| IDsInsideRegion1Andsecond_region | DuckDB | 128 | 148 ms | 149 ms | 169 ms | 173 ms | 12 ms |
+| IDsInsideRegion1Andsecond_region | **SpaceTime** | 128 | **29 ms** | 29 ms | 34 ms | 38 ms | 3 ms |
+| IDsInsideRegion1Andsecond_region | Sedona | 128 | 1.08 s | 834 ms | 2.01 s | 2.18 s | 458 ms |
+| SpatialBBox | PostGIS | 128 | 677 ms | 663 ms | 1.00 s | 1.40 s | 227 ms |
+| SpatialBBox | MobilityDB | 128 | 734 ms | 649 ms | 1.55 s | 1.66 s | 341 ms |
+| SpatialBBox | **ClickHouse** | 128 | **43 ms** | 42 ms | 58 ms | 64 ms | 8 ms |
+| SpatialBBox | DuckDB | 128 | 2.31 s | 2.33 s | 3.53 s | 3.67 s | 788 ms |
+| SpatialBBox | SpaceTime | 128 | 181 ms | 191 ms | 246 ms | 267 ms | 49 ms |
+| SpatialBBox | Sedona | 128 | 3.93 s | 3.79 s | 5.94 s | 6.83 s | 1.04 s |
+| countFlightsInCounties | PostGIS | 128 | 2.59 s | 2.13 s | 6.03 s | 7.50 s | 1.64 s |
+| countFlightsInCounties | MobilityDB | 128 | 31.05 s | 29.46 s | 56.10 s | 65.71 s | 14.27 s |
+| countFlightsInCounties | **ClickHouse** | 128 | **375 ms** | 330 ms | 758 ms | 798 ms | 158 ms |
+| countFlightsInCounties | DuckDB | 128 | 13.73 s | 11.93 s | 34.65 s | 34.79 s | 8.63 s |
+| countFlightsInCounties | SpaceTime | 128 | 642 ms | 604 ms | 1.20 s | 1.52 s | 302 ms |
+| countFlightsInCounties | Sedona | 128 | 34.82 s | 34.88 s | 35.73 s | 36.00 s | 634 ms |
+| flightClosestToPoint | PostGIS | 128 | 76 ms | 70 ms | 114 ms | 120 ms | 18 ms |
+| flightClosestToPoint | MobilityDB | 128 | 7.32 s | 7.06 s | 14.17 s | 16.60 s | 4.17 s |
+| flightClosestToPoint | **ClickHouse** | 128 | **37 ms** | 35 ms | 60 ms | 69 ms | 11 ms |
+| flightClosestToPoint | DuckDB | 128 | 260 ms | 238 ms | 416 ms | 513 ms | 84 ms |
+| flightClosestToPoint | SpaceTime | 128 | 105 ms | 91 ms | 191 ms | 250 ms | 43 ms |
+| flightClosestToPoint | Sedona | 128 | 2.14 s | 2.09 s | 2.91 s | 3.28 s | 409 ms |
+| flightsInCountyInPeriod | PostGIS | 128 | 229 ms | 196 ms | 512 ms | 672 ms | 138 ms |
+| flightsInCountyInPeriod | MobilityDB | 128 | 991 ms | 950 ms | 1.98 s | 2.63 s | 574 ms |
+| flightsInCountyInPeriod | ClickHouse | 128 | 90 ms | 82 ms | 150 ms | 173 ms | 31 ms |
+| flightsInCountyInPeriod | DuckDB | 128 | 316 ms | 251 ms | 773 ms | 1.04 s | 250 ms |
+| flightsInCountyInPeriod | **SpaceTime** | 128 | **42 ms** | 40 ms | 65 ms | 74 ms | 11 ms |
+| flightsInCountyInPeriod | Sedona | 128 | 1.53 s | 1.33 s | 3.71 s | 4.24 s | 940 ms |
+| kNN | **PostGIS** | 128 | **41 ms** | 40 ms | 52 ms | 53 ms | 7 ms |
+| kNN | MobilityDB | 128 | 43 ms | 46 ms | 53 ms | 56 ms | 10 ms |
+| kNN | ClickHouse | 128 | 47 ms | 46 ms | 72 ms | 80 ms | 14 ms |
+| kNN | DuckDB | 128 | 330 ms | 322 ms | 559 ms | 625 ms | 116 ms |
+| kNN | SpaceTime | 128 | 66 ms | 65 ms | 79 ms | 90 ms | 8 ms |
+| kNN | Sedona | 128 | 2.77 s | 2.71 s | 3.81 s | 4.33 s | 615 ms |
+| spatioTemporalRange | PostGIS | 128 | 142 ms | 138 ms | 175 ms | 208 ms | 20 ms |
+| spatioTemporalRange | MobilityDB | 128 | 712 ms | 565 ms | 1.58 s | 1.71 s | 369 ms |
+| spatioTemporalRange | ClickHouse | 128 | 29 ms | 29 ms | 36 ms | 40 ms | 4 ms |
+| spatioTemporalRange | DuckDB | 128 | 38 ms | 38 ms | 54 ms | 58 ms | 10 ms |
+| spatioTemporalRange | **SpaceTime** | 128 | **24 ms** | 23 ms | 28 ms | 30 ms | 4 ms |
+| spatioTemporalRange | Sedona | 128 | 424 ms | 334 ms | 947 ms | 1.19 s | 227 ms |
+| timeAggregation | PostGIS | 128 | 832 ms | 886 ms | 1.29 s | 1.51 s | 242 ms |
+| timeAggregation | MobilityDB | 128 | 1.07 s | 828 ms | 1.95 s | 2.07 s | 448 ms |
+| timeAggregation | ClickHouse | 128 | 111 ms | 114 ms | 154 ms | 180 ms | 22 ms |
+| timeAggregation | **DuckDB** | 128 | **79 ms** | 79 ms | 87 ms | 90 ms | 5 ms |
+| timeAggregation | SpaceTime | 128 | 201 ms | 200 ms | 221 ms | 229 ms | 11 ms |
+| timeAggregation | Sedona | 128 | 561 ms | 470 ms | 1.18 s | 1.37 s | 239 ms |
+| timeInterval | PostGIS | 128 | 338 ms | 328 ms | 571 ms | 622 ms | 103 ms |
+| timeInterval | MobilityDB | 128 | 1.06 s | 1.16 s | 1.40 s | 1.57 s | 287 ms |
+| timeInterval | ClickHouse | 128 | 85 ms | 86 ms | 117 ms | 138 ms | 18 ms |
+| timeInterval | **DuckDB** | 128 | **62 ms** | 61 ms | 73 ms | 76 ms | 6 ms |
+| timeInterval | SpaceTime | 128 | 120 ms | 120 ms | 140 ms | 146 ms | 12 ms |
+| timeInterval | Sedona | 128 | 552 ms | 407 ms | 1.24 s | 1.45 s | 302 ms |
+
+### Cycling
+
+| Query | System | n | Mean | Median | p95 | p99 | Std dev |
+|---|---|---:|---:|---:|---:|---:|---:|
+| AverageUpdatesPerRideInDistrictInPeriod | PostGIS | 128 | 224 ms | 178 ms | 526 ms | 751 ms | 157 ms |
+| AverageUpdatesPerRideInDistrictInPeriod | MobilityDB | 128 | 1.15 s | 1.04 s | 2.42 s | 3.40 s | 693 ms |
+| AverageUpdatesPerRideInDistrictInPeriod | ClickHouse | 128 | 128 ms | 115 ms | 230 ms | 274 ms | 54 ms |
+| AverageUpdatesPerRideInDistrictInPeriod | DuckDB | 128 | 451 ms | 292 ms | 1.49 s | 1.71 s | 449 ms |
+| AverageUpdatesPerRideInDistrictInPeriod | **SpaceTime** | 128 | **90 ms** | 71 ms | 222 ms | 290 ms | 64 ms |
+| AverageUpdatesPerRideInDistrictInPeriod | Sedona | 128 | 562 ms | 553 ms | 893 ms | 995 ms | 194 ms |
+| CountRidesFullyInDistrictRadius | PostGIS | 128 | 7.62 s | 4.87 s | 23.06 s | 25.41 s | 6.67 s |
+| CountRidesFullyInDistrictRadius | MobilityDB | 128 | 42.19 s | 25.43 s | 108.89 s | 119.70 s | 33.41 s |
+| CountRidesFullyInDistrictRadius | ClickHouse | 128 | 4.52 s | 3.26 s | 11.64 s | 12.46 s | 3.06 s |
+| CountRidesFullyInDistrictRadius | **DuckDB** | 128 | **4.05 s** | 3.40 s | 7.92 s | 8.43 s | 1.73 s |
+| CountRidesFullyInDistrictRadius | SpaceTime | 128 | 10.63 s | 7.69 s | 24.41 s | 26.57 s | 6.66 s |
+| CountRidesFullyInDistrictRadius | Sedona | 128 | 40.86 s | 40.65 s | 43.00 s | 44.23 s | 1.16 s |
+| IDsInsideRegion1Andsecond_region | PostGIS | 128 | 467 ms | 487 ms | 768 ms | 1.22 s | 239 ms |
+| IDsInsideRegion1Andsecond_region | MobilityDB | 128 | 691 ms | 720 ms | 1.00 s | 1.08 s | 251 ms |
+| IDsInsideRegion1Andsecond_region | ClickHouse | 128 | 112 ms | 120 ms | 189 ms | 214 ms | 51 ms |
+| IDsInsideRegion1Andsecond_region | DuckDB | 128 | 82 ms | 84 ms | 157 ms | 226 ms | 46 ms |
+| IDsInsideRegion1Andsecond_region | **SpaceTime** | 128 | **31 ms** | 27 ms | 53 ms | 71 ms | 12 ms |
+| IDsInsideRegion1Andsecond_region | Sedona | 128 | 501 ms | 535 ms | 740 ms | 759 ms | 165 ms |
+| RidesAcrossMultipleHours | PostGIS | 128 | 327 ms | 317 ms | 569 ms | 772 ms | 145 ms |
+| RidesAcrossMultipleHours | MobilityDB | 128 | 12.33 s | 10.51 s | 26.48 s | 29.40 s | 8.39 s |
+| RidesAcrossMultipleHours | ClickHouse | 128 | 204 ms | 184 ms | 393 ms | 454 ms | 109 ms |
+| RidesAcrossMultipleHours | **DuckDB** | 128 | **74 ms** | 72 ms | 140 ms | 162 ms | 43 ms |
+| RidesAcrossMultipleHours | SpaceTime | 128 | 464 ms | 384 ms | 1.03 s | 1.35 s | 333 ms |
+| RidesAcrossMultipleHours | Sedona | 128 | 454 ms | 442 ms | 647 ms | 803 ms | 124 ms |
+| RidesDuringRushHourInPeriod | PostGIS | 128 | 463 ms | 456 ms | 830 ms | 1.11 s | 222 ms |
+| RidesDuringRushHourInPeriod | MobilityDB | 128 | 1.17 s | 1.11 s | 2.36 s | 2.74 s | 700 ms |
+| RidesDuringRushHourInPeriod | ClickHouse | 128 | 156 ms | 125 ms | 343 ms | 392 ms | 76 ms |
+| RidesDuringRushHourInPeriod | **DuckDB** | 128 | **29 ms** | 22 ms | 74 ms | 88 ms | 20 ms |
+| RidesDuringRushHourInPeriod | SpaceTime | 128 | 180 ms | 146 ms | 448 ms | 671 ms | 137 ms |
+| RidesDuringRushHourInPeriod | Sedona | 128 | 354 ms | 323 ms | 560 ms | 679 ms | 115 ms |
+| RidesPastOrToUniversityInPeriod | PostGIS | 128 | 71 ms | 60 ms | 172 ms | 266 ms | 49 ms |
+| RidesPastOrToUniversityInPeriod | MobilityDB | 128 | 1.41 s | 1.35 s | 2.65 s | 3.36 s | 760 ms |
+| RidesPastOrToUniversityInPeriod | ClickHouse | 128 | 405 ms | 332 ms | 1.30 s | 1.63 s | 334 ms |
+| RidesPastOrToUniversityInPeriod | **DuckDB** | 128 | **29 ms** | 22 ms | 82 ms | 122 ms | 24 ms |
+| RidesPastOrToUniversityInPeriod | SpaceTime | 128 | 41 ms | 32 ms | 106 ms | 157 ms | 28 ms |
+| RidesPastOrToUniversityInPeriod | Sedona | 128 | 484 ms | 452 ms | 813 ms | 1.01 s | 182 ms |
+| SpatialBBox | PostGIS | 128 | 228 ms | 139 ms | 871 ms | 1.03 s | 267 ms |
+| SpatialBBox | MobilityDB | 128 | 260 ms | 144 ms | 935 ms | 1.23 s | 314 ms |
+| SpatialBBox | **ClickHouse** | 128 | **58 ms** | 48 ms | 124 ms | 132 ms | 32 ms |
+| SpatialBBox | DuckDB | 128 | 1.02 s | 427 ms | 4.69 s | 6.06 s | 1.48 s |
+| SpatialBBox | SpaceTime | 128 | 71 ms | 48 ms | 206 ms | 306 ms | 67 ms |
+| SpatialBBox | Sedona | 128 | 1.54 s | 1.29 s | 3.40 s | 3.88 s | 869 ms |
+| countRideInDistrict | PostGIS | 128 | 3.05 s | 3.03 s | 7.09 s | 7.84 s | 2.06 s |
+| countRideInDistrict | MobilityDB | 128 | 20.31 s | 18.35 s | 40.74 s | 48.46 s | 11.32 s |
+| countRideInDistrict | ClickHouse | 128 | 2.69 s | 2.92 s | 5.11 s | 5.20 s | 1.38 s |
+| countRideInDistrict | DuckDB | 128 | 27.33 s | 26.29 s | 56.44 s | 56.52 s | 17.81 s |
+| countRideInDistrict | **SpaceTime** | 128 | **1.39 s** | 1.31 s | 3.79 s | 4.73 s | 1.07 s |
+| countRideInDistrict | Sedona | 128 | 11.41 s | 11.29 s | 12.79 s | 14.65 s | 881 ms |
+| kNN | **PostGIS** | 128 | **22 ms** | 15 ms | 43 ms | 54 ms | 12 ms |
+| kNN | MobilityDB | 128 | 25 ms | 16 ms | 53 ms | 71 ms | 16 ms |
+| kNN | ClickHouse | 128 | 82 ms | 68 ms | 188 ms | 211 ms | 54 ms |
+| kNN | DuckDB | 128 | 68 ms | 59 ms | 146 ms | 179 ms | 36 ms |
+| kNN | SpaceTime | 128 | 30 ms | 28 ms | 54 ms | 80 ms | 13 ms |
+| kNN | Sedona | 128 | 1.10 s | 1.01 s | 1.91 s | 2.20 s | 475 ms |
+| spatioTemporalRange | PostGIS | 128 | 67 ms | 74 ms | 127 ms | 163 ms | 41 ms |
+| spatioTemporalRange | MobilityDB | 128 | 373 ms | 374 ms | 530 ms | 609 ms | 101 ms |
+| spatioTemporalRange | ClickHouse | 128 | 35 ms | 33 ms | 57 ms | 66 ms | 12 ms |
+| spatioTemporalRange | **DuckDB** | 128 | **20 ms** | 15 ms | 50 ms | 93 ms | 16 ms |
+| spatioTemporalRange | SpaceTime | 128 | 21 ms | 20 ms | 31 ms | 48 ms | 6 ms |
+| spatioTemporalRange | Sedona | 128 | 214 ms | 206 ms | 290 ms | 326 ms | 47 ms |
+| timeAggregation | PostGIS | 128 | 368 ms | 396 ms | 670 ms | 952 ms | 211 ms |
+| timeAggregation | MobilityDB | 128 | 1.27 s | 1.36 s | 2.19 s | 2.31 s | 632 ms |
+| timeAggregation | ClickHouse | 128 | 180 ms | 184 ms | 285 ms | 302 ms | 77 ms |
+| timeAggregation | **DuckDB** | 128 | **41 ms** | 43 ms | 69 ms | 80 ms | 21 ms |
+| timeAggregation | SpaceTime | 128 | 355 ms | 342 ms | 696 ms | 712 ms | 219 ms |
+| timeAggregation | Sedona | 128 | 357 ms | 348 ms | 583 ms | 625 ms | 109 ms |
+| timeInterval | PostGIS | 128 | 175 ms | 170 ms | 306 ms | 396 ms | 68 ms |
+| timeInterval | MobilityDB | 128 | 541 ms | 582 ms | 798 ms | 875 ms | 201 ms |
+| timeInterval | ClickHouse | 128 | 144 ms | 168 ms | 215 ms | 224 ms | 58 ms |
+| timeInterval | **DuckDB** | 128 | **31 ms** | 34 ms | 47 ms | 52 ms | 14 ms |
+| timeInterval | SpaceTime | 128 | 245 ms | 260 ms | 462 ms | 489 ms | 134 ms |
+| timeInterval | Sedona | 128 | 295 ms | 301 ms | 357 ms | 446 ms | 52 ms |
+
+### Geolife
+
+| Query | System | n | Mean | Median | p95 | p99 | Std dev |
+|---|---|---:|---:|---:|---:|---:|---:|
+| AverageDailyActivityPerUserInPeriod | PostGIS | 128 | 2.15 s | 2.17 s | 2.84 s | 2.86 s | 481 ms |
+| AverageDailyActivityPerUserInPeriod | **ClickHouse** | 128 | **287 ms** | 288 ms | 341 ms | 351 ms | 39 ms |
+| AverageDailyActivityPerUserInPeriod | DuckDB | 128 | 1.63 s | 1.60 s | 2.22 s | 2.33 s | 374 ms |
+| AverageDailyActivityPerUserInPeriod | SpaceTime | 128 | 2.09 s | 1.73 s | 3.71 s | 4.23 s | 769 ms |
+| AverageDailyActivityPerUserInPeriod | Sedona | 128 | 4.66 s | 4.74 s | 6.27 s | 6.82 s | 1.03 s |
+| ClosestRestaurantToPoint | PostGIS | 128 | 5.03 s | 3.59 s | 15.63 s | 17.89 s | 4.57 s |
+| ClosestRestaurantToPoint | **ClickHouse** | 128 | **381 ms** | 378 ms | 682 ms | 703 ms | 194 ms |
+| ClosestRestaurantToPoint | DuckDB | 128 | 1000 ms | 854 ms | 2.38 s | 2.58 s | 633 ms |
+| ClosestRestaurantToPoint | SpaceTime | 128 | 62 ms | 59 ms | 104 ms | 124 ms | 23 ms |
+| ClosestRestaurantToPoint | Sedona | 128 | 9.90 s | 8.36 s | 20.06 s | 22.36 s | 5.05 s |
+| CountPOIsByTypeInRegion | PostGIS | 128 | 8.89 s | 6.68 s | 22.06 s | 23.25 s | 6.70 s |
+| CountPOIsByTypeInRegion | **ClickHouse** | 128 | **212 ms** | 186 ms | 407 ms | 432 ms | 111 ms |
+| CountPOIsByTypeInRegion | DuckDB | 128 | 19.19 s | 14.80 s | 48.11 s | 50.37 s | 14.44 s |
+| CountPOIsByTypeInRegion | SpaceTime | 128 | 2.32 s | 1.81 s | 5.86 s | 6.31 s | 1.76 s |
+| CountPOIsByTypeInRegion | Sedona | 128 | 9.45 s | 9.16 s | 15.73 s | 16.60 s | 3.44 s |
+| FirstAndLastActivityInPeriod | PostGIS | 128 | 1.59 s | 1.62 s | 2.16 s | 2.18 s | 411 ms |
+| FirstAndLastActivityInPeriod | **ClickHouse** | 128 | **220 ms** | 220 ms | 243 ms | 252 ms | 17 ms |
+| FirstAndLastActivityInPeriod | DuckDB | 128 | 876 ms | 878 ms | 1.14 s | 1.25 s | 216 ms |
+| FirstAndLastActivityInPeriod | SpaceTime | 128 | 1.79 s | 1.62 s | 3.11 s | 3.96 s | 631 ms |
+| FirstAndLastActivityInPeriod | Sedona | 128 | 3.05 s | 3.05 s | 4.22 s | 5.00 s | 823 ms |
+| IDsInsideRegion1Andsecond_region | PostGIS | 128 | 772 ms | 776 ms | 822 ms | 834 ms | 33 ms |
+| IDsInsideRegion1Andsecond_region | **ClickHouse** | 128 | **119 ms** | 120 ms | 175 ms | 185 ms | 34 ms |
+| IDsInsideRegion1Andsecond_region | DuckDB | 128 | 196 ms | 170 ms | 328 ms | 431 ms | 67 ms |
+| IDsInsideRegion1Andsecond_region | SpaceTime | 128 | 52 ms | 50 ms | 82 ms | 94 ms | 15 ms |
+| IDsInsideRegion1Andsecond_region | Sedona | 128 | 1.33 s | 1.33 s | 1.47 s | 1.55 s | 79 ms |
+| SlidingWindowActivityInRegionPerMinuteWithNonZeroID | PostGIS | 128 | 385 ms | 297 ms | 1.19 s | 1.85 s | 362 ms |
+| SlidingWindowActivityInRegionPerMinuteWithNonZeroID | **ClickHouse** | 128 | **180 ms** | 182 ms | 291 ms | 328 ms | 66 ms |
+| SlidingWindowActivityInRegionPerMinuteWithNonZeroID | DuckDB | 128 | 622 ms | 352 ms | 2.25 s | 3.15 s | 710 ms |
+| SlidingWindowActivityInRegionPerMinuteWithNonZeroID | SpaceTime | 128 | 147 ms | 104 ms | 404 ms | 615 ms | 126 ms |
+| SlidingWindowActivityInRegionPerMinuteWithNonZeroID | Sedona | 128 | 1.37 s | 1.11 s | 3.41 s | 3.88 s | 900 ms |
+| SpatialBBox | PostGIS | 128 | 1.44 s | 926 ms | 3.70 s | 5.46 s | 1.23 s |
+| SpatialBBox | **ClickHouse** | 128 | **84 ms** | 72 ms | 171 ms | 186 ms | 46 ms |
+| SpatialBBox | DuckDB | 128 | 3.37 s | 2.25 s | 9.34 s | 12.07 s | 3.29 s |
+| SpatialBBox | SpaceTime | 128 | 179 ms | 146 ms | 427 ms | 541 ms | 129 ms |
+| SpatialBBox | Sedona | 128 | 5.29 s | 5.32 s | 7.97 s | 8.75 s | 1.64 s |
+| UniqueUsersPerHourInRegionInPeriod | PostGIS | 128 | 782 ms | 632 ms | 2.20 s | 2.73 s | 604 ms |
+| UniqueUsersPerHourInRegionInPeriod | **ClickHouse** | 128 | **244 ms** | 240 ms | 352 ms | 397 ms | 68 ms |
+| UniqueUsersPerHourInRegionInPeriod | DuckDB | 128 | 1.62 s | 1.45 s | 4.42 s | 5.63 s | 1.31 s |
+| UniqueUsersPerHourInRegionInPeriod | SpaceTime | 128 | 1.41 s | 1.48 s | 2.38 s | 3.10 s | 602 ms |
+| UniqueUsersPerHourInRegionInPeriod | Sedona | 128 | 3.39 s | 3.28 s | 5.59 s | 6.66 s | 1.31 s |
+| kNN | PostGIS | 128 | 252 ms | 254 ms | 347 ms | 443 ms | 57 ms |
+| kNN | ClickHouse | 128 | 123 ms | 93 ms | 293 ms | 360 ms | 88 ms |
+| kNN | DuckDB | 128 | 496 ms | 464 ms | 960 ms | 998 ms | 216 ms |
+| kNN | **SpaceTime** | 128 | **45 ms** | 39 ms | 84 ms | 115 ms | 19 ms |
+| kNN | Sedona | 128 | 4.21 s | 4.12 s | 6.20 s | 7.13 s | 1.06 s |
+| spatioTemporalRange | PostGIS | 128 | 73 ms | 74 ms | 91 ms | 97 ms | 11 ms |
+| spatioTemporalRange | ClickHouse | 128 | 57 ms | 54 ms | 95 ms | 104 ms | 21 ms |
+| spatioTemporalRange | DuckDB | 128 | 50 ms | 43 ms | 108 ms | 124 ms | 29 ms |
+| spatioTemporalRange | **SpaceTime** | 128 | **36 ms** | 35 ms | 53 ms | 58 ms | 10 ms |
+| spatioTemporalRange | Sedona | 128 | 360 ms | 364 ms | 433 ms | 496 ms | 51 ms |
+| timeAggregation | PostGIS | 128 | 301 ms | 299 ms | 327 ms | 330 ms | 16 ms |
+| timeAggregation | **ClickHouse** | 128 | **183 ms** | 183 ms | 192 ms | 202 ms | 6 ms |
+| timeAggregation | DuckDB | 128 | 186 ms | 184 ms | 206 ms | 214 ms | 11 ms |
+| timeAggregation | SpaceTime | 128 | 588 ms | 545 ms | 903 ms | 992 ms | 146 ms |
+| timeAggregation | Sedona | 128 | 1.18 s | 1.17 s | 1.30 s | 1.36 s | 86 ms |
+| timeInterval | PostGIS | 128 | 176 ms | 179 ms | 186 ms | 189 ms | 8 ms |
+| timeInterval | ClickHouse | 128 | 140 ms | 140 ms | 151 ms | 155 ms | 7 ms |
+| timeInterval | **DuckDB** | 128 | **97 ms** | 96 ms | 109 ms | 116 ms | 6 ms |
+| timeInterval | SpaceTime | 128 | 433 ms | 446 ms | 639 ms | 677 ms | 153 ms |
+| timeInterval | Sedona | 128 | 694 ms | 690 ms | 859 ms | 1.31 s | 150 ms |
+
+## Empty results
+
+Share of the measured parameter sets for which a query returned no row (from the row counts the client prints; SpaceTime's client does not print them). Aggregates that always return one row (a count, an average, ...) answer "no data" with a row of zeros, which row counts cannot show; they are not listed.
+
+| Scenario | Query | Empty | Rows (median / max) |
+|---|---|---:|---|
+| ais | HarbourActivityInPeriod | 63.3 % (81/128) | 0.0 / 1 |
+| ais | countActiveCrossingsNearIsland | 6.3 % (8/126) (differs by system) | 1.0 / 1 |
+| ais | crossingsAroundHarbour | 17.2 % (22/128) | 37.0 / 21705 |
+| ais | kNN | 4.7 % (6/128) | 4.0 / 10 |
+| cycling | RidesAcrossMultipleHours | 7.8 % (10/128) | 77093.0 / 238620 |
+| cycling | RidesPastOrToUniversityInPeriod | 15.6 % (20/128) | 6281.0 / 55227 |
+| cycling | kNN | 62.5 % (80/128) | 0.0 / 10 |
+| geolife | kNN | 11.7 % (15/128) | 4.0 / 10 |
+
+Every system that prints row counts returned no row on exactly the same parameter sets.
+
+## Hardware
+
+Means over the five nodes and over the time the system ran (5 s samples; per scenario and node in `hardware_by_phase.csv`).
+
+| System | Run time | CPU busy | Memory used | Disk read |
+|---|---:|---:|---:|---:|
+| PostGIS | 2.1 h | 25 % | 18.3 GB | 1000 MB/s |
+| MobilityDB | 11.1 h | 6 % | 16.7 GB | 297 MB/s |
+| ClickHouse | 0.8 h | 69 % | 5.0 GB | 26 MB/s |
+| DuckDB | 3.4 h | 19 % | 14.0 GB | 37 MB/s |
+| SpaceTime | 1.3 h | 43 % | 3.5 GB | 15 MB/s |
+| Sedona | 9.7 h | 51 % | 27.1 GB | 123 MB/s |
+
+## Caveats
+
+- **SpaceTime's Geolife data** is an older copy than the other systems' (re-import pending): its Geolife queries whose results differ from PostGIS are not ranked (see *Not ranked*). Its cycling `kNN` is not ranked because the pre-run check found a ride missing that the other systems held then (a test ride since removed from all of them); it is checked again after the runs.
+- **Client host:** the benchmark client runs on a separate host with one CPU core and 1 GB of RAM. Results are read in batches of 100,000 rows; with several client threads, the client can become a limit for queries with large results.
+- **Sedona** skips GeoParquet files by their bounding box only when a query compares with a constant geometry; joins with a whole reference table (harbours, islands, districts, counties) read the whole table.
+- **Parameters** are drawn uniformly over each scenario's area and time span, so some queries often find no data (see *Empty results*); every system answers the same parameter sets.
+
+## Files
+
+| File | One row per |
+|---|---|
+| `executions.csv` | query execution (scenario, system, query, repetition, warm-up, status, duration, parameters, SQL) |
+| `summary.csv` | (scenario, query, system): runs, failures, mean/median/p95/p99/min/max/std dev/variance, equivalence, rank |
+| `winners.csv` | (scenario, query): fastest ranked system, runner-up, margin |
+| `system_scores.csv` | system: wins, completed and ranked queries, slowdowns |
+| `pairwise_total_time.csv` | pair of systems: total runtime over the queries both completed |
+| `empty_results.csv` | (scenario, query, system): measured executions without a row |
+| `equivalence.csv` | (scenario, query, system): result compared with PostGIS |
+| `hardware_by_phase.csv` | (scenario, system): CPU, memory, disk and network per node |
+| `dropped_parameter_sets.csv` | parameter sets left out for every system |
+| `tables.md`, `plots/` | the tables and figures generated from the above |
+| `raw/` | client logs, query files, hardware samples, the equivalence check |
