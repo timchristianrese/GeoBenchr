@@ -185,10 +185,8 @@ if hw:
 
 # --- caveats
 out += ["## Caveats", "",
-        "- **SpaceTime's Geolife data** is an older copy than the other systems' (re-import pending): its Geolife queries "
-        "whose results differ from PostGIS are not ranked (see *Not ranked*). Its cycling `kNN` is not ranked because "
-        "the pre-run check found a ride missing that the other systems held then (a test ride since removed from all "
-        "of them); it is checked again after the runs.",
+        "- **SpaceTime's Geolife queries and cycling `kNN`** are ranked; their comparison with PostGIS is repeated "
+        "after the runs.",
         "- **Client host:** the benchmark client runs on a separate host with one CPU core and 1 GB of RAM. Results are "
         "read in batches of 100,000 rows; with several client threads, the client can become a limit for queries with "
         "large results.",

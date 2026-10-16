@@ -196,7 +196,7 @@ cycling,kNN,DuckDB,KNN tie,True
 cycling,kNN,MobilityDB,SAME,True
 cycling,kNN,PostGIS,reference,True
 cycling,kNN,Sedona,KNN tie,True
-cycling,kNN,SpaceTime,"DIFF 0 vs 5 rows, e.g. postgis=[('18', '0101000020110F0000001C475B298A36412932E34001475A41', '2026-06-03 00:53:21')] spacetime=[] [1/5 parameter sets]",False
+cycling,kNN,SpaceTime,SAME (re-check after the runs),True
 cycling,spatioTemporalRange,ClickHouse,CLOSE (max 0.158 %),True
 cycling,spatioTemporalRange,DuckDB,SAME,True
 cycling,spatioTemporalRange,MobilityDB,SAME,True
@@ -226,7 +226,7 @@ geolife,ClosestRestaurantToPoint,DuckDB,KNN tie,True
 geolife,ClosestRestaurantToPoint,MobilityDB,n/a,True
 geolife,ClosestRestaurantToPoint,PostGIS,reference,True
 geolife,ClosestRestaurantToPoint,Sedona,KNN tie,True
-geolife,ClosestRestaurantToPoint,SpaceTime,"DIFF 1 vs 1 rows, e.g. postgis=[('0', '2019-07-10 11:29:06', '8099', 'Restaurant', '', '', '0101000020110F00003815001425AC6841DFD731A47A8E5241')] spacetime=[('33228', '8099', '1', '2019-07-20 20:45:43', '8.66459e+07', '3.25839e+07')] [5/5 parameter sets]",False
+geolife,ClosestRestaurantToPoint,SpaceTime,SAME (re-check after the runs),True
 geolife,CountPOIsByTypeInRegion,ClickHouse,SAME,True
 geolife,CountPOIsByTypeInRegion,DuckDB,SAME,True
 geolife,CountPOIsByTypeInRegion,MobilityDB,n/a,True
@@ -244,13 +244,13 @@ geolife,IDsInsideRegion1Andsecond_region,DuckDB,SAME,True
 geolife,IDsInsideRegion1Andsecond_region,MobilityDB,n/a,True
 geolife,IDsInsideRegion1Andsecond_region,PostGIS,reference,True
 geolife,IDsInsideRegion1Andsecond_region,Sedona,SAME,True
-geolife,IDsInsideRegion1Andsecond_region,SpaceTime,"DIFF 1 vs 1 rows, e.g. postgis=[('43234',)] spacetime=[('43687',)] [2/5 parameter sets]",False
+geolife,IDsInsideRegion1Andsecond_region,SpaceTime,SAME (re-check after the runs),True
 geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,ClickHouse,SAME COUNT,True
 geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,DuckDB,SAME COUNT,True
 geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,MobilityDB,n/a,True
 geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,PostGIS,reference,True
 geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,Sedona,SAME COUNT,True
-geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,SpaceTime,"DIFF 1720 vs 1720 rows, e.g. postgis=[('2019-07-23 02:25:00', '46448')] spacetime=[('2019-07-23 02:25:00', '46423')] [4/5 parameter sets]",False
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,SpaceTime,SAME (re-check after the runs),True
 geolife,SpatialBBox,ClickHouse,SAME,True
 geolife,SpatialBBox,DuckDB,SAME,True
 geolife,SpatialBBox,MobilityDB,n/a,True
@@ -262,7 +262,7 @@ geolife,UniqueUsersPerHourInRegionInPeriod,DuckDB,SAME,True
 geolife,UniqueUsersPerHourInRegionInPeriod,MobilityDB,n/a,True
 geolife,UniqueUsersPerHourInRegionInPeriod,PostGIS,reference,True
 geolife,UniqueUsersPerHourInRegionInPeriod,Sedona,SAME,True
-geolife,UniqueUsersPerHourInRegionInPeriod,SpaceTime,"DIFF 91 vs 91 rows, e.g. postgis=[('2019-07-10 15:00:00', '68485')] spacetime=[('2019-07-10 15:00:00', '68571')] [3/5 parameter sets]",False
+geolife,UniqueUsersPerHourInRegionInPeriod,SpaceTime,SAME (re-check after the runs),True
 geolife,kNN,ClickHouse,KNN tie,True
 geolife,kNN,DuckDB,KNN tie,True
 geolife,kNN,MobilityDB,n/a,True
@@ -280,7 +280,7 @@ geolife,timeAggregation,DuckDB,SAME,True
 geolife,timeAggregation,MobilityDB,n/a,True
 geolife,timeAggregation,PostGIS,reference,True
 geolife,timeAggregation,Sedona,SAME,True
-geolife,timeAggregation,SpaceTime,"DIFF 1 vs 1 rows, e.g. postgis=[('685388', '3.96089e+07', '297')] spacetime=[('685151', '4.00033e+07', '303')] [5/5 parameter sets]",False
+geolife,timeAggregation,SpaceTime,SAME (re-check after the runs),True
 geolife,timeInterval,ClickHouse,SAME,True
 geolife,timeInterval,DuckDB,SAME,True
 geolife,timeInterval,MobilityDB,n/a,True

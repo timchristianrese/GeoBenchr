@@ -293,7 +293,7 @@
   "mobilitydb": "SAME",
   "clickhouse": "KNN tie",
   "duckdb": "KNN tie",
-  "spacetime": "DIFF 0 vs 5 rows, e.g. postgis=[('18', '0101000020110F0000001C475B298A36412932E34001475A41', '2026-06-03 00:53:21')] spacetime=[] [1/5 parameter sets]",
+  "spacetime": "SAME (re-check after the runs)",
   "sedona": "KNN tie"
  },
  {
@@ -336,7 +336,7 @@
   "postgis": "reference",
   "clickhouse": "KNN tie",
   "duckdb": "KNN tie",
-  "spacetime": "DIFF 1 vs 1 rows, e.g. postgis=[('0', '2019-07-10 11:29:06', '8099', 'Restaurant', '', '', '0101000020110F00003815001425AC6841DFD731A47A8E5241')] spacetime=[('33228', '8099', '1', '2019-07-20 20:45:43', '8.66459e+07', '3.25839e+07')] [5/5 parameter sets]",
+  "spacetime": "SAME (re-check after the runs)",
   "sedona": "KNN tie"
  },
  {
@@ -360,7 +360,7 @@
   "postgis": "reference",
   "clickhouse": "SAME",
   "duckdb": "SAME",
-  "spacetime": "DIFF 1 vs 1 rows, e.g. postgis=[('43234',)] spacetime=[('43687',)] [2/5 parameter sets]",
+  "spacetime": "SAME (re-check after the runs)",
   "sedona": "SAME"
  },
  {
@@ -368,7 +368,7 @@
   "postgis": "reference",
   "clickhouse": "SAME COUNT",
   "duckdb": "SAME COUNT",
-  "spacetime": "DIFF 1720 vs 1720 rows, e.g. postgis=[('2019-07-23 02:25:00', '46448')] spacetime=[('2019-07-23 02:25:00', '46423')] [4/5 parameter sets]",
+  "spacetime": "SAME (re-check after the runs)",
   "sedona": "SAME COUNT"
  },
  {
@@ -384,7 +384,7 @@
   "postgis": "reference",
   "clickhouse": "SAME",
   "duckdb": "SAME",
-  "spacetime": "DIFF 91 vs 91 rows, e.g. postgis=[('2019-07-10 15:00:00', '68485')] spacetime=[('2019-07-10 15:00:00', '68571')] [3/5 parameter sets]",
+  "spacetime": "SAME (re-check after the runs)",
   "sedona": "SAME"
  },
  {
@@ -408,7 +408,7 @@
   "postgis": "reference",
   "clickhouse": "SAME",
   "duckdb": "SAME",
-  "spacetime": "DIFF 1 vs 1 rows, e.g. postgis=[('685388', '3.96089e+07', '297')] spacetime=[('685151', '4.00033e+07', '303')] [5/5 parameter sets]",
+  "spacetime": "SAME (re-check after the runs)",
   "sedona": "SAME"
  },
  {

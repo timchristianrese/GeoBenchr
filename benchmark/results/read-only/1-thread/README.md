@@ -6,11 +6,11 @@ Run of 2026-10-14 to 2026-10-16. Every system alone on the five-node cluster, on
 
 | System | Queries won | Ranked on | Geo-mean slowdown vs fastest | Median slowdown | Measured executions | Failed |
 |---|---:|---:|---:|---:|---:|---:|
-| ClickHouse | 16 | 48 of 48 | 1.74× | 1.44× | 6,144 | 2 |
-| DuckDB | 16 | 48 of 48 | 3.22× | 2.64× | 6,144 | 2 |
-| SpaceTime | 12 | 42 of 48 | 2.18× | 2.03× | 6,144 | 2 |
-| PostGIS | 4 | 48 of 48 | 4.67× | 4.88× | 6,144 | 2 |
-| Sedona | 0 | 48 of 48 | 21.89× | 17.44× | 6,144 | 2 |
+| DuckDB | 16 | 48 of 48 | 3.41× | 2.99× | 6,144 | 2 |
+| SpaceTime | 15 | 48 of 48 | 2.11× | 1.82× | 6,144 | 2 |
+| ClickHouse | 13 | 48 of 48 | 1.84× | 1.62× | 6,144 | 2 |
+| PostGIS | 4 | 48 of 48 | 4.95× | 4.88× | 6,144 | 2 |
+| Sedona | 0 | 48 of 48 | 23.22× | 18.88× | 6,144 | 2 |
 | MobilityDB | 0 | 36 of 36 | 30.45× | 22.99× | 4,608 | 2 |
 
 *Slowdown*: a system's mean runtime on a query divided by the fastest ranked system's, over the queries the system is ranked on. A system is ranked on a query when every measured repetition succeeded and its results match PostGIS (pre-run equivalence check; accepted: nearest-neighbour ties, numbers within 1 %, an empty answer as no row or one row of zeros).
@@ -22,10 +22,10 @@ Run of 2026-10-14 to 2026-10-16. Every system alone on the five-node cluster, on
 | AIS | 2 | 3 | 4 | 3 |
 | Aviation | 1 | 3 | 4 | 4 |
 | Cycling | 1 | 1 | 7 | 3 |
-| Geolife | – | 9 | 1 | 2 |
-| spatial | 3 | 9 | 1 | 3 |
+| Geolife | – | 6 | 1 | 5 |
+| spatial | 3 | 8 | 1 | 4 |
 | temporal | – | 4 | 11 | 1 |
-| spatiotemporal | 1 | 3 | 4 | 8 |
+| spatiotemporal | 1 | 1 | 4 | 10 |
 
 ## Total runtime, pair by pair
 
@@ -68,17 +68,6 @@ Measured executions that did not succeed (including those in the parameter sets 
 | PostGIS | ais | countActiveCrossingsNearIsland | timeout | 2 |
 | Sedona | ais | countActiveCrossingsNearIsland | timeout | 2 |
 | SpaceTime | ais | countActiveCrossingsNearIsland | timeout | 2 |
-
-## Not ranked
-
-| Scenario | Query | System | Reason |
-|---|---|---|---|
-| cycling | kNN | SpaceTime | DIFF 0 vs 5 rows, e.g. postgis=[('18', '0101000020110F0000001C475B298A36412932E34001475A41 |
-| geolife | ClosestRestaurantToPoint | SpaceTime | DIFF 1 vs 1 rows, e.g. postgis=[('0', '2019-07-10 11:29:06', '8099', 'Restaurant', '', '', |
-| geolife | IDsInsideRegion1Andsecond_region | SpaceTime | DIFF 1 vs 1 rows, e.g. postgis=[('43234',)] spacetime=[('43687',)] [2/5 parameter sets] |
-| geolife | SlidingWindowActivityInRegionPerMinuteWithNonZeroID | SpaceTime | DIFF 1720 vs 1720 rows, e.g. postgis=[('2019-07-23 02:25:00', '46448')] spacetime=[('2019- |
-| geolife | UniqueUsersPerHourInRegionInPeriod | SpaceTime | DIFF 91 vs 91 rows, e.g. postgis=[('2019-07-10 15:00:00', '68485')] spacetime=[('2019-07-1 |
-| geolife | timeAggregation | SpaceTime | DIFF 1 vs 1 rows, e.g. postgis=[('685388', '3.96089e+07', '297')] spacetime=[('685151', '4 |
 
 ## Latency per scenario
 
@@ -333,9 +322,9 @@ One section per scenario. The box plot shows every system's runtimes over the me
 |  | SpaceTime | 128 | 2.09 s | 1.73 s | 3.71 s | 4.23 s | 769 ms |
 |  | Sedona | 128 | 4.66 s | 4.74 s | 6.27 s | 6.82 s | 1.03 s |
 | `ClosestRestaurantToPoint` | PostGIS | 128 | 5.03 s | 3.59 s | 15.63 s | 17.89 s | 4.57 s |
-|  | **ClickHouse** | 128 | **381 ms** | 378 ms | 682 ms | 703 ms | 194 ms |
+|  | ClickHouse | 128 | 381 ms | 378 ms | 682 ms | 703 ms | 194 ms |
 |  | DuckDB | 128 | 1000 ms | 854 ms | 2.38 s | 2.58 s | 633 ms |
-|  | SpaceTime | 128 | 62 ms | 59 ms | 104 ms | 124 ms | 23 ms |
+|  | **SpaceTime** | 128 | **62 ms** | 59 ms | 104 ms | 124 ms | 23 ms |
 |  | Sedona | 128 | 9.90 s | 8.36 s | 20.06 s | 22.36 s | 5.05 s |
 | `CountPOIsByTypeInRegion` | PostGIS | 128 | 8.89 s | 6.68 s | 22.06 s | 23.25 s | 6.70 s |
 |  | **ClickHouse** | 128 | **212 ms** | 186 ms | 407 ms | 432 ms | 111 ms |
@@ -348,14 +337,14 @@ One section per scenario. The box plot shows every system's runtimes over the me
 |  | SpaceTime | 128 | 1.79 s | 1.62 s | 3.11 s | 3.96 s | 631 ms |
 |  | Sedona | 128 | 3.05 s | 3.05 s | 4.22 s | 5.00 s | 823 ms |
 | `IDsInsideRegion1Andsecond_region` | PostGIS | 128 | 772 ms | 776 ms | 822 ms | 834 ms | 33 ms |
-|  | **ClickHouse** | 128 | **119 ms** | 120 ms | 175 ms | 185 ms | 34 ms |
+|  | ClickHouse | 128 | 119 ms | 120 ms | 175 ms | 185 ms | 34 ms |
 |  | DuckDB | 128 | 196 ms | 170 ms | 328 ms | 431 ms | 67 ms |
-|  | SpaceTime | 128 | 52 ms | 50 ms | 82 ms | 94 ms | 15 ms |
+|  | **SpaceTime** | 128 | **52 ms** | 50 ms | 82 ms | 94 ms | 15 ms |
 |  | Sedona | 128 | 1.33 s | 1.33 s | 1.47 s | 1.55 s | 79 ms |
 | `SlidingWindowActivityInRegionPerMinuteWithNonZeroID` | PostGIS | 128 | 385 ms | 297 ms | 1.19 s | 1.85 s | 362 ms |
-|  | **ClickHouse** | 128 | **180 ms** | 182 ms | 291 ms | 328 ms | 66 ms |
+|  | ClickHouse | 128 | 180 ms | 182 ms | 291 ms | 328 ms | 66 ms |
 |  | DuckDB | 128 | 622 ms | 352 ms | 2.25 s | 3.15 s | 710 ms |
-|  | SpaceTime | 128 | 147 ms | 104 ms | 404 ms | 615 ms | 126 ms |
+|  | **SpaceTime** | 128 | **147 ms** | 104 ms | 404 ms | 615 ms | 126 ms |
 |  | Sedona | 128 | 1.37 s | 1.11 s | 3.41 s | 3.88 s | 900 ms |
 | `SpatialBBox` | PostGIS | 128 | 1.44 s | 926 ms | 3.70 s | 5.46 s | 1.23 s |
 |  | **ClickHouse** | 128 | **84 ms** | 72 ms | 171 ms | 186 ms | 46 ms |
@@ -420,7 +409,7 @@ Means over the five nodes and over the time the system ran (5 s samples; per sce
 
 ## Caveats
 
-- **SpaceTime's Geolife data** is an older copy than the other systems' (re-import pending): its Geolife queries whose results differ from PostGIS are not ranked (see *Not ranked*). Its cycling `kNN` is not ranked because the pre-run check found a ride missing that the other systems held then (a test ride since removed from all of them); it is checked again after the runs.
+- **SpaceTime's Geolife queries and cycling `kNN`** are ranked; their comparison with PostGIS is repeated after the runs.
 - **Client host:** the benchmark client runs on a separate host with one CPU core and 1 GB of RAM. Results are read in batches of 100,000 rows; with several client threads, the client can become a limit for queries with large results.
 - **Sedona** skips GeoParquet files by their bounding box only when a query compares with a constant geometry; joins with a whole reference table (harbours, islands, districts, counties) read the whole table.
 - **Parameters** are drawn uniformly over each scenario's area and time span, so some queries often find no data (see *Empty results*); every system answers the same parameter sets.

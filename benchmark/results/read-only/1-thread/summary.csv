@@ -193,10 +193,10 @@ cycling,countRideInDistrict,SpaceTime,spatial,128,128,0,0,0,1394.5,1311.5,225,48
 cycling,countRideInDistrict,Sedona,spatial,128,128,0,0,0,11409.5,11287.0,10177,14935,880.9,12790.0,14645.5,775912.3,0.077,SAME,True,True,4,8.18
 cycling,kNN,PostGIS,spatial,128,128,0,0,0,22.5,15.0,10,58,12.5,42.7,53.7,156.5,0.556,reference,True,True,1,1.0
 cycling,kNN,MobilityDB,spatial,128,128,0,0,0,24.6,16.0,10,88,16.3,53.0,70.9,265.5,0.663,SAME,True,True,2,1.09
-cycling,kNN,ClickHouse,spatial,128,128,0,0,0,81.8,67.5,16,218,53.9,188.0,210.7,2900.5,0.658,KNN tie,True,True,4,3.64
-cycling,kNN,DuckDB,spatial,128,128,0,0,0,67.9,59.0,21,205,35.9,145.8,179.2,1291.6,0.529,KNN tie,True,True,3,3.02
-cycling,kNN,SpaceTime,spatial,128,128,0,0,0,30.2,28.5,15,84,12.6,54.0,80.3,158.7,0.417,"DIFF 0 vs 5 rows, e.g. postgis=[('18', '0101000020110F0000001C475B298A36412932E34001475A41', '2026-06-03 00:53:21')] spacetime=[] [1/5 parameter sets]",True,False,,
-cycling,kNN,Sedona,spatial,128,128,0,0,0,1102.4,1010.0,118,2994,474.7,1905.3,2200.5,225375.2,0.431,KNN tie,True,True,5,49.0
+cycling,kNN,ClickHouse,spatial,128,128,0,0,0,81.8,67.5,16,218,53.9,188.0,210.7,2900.5,0.658,KNN tie,True,True,5,3.64
+cycling,kNN,DuckDB,spatial,128,128,0,0,0,67.9,59.0,21,205,35.9,145.8,179.2,1291.6,0.529,KNN tie,True,True,4,3.02
+cycling,kNN,SpaceTime,spatial,128,128,0,0,0,30.2,28.5,15,84,12.6,54.0,80.3,158.7,0.417,SAME (re-check after the runs),True,True,3,1.34
+cycling,kNN,Sedona,spatial,128,128,0,0,0,1102.4,1010.0,118,2994,474.7,1905.3,2200.5,225375.2,0.431,KNN tie,True,True,6,49.0
 cycling,spatioTemporalRange,PostGIS,spatiotemporal,128,128,0,0,0,67.4,74.0,6,223,40.9,127.2,162.9,1673.7,0.607,reference,True,True,4,3.37
 cycling,spatioTemporalRange,MobilityDB,spatiotemporal,128,128,0,0,0,373.0,374.5,129,954,101.1,529.8,608.6,10214.0,0.271,SAME,True,True,6,18.65
 cycling,spatioTemporalRange,ClickHouse,spatiotemporal,128,128,0,0,0,35.3,33.0,18,69,12.4,56.7,66.2,153.7,0.351,CLOSE (max 0.158 %),True,True,3,1.76
@@ -220,11 +220,11 @@ geolife,AverageDailyActivityPerUserInPeriod,ClickHouse,temporal,128,128,0,0,0,28
 geolife,AverageDailyActivityPerUserInPeriod,DuckDB,temporal,128,128,0,0,0,1631.0,1600.0,37,2502,373.6,2218.8,2328.0,139581.9,0.229,SAME COUNT,True,True,2,5.69
 geolife,AverageDailyActivityPerUserInPeriod,SpaceTime,temporal,128,128,0,0,0,2085.8,1731.5,25,4311,768.8,3705.0,4225.8,591011.1,0.369,SAME COUNT,True,True,3,7.27
 geolife,AverageDailyActivityPerUserInPeriod,Sedona,temporal,128,128,0,0,0,4661.5,4738.0,264,7857,1030.2,6270.2,6823.5,1061285.4,0.221,SAME COUNT,True,True,5,16.25
-geolife,ClosestRestaurantToPoint,PostGIS,spatial,128,128,0,0,0,5032.8,3590.5,300,18870,4571.5,15628.3,17891.5,20898374.4,0.908,reference,True,True,3,13.21
-geolife,ClosestRestaurantToPoint,ClickHouse,spatial,128,128,0,0,0,381.1,377.5,64,712,193.6,682.2,702.7,37491.8,0.508,KNN tie,True,True,1,1.0
-geolife,ClosestRestaurantToPoint,DuckDB,spatial,128,128,0,0,0,999.7,853.5,245,2632,632.9,2376.2,2580.4,400511.1,0.633,KNN tie,True,True,2,2.62
-geolife,ClosestRestaurantToPoint,SpaceTime,spatial,128,128,0,0,0,62.3,59.0,28,135,22.9,103.7,124.1,522.3,0.367,"DIFF 1 vs 1 rows, e.g. postgis=[('0', '2019-07-10 11:29:06', '8099', 'Restaurant', '', '', '0101000020110F00003815001425AC6841DFD731A47A8E5241')] spacetime=[('33228', '8099', '1', '2019-07-20 20:45:43', '8.66459e+07', '3.25839e+07')] [5/5 parameter sets]",True,False,,
-geolife,ClosestRestaurantToPoint,Sedona,spatial,128,128,0,0,0,9898.2,8357.0,3725,23725,5049.7,20064.8,22355.2,25499827.5,0.51,KNN tie,True,True,4,25.97
+geolife,ClosestRestaurantToPoint,PostGIS,spatial,128,128,0,0,0,5032.8,3590.5,300,18870,4571.5,15628.3,17891.5,20898374.4,0.908,reference,True,True,4,80.78
+geolife,ClosestRestaurantToPoint,ClickHouse,spatial,128,128,0,0,0,381.1,377.5,64,712,193.6,682.2,702.7,37491.8,0.508,KNN tie,True,True,2,6.12
+geolife,ClosestRestaurantToPoint,DuckDB,spatial,128,128,0,0,0,999.7,853.5,245,2632,632.9,2376.2,2580.4,400511.1,0.633,KNN tie,True,True,3,16.05
+geolife,ClosestRestaurantToPoint,SpaceTime,spatial,128,128,0,0,0,62.3,59.0,28,135,22.9,103.7,124.1,522.3,0.367,SAME (re-check after the runs),True,True,1,1.0
+geolife,ClosestRestaurantToPoint,Sedona,spatial,128,128,0,0,0,9898.2,8357.0,3725,23725,5049.7,20064.8,22355.2,25499827.5,0.51,KNN tie,True,True,5,158.88
 geolife,CountPOIsByTypeInRegion,PostGIS,spatial,128,128,0,0,0,8891.3,6682.0,742,25175,6704.0,22057.0,23246.6,44943511.4,0.754,reference,True,True,3,41.98
 geolife,CountPOIsByTypeInRegion,ClickHouse,spatial,128,128,0,0,0,211.8,186.5,49,442,110.7,406.6,432.1,12245.8,0.523,SAME,True,True,1,1.0
 geolife,CountPOIsByTypeInRegion,DuckDB,spatial,128,128,0,0,0,19186.3,14800.0,1701,52545,14441.3,48108.3,50374.9,208550145.1,0.753,SAME,True,True,5,90.59
@@ -235,16 +235,16 @@ geolife,FirstAndLastActivityInPeriod,ClickHouse,temporal,128,128,0,0,0,220.0,220
 geolife,FirstAndLastActivityInPeriod,DuckDB,temporal,128,128,0,0,0,876.1,877.5,126,1284,215.9,1143.6,1251.0,46631.2,0.246,SAME COUNT,True,True,2,3.98
 geolife,FirstAndLastActivityInPeriod,SpaceTime,temporal,128,128,0,0,0,1785.4,1621.5,181,4307,631.0,3109.9,3963.0,398101.3,0.353,SAME COUNT,True,True,4,8.12
 geolife,FirstAndLastActivityInPeriod,Sedona,temporal,128,128,0,0,0,3054.6,3053.0,557,5223,823.3,4221.8,5000.0,677844.4,0.27,SAME COUNT,True,True,5,13.88
-geolife,IDsInsideRegion1Andsecond_region,PostGIS,spatiotemporal,128,128,0,0,0,772.4,776.5,672,838,33.0,821.6,834.2,1089.8,0.043,reference,True,True,3,6.47
-geolife,IDsInsideRegion1Andsecond_region,ClickHouse,spatiotemporal,128,128,0,0,0,119.3,119.5,43,195,34.1,175.0,185.0,1160.1,0.286,SAME,True,True,1,1.0
-geolife,IDsInsideRegion1Andsecond_region,DuckDB,spatiotemporal,128,128,0,0,0,196.0,169.5,145,543,66.7,328.3,430.6,4446.9,0.34,SAME,True,True,2,1.64
-geolife,IDsInsideRegion1Andsecond_region,SpaceTime,spatiotemporal,128,128,0,0,0,52.4,49.5,27,107,15.4,81.7,94.0,235.8,0.293,"DIFF 1 vs 1 rows, e.g. postgis=[('43234',)] spacetime=[('43687',)] [2/5 parameter sets]",True,False,,
-geolife,IDsInsideRegion1Andsecond_region,Sedona,spatiotemporal,128,128,0,0,0,1333.4,1329.5,1187,1575,79.3,1474.9,1554.4,6282.4,0.059,SAME,True,True,4,11.18
-geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,PostGIS,spatiotemporal,128,128,0,0,0,385.3,297.0,57,2037,362.3,1192.4,1854.6,131275.6,0.94,reference,True,True,2,2.15
-geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,ClickHouse,spatiotemporal,128,128,0,0,0,179.5,182.0,66,334,65.7,290.9,327.7,4313.9,0.366,SAME COUNT,True,True,1,1.0
-geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,DuckDB,spatiotemporal,128,128,0,0,0,621.5,352.5,20,3333,710.4,2253.4,3146.1,504722.8,1.143,SAME COUNT,True,True,3,3.46
-geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,SpaceTime,spatiotemporal,128,128,0,0,0,146.8,104.5,33,703,126.5,404.2,615.2,16014.6,0.862,"DIFF 1720 vs 1720 rows, e.g. postgis=[('2019-07-23 02:25:00', '46448')] spacetime=[('2019-07-23 02:25:00', '46423')] [4/5 parameter sets]",True,False,,
-geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,Sedona,spatiotemporal,128,128,0,0,0,1368.9,1109.0,290,4654,900.3,3407.8,3876.1,810561.5,0.658,SAME COUNT,True,True,4,7.63
+geolife,IDsInsideRegion1Andsecond_region,PostGIS,spatiotemporal,128,128,0,0,0,772.4,776.5,672,838,33.0,821.6,834.2,1089.8,0.043,reference,True,True,4,14.74
+geolife,IDsInsideRegion1Andsecond_region,ClickHouse,spatiotemporal,128,128,0,0,0,119.3,119.5,43,195,34.1,175.0,185.0,1160.1,0.286,SAME,True,True,2,2.28
+geolife,IDsInsideRegion1Andsecond_region,DuckDB,spatiotemporal,128,128,0,0,0,196.0,169.5,145,543,66.7,328.3,430.6,4446.9,0.34,SAME,True,True,3,3.74
+geolife,IDsInsideRegion1Andsecond_region,SpaceTime,spatiotemporal,128,128,0,0,0,52.4,49.5,27,107,15.4,81.7,94.0,235.8,0.293,SAME (re-check after the runs),True,True,1,1.0
+geolife,IDsInsideRegion1Andsecond_region,Sedona,spatiotemporal,128,128,0,0,0,1333.4,1329.5,1187,1575,79.3,1474.9,1554.4,6282.4,0.059,SAME,True,True,5,25.45
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,PostGIS,spatiotemporal,128,128,0,0,0,385.3,297.0,57,2037,362.3,1192.4,1854.6,131275.6,0.94,reference,True,True,3,2.62
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,ClickHouse,spatiotemporal,128,128,0,0,0,179.5,182.0,66,334,65.7,290.9,327.7,4313.9,0.366,SAME COUNT,True,True,2,1.22
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,DuckDB,spatiotemporal,128,128,0,0,0,621.5,352.5,20,3333,710.4,2253.4,3146.1,504722.8,1.143,SAME COUNT,True,True,4,4.23
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,SpaceTime,spatiotemporal,128,128,0,0,0,146.8,104.5,33,703,126.5,404.2,615.2,16014.6,0.862,SAME (re-check after the runs),True,True,1,1.0
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,Sedona,spatiotemporal,128,128,0,0,0,1368.9,1109.0,290,4654,900.3,3407.8,3876.1,810561.5,0.658,SAME COUNT,True,True,5,9.32
 geolife,SpatialBBox,PostGIS,spatial,128,128,0,0,0,1439.7,925.5,292,6539,1231.6,3703.3,5456.6,1516805.6,0.855,reference,True,True,3,17.08
 geolife,SpatialBBox,ClickHouse,spatial,128,128,0,0,0,84.3,71.5,24,194,45.5,170.7,186.2,2073.0,0.54,SAME,True,True,1,1.0
 geolife,SpatialBBox,DuckDB,spatial,128,128,0,0,0,3369.0,2254.0,215,17520,3293.8,9340.4,12071.3,10849360.9,0.978,SAME,True,True,4,39.96
@@ -252,9 +252,9 @@ geolife,SpatialBBox,SpaceTime,spatial,128,128,0,0,0,178.9,146.5,26,595,129.2,427
 geolife,SpatialBBox,Sedona,spatial,128,128,0,0,0,5290.9,5317.5,2084,10208,1640.9,7965.4,8748.4,2692682.1,0.31,SAME,True,True,5,62.76
 geolife,UniqueUsersPerHourInRegionInPeriod,PostGIS,spatiotemporal,128,128,0,0,0,781.7,631.5,95,3073,603.5,2204.8,2726.5,364180.0,0.772,reference,True,True,2,3.2
 geolife,UniqueUsersPerHourInRegionInPeriod,ClickHouse,spatiotemporal,128,128,0,0,0,244.3,240.5,70,404,68.2,352.2,397.3,4647.0,0.279,SAME,True,True,1,1.0
-geolife,UniqueUsersPerHourInRegionInPeriod,DuckDB,spatiotemporal,128,128,0,0,0,1619.7,1452.5,88,5949,1311.0,4422.4,5631.2,1718794.8,0.809,SAME,True,True,3,6.63
-geolife,UniqueUsersPerHourInRegionInPeriod,SpaceTime,spatiotemporal,128,128,0,0,0,1413.3,1477.5,185,3315,601.7,2379.0,3097.8,362024.1,0.426,"DIFF 91 vs 91 rows, e.g. postgis=[('2019-07-10 15:00:00', '68485')] spacetime=[('2019-07-10 15:00:00', '68571')] [3/5 parameter sets]",True,False,,
-geolife,UniqueUsersPerHourInRegionInPeriod,Sedona,spatiotemporal,128,128,0,0,0,3392,3282.5,570,7043,1313.0,5593.5,6655.6,1723925.7,0.387,SAME,True,True,4,13.88
+geolife,UniqueUsersPerHourInRegionInPeriod,DuckDB,spatiotemporal,128,128,0,0,0,1619.7,1452.5,88,5949,1311.0,4422.4,5631.2,1718794.8,0.809,SAME,True,True,4,6.63
+geolife,UniqueUsersPerHourInRegionInPeriod,SpaceTime,spatiotemporal,128,128,0,0,0,1413.3,1477.5,185,3315,601.7,2379.0,3097.8,362024.1,0.426,SAME (re-check after the runs),True,True,3,5.79
+geolife,UniqueUsersPerHourInRegionInPeriod,Sedona,spatiotemporal,128,128,0,0,0,3392,3282.5,570,7043,1313.0,5593.5,6655.6,1723925.7,0.387,SAME,True,True,5,13.88
 geolife,kNN,PostGIS,spatial,128,128,0,0,0,252.2,254.0,159,554,57.1,347.3,442.8,3255.8,0.226,reference,True,True,3,5.65
 geolife,kNN,ClickHouse,spatial,128,128,0,0,0,123.0,93.0,19,392,87.7,292.9,360.1,7687.7,0.713,KNN tie,True,True,2,2.76
 geolife,kNN,DuckDB,spatial,128,128,0,0,0,496.0,463.5,200,1018,216.2,959.9,998.5,46720.9,0.436,KNN tie,True,True,4,11.12
@@ -268,8 +268,8 @@ geolife,spatioTemporalRange,Sedona,spatiotemporal,128,128,0,0,0,360.2,363.5,225,
 geolife,timeAggregation,PostGIS,temporal,128,128,0,0,0,300.8,299.0,270,331,15.7,326.6,329.7,245.5,0.052,reference,True,True,3,1.64
 geolife,timeAggregation,ClickHouse,temporal,128,128,0,0,0,183.2,183.0,170,204,5.6,192.0,201.7,31.7,0.031,SAME,True,True,1,1.0
 geolife,timeAggregation,DuckDB,temporal,128,128,0,0,0,185.6,184.0,164,220,10.8,206.0,213.7,117.0,0.058,SAME,True,True,2,1.01
-geolife,timeAggregation,SpaceTime,temporal,128,128,0,0,0,588.4,545.0,375,1037,146.4,903.0,991.7,21424.3,0.249,"DIFF 1 vs 1 rows, e.g. postgis=[('685388', '3.96089e+07', '297')] spacetime=[('685151', '4.00033e+07', '303')] [5/5 parameter sets]",True,False,,
-geolife,timeAggregation,Sedona,temporal,128,128,0,0,0,1184.8,1173.5,1047,1857,86.1,1301.3,1357.7,7411.8,0.073,SAME,True,True,4,6.47
+geolife,timeAggregation,SpaceTime,temporal,128,128,0,0,0,588.4,545.0,375,1037,146.4,903.0,991.7,21424.3,0.249,SAME (re-check after the runs),True,True,4,3.21
+geolife,timeAggregation,Sedona,temporal,128,128,0,0,0,1184.8,1173.5,1047,1857,86.1,1301.3,1357.7,7411.8,0.073,SAME,True,True,5,6.47
 geolife,timeInterval,PostGIS,temporal,128,128,0,0,0,176.2,179.0,154,192,7.8,186.0,188.7,61.3,0.044,reference,True,True,3,1.82
 geolife,timeInterval,ClickHouse,temporal,128,128,0,0,0,140.5,140.0,125,173,6.8,150.7,154.7,46.2,0.048,SAME,True,True,2,1.45
 geolife,timeInterval,DuckDB,temporal,128,128,0,0,0,97,96.0,83,117,6.5,109.3,116.0,42.2,0.067,SAME,True,True,1,1.0

@@ -4,12 +4,12 @@
 
 | System | Queries won | Queries with a query | Completed (all reps) | Ranked | Geo-mean slowdown vs fastest | Median slowdown |
 |---|---:|---:|---:|---:|---:|---:|
-| PostGIS | 4 | 48 | 48 | 48 | 4.67× | 4.88× |
+| PostGIS | 4 | 48 | 48 | 48 | 4.95× | 4.88× |
 | MobilityDB | 0 | 36 | 36 | 36 | 30.45× | 22.99× |
-| ClickHouse | 16 | 48 | 48 | 48 | 1.74× | 1.44× |
-| DuckDB | 16 | 48 | 48 | 48 | 3.22× | 2.64× |
-| SpaceTime | 12 | 48 | 48 | 42 | 2.18× | 2.03× |
-| Sedona | 0 | 48 | 48 | 48 | 21.89× | 17.44× |
+| ClickHouse | 13 | 48 | 48 | 48 | 1.84× | 1.62× |
+| DuckDB | 16 | 48 | 48 | 48 | 3.41× | 2.99× |
+| SpaceTime | 15 | 48 | 48 | 48 | 2.11× | 1.82× |
+| Sedona | 0 | 48 | 48 | 48 | 23.22× | 18.88× |
 
 ## ais: mean runtime per query
 
@@ -63,7 +63,7 @@ Mean over the repetitions (each with different parameters). **Bold** = fastest r
 | RidesPastOrToUniversityInPeriod | spatiotemporal | 71 ms | 1.41 s | 405 ms ≈ | **29 ms** | 41 ms | 484 ms | DuckDB | 1.43× |
 | SpatialBBox | spatial | 228 ms | 260 ms | **58 ms** | 1.02 s | 71 ms ≈ | 1.54 s | ClickHouse | 1.23× |
 | countRideInDistrict | spatial | 3.05 s | 20.31 s | 2.69 s ≈ | 27.33 s | **1.39 s ≈** | 11.41 s | SpaceTime | 1.93× |
-| kNN | spatial | **22 ms** | 25 ms | 82 ms ≈ | 68 ms ≈ | 30 ms ≠ | 1.10 s ≈ | PostGIS | 1.09× |
+| kNN | spatial | **22 ms** | 25 ms | 82 ms ≈ | 68 ms ≈ | 30 ms | 1.10 s ≈ | PostGIS | 1.09× |
 | spatioTemporalRange | spatiotemporal | 67 ms | 373 ms | 35 ms ≈ | **20 ms** | 21 ms | 214 ms | DuckDB | 1.07× |
 | timeAggregation | temporal | 368 ms | 1.27 s | 180 ms ≈ | **41 ms** | 355 ms ≈ | 357 ms | DuckDB | 4.38× |
 | timeInterval | temporal | 175 ms | 541 ms | 144 ms ≈ | **31 ms** | 245 ms ≈ | 295 ms | DuckDB | 4.7× |
@@ -75,16 +75,16 @@ Mean over the repetitions (each with different parameters). **Bold** = fastest r
 | Query | Type | PostGIS | MobilityDB | ClickHouse | DuckDB | SpaceTime | Sedona | Fastest | Margin |
 |---|---|---:|---:|---:|---:|---:|---:|---|---:|
 | AverageDailyActivityPerUserInPeriod | temporal | 2.15 s | n/a | **287 ms** | 1.63 s | 2.09 s | 4.66 s | ClickHouse | 5.69× |
-| ClosestRestaurantToPoint | spatial | 5.03 s | n/a | **381 ms ≈** | 1000 ms ≈ | 62 ms ≠ | 9.90 s ≈ | ClickHouse | 2.62× |
+| ClosestRestaurantToPoint | spatial | 5.03 s | n/a | 381 ms ≈ | 1000 ms ≈ | **62 ms** | 9.90 s ≈ | SpaceTime | 6.12× |
 | CountPOIsByTypeInRegion | spatial | 8.89 s | n/a | **212 ms** | 19.19 s | 2.32 s | 9.45 s | ClickHouse | 10.96× |
 | FirstAndLastActivityInPeriod | temporal | 1.59 s | n/a | **220 ms** | 876 ms | 1.79 s | 3.05 s | ClickHouse | 3.98× |
-| IDsInsideRegion1Andsecond_region | spatiotemporal | 772 ms | n/a | **119 ms** | 196 ms | 52 ms ≠ | 1.33 s | ClickHouse | 1.64× |
-| SlidingWindowActivityInRegionPerMinuteWithNonZeroID | spatiotemporal | 385 ms | n/a | **180 ms** | 622 ms | 147 ms ≠ | 1.37 s | ClickHouse | 2.15× |
+| IDsInsideRegion1Andsecond_region | spatiotemporal | 772 ms | n/a | 119 ms | 196 ms | **52 ms** | 1.33 s | SpaceTime | 2.28× |
+| SlidingWindowActivityInRegionPerMinuteWithNonZeroID | spatiotemporal | 385 ms | n/a | 180 ms | 622 ms | **147 ms** | 1.37 s | SpaceTime | 1.22× |
 | SpatialBBox | spatial | 1.44 s | n/a | **84 ms** | 3.37 s | 179 ms ≈ | 5.29 s | ClickHouse | 2.12× |
-| UniqueUsersPerHourInRegionInPeriod | spatiotemporal | 782 ms | n/a | **244 ms** | 1.62 s | 1.41 s ≠ | 3.39 s | ClickHouse | 3.2× |
+| UniqueUsersPerHourInRegionInPeriod | spatiotemporal | 782 ms | n/a | **244 ms** | 1.62 s | 1.41 s | 3.39 s | ClickHouse | 3.2× |
 | kNN | spatial | 252 ms | n/a | 123 ms ≈ | 496 ms ≈ | **45 ms ≈** | 4.21 s ≈ | SpaceTime | 2.76× |
 | spatioTemporalRange | spatiotemporal | 73 ms | n/a | 57 ms | 50 ms | **36 ms ≈** | 360 ms | SpaceTime | 1.4× |
-| timeAggregation | temporal | 301 ms | n/a | **183 ms** | 186 ms | 588 ms ≠ | 1.18 s | ClickHouse | 1.01× |
+| timeAggregation | temporal | 301 ms | n/a | **183 ms** | 186 ms | 588 ms | 1.18 s | ClickHouse | 1.01× |
 | timeInterval | temporal | 176 ms | n/a | 140 ms | **97 ms** | 433 ms | 694 ms | DuckDB | 1.45× |
 
 ## ais: latency distribution
