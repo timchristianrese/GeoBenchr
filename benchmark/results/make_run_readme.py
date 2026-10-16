@@ -112,21 +112,28 @@ if nr:
         out.append(f"| {r['scenario']} | {r['query']} | {r['system']} | {why[:90]} |")
     out.append("")
 
-# --- latency tables per scenario
-out += ["## Latency per query", "",
-        "Mean, median, 95th and 99th percentile and standard deviation over the measured repetitions that succeeded "
-        "(n); the variance (standard deviation squared, ms²) is in `summary.csv` (`var_ms2`). **Bold**: fastest ranked "
-        "system on the query (by mean).", ""]
+# --- latency per scenario: box plot, then one table per scenario
+out += ["## Latency per scenario", "",
+        "One section per scenario. The box plot shows every system's runtimes over the measured repetitions that "
+        "succeeded (box: 25th to 75th percentile, line: median, whiskers: 1.5 × the box height, dots: outliers; log "
+        "scale; hatched: not ranked). The table below it gives mean, median, 95th and 99th percentile and standard "
+        "deviation over those repetitions (n); the variance (standard deviation squared, ms²) is in `summary.csv` "
+        "(`var_ms2`). **Bold**: fastest ranked system on the query (by mean).", ""]
 win_of = {(w["scenario"], w["query"]): w["winner"] for w in winners}
 for sc in SCEN:
     rs = [r for r in summary if r["scenario"] == sc and r["succeeded"] not in ("0", "")]
     if not rs:
         continue
-    out += [f"### {SCEN_NAME[sc]}", "", "| Query | System | n | Mean | Median | p95 | p99 | Std dev |",
-            "|---|---|---:|---:|---:|---:|---:|---:|"]
+    out += [f"### {SCEN_NAME[sc]}", ""]
+    if os.path.exists(os.path.join(RUN, "plots", f"boxplot_{sc}.png")):
+        out += [f"![{SCEN_NAME[sc]}: runtime per query and system](plots/boxplot_{sc}.png)", ""]
+    out += ["| Query | System | n | Mean | Median | p95 | p99 | Std dev |", "|---|---|---:|---:|---:|---:|---:|---:|"]
+    last = None
     for r in sorted(rs, key=lambda r: (r["query"], SYSTEMS.index(r["system"]))):
         b = "**" if win_of.get((sc, r["query"])) == r["system"] else ""
-        out.append(f"| {r['query']} | {b}{r['system']}{b} | {r['succeeded']} | {b}{ms(r['mean_ms'])}{b} | {ms(r['median_ms'])} | "
+        q = f"`{r['query']}`" if r["query"] != last else ""
+        last = r["query"]
+        out.append(f"| {q} | {b}{r['system']}{b} | {r['succeeded']} | {b}{ms(r['mean_ms'])}{b} | {ms(r['median_ms'])} | "
                    f"{ms(r['p95_ms'])} | {ms(r['p99_ms'])} | {ms(r['std_ms'])} |")
     out.append("")
 
@@ -200,7 +207,7 @@ out += ["## Files", "", "| File | One row per |", "|---|---|",
         "| `equivalence.csv` | (scenario, query, system): result compared with PostGIS |",
         "| `hardware_by_phase.csv` | (scenario, system): CPU, memory, disk and network per node |",
         "| `dropped_parameter_sets.csv` | parameter sets left out for every system |",
-        "| `tables.md`, `plots/` | the tables and figures generated from the above |",
+        "| `tables.md`, `plots/` | the tables and figures generated from the above (`plots/boxplot_<scenario>.png`: the box plots) |",
         "| `raw/` | client logs, query files, hardware samples, the equivalence check |", ""]
 open(os.path.join(RUN, "README.md"), "w").write("\n".join(out))
 print("wrote", os.path.join(RUN, "README.md"), len(out), "lines")

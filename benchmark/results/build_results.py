@@ -416,6 +416,47 @@ def plots(execs, summary, winners, scores):
         fig.savefig(os.path.join(PLOTS, f"overview_{sc}.png"), dpi=110)
         plt.close(fig)
 
+    # box plots: one figure per scenario, the queries side by side, one box per system (log scale; whiskers 1.5 IQR,
+    # outliers as small dots); a hatched box marks a system not ranked on the query
+    from matplotlib.patches import Patch
+    for sc in SCENARIOS:
+        qs = sorted({r["query"] for r in summary if r["scenario"] == sc})
+        present = [s for s in SYSTEMS if any((sc, q, s) in by for q in qs)]
+        if not qs or not present:
+            continue
+        width = 0.8 / len(present)
+        fig, ax = plt.subplots(figsize=(max(12, 1.5 * len(qs)), 6))
+        for j, s in enumerate(present):
+            pos = [i - 0.4 + width * (j + 0.5) for i, q in enumerate(qs) if by.get((sc, q, s))]
+            data = [by[(sc, q, s)] for q in qs if by.get((sc, q, s))]
+            ranked = [sumk[(sc, q, s)]["eligible"] for q in qs if by.get((sc, q, s))]
+            if not data:
+                continue
+            bp = ax.boxplot(data, positions=pos, widths=width * 0.85, patch_artist=True, whis=1.5,
+                            medianprops={"color": "black", "linewidth": 1},
+                            flierprops={"marker": ".", "markersize": 2, "markerfacecolor": "#555", "markeredgecolor": "none"},
+                            whiskerprops={"linewidth": 0.8}, capprops={"linewidth": 0.8}, boxprops={"linewidth": 0.8})
+            for patch, ok in zip(bp["boxes"], ranked):
+                patch.set_facecolor(COLORS[s])
+                patch.set_alpha(0.9)
+                if not ok:
+                    patch.set_hatch("///")
+        ax.set_yscale("log")
+        ax.set_xticks(range(len(qs)))
+        ax.set_xticklabels(qs, rotation=35, ha="right", fontsize=9)
+        ax.set_xlim(-0.6, len(qs) - 0.4)
+        for i in range(1, len(qs)):
+            ax.axvline(i - 0.5, color="#ddd", linewidth=0.8)
+        ax.set_ylabel("runtime in seconds (log scale)")
+        ax.grid(axis="y", which="major", alpha=0.4)
+        ax.set_title(f"{sc}: runtime per query and system over the measured repetitions", pad=28)
+        handles = [Patch(facecolor=COLORS[s], label=s) for s in present]
+        handles.append(Patch(facecolor="white", edgecolor="black", hatch="///", label="not ranked"))
+        ax.legend(handles=handles, ncol=len(handles), loc="lower center", bbox_to_anchor=(0.5, 1.0), frameon=False, fontsize=9)
+        fig.tight_layout()
+        fig.savefig(os.path.join(PLOTS, f"boxplot_{sc}.png"), dpi=120)
+        plt.close(fig)
+
     if scores:
         fig, ax = plt.subplots(figsize=(7, 4))
         ax.bar([s["system"] for s in scores], [s["wins"] for s in scores], color=[COLORS[s["system"]] for s in scores])
