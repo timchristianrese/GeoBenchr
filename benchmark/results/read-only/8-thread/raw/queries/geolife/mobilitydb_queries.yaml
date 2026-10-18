@@ -1,0 +1,4896 @@
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.19486846743224, 39.951522164648445,
+    116.29846437497442, 40.0085054582462), 4326), 3857)
+  - '''2019-07-13 00:04:28'' AND ''2019-07-15 18:10:54'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.21805417232714, 39.80512790488305,
+    116.32165007986931, 39.862111198480804), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-17 21:33:43'' AND ''2019-07-20 19:08:34'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-30 16:11:00'' AND ''2019-07-31 21:59:59'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-24 15:26:40'' AND ''2019-07-25 01:40:40'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.29362128981462, 39.97729330888433,
+    116.3972171973568, 40.03427660248208), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-28 03:59:56'' AND ''2019-07-30 18:13:55'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-12 07:25:10'' AND ''2019-07-15 01:14:58'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-04 02:47:53'' AND ''2019-07-04 23:19:39'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32013970182028, 39.959361566756485,
+    116.42373560936245, 40.01634486035424), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.24419942312704, 39.980098820799874,
+    116.34779533066921, 40.03708211439763), 4326), 3857)
+  - '''2019-07-26 17:53:50'' AND ''2019-07-28 20:32:25'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-11 16:22:13'' AND ''2019-07-14 07:57:11'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36909220767885, 39.78389748762909,
+    116.47268811522102, 39.84088078122684), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-18 07:19:21'' AND ''2019-07-20 08:01:44'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.27500176545419, 39.885177471593835,
+    116.37859767299636, 39.94216076519159), 4326), 3857)
+  - '''2019-07-30 15:36:06'' AND ''2019-07-31 21:59:59'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-30 20:49:06'' AND ''2019-07-31 13:22:18'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.17141517224815, 39.875592468224, 116.27501107979032,
+    39.93257576182175), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.26332190884133, 39.962850091746056,
+    116.3669178163835, 40.01983338534381), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-15 04:06:16'' AND ''2019-07-17 02:03:42'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.26937013373382, 39.97566869427957,
+    116.37296604127599, 40.03265198787732), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-05 02:02:21'' AND ''2019-07-06 03:24:00'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36886603796316, 39.89267753641244,
+    116.47246194550533, 39.949660830010195), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.38727076611941, 39.9708098715679,
+    116.49086667366159, 40.027793165165654), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.26129466930338, 39.9118734279784,
+    116.36489057684555, 39.96885672157615), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32658386689884, 39.86691971567454,
+    116.43017977444102, 39.923903009272294), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 07:40:38'' AND ''2019-07-26 05:35:44'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-23 15:45:07'' AND ''2019-07-25 21:02:53'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.39792839341318, 39.93117983959556,
+    116.50152430095535, 39.98816313319331), 4326), 3857)
+  - '''2019-07-07 00:17:00'' AND ''2019-07-10 15:18:07'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-08 06:55:09'' AND ''2019-07-10 18:34:15'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-25 02:12:44'' AND ''2019-07-25 16:04:57'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51096509167961, 39.80105256678041,
+    116.61456099922178, 39.858035860378166), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-24 14:24:11'' AND ''2019-07-27 14:54:28'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-17 01:49:11'' AND ''2019-07-18 02:20:31'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.39205138669217, 39.87523770014968,
+    116.49564729423435, 39.932220993747436), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.21231438080126, 39.88157564294928,
+    116.31591028834343, 39.93855893654703), 4326), 3857)
+  - '''2019-06-30 22:00:00'' AND ''2019-07-01 18:12:24'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.30245733503871, 39.80151061828419), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-21 20:22:21'' AND ''2019-07-23 16:29:51'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.48455028896426, 39.883115634318955,
+    116.58814619650643, 39.94009892791671), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-06 23:14:28'' AND ''2019-07-08 19:21:23'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.22147109940644, 39.8119242032361,
+    116.32506700694861, 39.868907496833856), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-17 04:17:37'' AND ''2019-07-19 04:41:52'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.47585424989259, 39.90118250204925,
+    116.57945015743476, 39.958165795647005), 4326), 3857)
+  - '''2019-07-25 22:18:41'' AND ''2019-07-28 15:08:38'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-03 06:01:40'' AND ''2019-07-06 21:09:34'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49091559195979, 39.946207552653405,
+    116.59451149950196, 40.00319084625116), 4326), 3857)
+  - '''2019-07-04 19:16:12'' AND ''2019-07-08 17:10:46'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.41414315013917, 39.915363255024715), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46509575292141, 39.9591638598811,
+    116.56869166046359, 40.016147153478855), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 10:04:15'' AND ''2019-07-30 00:19:16'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.16512873509484, 39.96344885750777,
+    116.26872464263701, 40.020432151105524), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-18 15:38:28'' AND ''2019-07-20 17:27:47'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-10 04:04:43'' AND ''2019-07-13 05:11:27'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.24333031622942, 40.0163149863756), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-20 16:53:06'' AND ''2019-07-22 22:54:52'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 19:57:02'' AND ''2019-07-29 08:10:01'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.26288948240291, 39.976002831977304), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.40480258650103, 39.964225747521645,
+    116.5083984940432, 40.0212090411194), 4326), 3857)
+  - '''2019-06-30 22:00:00'' AND ''2019-07-02 18:11:14'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-15 21:26:42'' AND ''2019-07-17 20:10:36'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32042504213267, 39.79172121368705,
+    116.42402094967484, 39.8487045072848), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-18 10:23:10'' AND ''2019-07-21 18:28:31'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-18 03:35:43'' AND ''2019-07-20 23:33:09'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 17:09:43'' AND ''2019-07-24 22:57:28'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.17611181620562, 39.89097357185391,
+    116.27970772374779, 39.947956865451665), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-21 11:42:59'' AND ''2019-07-23 16:59:33'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2342829580548, 39.85466823937823,
+    116.33787886559698, 39.91165153297598), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.38520398053137, 39.88727900565965,
+    116.48879988807354, 39.9442622992574), 4326), 3857)
+  - '''2019-07-09 04:00:54'' AND ''2019-07-12 13:31:14'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-08 10:59:38'' AND ''2019-07-12 09:34:45'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-10 15:57:40'' AND ''2019-07-13 06:34:35'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.43730119967195, 39.857671778877986,
+    116.54089710721412, 39.91465507247574), 4326), 3857)
+  - '''2019-07-02 18:47:09'' AND ''2019-07-04 22:42:58'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-18 03:20:33'' AND ''2019-07-21 19:21:32'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-06-30 22:00:00'' AND ''2019-07-02 23:13:21'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3285598501793, 39.79772231004458,
+    116.43215575772147, 39.85470560364233), 4326), 3857)
+  - '''2019-07-22 02:26:55'' AND ''2019-07-25 06:35:09'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.42028310586882, 39.921591796559994,
+    116.52387901341099, 39.97857509015775), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 10:29:50'' AND ''2019-07-24 12:03:34'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-05 05:43:03'' AND ''2019-07-09 01:54:54'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.58678842437686, 39.987933104404874), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-13 11:23:18'' AND ''2019-07-13 17:46:04'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.19390057541018, 39.92360825727987,
+    116.29749648295235, 39.98059155087762), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-27 01:11:03'' AND ''2019-07-29 10:14:56'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.56786982647756, 39.91010971362001), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-25 02:06:00'' AND ''2019-07-28 20:40:08'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-27 14:18:33'' AND ''2019-07-30 05:13:48'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-03 21:03:57'' AND ''2019-07-07 13:53:52'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-01 06:22:40'' AND ''2019-07-02 03:35:19'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.23147504782476, 39.90669531736422,
+    116.33507095536693, 39.96367861096197), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.60361218420498, 40.02464430196247), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.39095705993547, 39.89380335082265,
+    116.49455296747765, 39.950786644420404), 4326), 3857)
+  - '''2019-07-12 12:01:58'' AND ''2019-07-14 20:50:24'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46250753708185, 39.89077664254012,
+    116.56610344462402, 39.94775993613787), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.28930517722169, 39.86862138087387), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-28 09:33:15'' AND ''2019-07-31 20:18:27'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 01:01:20'' AND ''2019-07-24 20:33:56'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.48317379156065, 39.829090442020956,
+    116.58676969910282, 39.88607373561871), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-27 04:10:09'' AND ''2019-07-29 05:34:59'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-11 12:02:26'' AND ''2019-07-13 23:24:48'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.462198586629, 39.92739544938454), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46716241721055, 39.9730450342996,
+    116.57075832475272, 40.030028327897355), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-02 20:36:44'' AND ''2019-07-03 19:10:37'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36400930018712, 39.95882562728371,
+    116.46760520772929, 40.01580892088146), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-13 10:14:03'' AND ''2019-07-13 21:27:30'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.23365809348809, 39.785194653512185,
+    116.33725400103026, 39.84217794710994), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-21 17:07:57'' AND ''2019-07-23 17:06:48'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32662831187616, 39.90415551786523,
+    116.43022421941833, 39.96113881146298), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34248892450344, 39.83324767975373,
+    116.44608483204561, 39.890230973351485), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.21361913280369, 39.867406336173914), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.47001860422223, 39.82801152361545,
+    116.5736145117644, 39.884994817213204), 4326), 3857)
+  - '''2019-07-12 03:07:46'' AND ''2019-07-15 02:19:10'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-21 07:07:59'' AND ''2019-07-21 16:28:48'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.23946018188362, 39.96449529046459,
+    116.34305608942579, 40.02147858406234), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50033254104822, 39.97509811203271,
+    116.6039284485904, 40.032081405630464), 4326), 3857)
+  - '''2019-07-25 04:27:31'' AND ''2019-07-28 18:26:58'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-14 18:16:33'' AND ''2019-07-17 09:35:40'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.3280526614999, 39.96377405028962), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.38915368790974, 39.99703134530435), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2544829893531, 39.96555332715671,
+    116.35807889689526, 40.022536620754465), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.19254398035305, 39.945947297169205,
+    116.29613988789522, 40.00293059076696), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-21 03:03:27'' AND ''2019-07-24 16:42:32'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-26 01:42:16'' AND ''2019-07-27 16:14:16'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.31376903596474, 39.86143032086404,
+    116.41736494350691, 39.91841361446179), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.27263650859265, 39.881672511200286,
+    116.37623241613483, 39.93865580479804), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-07 20:32:29'' AND ''2019-07-09 20:50:18'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-24 11:30:51'' AND ''2019-07-26 17:31:17'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50025298267657, 39.947582096794775,
+    116.60384889021874, 40.00456539039253), 4326), 3857)
+  - '''2019-07-15 23:41:27'' AND ''2019-07-18 01:04:55'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-04 00:31:14'' AND ''2019-07-07 00:47:33'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.29677396737277, 39.886357792749266,
+    116.40036987491494, 39.94334108634702), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-06-30 22:00:00'' AND ''2019-07-01 04:44:48'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34467441637499, 39.84535072102343,
+    116.44827032391716, 39.90233401462118), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.4184005926314, 39.952094322093515,
+    116.52199650017357, 40.00907761569127), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-10 16:18:32'' AND ''2019-07-13 17:09:47'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-07 02:49:29'' AND ''2019-07-08 03:27:50'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51910293900961, 39.95088086780622,
+    116.62269884655178, 40.00786416140397), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.18680683852423, 39.88975537634128), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-01 19:17:51'' AND ''2019-07-03 04:41:13'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.23853036563246, 39.87483412306386,
+    116.34212627317463, 39.931817416661616), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.52778720615822, 39.966388694376356), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.34745257247177, 40.0372152758528), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.45459938062228, 39.92894562504182,
+    116.55819528816446, 39.98592891863957), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.38234555446579, 39.82562167037628), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.17901472663853, 39.825514968256606,
+    116.2826106341807, 39.88249826185436), 4326), 3857)
+  - '''2019-07-04 07:12:30'' AND ''2019-07-07 08:37:52'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-06-30 22:00:00'' AND ''2019-07-03 04:07:35'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-03 01:35:49'' AND ''2019-07-06 03:26:04'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-12 11:55:17'' AND ''2019-07-13 05:23:57'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.20586325336566, 39.79739174706134,
+    116.30945916090783, 39.85437504065909), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18838542384995, 39.85635499350901,
+    116.29198133139212, 39.91333828710676), 4326), 3857)
+  - '''2019-07-09 15:29:35'' AND ''2019-07-11 19:34:47'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.23276354877302, 39.898472039817996), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-15 17:11:11'' AND ''2019-07-17 00:31:08'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34271323391722, 39.83665455918572,
+    116.4463091414594, 39.89363785278347), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.37690399124978, 39.9119750069223,
+    116.48049989879195, 39.96895830052005), 4326), 3857)
+  - '''2019-07-28 13:51:09'' AND ''2019-07-31 19:59:50'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.35903708795772, 39.79090117084477,
+    116.46263299549989, 39.84788446444252), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.45595310359133, 39.82521561882637), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.19961729717446, 39.987604610033614), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.22361233860225, 39.84943253848082,
+    116.32720824614442, 39.90641583207857), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.3284461659576, 39.87686276508681), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.48488454672444, 39.81151773616068,
+    116.58848045426662, 39.868501029758434), 4326), 3857)
+  - '''2019-07-06 10:15:24'' AND ''2019-07-10 09:28:07'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-01 00:09:29'' AND ''2019-07-04 17:33:43'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-05 02:04:00'' AND ''2019-07-08 13:44:21'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.59226903525085, 39.976809210240305), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-19 09:44:34'' AND ''2019-07-20 13:42:24'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.39903113529432, 39.90327684974642,
+    116.5026270428365, 39.96026014334417), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.56902153195273, 39.96284993060238), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-15 13:39:57'' AND ''2019-07-18 05:22:49'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-03 18:39:50'' AND ''2019-07-04 10:45:37'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36619682717996, 39.952647023032235,
+    116.46979273472213, 40.00963031662999), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-06 10:14:51'' AND ''2019-07-09 15:34:12'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.29769385715977, 39.96306632947423,
+    116.40128976470194, 40.02004962307198), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.43101670346974, 39.85716440049058,
+    116.53461261101191, 39.914147694088335), 4326), 3857)
+  - '''2019-07-16 18:25:11'' AND ''2019-07-19 03:22:28'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.50234406024252, 39.78675344046434), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32251437866321, 39.84574230317698,
+    116.42611028620539, 39.90272559677474), 4326), 3857)
+  - '''2019-07-07 09:23:26'' AND ''2019-07-11 07:15:58'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-30 07:52:22'' AND ''2019-07-31 03:24:28'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.26706657859339, 39.916592136439725,
+    116.37066248613556, 39.97357543003748), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-27 13:46:47'' AND ''2019-07-30 04:04:34'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3050360042809, 39.83160370791732,
+    116.40863191182306, 39.88858700151507), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.17444917385792, 39.80131187245563,
+    116.2780450814001, 39.85829516605338), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.2906277409225, 40.015899425744294), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-25 06:49:19'' AND ''2019-07-25 17:04:27'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50734441001082, 39.88351176671429,
+    116.61094031755299, 39.940495060312045), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-07 19:18:47'' AND ''2019-07-11 06:38:50'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-11 06:24:10'' AND ''2019-07-15 05:43:01'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.60198252838158, 39.9773176673977), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-23 21:47:53'' AND ''2019-07-25 08:39:39'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33181162259181, 39.824576200351274,
+    116.43540753013399, 39.88155949394903), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.1727141747321, 39.87132827555913,
+    116.27631008227428, 39.92831156915688), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-10 12:53:09'' AND ''2019-07-14 03:50:15'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-03 13:59:07'' AND ''2019-07-06 07:37:38'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33193428738575, 39.88200132917409,
+    116.43553019492792, 39.93898462277184), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-11 04:40:28'' AND ''2019-07-13 14:52:31'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46328256928476, 39.9507063466441,
+    116.56687847682693, 40.00768964024185), 4326), 3857)
+  - '''2019-07-19 02:39:17'' AND ''2019-07-21 21:25:07'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-14 15:21:26'' AND ''2019-07-15 04:06:43'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.40239929938974, 39.97909669012479,
+    116.50599520693191, 40.036079983722544), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-08 22:50:56'' AND ''2019-07-11 00:35:05'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.28965428095385, 39.882217749746246,
+    116.39325018849603, 39.939201043344), 4326), 3857)
+  - '''2019-07-29 21:59:16'' AND ''2019-07-31 21:59:59'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.2904725252779, 39.88665988579239), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-13 13:07:30'' AND ''2019-07-16 22:41:23'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-19 05:49:11'' AND ''2019-07-21 21:38:52'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.38783239640006, 39.80719931086636,
+    116.49142830394223, 39.86418260446411), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-09 20:27:45'' AND ''2019-07-11 23:35:52'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-06 17:01:54'' AND ''2019-07-09 03:03:10'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.5138188685356, 39.82981285193807,
+    116.61741477607777, 39.886796145535826), 4326), 3857)
+  - '''2019-07-19 18:08:43'' AND ''2019-07-21 20:05:45'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.46789386246861, 39.97217331258062), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-22 17:56:16'' AND ''2019-07-23 08:38:02'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36613701904061, 39.936622512623984,
+    116.46973292658278, 39.99360580622174), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.40584351678645, 39.82140367578718,
+    116.50943942432862, 39.878386969384934), 4326), 3857)
+  - '''2019-07-08 21:09:40'' AND ''2019-07-11 14:12:50'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-28 12:22:59'' AND ''2019-07-31 04:12:56'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.22441758272188, 39.86374429476715,
+    116.32801349026406, 39.920727588364905), 4326), 3857)
+  - '''2019-07-02 15:30:44'' AND ''2019-07-06 03:26:44'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.41132603060665, 39.89312292929473,
+    116.51492193814882, 39.95010622289248), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-12 01:47:49'' AND ''2019-07-15 03:05:33'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-20 05:24:51'' AND ''2019-07-23 16:44:27'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-20 12:49:24'' AND ''2019-07-21 19:20:27'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.22125284134707, 39.97944367574842,
+    116.32484874888924, 40.036426969346174), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-16 00:10:54'' AND ''2019-07-18 14:05:07'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-29 13:39:00'' AND ''2019-07-29 23:48:45'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.28437096149902, 39.97090319990343,
+    116.3879668690412, 40.027886493501185), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.37935410192378, 39.815882567109206,
+    116.48295000946595, 39.87286586070696), 4326), 3857)
+  - '''2019-07-21 07:04:16'' AND ''2019-07-23 21:46:06'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.4369360486205, 39.98003610079358,
+    116.54053195616267, 40.037019394391336), 4326), 3857)
+  - '''2019-06-30 22:00:00'' AND ''2019-07-01 09:26:50'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.21055193084183, 39.850748683672634,
+    116.314147838384, 39.90773197727039), 4326), 3857)
+  - '''2019-07-11 16:28:27'' AND ''2019-07-15 02:31:02'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-24 23:25:26'' AND ''2019-07-27 10:58:16'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-13 20:33:49'' AND ''2019-07-17 04:08:09'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.42143909602471, 39.9191933500424), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.30002654986201, 39.86013957509011), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-09 01:25:25'' AND ''2019-07-10 06:03:27'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49669969011418, 39.809750360512744,
+    116.60029559765636, 39.8667336541105), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32705675915861, 39.85766717044465,
+    116.43065266670078, 39.9146504640424), 4326), 3857)
+  - '''2019-07-25 20:52:04'' AND ''2019-07-29 14:52:10'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2172383906638, 39.880511434815446,
+    116.32083429820597, 39.9374947284132), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32690947420147, 39.96207152644082,
+    116.43050538174364, 40.019054820038576), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3899152155699, 39.96866462127362,
+    116.49351112311207, 40.02564791487137), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-03 06:55:21'' AND ''2019-07-06 06:32:07'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-12 22:40:41'' AND ''2019-07-12 23:15:22'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.17502798888832, 39.876732819435944,
+    116.27862389643049, 39.9337161130337), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-20 19:08:45'' AND ''2019-07-22 20:38:33'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-20 11:04:17'' AND ''2019-07-21 16:43:34'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18459793462206, 39.814720626102265,
+    116.28819384216423, 39.87170391970002), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-17 02:38:22'' AND ''2019-07-19 21:00:10'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-20 19:10:31'' AND ''2019-07-22 10:32:30'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3079065966974, 39.970841366888074,
+    116.41150250423958, 40.02782466048583), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.20494838839011, 39.82656291600232,
+    116.30854429593228, 39.88354620960007), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.29123758014592, 39.82475815110553,
+    116.39483348768809, 39.88174144470328), 4326), 3857)
+  - '''2019-07-08 21:43:01'' AND ''2019-07-12 09:42:05'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51342235739975, 39.80442379245587,
+    116.61701826494192, 39.861407086053624), 4326), 3857)
+  - '''2019-06-30 22:00:00'' AND ''2019-07-02 11:50:23'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.42278517083017, 40.00915318059015), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.33764627225595, 39.79950054432831), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-06-30 22:00:00'' AND ''2019-07-04 06:24:37'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.41122666588291, 39.81166303219925), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-27 21:53:19'' AND ''2019-07-31 07:02:33'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-11 15:50:11'' AND ''2019-07-13 06:34:36'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.43564595361067, 39.78554349399519,
+    116.53924186115285, 39.842526787592945), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.24747957224456, 39.969829062911806,
+    116.35107547978673, 40.02681235650956), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30630851142857, 39.87083847886374,
+    116.40990441897074, 39.92782177246149), 4326), 3857)
+  - '''2019-07-19 20:14:40'' AND ''2019-07-23 19:27:44'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-25 10:36:18'' AND ''2019-07-27 21:54:31'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-28 02:41:55'' AND ''2019-07-30 20:49:35'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-05 22:48:13'' AND ''2019-07-08 05:21:26'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34664684341281, 39.84088383866749,
+    116.45024275095498, 39.89786713226524), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-16 16:51:43'' AND ''2019-07-16 23:18:24'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.41083915772096, 39.91834378746619,
+    116.51443506526313, 39.975327081063945), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-24 16:25:51'' AND ''2019-07-26 19:33:21'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.20690764394216, 39.97903370819413), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.47389028816897, 39.806229168279884), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-23 06:00:37'' AND ''2019-07-25 11:11:10'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-19 00:05:08'' AND ''2019-07-21 02:54:23'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 00:46:51'' AND ''2019-07-24 20:04:59'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.40441355682135, 39.92956811868738), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-06 22:18:31'' AND ''2019-07-08 00:50:08'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.22985274345736, 39.94453090688095,
+    116.33344865099953, 40.0015142004787), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-07 00:41:39'' AND ''2019-07-10 00:33:08'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.35407789513954, 40.02176168403266), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.39678778081466, 39.966471585341246,
+    116.50038368835683, 40.023454878939), 4326), 3857)
+  - '''2019-07-30 07:28:56'' AND ''2019-07-31 21:59:59'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.42587889864039, 39.80258765095044,
+    116.52947480618256, 39.859570944548196), 4326), 3857)
+  - '''2019-07-12 13:35:37'' AND ''2019-07-14 13:54:53'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-05 20:42:15'' AND ''2019-07-08 21:28:02'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-10 13:00:18'' AND ''2019-07-14 09:46:32'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-24 20:36:43'' AND ''2019-07-24 23:12:28'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.39956941140572, 39.912528375399326,
+    116.5031653189479, 39.96951166899708), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-07 08:07:21'' AND ''2019-07-08 14:02:53'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.4783485438654, 39.90123934373902,
+    116.58194445140757, 39.958222637336775), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.4933161968709, 39.79872666988488), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-08 00:12:06'' AND ''2019-07-10 05:52:39'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.20071441848138, 39.831823589947156), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34495757402671, 39.87028295682115,
+    116.44855348156888, 39.9272662504189), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.24837942577483, 39.82392800118546,
+    116.351975333317, 39.88091129478321), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-14 20:02:15'' AND ''2019-07-18 08:35:59'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-20 14:47:06'' AND ''2019-07-24 02:58:59'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-14 10:36:43'' AND ''2019-07-18 09:28:18'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.57828065570872, 39.8038846694854), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.35502729180645, 39.811208409251996,
+    116.45862319934862, 39.86819170284975), 4326), 3857)
+  - '''2019-07-06 15:14:05'' AND ''2019-07-10 07:14:00'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.59213846927767, 39.92333520648324), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.26228371517605, 39.84045781105445,
+    116.36587962271823, 39.8974411046522), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-28 08:31:13'' AND ''2019-07-31 03:44:23'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.26592225355493, 39.82779650866779,
+    116.3695181610971, 39.88477980226554), 4326), 3857)
+  - '''2019-07-02 18:45:00'' AND ''2019-07-05 18:23:30'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30670777742166, 39.85074850337578,
+    116.41030368496384, 39.907731796973536), 4326), 3857)
+  - '''2019-07-11 18:51:20'' AND ''2019-07-15 18:49:42'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 14:58:24'' AND ''2019-07-30 03:18:55'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46539736141646, 39.93953279081486,
+    116.56899326895864, 39.99651608441261), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33890128227831, 39.79717020953838,
+    116.44249718982049, 39.85415350313613), 4326), 3857)
+  - '''2019-07-03 09:59:20'' AND ''2019-07-06 23:13:08'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-20 18:23:39'' AND ''2019-07-21 16:37:07'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.22187410126836, 39.980875989416354,
+    116.32547000881053, 40.03785928301411), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46118421022629, 39.79837820760786,
+    116.56478011776846, 39.855361501205614), 4326), 3857)
+  - '''2019-07-11 07:02:11'' AND ''2019-07-14 19:25:33'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-06-30 23:23:50'' AND ''2019-07-02 10:54:00'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.19600046369288, 39.962893111963844,
+    116.29959637123505, 40.0198764055616), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-10 06:40:17'' AND ''2019-07-11 20:36:12'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.25421133994173, 39.88776539745269,
+    116.3578072474839, 39.94474869105044), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-16 06:18:07'' AND ''2019-07-20 01:34:51'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-21 16:38:46'' AND ''2019-07-22 17:18:20'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.44727431481628, 39.808146959670076,
+    116.55087022235845, 39.86513025326783), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 16:34:18'' AND ''2019-07-26 03:59:34'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.41407383859077, 39.89411542443551,
+    116.51766974613294, 39.951098718033265), 4326), 3857)
+  - '''2019-07-23 08:37:51'' AND ''2019-07-26 11:51:31'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.22940805330632, 39.944692567872494), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36254340440387, 39.8735513838721,
+    116.46613931194604, 39.93053467746985), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.47199870291982, 39.87653189959661), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18099558252344, 39.78612805413208,
+    116.28459149006561, 39.84311134772983), 4326), 3857)
+  - '''2019-07-31 11:09:41'' AND ''2019-07-31 21:59:59'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-06 18:15:51'' AND ''2019-07-08 14:36:56'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50742512592225, 39.82502816993635,
+    116.61102103346443, 39.882011463534106), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.34613047238985, 39.89535338647417), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33901091695823, 39.83054969814982,
+    116.4426068245004, 39.88753299174757), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-18 01:23:10'' AND ''2019-07-19 07:51:59'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.39754857064366, 39.939197372287126,
+    116.50114447818584, 39.99618066588488), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.40873638818945, 39.905842268784234,
+    116.51233229573162, 39.96282556238199), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 18:46:32'' AND ''2019-07-30 08:57:39'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-24 03:21:26'' AND ''2019-07-24 17:29:49'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.45925494098731, 39.87648087752389,
+    116.56285084852948, 39.93346417112164), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-19 02:26:57'' AND ''2019-07-21 16:14:14'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-27 14:09:26'' AND ''2019-07-27 18:52:05'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18938346048986, 39.88263765132741,
+    116.29297936803204, 39.93962094492516), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-03 23:32:32'' AND ''2019-07-04 13:42:56'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34800113602789, 39.814200213974075,
+    116.45159704357006, 39.87118350757183), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33415336306129, 39.8646597543662,
+    116.43774927060346, 39.921643047963954), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.47332077598273, 39.809662224815305,
+    116.5769166835249, 39.86664551841306), 4326), 3857)
+  - '''2019-07-25 15:17:49'' AND ''2019-07-27 15:49:15'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.31935530524008, 39.976561475688825,
+    116.42295121278225, 40.03354476928658), 4326), 3857)
+  - '''2019-07-11 04:53:56'' AND ''2019-07-13 15:38:09'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.19556511908348, 39.81921960647669,
+    116.29916102662565, 39.876202900074446), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-25 04:35:08'' AND ''2019-07-28 01:04:01'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-14 22:07:02'' AND ''2019-07-15 03:57:56'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2901310464355, 39.935127570656796,
+    116.39372695397768, 39.99211086425455), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-20 09:57:28'' AND ''2019-07-22 20:00:17'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-23 13:31:51'' AND ''2019-07-24 20:37:30'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.28740991802628, 39.91767584987584,
+    116.39100582556846, 39.974659143473595), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.26049764201767, 39.88272840728989,
+    116.36409354955984, 39.93971170088764), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2529544555102, 39.955084654828404,
+    116.35655036305238, 40.01206794842616), 4326), 3857)
+  - '''2019-07-25 14:41:10'' AND ''2019-07-28 06:44:06'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-30 00:09:22'' AND ''2019-07-30 05:30:40'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.40767680502456, 39.91417544577226,
+    116.51127271256674, 39.97115873937001), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.32326967754045, 39.879785069711374), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-07 08:11:25'' AND ''2019-07-10 05:54:32'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-21 05:47:42'' AND ''2019-07-25 04:30:20'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.45187219471104, 39.872891549292696,
+    116.55546810225322, 39.92987484289045), 4326), 3857)
+  - '''2019-07-03 13:41:13'' AND ''2019-07-07 01:00:27'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-29 22:46:46'' AND ''2019-07-31 21:59:59'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-21 07:47:40'' AND ''2019-07-24 18:45:46'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-06 07:31:42'' AND ''2019-07-08 18:21:05'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-24 03:55:24'' AND ''2019-07-27 23:12:41'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-11 06:23:24'' AND ''2019-07-12 01:41:15'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33254610780402, 39.8437781382308,
+    116.43614201534619, 39.900761431828556), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33736363814096, 39.82374584470108,
+    116.44095954568313, 39.88072913829883), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-20 13:07:28'' AND ''2019-07-20 18:54:56'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18533381818506, 39.85397204638349,
+    116.28892972572723, 39.91095533998124), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 00:16:55'' AND ''2019-07-29 09:15:10'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-08 11:38:15'' AND ''2019-07-10 01:11:32'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.21789947350292, 39.900039397994256,
+    116.3214953810451, 39.95702269159201), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-20 00:00:24'' AND ''2019-07-22 00:58:08'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-09 07:46:38'' AND ''2019-07-11 17:27:08'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18949617211275, 39.83816633155567,
+    116.29309207965493, 39.89514962515342), 4326), 3857)
+  - '''2019-07-24 20:33:14'' AND ''2019-07-28 19:56:11'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-04 00:06:42'' AND ''2019-07-06 00:57:50'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-07 05:52:03'' AND ''2019-07-11 01:33:03'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.21365468079588, 39.91239095297524), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.56616458335058, 39.80202408754052), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-09 16:09:28'' AND ''2019-07-11 21:07:35'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-04 21:56:47'' AND ''2019-07-05 00:56:17'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.31287744667982, 39.978536575984606,
+    116.41647335422199, 40.03551986958236), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-17 00:01:12'' AND ''2019-07-18 23:58:11'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34995083817509, 39.89910135619166,
+    116.45354674571726, 39.95608464978941), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-13 16:19:35'' AND ''2019-07-16 00:47:50'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-03 20:30:21'' AND ''2019-07-06 15:32:45'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-27 12:04:07'' AND ''2019-07-31 00:37:30'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-11 18:14:09'' AND ''2019-07-13 12:26:35'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.44931002233372, 39.847015657250935,
+    116.55290592987589, 39.90399895084869), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.22369296485927, 39.78437205832296), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.24013192148668, 39.86260985344156), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-10 21:39:07'' AND ''2019-07-13 00:50:55'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.21482595820456, 39.92284085694802,
+    116.31842186574673, 39.979824150545774), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-20 10:39:35'' AND ''2019-07-21 14:39:00'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.52123046437484, 39.85917747745885,
+    116.62482637191701, 39.9161607710566), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.42993006130654, 39.81107802927108,
+    116.5335259688487, 39.86806132286883), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50978160203701, 39.97446796707579,
+    116.61337750957918, 40.03145126067354), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50969491593257, 39.78605553651546,
+    116.61329082347474, 39.843038830113215), 4326), 3857)
+  - '''2019-07-18 14:54:15'' AND ''2019-07-20 22:18:34'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.213639554598, 39.94112405096695, 116.31723546214018,
+    39.9981073445647), 4326), 3857)
+  - '''2019-07-05 08:38:31'' AND ''2019-07-08 23:58:49'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-29 11:43:45'' AND ''2019-07-31 21:59:59'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-14 05:29:07'' AND ''2019-07-17 10:42:26'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.31843290149205, 40.02308635705325), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-28 13:58:43'' AND ''2019-07-31 05:19:16'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-06 17:11:54'' AND ''2019-07-09 01:08:12'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-20 08:47:12'' AND ''2019-07-23 01:54:34'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-03 13:43:21'' AND ''2019-07-06 08:48:22'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.31809993587196, 40.01183565846467), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.29245184366734, 39.97636226253835,
+    116.39604775120951, 40.033345556136105), 4326), 3857)
+  - '''2019-07-09 04:11:40'' AND ''2019-07-12 15:04:14'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-11 21:47:50'' AND ''2019-07-14 04:58:16'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.60862273937482, 39.96288189604005), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.43846897230875, 39.915650394417995), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-25 16:25:15'' AND ''2019-07-29 00:19:57'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-25 00:41:41'' AND ''2019-07-25 17:35:28'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2491300266957, 39.91552397292624,
+    116.35272593423787, 39.97250726652399), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-08 10:43:56'' AND ''2019-07-12 06:32:41'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-28 21:53:42'' AND ''2019-07-31 21:59:59'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50073929262832, 39.860611540292545,
+    116.6043352001705, 39.9175948338903), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.25625217966517, 39.965451207238175,
+    116.35984808720734, 40.02243450083593), 4326), 3857)
+  - '''2019-06-30 22:00:00'' AND ''2019-07-03 01:36:16'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.38812252213424, 39.81103896172339), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-05 19:20:34'' AND ''2019-07-09 14:41:13'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-30 04:40:59'' AND ''2019-07-31 21:59:59'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.26889407593337, 40.02039031282894), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-14 07:35:27'' AND ''2019-07-15 20:45:38'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36498897462063, 39.902365496004485,
+    116.4685848821628, 39.95934878960224), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2241096298541, 39.83280793744853,
+    116.32770553739627, 39.88979123104628), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-01 18:06:27'' AND ''2019-07-05 17:49:29'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.6239156730794, 39.932313300135306), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.48377096021304, 39.82894416763042,
+    116.58736686775521, 39.88592746122817), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.42373173102821, 39.84055053094729,
+    116.52732763857038, 39.89753382454504), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.29796587860206, 39.919104399032015,
+    116.40156178614423, 39.97608769262977), 4326), 3857)
+  - '''2019-07-27 06:21:22'' AND ''2019-07-29 09:34:27'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-04 21:25:00'' AND ''2019-07-07 10:12:38'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-11 17:16:52'' AND ''2019-07-14 15:06:00'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-18 20:27:38'' AND ''2019-07-21 09:27:31'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-29 23:40:22'' AND ''2019-07-31 06:23:41'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.29366582026105, 39.82705362660741,
+    116.39726172780323, 39.88403692020516), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-15 14:44:27'' AND ''2019-07-17 06:18:16'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.48229077648612, 39.956894629132584,
+    116.5858866840283, 40.01387792273034), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32167369839864, 39.901374058857144,
+    116.42526960594081, 39.9583573524549), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.17348726017633, 39.96864432446307,
+    116.2770831677185, 40.025627618060824), 4326), 3857)
+  - '''2019-07-10 02:35:22'' AND ''2019-07-13 23:27:52'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-08 02:45:19'' AND ''2019-07-11 07:10:57'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-06-30 22:00:00'' AND ''2019-07-01 16:23:49'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.25046484236783, 39.82466306670321,
+    116.35406074991, 39.88164636030096), 4326), 3857)
+  - '''2019-07-04 17:16:19'' AND ''2019-07-06 23:59:35'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46234768482616, 39.8933150373515,
+    116.56594359236833, 39.95029833094925), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-02 04:50:32'' AND ''2019-07-05 23:23:52'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.45288132332391, 39.850165093344685,
+    116.55647723086608, 39.90714838694244), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-06-30 22:00:00'' AND ''2019-07-02 17:57:15'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 12:11:42'' AND ''2019-07-28 20:29:10'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-07 09:07:40'' AND ''2019-07-09 10:59:13'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-21 09:44:38'' AND ''2019-07-22 08:32:31'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.24466643435424, 39.84132832279164,
+    116.34826234189642, 39.89831161638939), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3350029478828, 39.95841595958759,
+    116.43859885542497, 40.01539925318534), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-23 08:30:41'' AND ''2019-07-26 08:00:07'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51294461574219, 39.91968241007435,
+    116.61654052328436, 39.976665703672104), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-07 17:51:09'' AND ''2019-07-10 18:24:58'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-14 16:29:45'' AND ''2019-07-16 15:27:04'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.52097402690723, 39.79916705824905,
+    116.6245699344494, 39.8561503518468), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-14 15:45:58'' AND ''2019-07-17 07:02:07'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.29828977888735, 39.923283093585574,
+    116.40188568642952, 39.98026638718333), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-01 18:05:23'' AND ''2019-07-03 15:51:32'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30439299787967, 39.90097651565669,
+    116.40798890542185, 39.95795980925444), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-05 02:06:03'' AND ''2019-07-07 01:24:32'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.40888053690568, 39.92241009927108,
+    116.51247644444786, 39.979393392868836), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-29 17:13:21'' AND ''2019-07-31 19:03:38'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-28 12:41:36'' AND ''2019-07-30 16:15:26'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.186790076964, 39.8133707082456, 116.29038598450617,
+    39.87035400184335), 4326), 3857)
+  - '''2019-07-28 02:50:13'' AND ''2019-07-31 04:37:20'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-06 02:55:27'' AND ''2019-07-10 00:21:15'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.28998696636857, 39.964767133864555), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-23 02:57:32'' AND ''2019-07-26 23:42:18'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-15 09:33:53'' AND ''2019-07-18 05:54:01'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.40654570734128, 39.92306296354076,
+    116.51014161488345, 39.98004625713851), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-25 08:49:06'' AND ''2019-07-28 18:55:41'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-24 17:12:22'' AND ''2019-07-26 23:43:09'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49999079170786, 39.78659865436901,
+    116.60358669925003, 39.84358194796676), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-06-30 22:00:00'' AND ''2019-07-02 19:03:57'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-22 19:11:18'' AND ''2019-07-22 21:16:18'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.29157449730995, 39.933000026970056,
+    116.39517040485212, 39.98998332056781), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.523325309808, 39.99023785816776), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-19 17:34:53'' AND ''2019-07-23 01:42:31'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51129651256454, 39.980976218564344,
+    116.61489242010671, 40.0379595121621), 4326), 3857)
+  - '''2019-07-13 08:01:57'' AND ''2019-07-16 17:48:11'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3995229174409, 39.82864150511486,
+    116.50311882498308, 39.88562479871261), 4326), 3857)
+  - '''2019-07-21 16:13:18'' AND ''2019-07-24 20:09:28'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-18 06:04:55'' AND ''2019-07-21 01:30:27'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.24375997909685, 39.787060883352346,
+    116.34735588663902, 39.8440441769501), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33825107646493, 39.85489284237886,
+    116.4418469840071, 39.91187613597661), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2867743617884, 39.8334802548, 116.39037026933057,
+    39.890463548397754), 4326), 3857)
+  - '''2019-07-28 00:26:07'' AND ''2019-07-31 10:40:34'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.28079638988356, 39.790290527037214), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50358481071022, 39.89765038640102,
+    116.6071807182524, 39.95463367999877), 4326), 3857)
+  - '''2019-07-01 12:33:55'' AND ''2019-07-04 14:34:51'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.42748488505644, 39.87525291103458,
+    116.53108079259862, 39.93223620463233), 4326), 3857)
+  - '''2019-07-05 09:25:11'' AND ''2019-07-07 13:01:38'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-13 19:41:10'' AND ''2019-07-16 10:33:06'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.22088355652119, 39.998609481330355), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.23741537518202, 39.78575940131402,
+    116.3410112827242, 39.84274269491177), 4326), 3857)
+  - '''2019-07-30 06:50:41'' AND ''2019-07-31 21:59:59'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.30674104052086, 39.994256407906605), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.21832102516213, 39.969750140822406,
+    116.3219169327043, 40.02673343442016), 4326), 3857)
+  - '''2019-07-20 09:31:54'' AND ''2019-07-23 13:04:44'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-20 10:47:11'' AND ''2019-07-22 20:01:52'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.22134636174442, 39.794203205754485,
+    116.3249422692866, 39.85118649935224), 4326), 3857)
+  - '''2019-07-01 07:45:02'' AND ''2019-07-03 18:30:56'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-25 17:13:14'' AND ''2019-07-27 15:51:29'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33894615583483, 39.87272969954635,
+    116.442542063377, 39.9297129931441), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-17 12:17:35'' AND ''2019-07-19 06:56:30'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.21048155003619, 39.83003728186929,
+    116.31407745757836, 39.88702057546704), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 00:18:35'' AND ''2019-07-25 12:10:16'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-12 18:23:49'' AND ''2019-07-13 11:58:35'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32239236359293, 39.85162555102344,
+    116.4259882711351, 39.90860884462119), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.49437129520295, 39.875496684212685), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.43782530848763, 39.917588601115895), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.25340277247209, 39.9254636284262,
+    116.35699868001426, 39.982446922023954), 4326), 3857)
+  - '''2019-07-08 07:16:29'' AND ''2019-07-10 14:59:15'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.28060982527691, 39.84223021635029), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-09 01:26:41'' AND ''2019-07-11 23:04:50'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.21664337128668, 39.89662901434275,
+    116.32023927882885, 39.9536123079405), 4326), 3857)
+  - '''2019-06-30 22:00:00'' AND ''2019-07-02 06:22:08'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-14 08:49:46'' AND ''2019-07-16 19:45:24'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-06 23:59:05'' AND ''2019-07-10 01:38:09'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.45483524832022, 39.96435089100489), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-02 01:13:33'' AND ''2019-07-03 16:29:51'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34332964704791, 39.87222708641304,
+    116.44692555459008, 39.929210380010794), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.45365030206516, 39.891731163834436), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49965259615031, 39.81043995242413,
+    116.60324850369248, 39.867423246021886), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-24 20:58:48'' AND ''2019-07-28 09:40:53'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.48774392397333, 39.87579459535134,
+    116.5913398315155, 39.93277788894909), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-11 02:27:22'' AND ''2019-07-11 13:39:46'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.17062599355131, 39.91480196064591,
+    116.27422190109348, 39.97178525424366), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-19 08:31:09'' AND ''2019-07-21 18:56:14'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.4275737728298, 39.93262777980616,
+    116.53116968037197, 39.989611073403914), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-15 13:13:19'' AND ''2019-07-17 07:44:46'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.28029600675134, 39.82528490390914,
+    116.38389191429351, 39.882268197506896), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-10 17:20:52'' AND ''2019-07-13 14:31:38'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49062266420869, 39.972501446747984,
+    116.59421857175086, 40.02948474034574), 4326), 3857)
+  - '''2019-07-16 18:43:38'' AND ''2019-07-19 09:05:03'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3423429518202, 39.867175309767156,
+    116.44593885936237, 39.92415860336491), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.41671851693194, 39.90578066593706), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-05 13:48:35'' AND ''2019-07-09 13:42:09'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.40623017580299, 39.97835036639439), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.51560839882163, 39.99132314063604), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-02 03:00:04'' AND ''2019-07-04 19:47:51'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.62608056663825, 39.940220503703806), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34200258777787, 39.979037440412874,
+    116.44559849532004, 40.03602073401063), 4326), 3857)
+  - '''2019-07-28 05:18:39'' AND ''2019-07-31 14:13:44'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-16 00:47:06'' AND ''2019-07-17 10:44:07'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.38585130229544, 39.849558689050745,
+    116.4894472098376, 39.9065419826485), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2728625175466, 39.81128688780257,
+    116.37645842508877, 39.86827018140032), 4326), 3857)
+  - '''2019-07-26 18:56:02'' AND ''2019-07-29 14:21:10'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18768360129687, 39.901521826465945,
+    116.29127950883904, 39.9585051200637), 4326), 3857)
+  - '''2019-07-24 17:46:09'' AND ''2019-07-27 17:13:18'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-08 09:06:08'' AND ''2019-07-10 13:46:12'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-24 20:01:51'' AND ''2019-07-28 16:48:16'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.52447179144555, 39.803768170141886,
+    116.62806769898772, 39.86075146373964), 4326), 3857)
+  - '''2019-06-30 22:00:00'' AND ''2019-07-03 00:51:41'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-28 23:24:51'' AND ''2019-07-29 20:24:13'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.43152389195254, 39.90209753581125,
+    116.53511979949471, 39.959080829409004), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-27 01:45:47'' AND ''2019-07-29 19:44:29'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.42358316098236, 39.846645146279634,
+    116.52717906852453, 39.90362843987739), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.47158357278492, 39.96640250775254), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.48948773363199, 39.8730885865795), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49716242767794, 39.91869229201132,
+    116.6007583352201, 39.975675585609075), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.48710912017367, 39.867856501830374,
+    116.59070502771584, 39.92483979542813), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-21 14:09:45'' AND ''2019-07-23 22:45:12'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.43387055558394, 39.950521549990775,
+    116.53746646312611, 40.00750484358853), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-07 04:51:22'' AND ''2019-07-10 21:04:09'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.6148650051849, 39.90576193714221), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.467760058296, 39.792211293516374,
+    116.57135596583817, 39.84919458711413), 4326), 3857)
+  - '''2019-07-02 07:33:34'' AND ''2019-07-06 01:02:04'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-08 10:13:43'' AND ''2019-07-10 15:29:02'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-14 15:07:30'' AND ''2019-07-18 00:59:22'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-04 12:18:52'' AND ''2019-07-07 13:05:55'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36666777536436, 39.966313091685045,
+    116.47026368290653, 40.0232963852828), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.25449375762777, 39.901475926549395), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-27 04:33:59'' AND ''2019-07-27 18:43:10'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18381588896841, 39.92982254093456,
+    116.28741179651058, 39.98680583453231), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 19:10:25'' AND ''2019-07-30 14:17:23'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-09 16:51:38'' AND ''2019-07-10 17:29:49'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.35558358930844, 39.97945131100206,
+    116.45917949685061, 40.03643460459981), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49719181047239, 39.90547639089115,
+    116.60078771801456, 39.962459684488906), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.22303783616599, 39.97482268600227), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33147297617109, 39.965064237228546,
+    116.43506888371326, 40.0220475308263), 4326), 3857)
+  - '''2019-07-05 09:57:57'' AND ''2019-07-08 07:39:10'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.263402528089, 39.89639895017528), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46281083354042, 39.902892629080384,
+    116.56640674108259, 39.95987592267814), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46097404314321, 39.78439501412222,
+    116.56456995068538, 39.84137830771997), 4326), 3857)
+  - '''2019-07-22 01:36:49'' AND ''2019-07-24 10:53:55'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-02 19:17:33'' AND ''2019-07-06 17:41:51'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-06-30 22:00:00'' AND ''2019-07-03 06:49:18'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-08 08:53:44'' AND ''2019-07-10 09:59:45'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.28524837335581, 39.899638540909905), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.43987943177578, 39.84423713690549), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.37824379290856, 39.9803016380028), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.33828040542352, 39.901348936048535), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-22 19:39:34'' AND ''2019-07-23 00:17:06'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36200546605161, 39.965801721172525,
+    116.46560137359378, 40.02278501477028), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.19774288832622, 39.99270778718761), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-27 11:04:07'' AND ''2019-07-30 16:59:56'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.3047507299784, 39.94572149805456), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.52374652345476, 39.78472771768381,
+    116.62734243099693, 39.84171101128156), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.25578179371206, 39.9317372709625,
+    116.35937770125423, 39.98872056456025), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-28 22:03:15'' AND ''2019-07-28 23:08:59'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.19639484253206, 39.88093636940518,
+    116.29999075007423, 39.93791966300293), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 23:23:19'' AND ''2019-07-29 13:53:00'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.45566965767617, 39.834491393300674,
+    116.55926556521834, 39.89147468689843), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33942860408803, 39.898440985569984,
+    116.4430245116302, 39.95542427916774), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-15 15:19:55'' AND ''2019-07-17 04:28:47'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36831954445763, 39.925147471538665,
+    116.4719154519998, 39.98213076513642), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-16 16:56:10'' AND ''2019-07-20 14:06:15'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-03 03:03:31'' AND ''2019-07-06 21:06:56'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-06-30 22:00:00'' AND ''2019-06-30 22:11:35'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-16 13:32:13'' AND ''2019-07-16 14:16:34'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33128699545975, 39.82678166802601,
+    116.43488290300192, 39.88376496162376), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.21627283085017, 39.88046861584096,
+    116.31986873839234, 39.937451909438714), 4326), 3857)
+  - '''2019-07-14 08:47:21'' AND ''2019-07-18 04:42:31'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.45469318317046, 40.02113723080907), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2016773632588, 39.9706588400267, 116.30527327080097,
+    40.027642133624454), 4326), 3857)
+  - '''2019-07-09 17:17:47'' AND ''2019-07-11 17:30:40'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-17 00:50:23'' AND ''2019-07-20 06:30:35'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.33188446821389, 40.01296269435504), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-08 20:35:20'' AND ''2019-07-10 15:14:58'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.37094237493675, 39.95457418641308,
+    116.47453828247892, 40.011557480010836), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.37919806148031, 39.885042805148366), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-19 02:03:39'' AND ''2019-07-22 16:25:04'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.47040298294348, 39.78572403414107), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-29 07:57:09'' AND ''2019-07-31 17:08:51'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 15:43:21'' AND ''2019-07-30 07:21:45'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 23:03:59'' AND ''2019-07-26 06:15:22'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-09 15:07:51'' AND ''2019-07-13 12:27:52'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-21 12:14:16'' AND ''2019-07-22 10:50:51'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51106679929488, 39.86687655094701,
+    116.61466270683705, 39.923859844544765), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-16 06:00:55'' AND ''2019-07-20 02:58:49'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-20 10:24:27'' AND ''2019-07-22 00:53:52'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18907459437791, 39.863627813671414,
+    116.29267050192009, 39.92061110726917), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.41861550754744, 39.93866819090807,
+    116.52221141508961, 39.99565148450582), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.19741935894218, 39.898873167942654,
+    116.30101526648436, 39.95585646154041), 4326), 3857)
+  - '''2019-07-04 21:51:53'' AND ''2019-07-07 15:53:36'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-13 03:34:07'' AND ''2019-07-13 13:52:13'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.28521010729737, 39.96713039078545,
+    116.38880601483955, 40.0241136843832), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-16 18:08:57'' AND ''2019-07-17 03:27:22'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50267902521081, 39.78841224538215,
+    116.60627493275298, 39.8453955389799), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.25030039770697, 39.916211825398946,
+    116.35389630524914, 39.9731951189967), 4326), 3857)
+  - '''2019-07-17 04:52:11'' AND ''2019-07-20 12:01:30'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-24 14:11:47'' AND ''2019-07-28 08:44:46'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-27 18:58:11'' AND ''2019-07-29 10:11:12'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33077547962597, 39.84369387339291,
+    116.43437138716814, 39.90067716699066), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30020132273494, 39.8805014351037,
+    116.4037972302771, 39.937484728701456), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-19 06:41:24'' AND ''2019-07-22 04:38:13'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-23 23:16:14'' AND ''2019-07-27 06:29:25'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-12 17:59:59'' AND ''2019-07-16 06:27:35'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-16 02:41:04'' AND ''2019-07-16 19:54:28'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.4466252814315, 39.83147569867897,
+    116.55022118897367, 39.888458992276725), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-02 01:43:41'' AND ''2019-07-05 16:38:15'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 04:31:13'' AND ''2019-07-25 17:45:29'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51087382108908, 39.93218978438789,
+    116.61446972863125, 39.98917307798564), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-17 09:12:46'' AND ''2019-07-18 10:12:03'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.4085469212304, 39.83864938701892,
+    116.51214282877257, 39.89563268061667), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-07 08:53:15'' AND ''2019-07-09 05:44:05'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.38878350576249, 39.95320954933585,
+    116.49237941330466, 40.010192842933606), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-12 11:34:25'' AND ''2019-07-14 11:53:27'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-13 05:58:46'' AND ''2019-07-15 22:16:29'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-25 05:58:01'' AND ''2019-07-25 12:01:38'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.1975085874065, 39.85438762576342,
+    116.30110449494867, 39.911370919361175), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 23:15:09'' AND ''2019-07-26 17:15:11'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.38129385115467, 40.03373944512761), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.61838926460914, 40.00713668362615), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.3161112386215, 39.785857685975834), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.52273754949283, 39.95761786636053,
+    116.626333457035, 40.01460115995828), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-06-30 22:00:00'' AND ''2019-07-03 13:10:10'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-01 22:45:04'' AND ''2019-07-04 19:17:03'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-23 05:43:02'' AND ''2019-07-26 16:03:39'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.43181055717768, 39.83581356070219,
+    116.53540646471986, 39.892796854299945), 4326), 3857)
+  - '''2019-07-27 20:28:09'' AND ''2019-07-31 07:11:03'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36398851545155, 39.826714759458575,
+    116.46758442299372, 39.88369805305633), 4326), 3857)
+  - '''2019-07-07 21:06:59'' AND ''2019-07-11 14:56:57'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30110153963827, 39.89718771374501,
+    116.40469744718044, 39.954171007342765), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34834362311241, 39.95918113566096,
+    116.45193953065458, 40.016164429258716), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.48571999601818, 39.87893824124111,
+    116.58931590356035, 39.93592153483886), 4326), 3857)
+  - '''2019-06-30 22:00:00'' AND ''2019-07-02 16:18:17'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.4175129841701, 39.962002136326966), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.45459114674509, 39.93711986295975,
+    116.55818705428726, 39.9941031565575), 4326), 3857)
+  - '''2019-07-22 23:10:20'' AND ''2019-07-26 18:20:56'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-21 14:18:13'' AND ''2019-07-24 06:06:46'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-21 08:54:12'' AND ''2019-07-25 05:38:22'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.20233624878253, 39.925090236788684,
+    116.3059321563247, 39.98207353038644), 4326), 3857)
+  - '''2019-07-26 10:25:07'' AND ''2019-07-29 14:11:03'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-03 22:49:10'' AND ''2019-07-07 05:13:02'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.25325157837662, 39.838153779037334,
+    116.35684748591879, 39.89513707263509), 4326), 3857)
+  - '''2019-07-03 19:31:57'' AND ''2019-07-06 10:09:08'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.4424862344196, 39.94471728297014,
+    116.54608214196178, 40.00170057656789), 4326), 3857)
+  - '''2019-07-10 05:10:07'' AND ''2019-07-13 22:53:16'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-28 02:10:48'' AND ''2019-07-30 05:47:45'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-06 02:20:58'' AND ''2019-07-06 12:27:10'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46568694043728, 39.81975999391779,
+    116.56928284797945, 39.876743287515545), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.37589092168294, 39.80630713576308,
+    116.47948682922511, 39.86329042936083), 4326), 3857)
+  - '''2019-07-11 01:35:18'' AND ''2019-07-13 10:46:02'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-19 04:21:38'' AND ''2019-07-21 07:13:31'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-06 03:42:07'' AND ''2019-07-06 07:09:16'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30596519738913, 39.93728570869446,
+    116.4095611049313, 39.994269002292214), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-23 20:25:11'' AND ''2019-07-24 18:33:32'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.44184556299165, 39.95067689713166,
+    116.54544147053382, 40.00766019072941), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-25 04:58:00'' AND ''2019-07-29 03:49:45'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-09 05:46:29'' AND ''2019-07-11 10:37:54'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.23112859368463, 39.96677896195852,
+    116.3347245012268, 40.02376225555627), 4326), 3857)
+  - '''2019-07-23 13:25:26'' AND ''2019-07-27 01:44:18'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.48615707288552, 39.93452984015157,
+    116.58975298042769, 39.99151313374932), 4326), 3857)
+  - '''2019-07-12 20:54:02'' AND ''2019-07-15 14:21:17'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50843854181635, 39.82926036649726,
+    116.61203444935852, 39.88624366009501), 4326), 3857)
+  - '''2019-06-30 22:00:00'' AND ''2019-07-04 02:30:58'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33133574340691, 39.888794140733594,
+    116.43493165094908, 39.94577743433135), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.56721306087086, 39.78563532037509), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-05 07:28:32'' AND ''2019-07-06 07:40:34'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.324544248333, 39.960144828755936,
+    116.42814015587517, 40.01712812235369), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-23 18:41:08'' AND ''2019-07-27 14:15:29'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.21049922765094, 39.81737349124516), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.17796184955398, 39.95070295385338), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-31 12:09:22'' AND ''2019-07-31 21:59:59'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-28 07:57:01'' AND ''2019-07-28 15:28:48'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.42895636650002, 39.83340556182552,
+    116.53255227404219, 39.890388855423275), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-19 02:53:26'' AND ''2019-07-19 12:48:56'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.1672352494971, 39.830553838067026,
+    116.27083115703927, 39.88753713166478), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-29 05:11:36'' AND ''2019-07-31 21:59:59'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46219901597235, 39.81290923427033,
+    116.56579492351452, 39.86989252786808), 4326), 3857)
+  - '''2019-07-21 09:05:23'' AND ''2019-07-23 23:57:21'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.19254627747189, 39.95965228323318), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.39582405813762, 39.90895548127425,
+    116.49941996567979, 39.965938774872), 4326), 3857)
+  - '''2019-07-15 20:40:31'' AND ''2019-07-19 08:00:23'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.6250077929482, 39.832740805136346), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.26147712893676, 39.828812688057035,
+    116.36507303647893, 39.88579598165479), 4326), 3857)
+  - '''2019-07-04 18:12:51'' AND ''2019-07-07 15:16:49'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-14 05:17:08'' AND ''2019-07-15 12:23:26'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.20623760033834, 39.90952903557995,
+    116.30983350788051, 39.966512329177704), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2496557777508, 39.87218111033391,
+    116.35325168529297, 39.929164403931665), 4326), 3857)
+  - '''2019-07-12 19:07:08'' AND ''2019-07-16 18:59:33'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-23 13:48:37'' AND ''2019-07-25 07:31:37'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.19660114611185, 39.86554296921221,
+    116.30019705365402, 39.92252626280996), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.42752245813023, 39.90348182922501,
+    116.5311183656724, 39.96046512282276), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.57393227661166, 39.96964607161592), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-14 03:41:24'' AND ''2019-07-16 17:55:30'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.17762893653814, 39.89494763558396,
+    116.28122484408031, 39.951930929181714), 4326), 3857)
+  - '''2019-07-23 14:25:06'' AND ''2019-07-26 22:43:04'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-05 00:44:46'' AND ''2019-07-08 21:36:38'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-17 02:06:23'' AND ''2019-07-20 00:23:04'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.57174362287543, 40.004040806863735), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-25 19:22:07'' AND ''2019-07-26 10:38:46'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.29522179511501, 39.801987390264266,
+    116.39881770265718, 39.85897068386202), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36972538448842, 39.804614861149574,
+    116.47332129203059, 39.86159815474733), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-25 08:17:17'' AND ''2019-07-28 07:09:09'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-06 10:58:27'' AND ''2019-07-09 03:38:20'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-29 15:36:04'' AND ''2019-07-30 06:38:07'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18452627914769, 39.88453469552307,
+    116.28812218668986, 39.941517989120825), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-18 20:27:59'' AND ''2019-07-21 22:48:50'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-07 23:39:53'' AND ''2019-07-10 16:10:01'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.55163295872606, 39.920705118985516), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46826851785097, 39.96794871501546,
+    116.57186442539314, 40.02493200861321), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.44425076287165, 39.81579341480798), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-24 05:58:55'' AND ''2019-07-24 11:08:47'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51982894159659, 39.96014657618211,
+    116.62342484913876, 40.017129869779865), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.41485563909778, 39.91560272394487), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.40816565559247, 39.83024082705031,
+    116.51176156313464, 39.887224120648064), 4326), 3857)
+  - '''2019-07-03 07:44:33'' AND ''2019-07-06 21:55:03'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-11 08:28:13'' AND ''2019-07-13 17:04:41'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-21 08:49:52'' AND ''2019-07-24 11:50:38'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-15 15:42:16'' AND ''2019-07-18 23:06:19'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-19 19:01:51'' AND ''2019-07-20 12:11:22'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3002092038328, 39.956025574782295,
+    116.40380511137496, 40.01300886838005), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.20451957488996, 39.878603806322076,
+    116.30811548243213, 39.93558709991983), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.5047077592569, 39.81543393352993,
+    116.60830366679907, 39.872417227127684), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-08 03:38:34'' AND ''2019-07-08 17:16:00'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.27485703279213, 39.84491244196114,
+    116.3784529403343, 39.901895735558895), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49391810201209, 39.917307545998845,
+    116.59751400955426, 39.9742908395966), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-01 03:54:45'' AND ''2019-07-03 20:58:19'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30621971968274, 39.836232046182715,
+    116.40981562722492, 39.89321533978047), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-18 20:31:53'' AND ''2019-07-21 00:34:00'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.51947420934792, 39.825813774299746), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-20 14:00:22'' AND ''2019-07-24 09:39:29'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-02 12:25:50'' AND ''2019-07-05 10:36:29'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-18 12:51:44'' AND ''2019-07-22 11:06:28'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.51597284880708, 39.872886734550086), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.41090864796946, 39.92890403909804,
+    116.51450455551164, 39.985887332695796), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-28 06:43:24'' AND ''2019-07-31 06:25:45'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49999267532368, 39.79724428760974,
+    116.60358858286585, 39.854227581207496), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.374275310187, 39.88284076962637, 116.47787121772917,
+    39.93982406322412), 4326), 3857)
+  - '''2019-07-10 20:23:24'' AND ''2019-07-14 11:09:02'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-24 09:13:04'' AND ''2019-07-27 21:25:11'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.43992821023107, 39.916417282676306,
+    116.54352411777325, 39.97340057627406), 4326), 3857)
+  - '''2019-07-05 23:53:18'' AND ''2019-07-09 09:08:01'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-01 09:01:53'' AND ''2019-07-04 06:39:44'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.44476420082941, 39.86572734917857), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-05 11:39:47'' AND ''2019-07-07 09:17:03'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32863566253398, 39.93675571746493,
+    116.43223157007615, 39.99373901106269), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-27 21:45:56'' AND ''2019-07-30 18:22:06'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.27718060755298, 39.86549838506057,
+    116.38077651509515, 39.92248167865832), 4326), 3857)
+  - '''2019-06-30 22:00:00'' AND ''2019-07-01 22:38:24'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.27564473204167, 39.8959226511793,
+    116.37924063958384, 39.95290594477705), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.20222329785432, 39.975654739450775,
+    116.30581920539649, 40.03263803304853), 4326), 3857)
+  - '''2019-07-05 07:26:02'' AND ''2019-07-07 12:38:06'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-04 01:17:42'' AND ''2019-07-07 17:35:59'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-13 11:44:04'' AND ''2019-07-16 10:47:57'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.28063660552401, 39.8011896144364,
+    116.38423251306618, 39.858172908034156), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49422262300217, 39.97696306739682,
+    116.59781853054434, 40.03394636099457), 4326), 3857)
+  - '''2019-07-02 07:55:01'' AND ''2019-07-04 23:33:46'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-07 10:13:04'' AND ''2019-07-10 08:50:12'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-21 21:34:53'' AND ''2019-07-24 17:51:46'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.17674375467283, 39.92554277329489,
+    116.280339662215, 39.982526066892646), 4326), 3857)
+  - '''2019-07-30 10:08:44'' AND ''2019-07-31 21:59:59'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.3916463722975, 39.94493595387432), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-04 09:26:40'' AND ''2019-07-08 06:10:17'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-22 11:27:12'' AND ''2019-07-22 14:04:09'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.1878808963353, 39.822849902331626,
+    116.29147680387747, 39.87983319592938), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-05 06:29:12'' AND ''2019-07-07 20:18:08'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-14 05:34:34'' AND ''2019-07-17 17:54:12'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.52081368697003, 39.822690849214744,
+    116.6244095945122, 39.8796741428125), 4326), 3857)
+  - '''2019-07-15 18:43:38'' AND ''2019-07-18 08:37:11'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 02:46:27'' AND ''2019-07-26 01:27:24'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-12 09:21:44'' AND ''2019-07-12 09:59:57'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.40484503733316, 39.83053258100803,
+    116.50844094487533, 39.88751587460578), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51576556651536, 39.83529956663168,
+    116.61936147405753, 39.892282860229436), 4326), 3857)
+  - '''2019-07-20 14:32:38'' AND ''2019-07-23 02:53:47'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.20341278323927, 40.03689182366485), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-16 07:02:25'' AND ''2019-07-16 22:09:13'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18436873646307, 39.935221965118465,
+    116.28796464400524, 39.99220525871622), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.43338294721295, 39.908951468808475,
+    116.53697885475512, 39.96593476240623), 4326), 3857)
+  - '''2019-07-12 20:57:14'' AND ''2019-07-16 12:12:40'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-14 22:47:57'' AND ''2019-07-18 15:07:41'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-10 10:16:46'' AND ''2019-07-12 11:05:00'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-13 08:22:30'' AND ''2019-07-14 04:32:17'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.1956907560033, 39.80844003417402,
+    116.29928666354547, 39.86542332777177), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.43001798916681, 39.90031162693419,
+    116.53361389670899, 39.95729492053194), 4326), 3857)
+  - '''2019-07-02 23:00:51'' AND ''2019-07-05 19:13:32'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.4972439560439, 39.80709222091511,
+    116.60083986358607, 39.86407551451286), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.23634761977539, 39.789482969932784,
+    116.33994352731756, 39.84646626353054), 4326), 3857)
+  - '''2019-07-27 06:34:56'' AND ''2019-07-29 21:45:20'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.54136240451506, 39.861186874208954), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-26 23:38:32'' AND ''2019-07-30 07:12:12'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-06 16:24:20'' AND ''2019-07-10 02:14:24'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-25 10:40:27'' AND ''2019-07-28 23:08:24'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-06 19:44:56'' AND ''2019-07-08 23:29:36'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.43923607530274, 39.94319400775509), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49274942758133, 39.82032532210513,
+    116.5963453351235, 39.87730861570288), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.24416069051907, 39.87372687685458,
+    116.34775659806124, 39.930710170452336), 4326), 3857)
+  - '''2019-06-30 22:00:00'' AND ''2019-07-02 01:15:15'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.1977433103913, 39.87450724249497), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-05 01:46:58'' AND ''2019-07-08 22:41:46'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.39189649341324, 39.81831196832863,
+    116.49549240095541, 39.87529526192638), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.50504533403338, 39.947898445262496), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-02 19:47:39'' AND ''2019-07-06 06:44:32'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-04 06:28:16'' AND ''2019-07-06 15:26:35'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.54074314914597, 39.84393568415175), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-20 02:36:44'' AND ''2019-07-20 23:47:12'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.52402601991771, 39.90188290167254,
+    116.62762192745988, 39.958866195270296), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-01 20:22:22'' AND ''2019-07-05 10:47:15'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-19 19:07:54'' AND ''2019-07-23 18:28:08'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-27 16:37:55'' AND ''2019-07-29 18:30:47'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-05 21:21:00'' AND ''2019-07-06 13:38:21'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51743059126437, 39.94852878736761,
+    116.62102649880654, 40.00551208096536), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51952312187503, 39.92270855094086,
+    116.6231190294172, 39.979691844538614), 4326), 3857)
+  - '''2019-07-12 00:08:17'' AND ''2019-07-14 08:03:30'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.22935044393694, 39.95648563792698,
+    116.33294635147911, 40.013468931524734), 4326), 3857)
+  - '''2019-07-09 07:34:32'' AND ''2019-07-12 02:19:17'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-05 04:54:32'' AND ''2019-07-09 03:21:47'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-20 05:43:09'' AND ''2019-07-20 17:06:18'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36765503016986, 39.96394264000762,
+    116.47125093771203, 40.020925933605376), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.47087214215708, 39.93479221764063,
+    116.57446804969925, 39.99177551123838), 4326), 3857)
+  - '''2019-07-02 23:29:07'' AND ''2019-07-05 21:31:24'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33984999513957, 39.84528436093728,
+    116.44344590268174, 39.90226765453503), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-11 10:22:56'' AND ''2019-07-14 09:55:31'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.4982784141758, 39.96690478963583), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-07 01:44:09'' AND ''2019-07-07 08:56:35'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50116668588501, 39.91710159574452,
+    116.60476259342718, 39.97408488934227), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32821267591613, 39.78657736579002,
+    116.4318085834583, 39.84356065938778), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-12 12:21:47'' AND ''2019-07-12 17:26:45'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.38599572796979, 39.79380696200177,
+    116.48959163551196, 39.85079025559952), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-09 00:56:22'' AND ''2019-07-12 20:33:26'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34022190601485, 39.819387640377705,
+    116.44381781355702, 39.87637093397546), 4326), 3857)
+  - '''2019-07-20 18:02:28'' AND ''2019-07-24 06:42:59'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.1775237073076, 39.7938702111781), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-08 12:33:55'' AND ''2019-07-08 13:25:28'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30223226435552, 39.9609383897008,
+    116.4058281718977, 40.01792168329855), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.53433542807227, 39.94217710606122), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-23 18:07:41'' AND ''2019-07-27 01:26:11'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-26 13:27:08'' AND ''2019-07-28 08:40:48'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.17306802337416, 39.821786431562266,
+    116.27666393091633, 39.87876972516002), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34175357837913, 39.95996303163163,
+    116.4453494859213, 40.016946325229384), 4326), 3857)
+  - '''2019-07-28 15:07:58'' AND ''2019-07-31 21:59:59'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.37174946131962, 39.884237250875195,
+    116.4753453688618, 39.94122054447295), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.476082025873, 39.88339010257532, 116.57967793341517,
+    39.94037339617307), 4326), 3857)
+  - '''2019-07-09 10:58:41'' AND ''2019-07-12 21:42:40'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-17 02:58:56'' AND ''2019-07-20 05:52:04'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.46687194831307, 39.81373003474951), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.174361896648, 39.882736000269574), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.23535795584029, 39.87345036178316,
+    116.33895386338246, 39.93043365538092), 4326), 3857)
+  - '''2019-07-14 11:22:12'' AND ''2019-07-18 00:22:21'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.37518653099579, 39.92822461419966,
+    116.47878243853796, 39.98520790779741), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-16 00:46:20'' AND ''2019-07-16 05:17:29'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33040515337655, 39.97635131293753,
+    116.43400106091872, 40.033334606535284), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49556081763187, 39.94409824876613,
+    116.59915672517404, 40.001081542363885), 4326), 3857)
+  - '''2019-07-05 03:51:19'' AND ''2019-07-08 20:12:31'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.26912553208675, 39.96768171077048,
+    116.37272143962892, 40.02466500436823), 4326), 3857)
+  - '''2019-07-18 21:38:06'' AND ''2019-07-22 03:15:25'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.1711576428508, 39.97202085498875,
+    116.27475355039297, 40.0290041485865), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-30 06:01:26'' AND ''2019-07-30 23:24:29'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32764333107207, 39.84393835264524,
+    116.43123923861424, 39.90092164624299), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.45924512892356, 39.960410034894956,
+    116.56284103646573, 40.01739332849271), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-05 20:38:20'' AND ''2019-07-06 07:41:44'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.22994350287166, 39.97956739045034,
+    116.33353941041383, 40.036550684048095), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34037261990886, 39.94342378841782,
+    116.44396852745103, 40.00040708201557), 4326), 3857)
+  - '''2019-07-13 12:50:41'' AND ''2019-07-15 15:47:00'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.35365129318878, 39.8457436806022,
+    116.45724720073095, 39.90272697419995), 4326), 3857)
+  - '''2019-07-05 14:28:58'' AND ''2019-07-09 00:31:33'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.38840268718269, 39.83679446379235,
+    116.49199859472486, 39.893777757390104), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.35426386501199, 39.898039657058185,
+    116.45785977255416, 39.95502295065594), 4326), 3857)
+  - '''2019-07-03 17:32:04'' AND ''2019-07-06 11:51:42'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3483747530372, 39.940255270713955,
+    116.45197066057938, 39.99723856431171), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.23055800246318, 39.841167236676895), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33084789232339, 39.80232401432326,
+    116.43444379986556, 39.859307307921014), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.41078392117728, 39.821165277891495,
+    116.51437982871946, 39.87814857148925), 4326), 3857)
+  - '''2019-07-16 07:35:32'' AND ''2019-07-18 21:17:43'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.43621783633574, 39.805984874418606,
+    116.53981374387791, 39.86296816801636), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-09 01:03:02'' AND ''2019-07-09 19:11:49'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.42558031342877, 39.8997082465321,
+    116.52917622097094, 39.95669154012985), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.49496263046805, 39.88638427016923), 4326),
+    3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-16 17:14:19'' AND ''2019-07-18 17:51:32'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.43444465226823, 39.92539230370362,
+    116.5380405598104, 39.98237559730137), 4326), 3857)
+  - '''2019-07-03 12:08:01'' AND ''2019-07-06 06:54:02'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33823848693186, 39.86922828073594,
+    116.44183439447403, 39.92621157433369), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.57122433142243, 39.827668735278706), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-15 15:16:28'' AND ''2019-07-16 17:30:25'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.16742077620248, 39.81393843603865,
+    116.27101668374465, 39.8709217296364), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-04 12:12:08'' AND ''2019-07-05 10:01:13'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.37316844125618, 39.79125201782524,
+    116.47676434879835, 39.84823531142299), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-20 23:03:11'' AND ''2019-07-23 13:40:35'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3689190242332, 39.89132856174957,
+    116.47251493177536, 39.94831185534732), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-15 15:54:49'' AND ''2019-07-19 00:35:50'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.25928284135102, 39.922469462197434,
+    116.3628787488932, 39.97945275579519), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34048528369156, 39.911303905973654,
+    116.44408119123374, 39.96828719957141), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.20203064707502, 39.867626225012536,
+    116.30562655461719, 39.92460951861029), 4326), 3857)
+  - '''2019-07-01 06:23:20'' AND ''2019-07-03 18:22:06'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-17 20:23:25'' AND ''2019-07-21 15:05:14'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.2459678464247, 39.97263437470112,
+    116.34956375396688, 40.029617668298876), 4326), 3857)
+  - '''2019-07-18 01:36:36'' AND ''2019-07-21 22:02:34'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-06-30 22:00:00'' AND ''2019-07-04 17:59:51'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.29157570654668, 39.813513977368544,
+    116.39517161408885, 39.8704972709663), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32157569509151, 39.82740514559618,
+    116.42517160263368, 39.884388439193934), 4326), 3857)
+  - '''2019-07-16 21:41:05'' AND ''2019-07-19 22:38:16'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-03 13:57:50'' AND ''2019-07-04 18:37:11'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3272000533164, 39.94083292041953,
+    116.43079596085857, 39.997816214017284), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.20364638684485, 39.97295640855317,
+    116.30724229438702, 40.02993970215093), 4326), 3857)
+  - '''2019-07-11 08:47:46'' AND ''2019-07-14 10:07:16'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 20:27:11'' AND ''2019-07-25 07:38:41'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.50569874459997, 39.91805286108063,
+    116.60929465214214, 39.975036154678385), 4326), 3857)
+  - '''2019-07-22 15:34:53'' AND ''2019-07-26 10:50:07'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-12 08:40:41'' AND ''2019-07-15 00:50:42'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.27800938211621, 39.859225027661594,
+    116.38160528965838, 39.91620832125935), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3144545591307, 39.850012977991305,
+    116.41805046667287, 39.90699627158906), 4326), 3857)
+  - '''2019-07-11 22:54:23'' AND ''2019-07-14 19:22:29'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.20982090022672, 39.889139108100416,
+    116.31341680776889, 39.94612240169817), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.34446975962304, 39.82570103458502,
+    116.44806566716521, 39.882684328182776), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-02 17:49:36'' AND ''2019-07-05 12:21:23'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-31 05:02:36'' AND ''2019-07-31 09:08:23'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.30410255090032, 39.808292373168946,
+    116.4076984584425, 39.8652756667667), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-04 20:57:51'' AND ''2019-07-06 14:32:57'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.49626126969474, 39.9669282721049,
+    116.59985717723691, 40.023911565702655), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-31 19:01:19'' AND ''2019-07-31 21:59:59'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-04 05:56:50'' AND ''2019-07-08 04:52:15'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-19 12:19:45'' AND ''2019-07-22 02:57:44'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.5146396491851, 39.87978646133542,
+    116.61823555672727, 39.936769754933174), 4326), 3857)
+  - '''2019-07-03 19:42:51'' AND ''2019-07-07 02:26:52'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.43564813264312, 39.911618889128086), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.32790929278913, 39.79925213076399,
+    116.4315052003313, 39.85623542436174), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-23 09:00:00'' AND ''2019-07-26 09:10:14'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3114382692621, 39.92467125389885,
+    116.41503417680427, 39.9816545474966), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-23 16:43:11'' AND ''2019-07-26 11:35:52'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.28449358634795, 39.963837908182754), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.2091245549075, 40.01792393753363), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.17290010204779, 39.862813065967536,
+    116.27649600958996, 39.91979635956529), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.41505606228718, 39.918640889685854,
+    116.51865196982935, 39.97562418328361), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-02 14:10:23'' AND ''2019-07-06 03:41:46'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51970593507596, 39.8898924709012,
+    116.62330184261813, 39.946875764498955), 4326), 3857)
+  - '''2019-06-30 22:00:00'' AND ''2019-07-01 19:11:39'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.35704512645404, 39.83646981554917,
+    116.46064103399621, 39.893453109146925), 4326), 3857)
+  - '''2019-07-05 00:27:56'' AND ''2019-07-08 08:02:16'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-13 19:07:07'' AND ''2019-07-16 00:35:53'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-14 21:05:49'' AND ''2019-07-16 08:15:55'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.21692565035565, 39.932427654914775,
+    116.32052155789782, 39.98941094851253), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.21237011780062, 39.964341018300416,
+    116.31596602534279, 40.02132431189817), 4326), 3857)
+  - '''2019-07-24 16:28:45'' AND ''2019-07-28 07:06:33'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.19154508885272, 39.95342780390121), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.60723884640058, 40.01034847188894), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.44174934708587, 39.92111996598545,
+    116.54534525462805, 39.9781032595832), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-06-30 22:00:00'' AND ''2019-07-03 10:54:44'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.33606203344556, 39.87841283964493), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-16 04:50:36'' AND ''2019-07-17 17:50:30'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.47189097557091, 39.81564152862582,
+    116.57548688311309, 39.87262482222357), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-03 16:01:52'' AND ''2019-07-04 14:34:14'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.25504879679464, 39.90384781847824,
+    116.35864470433681, 39.960831112075994), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.41668504685154, 39.89535982551053), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-22 18:33:57'' AND ''2019-07-24 23:42:58'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-03 09:43:15'' AND ''2019-07-06 23:00:09'''
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-23 23:04:51'' AND ''2019-07-26 14:37:20'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.52005825308291, 39.88486509825624,
+    116.62365416062508, 39.941848391853995), 4326), 3857)
+  - '''2019-07-12 10:56:39'' AND ''2019-07-15 06:24:35'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-31 17:00:42'' AND ''2019-07-31 21:59:59'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-09 06:50:27'' AND ''2019-07-09 22:12:44'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.4652041505591, 39.95982779252228,
+    116.56880005810127, 40.016811086120036), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-27 06:29:18'' AND ''2019-07-29 12:27:31'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.25890318386084, 39.95550901491155), 4326),
+    3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.29376801543299, 39.968737893029704,
+    116.39736392297516, 40.02572118662746), 4326), 3857)
+  - '''2019-07-23 12:18:14'' AND ''2019-07-25 16:18:56'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.20988580055709, 40.01830829629063), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.17120135848711, 39.81660326261124,
+    116.27479726602928, 39.87358655620899), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.33431545022404, 39.999292110009414), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.44408144785247, 39.83407895466745,
+    116.54767735539464, 39.8910622482652), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-07 01:05:58'' AND ''2019-07-07 15:17:17'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.52378459645456, 39.953726796363064,
+    116.62738050399673, 40.01071008996082), 4326), 3857)
+- name: AverageDailyActivityPerUserInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-01 13:12:20'' AND ''2019-07-04 07:51:38'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.22771004461237, 39.976448698925694,
+    116.33130595215454, 40.03343199252345), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36529710271897, 39.8932386302662,
+    116.46889301026114, 39.95022192386395), 4326), 3857)
+  - '''2019-07-17 13:40:50'' AND ''2019-07-19 19:38:17'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-10 02:59:33'' AND ''2019-07-13 07:36:44'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.23880091167825, 39.978404372345786,
+    116.34239681922043, 40.03538766594354), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.38967910331608, 39.89105625406123,
+    116.49327501085826, 39.948039547658986), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.46605838194789, 39.90949691618375,
+    116.56965428949006, 39.9664802097815), 4326), 3857)
+  - '''2019-07-18 05:19:34'' AND ''2019-07-21 02:32:00'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-03 07:44:33'' AND ''2019-07-04 16:47:19'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.36333999786264, 39.90635877223897,
+    116.46693590540481, 39.96334206583672), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.5117172824931, 39.8892309366438, 116.61531319003527,
+    39.94621423024155), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.28068501948438, 39.86597236162133), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.3840205052143, 39.84057868055227,
+    116.48761641275647, 39.89756197415002), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.37420246681572, 39.939080075546045), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-30 18:03:31'' AND ''2019-07-31 21:59:59'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.2051260173923, 39.962837701388004), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.24432002402797, 39.94013846114288), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-30 13:06:53'' AND ''2019-07-31 21:59:59'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18874405022298, 39.86859057004983,
+    116.29233995776515, 39.925573863647585), 4326), 3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-23 06:48:01'' AND ''2019-07-23 22:41:46'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.21952083818026, 39.80790635037921,
+    116.32311674572243, 39.864889643976966), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.51785478401196, 39.88753074583623,
+    116.62145069155413, 39.94451403943398), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-31 08:08:03'' AND ''2019-07-31 21:59:59'''
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.25029588098731, 39.946672106028586,
+    116.35389178852948, 40.00365539962634), 4326), 3857)
+  - '''2019-07-27 19:33:48'' AND ''2019-07-29 23:25:53'''
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.52224545064834, 39.85795519966522,
+    116.62584135819051, 39.91493849326297), 4326), 3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.33799664584821, 39.93594426406668,
+    116.44159255339038, 39.99292755766443), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.59022906021737, 39.846911336324226), 4326),
+    3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.30551735734429, 39.98727222734393), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.31810249591462, 39.92629048418096,
+    116.42169840345679, 39.98327377777871), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.5623318343517, 39.871421867987344), 4326),
+    3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-04 07:28:28'' AND ''2019-07-06 13:15:45'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-20 05:33:41'' AND ''2019-07-21 04:50:08'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.47714240880774, 39.87378663406464,
+    116.58073831634991, 39.930769927662396), 4326), 3857)
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.50288182978011, 39.837138053531305), 4326),
+    3857)
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-24 12:24:26'' AND ''2019-07-25 15:32:57'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.18760626686074, 39.875730384515535,
+    116.29120217440291, 39.93271367811329), 4326), 3857)
+- name: UniqueUsersPerHourInRegionInPeriod
+  type: spatiotemporal
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.25464741992117, 39.921805050827125,
+    116.35824332746334, 39.97878834442488), 4326), 3857)
+  - '''2019-07-04 20:29:13'' AND ''2019-07-07 23:16:44'''
+- name: SlidingWindowActivityInRegionPerMinuteWithNonZeroID
+  type: spatiotemporal
+  sql: ''
+  params:
+  - '''2019-07-05 21:11:41'' AND ''2019-07-06 01:42:46'''
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.41652570336583, 39.96563110954547,
+    116.520121610908, 40.02261440314322), 4326), 3857)
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-16 22:53:04'' AND ''2019-07-19 23:29:31'''
+- name: FirstAndLastActivityInPeriod
+  type: temporal
+  sql: ''
+  params:
+  - '''2019-07-17 07:58:57'' AND ''2019-07-20 14:32:57'''
+- name: ClosestRestaurantToPoint
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_Point(116.46352566354639, 39.949631564654176), 4326),
+    3857)
+- name: CountPOIsByTypeInRegion
+  type: spatial
+  sql: ''
+  params:
+  - ST_Transform(ST_SetSRID(ST_MakeEnvelope(116.22944335116097, 39.86341984134676,
+    116.33303925870314, 39.920403134944515), 4326), 3857)

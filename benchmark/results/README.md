@@ -12,8 +12,8 @@ queries over the same data on a five-node cluster. Each system runs alone on the
 | Run | Client threads | Status | Results |
 |---|---:|---|---|
 | 2026-10-14 to 2026-10-16 | 1 | done | [`read-only/1-thread/`](read-only/1-thread/README.md) |
-| 2026-10-16 | 4 | running | `read-only/4-thread/` (added when the run has finished) |
-| after the 4-thread run | 8 | pending | `read-only/8-thread/` (added when the run has finished) |
+| 2026-10-16 | 4 | done | [`read-only/4-thread/`](read-only/4-thread/README.md) |
+| 2026-10-16 to 2026-10-17 | 8 | done | [`read-only/8-thread/`](read-only/8-thread/README.md) |
 
 All three runs use the same queries, the same 128 parameter sets per query and the same configuration; they differ
 only in the number of client threads taking queries from one shared queue (and in the warm-up: one repetition per

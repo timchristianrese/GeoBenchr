@@ -1,0 +1,277 @@
+scenario,query,system,query_type,planned,succeeded,errors,timeouts,interrupted,mean_ms,median_ms,min_ms,max_ms,std_ms,p95_ms,p99_ms,var_ms2,cv,equivalence,complete,eligible,rank,slowdown_vs_best
+ais,CrossingsActiveAtGivenHourOfDay,PostGIS,temporal,128,128,0,0,0,47.5,45.5,9,92,22.2,84.7,89.0,492.7,0.467,reference,True,True,2,1.58
+ais,CrossingsActiveAtGivenHourOfDay,MobilityDB,temporal,128,128,0,0,0,56.0,52.0,10,157,28.7,109.0,143.7,823.8,0.513,SAME,True,True,3,1.87
+ais,CrossingsActiveAtGivenHourOfDay,ClickHouse,temporal,128,128,0,0,0,80.2,73.0,14,172,36.6,144.3,161.5,1337.2,0.456,SAME,True,True,4,2.67
+ais,CrossingsActiveAtGivenHourOfDay,DuckDB,temporal,128,128,0,0,0,30.0,25.5,10,109,18.8,74.4,99.8,353.6,0.626,SAME,True,True,1,1.0
+ais,CrossingsActiveAtGivenHourOfDay,SpaceTime,temporal,128,128,0,0,0,742.3,63.0,22,2093,817.5,1935.4,2033.5,668264.9,1.101,SAME,True,True,5,24.74
+ais,CrossingsActiveAtGivenHourOfDay,Sedona,temporal,128,128,0,0,0,1083.7,1092.5,234,3404,446.0,1685.3,2426.7,198945.1,0.412,SAME,True,True,6,36.12
+ais,HarbourActivityInPeriod,PostGIS,spatiotemporal,128,128,0,0,0,38.1,16.5,10,234,44.3,137.2,193.3,1966.4,1.164,reference,True,True,1,1.0
+ais,HarbourActivityInPeriod,MobilityDB,spatiotemporal,128,128,0,0,0,22893.1,22124.5,8120,48788,7940.4,36843.1,42583.6,63049785.9,0.347,SAME,True,True,6,600.87
+ais,HarbourActivityInPeriod,ClickHouse,spatiotemporal,128,128,0,0,0,162.2,150.0,33,404,59.9,284.6,355.8,3582.2,0.369,SAME,True,True,2,4.26
+ais,HarbourActivityInPeriod,DuckDB,spatiotemporal,128,128,0,0,0,217.8,184.5,40,988,156.3,549.6,664.0,24440.9,0.718,SAME,True,True,3,5.72
+ais,HarbourActivityInPeriod,SpaceTime,spatiotemporal,128,128,0,0,0,2453.9,117.5,43,11682,3407.0,8541.8,9941.5,11607430.1,1.388,SAME (shape),True,True,4,64.41
+ais,HarbourActivityInPeriod,Sedona,spatiotemporal,128,128,0,0,0,7154.5,6915.0,2359,13473,2120.0,10632.8,12243.7,4494609.6,0.296,SAME,True,True,5,187.78
+ais,IDsInsideRegion1Andsecond_region,PostGIS,spatiotemporal,128,128,0,0,0,2417.3,2370.0,1478,3999,505.2,3274.1,3810.3,255195.8,0.209,reference,True,True,3,17.27
+ais,IDsInsideRegion1Andsecond_region,MobilityDB,spatiotemporal,128,128,0,0,0,20414.7,19421.5,8847,39344,6703.5,33118.5,38312.7,44936648.4,0.328,SAME,True,True,6,145.82
+ais,IDsInsideRegion1Andsecond_region,ClickHouse,spatiotemporal,128,128,0,0,0,864.6,783.5,473,3168,356.3,1354.8,2326.3,126923.5,0.412,SAME,True,True,2,6.18
+ais,IDsInsideRegion1Andsecond_region,DuckDB,spatiotemporal,128,128,0,0,0,2608.5,1618.0,610,11885,2349.9,7690.6,11351.4,5522178.6,0.901,SAME,True,True,4,18.63
+ais,IDsInsideRegion1Andsecond_region,SpaceTime,spatiotemporal,128,128,0,0,0,140.0,120.5,37,508,72.7,261.3,311.9,5279.5,0.519,SAME,True,True,1,1.0
+ais,IDsInsideRegion1Andsecond_region,Sedona,spatiotemporal,128,128,0,0,0,5116.8,4986.0,2397,10160,1485.3,7411.2,8986.7,2206065.7,0.29,SAME,True,True,5,36.55
+ais,SpatialBBox,PostGIS,spatial,128,128,0,0,0,3854.4,2857.5,52,20408,4126.9,11616.0,13648.9,17031554.2,1.071,reference,True,True,4,4.29
+ais,SpatialBBox,MobilityDB,spatial,128,128,0,0,0,2723.0,2075.0,49,12094,2788.2,7558.3,10135.4,7773982.7,1.024,SAME,True,True,3,3.03
+ais,SpatialBBox,ClickHouse,spatial,128,128,0,0,0,899.2,618.0,283,6971,939.2,2373.4,4886.2,882182.1,1.044,SAME,True,True,1,1.0
+ais,SpatialBBox,DuckDB,spatial,128,128,0,0,0,8737.9,4715.0,583,44668,10033.8,30782.4,40600.1,100677021.0,1.148,SAME,True,True,5,9.72
+ais,SpatialBBox,SpaceTime,spatial,128,128,0,0,0,1628.8,646.5,81,59057,6245.6,2264.1,31460.3,39007664.9,3.834,CLOSE (max 0.003 %),True,True,2,1.81
+ais,SpatialBBox,Sedona,spatial,128,128,0,0,0,14855.3,13141.5,2352,50960,9275.9,32936.7,43747.4,86042382.7,0.624,SAME,True,True,6,16.52
+ais,busiestDayInWeekPeriod,PostGIS,temporal,128,128,0,0,0,60.2,47.5,8,250,34.9,126.9,163.7,1215.3,0.58,reference,True,True,2,1.99
+ais,busiestDayInWeekPeriod,MobilityDB,temporal,128,128,0,0,0,69.1,55.0,8,329,50.0,133.3,311.6,2499.2,0.724,SAME,True,True,3,2.29
+ais,busiestDayInWeekPeriod,ClickHouse,temporal,128,128,0,0,0,94.4,82.5,42,188,36.7,156.3,186.2,1349.1,0.389,SAME,True,True,4,3.13
+ais,busiestDayInWeekPeriod,DuckDB,temporal,128,128,0,0,0,30.2,23.0,9,131,22.2,80.0,113.0,491.3,0.733,SAME,True,True,1,1.0
+ais,busiestDayInWeekPeriod,SpaceTime,temporal,128,128,0,0,0,614.2,63.5,34,2031,793.5,1882.1,2017.1,629615.3,1.292,SAME,True,True,5,20.34
+ais,busiestDayInWeekPeriod,Sedona,temporal,128,128,0,0,0,1374.7,1380.0,276,2411,402.0,2085.6,2315.6,161633.6,0.292,SAME,True,True,6,45.52
+ais,countActiveCrossingsNearIsland,PostGIS,spatial,126,126,0,0,0,431.6,74.5,11,10237,1255.8,2082.2,5258.0,1577140.7,2.91,reference,True,True,1,1.0
+ais,countActiveCrossingsNearIsland,MobilityDB,spatial,126,126,0,0,0,40938.9,37129.0,558,179738,33497.1,83064.0,163039.2,1122056360.2,0.818,SAME,True,True,5,94.85
+ais,countActiveCrossingsNearIsland,ClickHouse,spatial,126,126,0,0,0,8685.9,1540.0,145,167212,25349.4,33951.8,150007.8,642591999.9,2.918,SAME,True,True,3,20.12
+ais,countActiveCrossingsNearIsland,DuckDB,spatial,126,126,0,0,0,7345.5,4806.0,538,67598,9305.3,19519.8,57733.2,86588026.0,1.267,SAME,True,True,2,17.02
+ais,countActiveCrossingsNearIsland,SpaceTime,spatial,126,126,0,0,0,10468.6,439.0,100,107050,19129.6,49970.5,83398.5,365942682.3,1.827,CLOSE (max 0.404 %),True,True,4,24.26
+ais,countActiveCrossingsNearIsland,Sedona,spatial,126,126,0,0,0,173012.2,167192.5,127546,280692,25823.0,220793.0,264505.8,666827858.9,0.149,SAME,True,True,6,400.86
+ais,crossingsAroundHarbour,PostGIS,spatial,128,128,0,0,0,80.4,53.5,15,857,105.4,244.7,527.9,11108.1,1.311,reference,True,True,1,1.0
+ais,crossingsAroundHarbour,MobilityDB,spatial,128,128,0,0,0,31439.5,26002.0,116,176380,28721.2,70929.6,142932.4,824909249.3,0.914,SAME COUNT,True,True,5,391.04
+ais,crossingsAroundHarbour,ClickHouse,spatial,128,128,0,0,0,535.2,303.0,40,7349,845.6,1409.5,4111.7,715053.4,1.58,SAME COUNT,True,True,2,6.66
+ais,crossingsAroundHarbour,DuckDB,spatial,128,128,0,0,0,5053.2,4327.0,537,21137,4025.0,13643.3,18742.9,16200723.2,0.797,SAME COUNT,True,True,3,62.85
+ais,crossingsAroundHarbour,SpaceTime,spatial,128,128,0,0,0,6618.1,372.5,96,45232,10649.8,24468.5,38948.9,113418441.8,1.609,CLOSE COUNT 20087 vs 20097,True,True,4,82.31
+ais,crossingsAroundHarbour,Sedona,spatial,128,128,0,0,0,170814.8,166977.0,129729,261197,25981.0,233313.9,244344.8,675011942.2,0.152,SAME COUNT,True,True,6,2124.56
+ais,islandOrCoastLineCrossingsInPeriod,PostGIS,spatiotemporal,128,128,0,0,0,62.7,19.0,6,389,76.6,217.3,341.1,5865.9,1.222,reference,True,True,1,1.0
+ais,islandOrCoastLineCrossingsInPeriod,MobilityDB,spatiotemporal,128,128,0,0,0,23438.1,22414.5,2243,50375,9359.2,40156.3,44658.6,87595100.2,0.399,SAME,True,True,6,373.81
+ais,islandOrCoastLineCrossingsInPeriod,ClickHouse,spatiotemporal,128,128,0,0,0,759.3,554.5,169,3932,632.4,2173.4,3500.7,399883.1,0.833,SAME,True,True,3,12.11
+ais,islandOrCoastLineCrossingsInPeriod,DuckDB,spatiotemporal,128,128,0,0,0,307.6,212.0,38,1637,282.7,890.1,1190.5,79925.1,0.919,SAME,True,True,2,4.91
+ais,islandOrCoastLineCrossingsInPeriod,SpaceTime,spatiotemporal,128,128,0,0,0,2404.1,129.5,34,11664,3376.4,8537.2,10537.4,11399917.5,1.404,SAME,True,True,4,38.34
+ais,islandOrCoastLineCrossingsInPeriod,Sedona,spatiotemporal,128,128,0,0,0,7650.1,7036.0,2119,20529,2608.7,11798.2,16462.0,6805356.9,0.341,SAME,True,True,5,122.01
+ais,kNN,PostGIS,spatial,128,128,0,0,0,109.1,94.0,17,717,79.0,195.3,422.7,6239.7,0.724,reference,True,True,2,1.22
+ais,kNN,MobilityDB,spatial,128,128,0,0,0,89.2,76.0,36,342,51.6,209.9,309.5,2662.9,0.578,SAME,True,True,1,1.0
+ais,kNN,ClickHouse,spatial,128,128,0,0,0,774.1,602.5,176,6277,815.6,1760.1,4785.3,665249.6,1.054,KNN tie,True,True,4,8.68
+ais,kNN,DuckDB,spatial,128,128,0,0,0,3131.7,2169.0,191,24513,3228.3,7046.8,17450.2,10421738.1,1.031,KNN tie,True,True,5,35.11
+ais,kNN,SpaceTime,spatial,128,128,0,0,0,302.5,296.5,118,628,108.0,511.0,568.1,11660.9,0.357,KNN tie,True,True,3,3.39
+ais,kNN,Sedona,spatial,128,128,0,0,0,10388.3,8088.5,2617,31449,6172.0,20317.5,28833.3,38093478.4,0.594,KNN tie,True,True,6,116.46
+ais,spatioTemporalRange,PostGIS,spatiotemporal,128,128,0,0,0,333.5,248.5,6,2158,353.9,1084.5,1499.3,125232.1,1.061,reference,True,True,3,1.22
+ais,spatioTemporalRange,MobilityDB,spatiotemporal,128,128,0,0,0,20284.0,19290.0,8480,47521,6838.6,33513.0,41198.0,46766144.1,0.337,SAME,True,True,6,74.14
+ais,spatioTemporalRange,ClickHouse,spatiotemporal,128,128,0,0,0,472.9,442.0,214,1506,163.5,728.8,1044.3,26732.3,0.346,SAME,True,True,4,1.73
+ais,spatioTemporalRange,DuckDB,spatiotemporal,128,128,0,0,0,290.1,149.5,30,2883,407.8,721.5,2353.2,166316.8,1.406,SAME,True,True,2,1.06
+ais,spatioTemporalRange,SpaceTime,spatiotemporal,128,128,0,0,0,273.6,85.0,26,13795,1442.9,176.2,6722.1,2082029.5,5.274,SAME,True,True,1,1.0
+ais,spatioTemporalRange,Sedona,spatiotemporal,128,128,0,0,0,1900.8,1878.5,489,4925,796.8,3150.6,3683.1,634932.4,0.419,SAME,True,True,5,6.95
+ais,timeAggregation,PostGIS,temporal,128,128,0,0,0,949.8,847.5,501,2398,357.2,1660.2,2077.8,127565.8,0.376,reference,True,True,3,1.29
+ais,timeAggregation,MobilityDB,temporal,128,128,0,0,0,21357.2,20614.5,6377,45625,7201.2,35735.0,41935.2,51857101.8,0.337,SAME,True,True,6,29.07
+ais,timeAggregation,ClickHouse,temporal,128,128,0,0,0,734.6,518.0,275,4902,719.7,2567.3,3593.4,517902.2,0.98,SAME,True,True,1,1.0
+ais,timeAggregation,DuckDB,temporal,128,128,0,0,0,1139.4,851.5,215,3195,713.5,2606.8,3032.7,509040.6,0.626,SAME,True,True,4,1.55
+ais,timeAggregation,SpaceTime,temporal,128,128,0,0,0,880.2,818.0,218,1808,343.1,1484.6,1732.8,117696.8,0.39,CLOSE (max 0.000 %),True,True,2,1.2
+ais,timeAggregation,Sedona,temporal,128,128,0,0,0,3208.7,3299.5,1009,5589,1061.8,4794.1,5566.8,1127477.7,0.331,SAME,True,True,5,4.37
+ais,timeInterval,PostGIS,temporal,128,128,0,0,0,61.2,55.5,21,164,23.0,102.3,141.7,526.9,0.375,reference,True,True,5,2.38
+ais,timeInterval,MobilityDB,temporal,128,128,0,0,0,50.1,48.0,25,106,13.4,74.0,77.7,178.4,0.267,SAME,True,True,3,1.95
+ais,timeInterval,ClickHouse,temporal,128,128,0,0,0,54.6,49.0,28,135,21.2,97.0,121.8,449.3,0.388,SAME,True,True,4,2.12
+ais,timeInterval,DuckDB,temporal,128,128,0,0,0,25.7,16.0,8,85,21.1,70.3,80.7,444.0,0.82,SAME,True,True,1,1.0
+ais,timeInterval,SpaceTime,temporal,128,128,0,0,0,49.2,28.0,18,2466,215.4,46.0,49.7,46418.5,4.382,SAME,True,True,2,1.91
+ais,timeInterval,Sedona,temporal,128,128,0,0,0,724.0,619.0,183,1970,413.8,1499.5,1724.5,171248.8,0.572,SAME,True,True,6,28.17
+aviation,CityActivityAtInstant,PostGIS,spatiotemporal,128,128,0,0,0,40.9,39.5,12,103,17.4,70.7,77.2,301.1,0.424,reference,True,True,2,1.85
+aviation,CityActivityAtInstant,MobilityDB,spatiotemporal,128,128,0,0,0,396.1,286.5,154,2015,280.4,868.9,1212.7,78603.5,0.708,SAME,True,True,5,17.92
+aviation,CityActivityAtInstant,ClickHouse,spatiotemporal,128,128,0,0,0,59.0,53.0,24,164,28.8,126.5,158.9,832.3,0.489,SAME,True,True,3,2.67
+aviation,CityActivityAtInstant,DuckDB,spatiotemporal,128,128,0,0,0,22.1,19.0,9,77,11.6,41.3,63.5,133.7,0.524,SAME,True,True,1,1.0
+aviation,CityActivityAtInstant,SpaceTime,spatiotemporal,128,128,0,0,0,116.4,111.5,35,326,48.8,196.7,240.1,2381.0,0.419,SAME,True,True,4,5.27
+aviation,CityActivityAtInstant,Sedona,spatiotemporal,128,128,0,0,0,2936.0,3051.5,371,6693,1002.6,4361.4,5233.2,1005216.6,0.341,SAME,True,True,6,132.85
+aviation,FlightsAtLowAltitudeInPeriod,PostGIS,temporal,128,128,0,0,0,3287.6,3379.0,376,8226,1883.1,6110.4,6646.7,3546045.4,0.573,reference,True,True,4,6.35
+aviation,FlightsAtLowAltitudeInPeriod,MobilityDB,temporal,128,128,0,0,0,7213.1,7549.0,2006,14101,3088.3,11664.4,12471.9,9537577.0,0.428,SAME COUNT,True,True,6,13.92
+aviation,FlightsAtLowAltitudeInPeriod,ClickHouse,temporal,128,128,0,0,0,518.0,463.5,116,1301,265.1,962.4,1144.4,70261.1,0.512,SAME COUNT,True,True,1,1.0
+aviation,FlightsAtLowAltitudeInPeriod,DuckDB,temporal,128,128,0,0,0,1266.1,1131.0,159,3348,729.5,2529.7,3021.1,532199.5,0.576,SAME COUNT,True,True,3,2.44
+aviation,FlightsAtLowAltitudeInPeriod,SpaceTime,temporal,128,128,0,0,0,620.0,588.5,91,1601,297.8,1186.6,1444.2,88668.4,0.48,SAME COUNT,True,True,2,1.2
+aviation,FlightsAtLowAltitudeInPeriod,Sedona,temporal,128,128,0,0,0,4256.7,3958.0,911,15582,1901.0,7720.7,9617.3,3613978.1,0.447,SAME COUNT,True,True,5,8.22
+aviation,FlightsAtNightInPeriod,PostGIS,temporal,128,128,0,0,0,150.0,124.0,34,440,81.7,293.2,422.5,6677.0,0.545,reference,True,True,4,3.02
+aviation,FlightsAtNightInPeriod,MobilityDB,temporal,128,128,0,0,0,96.0,85.0,19,311,45.2,184.9,246.5,2047.2,0.471,SAME COUNT,True,True,3,1.93
+aviation,FlightsAtNightInPeriod,ClickHouse,temporal,128,128,0,0,0,54.4,45.0,17,182,31.6,123.6,169.7,996.5,0.58,SAME COUNT,True,True,2,1.09
+aviation,FlightsAtNightInPeriod,DuckDB,temporal,128,128,0,0,0,163.2,145.0,85,324,56.5,286.0,305.6,3197.0,0.346,SAME COUNT,True,True,5,3.28
+aviation,FlightsAtNightInPeriod,SpaceTime,temporal,128,128,0,0,0,49.7,42.0,16,175,30.3,115.0,166.2,915.8,0.609,SAME COUNT,True,True,1,1.0
+aviation,FlightsAtNightInPeriod,Sedona,temporal,128,128,0,0,0,783.1,782.0,141,2084,384.6,1425.0,1917.0,147894.8,0.491,SAME COUNT,True,True,6,15.76
+aviation,IDsInsideRegion1Andsecond_region,PostGIS,spatiotemporal,128,128,0,0,0,2223.8,2219.0,1194,3786,471.8,2954.7,3528.7,222588.1,0.212,reference,True,True,5,31.15
+aviation,IDsInsideRegion1Andsecond_region,MobilityDB,spatiotemporal,128,128,0,0,0,1618.2,1692.5,564,2827,641.2,2500.9,2612.2,411078.2,0.396,SAME,True,True,4,22.66
+aviation,IDsInsideRegion1Andsecond_region,ClickHouse,spatiotemporal,128,128,0,0,0,71.4,67.0,29,143,24.0,120.0,137.5,574.4,0.336,SAME,True,True,1,1.0
+aviation,IDsInsideRegion1Andsecond_region,DuckDB,spatiotemporal,128,128,0,0,0,1294.0,994.5,381,7108,981.7,3116.7,4516.2,963700.4,0.759,SAME,True,True,3,18.12
+aviation,IDsInsideRegion1Andsecond_region,SpaceTime,spatiotemporal,128,128,0,0,0,83.9,85.0,30,188,31.0,136.0,162.2,961.0,0.369,SAME,True,True,2,1.18
+aviation,IDsInsideRegion1Andsecond_region,Sedona,spatiotemporal,128,128,0,0,0,3321.6,3194.0,1048,7983,1659.3,6500.2,7751.0,2753244.5,0.5,SAME,True,True,6,46.52
+aviation,SpatialBBox,PostGIS,spatial,128,128,0,0,0,1405.6,1431.5,537,2498,452.7,2125.3,2474.4,204931.7,0.322,reference,True,True,4,15.15
+aviation,SpatialBBox,MobilityDB,spatial,128,128,0,0,0,956.9,865.0,332,1833,357.6,1666.7,1827.1,127909.1,0.374,SAME,True,True,3,10.31
+aviation,SpatialBBox,ClickHouse,spatial,128,128,0,0,0,92.8,87.0,43,222,30.6,149.0,197.7,934.9,0.329,SAME,True,True,1,1.0
+aviation,SpatialBBox,DuckDB,spatial,128,128,0,0,0,6882.8,6771.5,1324,13386,2815.1,12269.4,12894.5,7924626.2,0.409,SAME,True,True,5,74.17
+aviation,SpatialBBox,SpaceTime,spatial,128,128,0,0,0,433.3,449.0,94,678,123.8,613.9,651.1,15317.8,0.286,CLOSE (max 0.000 %),True,True,2,4.67
+aviation,SpatialBBox,Sedona,spatial,128,128,0,0,0,10731.4,9956.5,3185,22126,4609.8,18985.7,20620.0,21249949.0,0.43,SAME,True,True,6,115.64
+aviation,countFlightsInCounties,PostGIS,spatial,128,128,0,0,0,4353.7,3693.0,537,12421,2646.3,9480.1,12286.5,7002819.8,0.608,reference,True,True,3,5.1
+aviation,countFlightsInCounties,MobilityDB,spatial,128,128,0,0,0,32035.6,29243.0,8368,69814,13438.7,55909.4,64477.6,180598217.4,0.419,SAME,True,True,4,37.52
+aviation,countFlightsInCounties,ClickHouse,spatial,128,128,0,0,0,853.8,780.0,190,1905,389.0,1625.2,1815.1,151325.2,0.456,CLOSE (max 0.003 %),True,True,1,1.0
+aviation,countFlightsInCounties,DuckDB,spatial,128,128,0,0,0,51730.5,47132.0,6082,135275,26200.6,99976.8,126001.8,686472210.6,0.506,SAME,True,True,5,60.59
+aviation,countFlightsInCounties,SpaceTime,spatial,128,128,0,0,0,1568.9,1544.5,289,3432,707.1,3021.2,3229.7,499922.7,0.451,CLOSE (max 0.001 %),True,True,2,1.84
+aviation,countFlightsInCounties,Sedona,spatial,128,128,0,0,0,96090.5,95731.5,55392,130986,16157.7,122376.1,130382.9,261071525.3,0.168,SAME,True,True,6,112.54
+aviation,flightClosestToPoint,PostGIS,spatial,128,128,0,0,0,141.0,134.5,67,353,37.1,206.3,228.0,1373.4,0.263,reference,True,True,2,1.05
+aviation,flightClosestToPoint,MobilityDB,spatial,128,128,0,0,0,7539.1,7340.0,611,19029,4141.5,15572.8,16949.5,17152116.5,0.549,SAME,True,True,5,56.26
+aviation,flightClosestToPoint,ClickHouse,spatial,128,128,0,0,0,134.0,102.0,21,465,97.0,320.2,438.7,9403.1,0.724,CLOSE (max 0.000 %),True,True,1,1.0
+aviation,flightClosestToPoint,DuckDB,spatial,128,128,0,0,0,5333.2,5155.5,931,15439,2809.7,10481.0,12693.8,7894656.9,0.527,SAME,True,True,4,39.8
+aviation,flightClosestToPoint,SpaceTime,spatial,128,128,0,0,0,367.1,340.5,89,1520,182.2,637.5,827.7,33205.7,0.496,"CLOSE (same flight, distance within 0.15 m)",True,True,3,2.74
+aviation,flightClosestToPoint,Sedona,spatial,128,128,0,0,0,8040.4,7238.0,2251,21489,3522.7,14203.3,21126.0,12409527.1,0.438,SAME,True,True,6,60.0
+aviation,flightsInCountyInPeriod,PostGIS,spatiotemporal,128,128,0,0,0,412.5,349.0,65,1494,244.4,887.1,1217.6,59726.2,0.592,reference,True,True,3,2.6
+aviation,flightsInCountyInPeriod,MobilityDB,spatiotemporal,128,128,0,0,0,964.4,811.0,96,3439,599.0,2077.5,2812.4,358749.0,0.621,SAME COUNT,True,True,4,6.08
+aviation,flightsInCountyInPeriod,ClickHouse,spatiotemporal,128,128,0,0,0,223.4,187.0,62,806,129.9,488.9,623.5,16881.9,0.582,CLOSE COUNT 24299 vs 24304,True,True,2,1.41
+aviation,flightsInCountyInPeriod,DuckDB,spatiotemporal,128,128,0,0,0,5088.3,3516.0,183,29687,4852.5,14213.1,19495.3,23546955.6,0.954,SAME COUNT,True,True,5,32.08
+aviation,flightsInCountyInPeriod,SpaceTime,spatiotemporal,128,128,0,0,0,158.6,158.5,42,315,57.8,263.9,296.8,3335.6,0.364,SAME COUNT,True,True,1,1.0
+aviation,flightsInCountyInPeriod,Sedona,spatiotemporal,128,128,0,0,0,6035.3,5292.5,1091,20164,3358.9,13512.6,18118.0,11281986.1,0.557,SAME COUNT,True,True,6,38.05
+aviation,kNN,PostGIS,spatial,128,128,0,0,0,77.9,79.0,20,135,21.4,114.0,126.7,459.2,0.275,reference,True,True,2,1.39
+aviation,kNN,MobilityDB,spatial,128,128,0,0,0,56.2,53.0,16,110,18.3,90.7,96.7,334.5,0.325,SAME,True,True,1,1.0
+aviation,kNN,ClickHouse,spatial,128,128,0,0,0,101.8,100.5,31,273,36.8,154.0,186.0,1356.7,0.362,KNN tie,True,True,3,1.81
+aviation,kNN,DuckDB,spatial,128,128,0,0,0,1890.2,1502.5,650,6829,1191.9,4420.6,6277.6,1420621.7,0.631,KNN tie,True,True,5,33.63
+aviation,kNN,SpaceTime,spatial,128,128,0,0,0,163.7,166.5,66,250,41.2,226.0,235.0,1694.1,0.251,KNN tie,True,True,4,2.91
+aviation,kNN,Sedona,spatial,128,128,0,0,0,7947.3,7100.5,2916,23542,3844.7,16636.7,19370.3,14781678.7,0.484,KNN tie,True,True,6,141.41
+aviation,spatioTemporalRange,PostGIS,spatiotemporal,128,128,0,0,0,293.7,282.5,141,575,71.8,410.6,519.2,5161.4,0.245,reference,True,True,3,6.44
+aviation,spatioTemporalRange,MobilityDB,spatiotemporal,128,128,0,0,0,1323.3,1416.0,474,2486,557.3,2063.0,2376.6,310573.1,0.421,SAME,True,True,6,29.02
+aviation,spatioTemporalRange,ClickHouse,spatiotemporal,128,128,0,0,0,45.6,41.0,21,100,16.6,75.0,95.7,274.7,0.363,SAME,True,True,1,1.0
+aviation,spatioTemporalRange,DuckDB,spatiotemporal,128,128,0,0,0,413.7,323.0,48,1763,321.4,1063.3,1529.2,103311.4,0.777,SAME,True,True,4,9.07
+aviation,spatioTemporalRange,SpaceTime,spatiotemporal,128,128,0,0,0,73.8,75.0,26,138,25.4,112.6,131.7,646.3,0.344,SAME,True,True,2,1.62
+aviation,spatioTemporalRange,Sedona,spatiotemporal,128,128,0,0,0,1257.8,1106.0,349,4123,741.3,2587.7,3897.7,549529.2,0.589,SAME,True,True,5,27.58
+aviation,timeAggregation,PostGIS,temporal,128,128,0,0,0,1951.1,1961.0,759,3640,627.8,3152.5,3404.1,394189.2,0.322,reference,True,True,5,12.13
+aviation,timeAggregation,MobilityDB,temporal,128,128,0,0,0,1664.0,1742.0,742,2845,575.2,2399.0,2768.2,330855.4,0.346,SAME,True,True,4,10.35
+aviation,timeAggregation,ClickHouse,temporal,128,128,0,0,0,160.8,154.0,72,335,48.6,256.0,301.0,2358.5,0.302,SAME,True,True,1,1.0
+aviation,timeAggregation,DuckDB,temporal,128,128,0,0,0,623.7,460.0,143,1717,426.7,1600.6,1687.4,182106.5,0.684,SAME,True,True,3,3.88
+aviation,timeAggregation,SpaceTime,temporal,128,128,0,0,0,393.3,391.0,231,592,82.8,551.2,582.9,6858.7,0.211,CLOSE (max 0.001 %),True,True,2,2.45
+aviation,timeAggregation,Sedona,temporal,128,128,0,0,0,2015.5,1857.0,676,6604,941.0,3521.5,5088.1,885543.6,0.467,SAME,True,True,6,12.53
+aviation,timeInterval,PostGIS,temporal,128,128,0,0,0,793.0,748.0,319,2621,295.8,1259.3,1521.2,87470.1,0.373,reference,True,True,4,5.88
+aviation,timeInterval,MobilityDB,temporal,128,128,0,0,0,1346.4,1414.5,518,2300,344.5,1825.8,2187.5,118670.4,0.256,SAME,True,True,5,9.99
+aviation,timeInterval,ClickHouse,temporal,128,128,0,0,0,134.8,126.5,48,254,44.2,221.2,241.7,1949.5,0.327,SAME,True,True,1,1.0
+aviation,timeInterval,DuckDB,temporal,128,128,0,0,0,437.9,348.0,100,978,258.4,894.3,967.8,66767.4,0.59,SAME,True,True,3,3.25
+aviation,timeInterval,SpaceTime,temporal,128,128,0,0,0,267.4,269.0,138,406,60.0,370.2,400.6,3600.3,0.224,CLOSE (max 0.003 %),True,True,2,1.98
+aviation,timeInterval,Sedona,temporal,128,128,0,0,0,1882.6,1654.5,544,7041,1024.5,3736.2,5198.1,1049672.8,0.544,SAME,True,True,6,13.97
+cycling,AverageUpdatesPerRideInDistrictInPeriod,PostGIS,spatiotemporal,128,128,0,0,0,913.4,494.5,89,8252,1224.6,3099.6,6197.0,1499739.1,1.341,reference,True,True,3,2.2
+cycling,AverageUpdatesPerRideInDistrictInPeriod,MobilityDB,spatiotemporal,128,128,0,0,0,1551.6,1403.0,11,4456,876.2,3048.4,4212.3,767750.5,0.565,SAME,True,True,4,3.74
+cycling,AverageUpdatesPerRideInDistrictInPeriod,ClickHouse,spatiotemporal,128,128,0,0,0,799.1,706.0,134,2572,531.9,1992.6,2275.8,282887.3,0.666,CLOSE (max 0.025 %),True,True,2,1.93
+cycling,AverageUpdatesPerRideInDistrictInPeriod,DuckDB,spatiotemporal,128,128,0,0,0,6890.2,3974.0,9,44586,8133.9,23566.9,38271.1,66161044.0,1.181,SAME,True,True,6,16.6
+cycling,AverageUpdatesPerRideInDistrictInPeriod,SpaceTime,spatiotemporal,128,128,0,0,0,415.1,280.5,44,2202,388.0,957.6,2017.3,150509.3,0.935,CLOSE (max 0.072 %),True,True,1,1.0
+cycling,AverageUpdatesPerRideInDistrictInPeriod,Sedona,spatiotemporal,128,128,0,0,0,4923.0,2776.5,355,25240,5116.2,17351.5,23292.3,26175803.6,1.039,SAME,True,True,5,11.86
+cycling,CountRidesFullyInDistrictRadius,PostGIS,spatial,128,128,0,0,0,17011.4,11605.5,1476,67304,15289.6,52029.3,64031.6,233770520.4,0.899,reference,True,True,2,1.65
+cycling,CountRidesFullyInDistrictRadius,MobilityDB,spatial,128,128,0,0,0,46578.0,29160.5,8004,140850,35310.2,115843.6,134695.2,1246809662.0,0.758,CLOSE COUNT 845623 vs 845733,True,True,5,4.52
+cycling,CountRidesFullyInDistrictRadius,ClickHouse,spatial,128,128,0,0,0,10311.9,8928.0,2978,27288,5049.1,20202.2,23910.4,25493539.6,0.49,SAME COUNT,True,True,1,1.0
+cycling,CountRidesFullyInDistrictRadius,DuckDB,spatial,128,128,0,0,0,30829.3,25288.0,7429,78505,17636.9,65528.6,72568.3,311059045.1,0.572,SAME COUNT,True,True,4,2.99
+cycling,CountRidesFullyInDistrictRadius,SpaceTime,spatial,128,128,0,0,0,22138.6,21930.5,5644,47996,9921.4,39618.7,46497.8,98434982.8,0.448,CLOSE COUNT 1044833 vs 1044837,True,True,3,2.15
+cycling,CountRidesFullyInDistrictRadius,Sedona,spatial,128,128,0,0,0,106203.9,107645.5,59945,157255,18597.8,131331.7,150123.0,345879369.6,0.175,SAME COUNT,True,True,6,10.3
+cycling,IDsInsideRegion1Andsecond_region,PostGIS,spatiotemporal,128,128,0,0,0,989.7,954.5,102,4027,583.5,1992.7,3017.2,340524.9,0.59,reference,True,True,4,16.15
+cycling,IDsInsideRegion1Andsecond_region,MobilityDB,spatiotemporal,128,128,0,0,0,1116.9,1120.0,182,3293,550.8,1978.5,2585.4,303374.4,0.493,SAME,True,True,5,18.22
+cycling,IDsInsideRegion1Andsecond_region,ClickHouse,spatiotemporal,128,128,0,0,0,224.4,218.5,50,510,107.0,426.8,466.4,11443.4,0.477,CLOSE (max 0.292 %),True,True,2,3.66
+cycling,IDsInsideRegion1Andsecond_region,DuckDB,spatiotemporal,128,128,0,0,0,904.5,598.0,19,5994,1022.9,2584.1,5172.8,1046357.9,1.131,SAME,True,True,3,14.76
+cycling,IDsInsideRegion1Andsecond_region,SpaceTime,spatiotemporal,128,128,0,0,0,61.3,52.5,25,246,31.3,115.6,195.6,981.4,0.511,SAME,True,True,1,1.0
+cycling,IDsInsideRegion1Andsecond_region,Sedona,spatiotemporal,128,128,0,0,0,1378.5,1356.5,397,3457,673.9,2506.4,3295.9,454146.8,0.489,SAME,True,True,6,22.49
+cycling,RidesAcrossMultipleHours,PostGIS,temporal,128,128,0,0,0,750.9,689.5,49,3834,444.2,1374.2,1952.5,197295.5,0.592,reference,True,True,2,1.01
+cycling,RidesAcrossMultipleHours,MobilityDB,temporal,128,128,0,0,0,13984.7,12282.0,70,38895,9344.8,30311.4,33822.5,87325839.6,0.668,SAME COUNT,True,True,6,18.77
+cycling,RidesAcrossMultipleHours,ClickHouse,temporal,128,128,0,0,0,931.3,807.5,134,3651,642.5,2192.6,3040.1,412858.6,0.69,SAME COUNT,True,True,3,1.25
+cycling,RidesAcrossMultipleHours,DuckDB,temporal,128,128,0,0,0,745,645.0,26,2057,510.3,1732.5,1989.2,260369.2,0.685,SAME COUNT,True,True,1,1.0
+cycling,RidesAcrossMultipleHours,SpaceTime,temporal,128,128,0,0,0,1428.9,1055.5,63,11588,1809.8,3754.3,9717.1,3275321.7,1.267,SAME COUNT,True,True,4,1.92
+cycling,RidesAcrossMultipleHours,Sedona,temporal,128,128,0,0,0,7486.0,2801.5,600,47616,9784.8,30461.0,41482.0,95742200.1,1.307,SAME COUNT,True,True,5,10.05
+cycling,RidesDuringRushHourInPeriod,PostGIS,temporal,128,128,0,0,0,1125.4,977.0,53,3960,735.4,2391.3,3793.2,540772.7,0.653,reference,True,True,4,2.22
+cycling,RidesDuringRushHourInPeriod,MobilityDB,temporal,128,128,0,0,0,1822.8,1467.5,99,13662,1684.4,4246.3,7606.0,2837185.6,0.924,SAME,True,True,5,3.6
+cycling,RidesDuringRushHourInPeriod,ClickHouse,temporal,128,128,0,0,0,671.6,580.0,126,2549,401.0,1406.9,1699.1,160782.4,0.597,CLOSE (max 0.013 %),True,True,2,1.33
+cycling,RidesDuringRushHourInPeriod,DuckDB,temporal,128,128,0,0,0,505.8,430.5,8,1886,366.5,1137.1,1320.8,134294.9,0.725,SAME,True,True,1,1.0
+cycling,RidesDuringRushHourInPeriod,SpaceTime,temporal,128,128,0,0,0,964.6,523.5,42,11671,1831.7,2458.9,10030.7,3355202.1,1.899,SAME,True,True,3,1.91
+cycling,RidesDuringRushHourInPeriod,Sedona,temporal,128,128,0,0,0,3813.9,2098.5,324,33424,4884.6,12779.5,21955.9,23858952.2,1.281,SAME,True,True,6,7.54
+cycling,RidesPastOrToUniversityInPeriod,PostGIS,spatiotemporal,128,128,0,0,0,275.4,117.0,10,2485,397.8,942.0,2169.7,158240.3,1.445,reference,True,True,3,1.22
+cycling,RidesPastOrToUniversityInPeriod,MobilityDB,spatiotemporal,128,128,0,0,0,1921.6,1574.0,136,8637,1309.4,4346.2,5925.0,1714419.1,0.681,SAME COUNT,True,True,5,8.52
+cycling,RidesPastOrToUniversityInPeriod,ClickHouse,spatiotemporal,128,128,0,0,0,1873.8,1545.0,158,11496,1566.7,4352.4,7331.9,2454599.4,0.836,CLOSE COUNT 18345 vs 18344,True,True,4,8.31
+cycling,RidesPastOrToUniversityInPeriod,DuckDB,spatiotemporal,128,128,0,0,0,225.5,108.5,12,2822,416.3,968.5,2224.3,173335.4,1.846,SAME COUNT,True,True,1,1.0
+cycling,RidesPastOrToUniversityInPeriod,SpaceTime,spatiotemporal,128,128,0,0,0,274.6,108.5,33,2895,377.1,876.1,1570.1,142227.5,1.373,SAME COUNT,True,True,2,1.22
+cycling,RidesPastOrToUniversityInPeriod,Sedona,spatiotemporal,128,128,0,0,0,3390.0,2291.0,419,21039,3382.3,10521.5,16959.0,11440277.0,0.998,SAME COUNT,True,True,6,15.03
+cycling,SpatialBBox,PostGIS,spatial,128,128,0,0,0,447.3,258.0,12,2162,498.7,1621.0,1906.7,248682.4,1.115,reference,True,True,4,2.94
+cycling,SpatialBBox,MobilityDB,spatial,128,128,0,0,0,428.5,260.0,12,3355,525.2,1373.8,2120.5,275813.1,1.226,SAME,True,True,3,2.82
+cycling,SpatialBBox,ClickHouse,spatial,128,128,0,0,0,151.9,139.5,26,390,83.7,323.6,351.4,7011.4,0.551,SAME,True,True,1,1.0
+cycling,SpatialBBox,DuckDB,spatial,128,128,0,0,0,3533.8,1732.0,36,24631,4416.9,11469.0,19357.2,19509007.9,1.25,SAME,True,True,6,23.26
+cycling,SpatialBBox,SpaceTime,spatial,128,128,0,0,0,156.9,126.0,18,659,129.8,430.0,584.8,16846.4,0.827,CLOSE (max 0.001 %),True,True,2,1.03
+cycling,SpatialBBox,Sedona,spatial,128,128,0,0,0,3338.5,2811.5,154,8914,1870.9,6638.7,8615.6,3500189.5,0.56,SAME,True,True,5,21.98
+cycling,countRideInDistrict,PostGIS,spatial,128,128,0,0,0,8969.1,7610.0,560,36795,6870.3,21334.0,30798.5,47201529.2,0.766,reference,True,True,3,1.69
+cycling,countRideInDistrict,MobilityDB,spatial,128,128,0,0,0,24617.6,22633.5,3649,62161,13776.4,49922.0,59815.5,189788222.0,0.56,SAME,True,True,4,4.65
+cycling,countRideInDistrict,ClickHouse,spatial,128,128,0,0,0,5299.6,5348.5,1324,10599,2273.3,8675.2,10006.8,5168053.6,0.429,CLOSE (max 0.001 %),True,True,1,1.0
+cycling,countRideInDistrict,DuckDB,spatial,128,128,0,0,0,90403.0,88471.5,11054,232571,53008.9,180439.5,210210.3,2809940139.3,0.586,SAME,True,True,6,17.06
+cycling,countRideInDistrict,SpaceTime,spatial,128,128,0,0,0,5380.6,3806.0,477,26210,5087.2,16758.2,18595.2,25879545.2,0.945,CLOSE (max 0.000 %),True,True,2,1.02
+cycling,countRideInDistrict,Sedona,spatial,128,128,0,0,0,47905.6,48899.5,16963,96077,18246.3,78142.3,94369.7,332927677.1,0.381,SAME,True,True,5,9.04
+cycling,kNN,PostGIS,spatial,128,128,0,0,0,45.9,38.0,12,576,54.9,94.6,177.5,3010.3,1.196,reference,True,True,1,1.0
+cycling,kNN,MobilityDB,spatial,128,128,0,0,0,86.2,42.0,10,1050,181.0,274.6,1041.0,32754.7,2.099,SAME,True,True,3,1.88
+cycling,kNN,ClickHouse,spatial,128,128,0,0,0,202.2,176.0,21,678,122.7,425.7,533.4,15055.3,0.607,KNN tie,True,True,4,4.41
+cycling,kNN,DuckDB,spatial,128,128,0,0,0,551.9,428.5,31,2765,445.5,1490.8,1584.5,198457.9,0.807,KNN tie,True,True,5,12.02
+cycling,kNN,SpaceTime,spatial,128,128,0,0,0,73.5,64.5,20,191,36.6,145.0,180.5,1338.9,0.498,SAME (re-check after the runs),True,True,2,1.6
+cycling,kNN,Sedona,spatial,128,128,0,0,0,2270.7,2098.5,174,6208,1163.6,4175.7,5955.3,1354025.6,0.512,KNN tie,True,True,6,49.47
+cycling,spatioTemporalRange,PostGIS,spatiotemporal,128,128,0,0,0,140.6,135.5,6,530,98.5,301.0,408.3,9695.0,0.7,reference,True,True,3,2.85
+cycling,spatioTemporalRange,MobilityDB,spatiotemporal,128,128,0,0,0,636.0,574.0,228,1897,277.1,1085.6,1603.6,76789.4,0.436,SAME,True,True,6,12.9
+cycling,spatioTemporalRange,ClickHouse,spatiotemporal,128,128,0,0,0,81.6,72.0,25,281,44.6,158.0,253.2,1986.7,0.547,CLOSE (max 0.158 %),True,True,2,1.66
+cycling,spatioTemporalRange,DuckDB,spatiotemporal,128,128,0,0,0,196.1,59.0,9,2768,332.9,681.9,1258.1,110793.6,1.698,SAME,True,True,4,3.98
+cycling,spatioTemporalRange,SpaceTime,spatiotemporal,128,128,0,0,0,49.3,45.0,20,132,21.5,98.6,119.2,462.9,0.437,SAME,True,True,1,1.0
+cycling,spatioTemporalRange,Sedona,spatiotemporal,128,128,0,0,0,471.0,412.0,153,1621,244.3,950.5,1265.7,59681.7,0.519,SAME,True,True,5,9.55
+cycling,timeAggregation,PostGIS,temporal,128,128,0,0,0,846.0,831.0,46,2868,526.3,1685.6,2651.2,277011.0,0.622,reference,True,True,5,2.9
+cycling,timeAggregation,MobilityDB,temporal,128,128,0,0,0,1724.4,1844.5,154,3767,862.8,3019.6,3322.2,744441.2,0.5,SAME,True,True,6,5.91
+cycling,timeAggregation,ClickHouse,temporal,128,128,0,0,0,376.8,381.5,66,758,169.4,652.9,749.5,28692.3,0.45,CLOSE (max 0.057 %),True,True,2,1.29
+cycling,timeAggregation,DuckDB,temporal,128,128,0,0,0,291.6,224.5,9,1411,240.1,707.7,1161.6,57643.8,0.823,SAME,True,True,1,1.0
+cycling,timeAggregation,SpaceTime,temporal,128,128,0,0,0,587.0,554.5,50,1474,387.0,1297.8,1431.0,149760.5,0.659,CLOSE (max 0.001 %),True,True,3,2.01
+cycling,timeAggregation,Sedona,temporal,128,128,0,0,0,826.6,793.5,279,1844,274.8,1266.8,1494.5,75530.7,0.332,SAME,True,True,4,2.83
+cycling,timeInterval,PostGIS,temporal,128,128,0,0,0,403.6,367.5,90,1383,207.5,745.3,1038.3,43035.6,0.514,reference,True,True,4,2.17
+cycling,timeInterval,MobilityDB,temporal,128,128,0,0,0,832.4,831.5,147,1892,371.1,1446.4,1664.0,137703.9,0.446,SAME,True,True,6,4.48
+cycling,timeInterval,ClickHouse,temporal,128,128,0,0,0,282.0,282.5,70,575,116.1,468.9,517.7,13481.4,0.412,CLOSE (max 0.040 %),True,True,2,1.52
+cycling,timeInterval,DuckDB,temporal,128,128,0,0,0,185.6,169.0,11,597,118.0,391.9,567.8,13925.3,0.636,SAME,True,True,1,1.0
+cycling,timeInterval,SpaceTime,temporal,128,128,0,0,0,362.5,347.0,30,1082,217.7,748.3,883.0,47414.4,0.601,CLOSE (max 0.000 %),True,True,3,1.95
+cycling,timeInterval,Sedona,temporal,128,128,0,0,0,768.6,694.0,310,1987,317.2,1415.8,1772.1,100643.9,0.413,SAME,True,True,5,4.14
+geolife,AverageDailyActivityPerUserInPeriod,PostGIS,temporal,128,128,0,0,0,3794.4,3724.0,134,6908,1094.8,5625.1,6718.3,1198591.7,0.289,reference,True,True,2,4.89
+geolife,AverageDailyActivityPerUserInPeriod,ClickHouse,temporal,128,128,0,0,0,775.3,764.0,320,1322,193.3,1105.9,1230.7,37356.7,0.249,SAME COUNT,True,True,1,1.0
+geolife,AverageDailyActivityPerUserInPeriod,DuckDB,temporal,128,128,0,0,0,7031.1,5564.0,336,20214,4349.7,16786.0,20001.3,18919874.9,0.619,SAME COUNT,True,True,4,9.07
+geolife,AverageDailyActivityPerUserInPeriod,SpaceTime,temporal,128,128,0,0,0,5794.1,5827.0,161,10780,2194.6,8995.6,9737.5,4816245.5,0.379,SAME COUNT,True,True,3,7.47
+geolife,AverageDailyActivityPerUserInPeriod,Sedona,temporal,128,128,0,0,0,12939.9,12837.0,1740,21858,3550.0,18591.3,21417.4,12602535.4,0.274,SAME COUNT,True,True,5,16.69
+geolife,ClosestRestaurantToPoint,PostGIS,spatial,128,128,0,0,0,8789.8,6554.5,666,28656,7009.1,24690.9,27438.9,49127102.1,0.797,reference,True,True,4,23.85
+geolife,ClosestRestaurantToPoint,ClickHouse,spatial,128,128,0,0,0,1089.5,1062.0,261,2467,515.1,1885.7,2284.0,265334.6,0.473,KNN tie,True,True,2,2.96
+geolife,ClosestRestaurantToPoint,DuckDB,spatial,128,128,0,0,0,7395.6,5914.5,1233,43290,6241.8,20063.9,34744.4,38959942.6,0.844,KNN tie,True,True,3,20.07
+geolife,ClosestRestaurantToPoint,SpaceTime,spatial,128,128,0,0,0,368.5,314.5,56,1265,178.1,654.0,888.5,31710.7,0.483,SAME (re-check after the runs),True,True,1,1.0
+geolife,ClosestRestaurantToPoint,Sedona,spatial,128,128,0,0,0,22382.3,19093.5,5802,53760,12068.3,44881.6,52354.4,145644442.8,0.539,KNN tie,True,True,5,60.74
+geolife,CountPOIsByTypeInRegion,PostGIS,spatial,128,128,0,0,0,15411.4,11900.5,1642,40874,10793.8,36414.1,39735.9,116505914.4,0.7,reference,True,True,3,21.96
+geolife,CountPOIsByTypeInRegion,ClickHouse,spatial,128,128,0,0,0,701.8,693.5,138,1552,309.9,1250.2,1494.8,96028.2,0.442,SAME,True,True,1,1.0
+geolife,CountPOIsByTypeInRegion,DuckDB,spatial,128,128,0,0,0,61386.3,50301.5,3881,228564,43550.7,122520.7,218123.1,1896666366.4,0.709,SAME,True,True,5,87.47
+geolife,CountPOIsByTypeInRegion,SpaceTime,spatial,128,128,0,0,0,3456.3,2901.0,411,11017,2299.4,7571.7,9151.7,5287048.6,0.665,SAME,True,True,2,4.92
+geolife,CountPOIsByTypeInRegion,Sedona,spatial,128,128,0,0,0,18435.0,17033.0,5829,40541,7839.9,32568.2,39598.6,61464015.2,0.425,SAME,True,True,4,26.27
+geolife,FirstAndLastActivityInPeriod,PostGIS,temporal,128,128,0,0,0,2714.6,2718.5,213,4727,807.7,4041.8,4437.3,652453.0,0.298,reference,True,True,2,4.34
+geolife,FirstAndLastActivityInPeriod,ClickHouse,temporal,128,128,0,0,0,625.1,620.0,214,1207,175.2,911.9,1122.1,30699.3,0.28,SAME COUNT,True,True,1,1.0
+geolife,FirstAndLastActivityInPeriod,DuckDB,temporal,128,128,0,0,0,5680.2,4326.5,451,15628,3537.1,12514.5,14832.5,12510884.2,0.623,SAME COUNT,True,True,4,9.09
+geolife,FirstAndLastActivityInPeriod,SpaceTime,temporal,128,128,0,0,0,5459.4,5410.5,430,10669,2166.1,8937.0,10454.2,4692183.8,0.397,SAME COUNT,True,True,3,8.73
+geolife,FirstAndLastActivityInPeriod,Sedona,temporal,128,128,0,0,0,8407.7,8316.0,915,18395,3112.2,14332.6,15985.0,9685518.1,0.37,SAME COUNT,True,True,5,13.45
+geolife,IDsInsideRegion1Andsecond_region,PostGIS,spatiotemporal,128,128,0,0,0,1226.0,1200.0,943,1627,151.4,1497.7,1532.4,22921.8,0.123,reference,True,True,3,10.17
+geolife,IDsInsideRegion1Andsecond_region,ClickHouse,spatiotemporal,128,128,0,0,0,233.0,222.0,94,601,77.1,368.3,470.9,5949.6,0.331,SAME,True,True,2,1.93
+geolife,IDsInsideRegion1Andsecond_region,DuckDB,spatiotemporal,128,128,0,0,0,1694.9,1303.0,373,7843,1325.5,4198.3,7139.8,1757057.1,0.782,SAME,True,True,4,14.07
+geolife,IDsInsideRegion1Andsecond_region,SpaceTime,spatiotemporal,128,128,0,0,0,120.5,101.0,60,369,53.1,206.9,296.5,2817.9,0.441,SAME (re-check after the runs),True,True,1,1.0
+geolife,IDsInsideRegion1Andsecond_region,Sedona,spatiotemporal,128,128,0,0,0,3896.1,3820.0,1678,7517,1249.3,6201.9,6764.4,1560817.2,0.321,SAME,True,True,5,32.33
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,PostGIS,spatiotemporal,128,128,0,0,0,811.3,594.0,102,3813,709.3,2320.1,3075.3,503043.3,0.874,reference,True,True,3,2.18
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,ClickHouse,spatiotemporal,128,128,0,0,0,416.0,423.5,102,1022,166.3,713.3,951.0,27656.1,0.4,SAME COUNT,True,True,2,1.12
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,DuckDB,spatiotemporal,128,128,0,0,0,5951.8,3812.5,170,31233,6358.8,21021.9,28029.6,40434849.7,1.068,SAME COUNT,True,True,5,16.01
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,SpaceTime,spatiotemporal,128,128,0,0,0,371.7,259.0,94,1749,308.7,980.2,1661.2,95279.0,0.83,SAME (re-check after the runs),True,True,1,1.0
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,Sedona,spatiotemporal,128,128,0,0,0,3515.0,3189.5,520,11601,1956.6,6581.9,10308.1,3828099.5,0.557,SAME COUNT,True,True,4,9.46
+geolife,SpatialBBox,PostGIS,spatial,128,128,0,0,0,2610.8,1908.5,598,11361,1945.8,6304.8,7595.7,3786014.9,0.745,reference,True,True,3,11.19
+geolife,SpatialBBox,ClickHouse,spatial,128,128,0,0,0,233.3,226.0,66,571,106.8,392.9,534.8,11411.0,0.458,SAME,True,True,1,1.0
+geolife,SpatialBBox,DuckDB,spatial,128,128,0,0,0,10429.7,7923.0,671,36579,8671.3,26944.7,34807.5,75192231.0,0.831,SAME,True,True,5,44.71
+geolife,SpatialBBox,SpaceTime,spatial,128,128,0,0,0,525.8,439.0,60,1607,340.8,1267.2,1418.7,116165.7,0.648,CLOSE (max 0.999 %),True,True,2,2.25
+geolife,SpatialBBox,Sedona,spatial,128,128,0,0,0,10007.7,9888.5,2932,20198,3330.1,15806.8,17948.1,11089779.0,0.333,SAME,True,True,4,42.9
+geolife,UniqueUsersPerHourInRegionInPeriod,PostGIS,spatiotemporal,128,128,0,0,0,1635.1,1365.5,152,5197,1112.3,3890.6,4867.6,1237271.4,0.68,reference,True,True,2,3.22
+geolife,UniqueUsersPerHourInRegionInPeriod,ClickHouse,spatiotemporal,128,128,0,0,0,508.3,492.0,210,1358,182.9,848.5,968.7,33457.2,0.36,SAME,True,True,1,1.0
+geolife,UniqueUsersPerHourInRegionInPeriod,DuckDB,spatiotemporal,128,128,0,0,0,12831.3,9198.5,914,71240,12700.0,45255.2,56017.2,161289141.7,0.99,SAME,True,True,5,25.24
+geolife,UniqueUsersPerHourInRegionInPeriod,SpaceTime,spatiotemporal,128,128,0,0,0,3074.2,3093.0,225,7060,1415.7,5373.5,6178.5,2004348.0,0.461,SAME (re-check after the runs),True,True,3,6.05
+geolife,UniqueUsersPerHourInRegionInPeriod,Sedona,spatiotemporal,128,128,0,0,0,7890.4,7522.5,1022,18825,3188.8,13715.7,17766.1,10168613.3,0.404,SAME,True,True,4,15.52
+geolife,kNN,PostGIS,spatial,128,128,0,0,0,623.3,612.0,190,1205,199.5,950.1,1200.9,39803.7,0.32,reference,True,True,3,3.84
+geolife,kNN,ClickHouse,spatial,128,128,0,0,0,315.2,275.5,64,800,165.5,626.6,748.0,27404.2,0.525,KNN tie,True,True,2,1.94
+geolife,kNN,DuckDB,spatial,128,128,0,0,0,2596.7,2347.0,488,10538,1567.5,4986.9,9074.7,2457108.8,0.604,KNN tie,True,True,4,16.0
+geolife,kNN,SpaceTime,spatial,128,128,0,0,0,162.3,151.0,37,392,60.1,267.6,331.8,3608.6,0.37,KNN tie,True,True,1,1.0
+geolife,kNN,Sedona,spatial,128,128,0,0,0,8133.9,7873.5,4228,17725,2538.4,12970.8,14791.7,6443361.3,0.312,KNN tie,True,True,5,50.12
+geolife,spatioTemporalRange,PostGIS,spatiotemporal,128,128,0,0,0,148.3,133.0,73,498,54.4,229.3,323.5,2963.2,0.367,reference,True,True,3,1.62
+geolife,spatioTemporalRange,ClickHouse,spatiotemporal,128,128,0,0,0,140.7,132.0,46,292,54.6,243.9,281.3,2984.2,0.388,SAME,True,True,2,1.53
+geolife,spatioTemporalRange,DuckDB,spatiotemporal,128,128,0,0,0,584.3,357.5,40,3885,676.7,2179.4,3195.0,457952.7,1.158,SAME,True,True,4,6.36
+geolife,spatioTemporalRange,SpaceTime,spatiotemporal,128,128,0,0,0,91.8,81.0,39,245,36.8,165.9,209.0,1351.2,0.4,CLOSE (max 0.558 %),True,True,1,1.0
+geolife,spatioTemporalRange,Sedona,spatiotemporal,128,128,0,0,0,1029.0,964.0,293,2319,448.6,1809.9,1971.5,201245.3,0.436,SAME,True,True,5,11.21
+geolife,timeAggregation,PostGIS,temporal,128,128,0,0,0,570.0,581.5,332,913,130.2,782.6,812.7,16953.4,0.228,reference,True,True,2,1.76
+geolife,timeAggregation,ClickHouse,temporal,128,128,0,0,0,323.5,321.0,209,514,66.2,454.2,469.9,4383.2,0.205,SAME,True,True,1,1.0
+geolife,timeAggregation,DuckDB,temporal,128,128,0,0,0,913.6,768.5,312,2724,466.3,1790.0,2287.0,217479.5,0.51,SAME,True,True,3,2.82
+geolife,timeAggregation,SpaceTime,temporal,128,128,0,0,0,1169.2,1150.5,443,2087,363.1,1855.5,1968.5,131870.5,0.311,SAME (re-check after the runs),True,True,4,3.61
+geolife,timeAggregation,Sedona,temporal,128,128,0,0,0,3242.2,3098.0,1334,6571,1060.8,4967.7,6156.2,1125292.8,0.327,SAME,True,True,5,10.02
+geolife,timeInterval,PostGIS,temporal,128,128,0,0,0,345.6,324.0,181,587,101.3,512.2,567.1,10254.5,0.293,reference,True,True,2,1.34
+geolife,timeInterval,ClickHouse,temporal,128,128,0,0,0,258.5,248.0,138,493,73.3,393.9,474.6,5367.0,0.283,SAME,True,True,1,1.0
+geolife,timeInterval,DuckDB,temporal,128,128,0,0,0,555.5,481.5,206,1382,290.4,1103.9,1338.3,84307.0,0.523,SAME,True,True,3,2.15
+geolife,timeInterval,SpaceTime,temporal,128,128,0,0,0,727.0,690.5,238,1573,248.0,1182.1,1404.8,61509.1,0.341,SAME,True,True,4,2.81
+geolife,timeInterval,Sedona,temporal,128,128,0,0,0,2001.2,1809.5,698,3988,753.3,3609.7,3750.6,567462.4,0.376,SAME,True,True,5,7.74
