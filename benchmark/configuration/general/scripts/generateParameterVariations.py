@@ -161,8 +161,8 @@ def get_scaled_radius(rnd, bbox):
         lat_meters ** 2 + lon_meters ** 2
     )
 
-    # radius between 1-3% of bbox diagonal
-    return rnd.uniform(0.01, 0.03) * diagonal_meters
+    # radius between 3-6% of bbox diagonal (2026-10-18, was 1-3 %)
+    return rnd.uniform(0.03, 0.06) * diagonal_meters
 
 def generate_fixed_time_span(rnd, lower, upper, fraction=0.01):
     total_seconds = (upper - lower).total_seconds()
@@ -264,14 +264,14 @@ def return_param_values(bbox, lower,upper, sql1,sql2, sql3, sql4, sql5, sql6, pa
 
     for param in params:
         replacement = {
-            "region": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.01),
-            "region1": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.01),
-            "second_region": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.01),
+            "region": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.03),  # 3 % of the area (2026-10-18, was 1 %)
+            "region1": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.03),  # 3 % of the area (2026-10-18, was 1 %)
+            "second_region": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.03),  # 3 % of the area (2026-10-18, was 1 %)
             "region_medium": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.05),
             "region_medium2": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.05),
             "radius": lambda: get_scaled_radius(rnd, bbox),
             "distance": lambda: get_scaled_radius(rnd, bbox), 
-            "period": lambda: generate_fixed_time_span(rnd, lower, upper, 0.01),
+            "period": lambda: generate_fixed_time_span(rnd, lower, upper, 0.03),  # 3 % of the time span (2026-10-18, was 1 %)
             "point" : lambda: get_random_point(rnd, bbox),
             "k": lambda: rnd.randint(1, 10),
         }.get(param, lambda: "")()
@@ -509,16 +509,16 @@ def generate_random_timestamp_in_bounds(rnd, lower, upper):
 
 def generate_random_time_span_in_bounds(rnd, lower, upper, mode=0):
     delta = (upper - lower).total_seconds()
-    ts1 = lower + timedelta(seconds=rnd.uniform(0, delta))
     mode_ranges = {
         1: (0, 2*24*60*60),         # short
         2: (2*24*60*60, 4*24*60*60), # medium
         3: (4*24*60*60, 8*24*60*60)   # long
     }
-    seconds = rnd.uniform(*mode_ranges.get(mode, (0, delta)))
-    ts2 = ts1 + timedelta(seconds=rnd.choice([-1, 1]) * seconds)
-    ts2 = max(lower, min(upper, ts2))
-    start, end = sorted([ts1, ts2])
+    seconds = min(rnd.uniform(*mode_ranges.get(mode, (0, delta))), delta)
+    # (2026-10-18) the window keeps its full length: it starts early enough to end within the data
+    # (before, a window running past either end was cut at it, down to a few minutes)
+    start = lower + timedelta(seconds=rnd.uniform(0, delta - seconds))
+    end = start + timedelta(seconds=seconds)
     return [
         start.strftime("%Y-%m-%d %H:%M:%S"),
         end.strftime("%Y-%m-%d %H:%M:%S")

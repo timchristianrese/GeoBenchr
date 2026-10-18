@@ -552,16 +552,16 @@ def generate_random_timestamp_in_bounds(rnd, lower, upper):
 
 def generate_random_time_span_in_bounds(rnd, lower, upper, mode=0):
     delta = (upper - lower).total_seconds()
-    ts1 = lower + timedelta(seconds=rnd.uniform(0, delta))
     mode_ranges = {
         1: (0, 2*24*60*60),         # short
         2: (2*24*60*60, 4*24*60*60), # medium
         3: (4*24*60*60, 8*24*60*60)   # long
     }
-    seconds = rnd.uniform(*mode_ranges.get(mode, (0, delta)))
-    ts2 = ts1 + timedelta(seconds=rnd.choice([-1, 1]) * seconds)
-    ts2 = max(lower, min(upper, ts2))
-    start, end = sorted([ts1, ts2])
+    seconds = min(rnd.uniform(*mode_ranges.get(mode, (0, delta))), delta)
+    # (2026-10-18) the window keeps its full length: it starts early enough to end within the data
+    # (before, a window running past either end was cut at it, down to a few minutes)
+    start = lower + timedelta(seconds=rnd.uniform(0, delta - seconds))
+    end = start + timedelta(seconds=seconds)
     return f"'{start.strftime('%Y-%m-%d %H:%M:%S')}' AND '{end.strftime('%Y-%m-%d %H:%M:%S')}'"
 
 # --- Spatial bounds ---

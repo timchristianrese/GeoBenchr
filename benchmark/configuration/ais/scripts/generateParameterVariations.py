@@ -288,7 +288,7 @@ def return_param_values(bbox, lower, upper, sql1, sql2, sql3, sql4, sql5, sql6, 
             "island": lambda: get_random_island_id(rnd),
             "region": lambda: get_random_place("regions-wkt-simplified", rnd, ";"),
             "point": lambda: get_random_point(rnd, bbox),
-            "radius": lambda: rnd.randint(1000,5000), #in meters
+            "radius": lambda: rnd.randint(5000,15000),  # in meters, harbour queries (2026-10-18, was 1000-5000)
             "distance": lambda: rnd.randint(1000,5000), #in meters
             "id": lambda: shared_id if shared_id is not None else get_scratch_id(rnd, query_type),
             "bulk_values": lambda: generate_bulk_values(rnd, bbox, lower, upper)
@@ -462,16 +462,16 @@ def generate_random_timestamp_in_bounds(rnd, lower, upper):
 
 def generate_random_time_span_in_bounds(rnd, lower, upper, mode=0):
     delta = (upper - lower).total_seconds()
-    ts1 = lower + timedelta(seconds=rnd.uniform(0, delta))
     mode_ranges = {
         1: (0, 2*24*60*60),         # short
         2: (2*24*60*60, 15*24*60*60), # medium
         3: (15*24*60*60, delta)       # long
     }
-    seconds = rnd.uniform(*mode_ranges.get(mode, (0, delta)))
-    ts2 = ts1 + timedelta(seconds=rnd.choice([-1, 1]) * seconds)
-    ts2 = max(lower, min(upper, ts2))
-    start, end = sorted([ts1, ts2])
+    seconds = min(rnd.uniform(*mode_ranges.get(mode, (0, delta))), delta)
+    # (2026-10-18) the window keeps its full length: it starts early enough to end within the data
+    # (before, a window running past either end was cut at it, down to a few minutes)
+    start = lower + timedelta(seconds=rnd.uniform(0, delta - seconds))
+    end = start + timedelta(seconds=seconds)
     return [
         start.strftime("%Y-%m-%d %H:%M:%S"),
         end.strftime("%Y-%m-%d %H:%M:%S")

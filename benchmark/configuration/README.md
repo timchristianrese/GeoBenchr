@@ -103,6 +103,30 @@ sense in every dialect); it is simply skipped when writing that dialect's output
   dialect blocks you want implemented (leave the rest `""`), list its `parameters`, and set
   `use`/`repetition`.
 
+### Parameter ranges
+
+Each value is drawn uniformly from its range, within the scenario's data extent (see
+[Spatial/time bounds](#spatialtime-bounds)). Time windows always have their full length: a window starts
+early enough to end within the data.
+
+| Parameter | Scenarios | Range |
+|---|---|---|
+| `region`, `region1`, `second_region` | general queries | rectangle covering 3 % of the scenario's area |
+| `region_medium`, `region_medium2` | all | rectangle covering 5 % of the area |
+| `radius` (`kNN`) | general queries | 3–6 % of the diagonal of the scenario's area |
+| `period` | general queries | 3 % of the scenario's time span |
+| `radius` | AIS (harbour queries) | 5–15 km |
+| `distance` | AIS (island queries) | 1–5 km |
+| `radius`, `distance` | aviation | 1–5 km |
+| `radius` | cycling (`CountRidesFullyInDistrictRadius`) | 100–1,000 m |
+| `distance` | cycling (`RidesPastOrToUniversityInPeriod`) | 500–2,000 m |
+| `radius`, `distance` | Geolife | 1–2 km |
+| `period_short` | cycling | 1–4 h |
+| `period_short` | AIS, aviation, Geolife | up to 2 days |
+| `period_medium` | AIS, aviation, cycling | 2–15 days |
+| `period_medium` | Geolife | 2–4 days |
+| `k` | all | 1–10 |
+
 ### Repetition and randomization
 
 `repetition: N` controls how many independently-randomized parameter draws are generated for that
