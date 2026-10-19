@@ -113,9 +113,13 @@ placed follows the data, so that a query's parameters lie where the data is:
   contains a sampled timestamp (at a random position inside it); windows always have their full length and
   lie within the data's time span;
 - `instant` is a sampled timestamp;
-- harbours, islands and universities are drawn only from those with data within the smallest radius
-  drawn for them (533 of 614 harbours within 5 km, 88 of 97 islands within 1 km, 7 of 8 universities
-  within 500 m).
+- harbours, islands, cities and universities are drawn only from those with data within the smallest
+  radius drawn for them (533 of 614 harbours within 5 km, 88 of 97 islands within 1 km, all 272 cities
+  within 1 km, 7 of 8 universities within 500 m);
+- parameters that belong together are drawn together: a place and the query's time window or instant
+  (around a timestamp of data near the place), the two regions of `IDsInsideRegion1Andsecond_region` and
+  its window (around two points of the same trip), and `RidesDuringRushHourInPeriod`'s window (around
+  rush-hour data).
 
 The sample and the place lists are in [`scripts/data_extent/`](scripts/data_extent/), written from the
 loaded tables by [`scripts/sample_data_extent.py`](scripts/sample_data_extent.py) (read-only, on the
