@@ -16,6 +16,7 @@ import math
 import sys as _sys
 _sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
 import spacetime_units  # noqa: E402  (shared EPSG:3857 -> SpaceTime radius conversion)
+import data_extent  # noqa: E402  (draws parameters where the data is)
 
 DATASET_CONFIG = {
     "ais": {
@@ -168,7 +169,7 @@ def generate_fixed_time_span(rnd, lower, upper, fraction=0.01):
     total_seconds = (upper - lower).total_seconds()
     span = total_seconds * fraction
 
-    start = lower + timedelta(seconds=rnd.uniform(0, total_seconds - span))
+    start = data_extent.window_start(rnd, lower, upper, span) or lower + timedelta(seconds=rnd.uniform(0, total_seconds - span))
     end = start + timedelta(seconds=span)
 
     return f"'{start.strftime('%Y-%m-%d %H:%M:%S')}' AND '{end.strftime('%Y-%m-%d %H:%M:%S')}'"
@@ -449,15 +450,9 @@ def generate_random_region_bbox(
     new_lon_span = lon_span * scale
 
     # Random lower-left corner
-    start_lat = rnd.uniform(
-        min_lat,
-        max_lat - new_lat_span
-    )
-
-    start_lon = rnd.uniform(
-        min_lon,
-        max_lon - new_lon_span
-    )
+    corner = data_extent.rect_start(rnd, min_lon, min_lat, max_lon, max_lat, new_lon_span, new_lat_span)
+    start_lon, start_lat = corner if corner else (rnd.uniform(min_lon, max_lon - new_lon_span),
+                                                  rnd.uniform(min_lat, max_lat - new_lat_span))
 
     return (f"ST_Transform(ST_SetSRID(ST_MakeEnvelope({start_lon}, {start_lat}, {start_lon + new_lon_span}, {start_lat + new_lat_span}), 4326), 3857)"
     )
@@ -504,7 +499,7 @@ def get_time_bounds(table, time_col="timestamp", file_name="time_bounds.txt"):
 
 def generate_random_timestamp_in_bounds(rnd, lower, upper):
     delta = (upper - lower).total_seconds()
-    ts = lower + timedelta(seconds=rnd.uniform(0, delta))
+    ts = data_extent.instant(rnd) or lower + timedelta(seconds=rnd.uniform(0, delta))
     return ts.strftime("%Y-%m-%d %H:%M:%S")
 
 def generate_random_time_span_in_bounds(rnd, lower, upper, mode=0):
@@ -517,7 +512,7 @@ def generate_random_time_span_in_bounds(rnd, lower, upper, mode=0):
     seconds = min(rnd.uniform(*mode_ranges.get(mode, (0, delta))), delta)
     # (2026-10-18) the window keeps its full length: it starts early enough to end within the data
     # (before, a window running past either end was cut at it, down to a few minutes)
-    start = lower + timedelta(seconds=rnd.uniform(0, delta - seconds))
+    start = data_extent.window_start(rnd, lower, upper, seconds) or lower + timedelta(seconds=rnd.uniform(0, delta - seconds))
     end = start + timedelta(seconds=seconds)
     return [
         start.strftime("%Y-%m-%d %H:%M:%S"),
@@ -543,8 +538,8 @@ def get_random_point(rnd, rect):
     # rect[1] the correct way round -- matched that here.
     ul_lon, ul_lat = rect[0]
     br_lon, br_lat = rect[1]
-    lon = ul_lon + rnd.random() * (br_lon - ul_lon)
-    lat = br_lat + rnd.random() * (ul_lat - br_lat)
+    ll = data_extent.lonlat(rnd)
+    lon, lat = ll if ll else (ul_lon + rnd.random() * (br_lon - ul_lon), br_lat + rnd.random() * (ul_lat - br_lat))
     return f"ST_Transform(ST_SetSRID(ST_Point({lon}, {lat}), 4326), 3857)"
 
     mode_ranges = {
@@ -569,6 +564,9 @@ def get_random_point(rnd, rect):
     return [start_ts.strftime(formatter), end_ts.strftime(formatter)]
 
 def get_random_place(filename: str, rnd: random.Random) -> Optional[str]:
+    pre = data_extent.place(filename)  # the place drawn together with this query's time parameters
+    if pre is not None:
+        return pre
     filepath = os.path.join("..", "data", f"{filename}.csv")
     
     try:
@@ -576,7 +574,12 @@ def get_random_place(filename: str, rnd: random.Random) -> Optional[str]:
             reader = list(csv.reader(csvfile))
             if len(reader) <= 1:
                 return None  # No data or only header
-            chosen_row = rnd.choice(reader[1:])  # Skip header
+            rows = reader[1:]
+            ok = data_extent.allowed(filename)
+            if ok is not None:
+                col = 4 if "cities" in filepath else 0
+                rows = [r for r in rows if len(r) > col and r[col] in ok] or rows
+            chosen_row = rnd.choice(rows)  # Skip header
             if filepath.__contains__("cities"):
                 return chosen_row[4]
             return chosen_row[0]  # Return value from column 0 (name)
@@ -660,6 +663,7 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
 
     dataset_key = config['benchmark'].get("dataset", "geolife")
     dataset_conf = DATASET_CONFIG[dataset_key]
+    data_extent.use(dataset_key)
 
     table_name = dataset_conf["table"]
     # FIX (2026-09-30): see DATASET_CONFIG's comment above -- None for geolife (no trajectory
@@ -686,6 +690,7 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
                     if alt and dataset_conf.get("trip_summary"):
                         return alt.replace(":trip_summary", dataset_conf["trip_summary"])
                     return query_config[d]
+                data_extent.begin(rnd, query_config.get("parameters"), query_config.get("name"))
                 mobilitydb_sql, postgis_sql, sedona_sql, spacetime_sql, clickhouse_sql, duckdb_sql, values = return_param_values(
                     bbox,
                     lower,

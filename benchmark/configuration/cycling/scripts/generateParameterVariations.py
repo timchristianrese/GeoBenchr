@@ -11,6 +11,8 @@ import psycopg2
 import sys as _sys
 _sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
 import spacetime_units  # noqa: E402  (shared EPSG:3857 -> SpaceTime radius conversion)
+import data_extent  # noqa: E402  (draws parameters where the data is)
+data_extent.use("cycling")
 import sedona_crs  # noqa: E402
 # Example usage:
 # convert_st_points_in_yaml("queries.yaml"
@@ -383,6 +385,9 @@ def get_spatial_bounds(table, geom_col="geom"):
     return [[xmin, ymax], [xmax, ymin]]
 
 def get_random_lonlat(rnd, rect):
+    ll = data_extent.lonlat(rnd)
+    if ll:
+        return ll
     ul_lon, ul_lat = rect[0]
     br_lon, br_lat = rect[1]
 
@@ -421,7 +426,7 @@ def get_random_day(rnd, lower,upper):
 
 def generate_random_timestamp_in_bounds(rnd, lower, upper):
     delta = (upper - lower).total_seconds()
-    ts = lower + timedelta(seconds=rnd.uniform(0, delta))
+    ts = data_extent.instant(rnd) or lower + timedelta(seconds=rnd.uniform(0, delta))
     return ts.strftime("%Y-%m-%d %H:%M:%S")
 
 def generate_random_time_span_in_bounds(rnd, lower, upper, mode=0):
@@ -434,18 +439,26 @@ def generate_random_time_span_in_bounds(rnd, lower, upper, mode=0):
     seconds = min(rnd.uniform(*mode_ranges.get(mode, (0, delta))), delta)
     # (2026-10-18) the window keeps its full length: it starts early enough to end within the data
     # (before, a window running past either end was cut at it, down to a few minutes)
-    start = lower + timedelta(seconds=rnd.uniform(0, delta - seconds))
+    start = data_extent.window_start(rnd, lower, upper, seconds) or lower + timedelta(seconds=rnd.uniform(0, delta - seconds))
     end = start + timedelta(seconds=seconds)
     return f"'{start.strftime('%Y-%m-%d %H:%M:%S')}' AND '{end.strftime('%Y-%m-%d %H:%M:%S')}'"
 
 
 def get_random_place(filename: str, rnd: random.Random) -> Optional[str]:
+    pre = data_extent.place(filename)  # the place drawn together with this query's time parameters
+    if pre is not None:
+        return pre
     filepath = os.path.join("..", "data", f"{filename}.csv")
     try:
         with open(filepath, newline='', encoding='utf-8') as csvfile:
             reader = list(csv.reader(csvfile))
             if len(reader) <= 1: return None
-            chosen_row = rnd.choice(reader[1:])
+            rows = reader[1:]
+            ok = data_extent.allowed(filename)
+            if ok is not None:
+                col = 4 if "cities" in filepath else 0
+                rows = [r for r in rows if len(r) > col and r[col] in ok] or rows
+            chosen_row = rnd.choice(rows)
             return chosen_row[0]
     except Exception as e:
         print(f"Error reading {filepath}: {e}")
@@ -506,6 +519,7 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
     for query_config in config['queryConfigs']:
         if query_config['use']:
             for _ in range(query_config['repetition']):
+                data_extent.begin(rnd, query_config.get("parameters"), query_config.get("name"))
                 mobilitydb_sql, postgis_sql, sedona_sql, spacetime_sql, clickhouse_sql, duckdb_sql, values = return_param_values(
                     bbox,
                     lower,

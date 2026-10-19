@@ -105,9 +105,23 @@ sense in every dialect); it is simply skipped when writing that dialect's output
 
 ### Parameter ranges
 
-Each value is drawn uniformly from its range, within the scenario's data extent (see
-[Spatial/time bounds](#spatialtime-bounds)). Time windows always have their full length: a window starts
-early enough to end within the data.
+Sizes (radii, region areas, window lengths) are drawn uniformly from the ranges below. Where they are
+placed follows the data, so that a query's parameters lie where the data is:
+
+- `point` is a point of the scenario's point table, drawn from a random sample of 4,000;
+- a region keeps its size but is placed so that it contains a sampled point, and a time window so that it
+  contains a sampled timestamp (at a random position inside it); windows always have their full length and
+  lie within the data's time span;
+- `instant` is a sampled timestamp;
+- harbours, islands and universities are drawn only from those with data within the smallest radius
+  drawn for them (533 of 614 harbours within 5 km, 88 of 97 islands within 1 km, 7 of 8 universities
+  within 500 m).
+
+The sample and the place lists are in [`scripts/data_extent/`](scripts/data_extent/), written from the
+loaded tables by [`scripts/sample_data_extent.py`](scripts/sample_data_extent.py) (read-only, on the
+PostGIS coordinator) and read by [`scripts/data_extent.py`](scripts/data_extent.py). Rerun it when a
+scenario's data changes. Without these files the generators draw uniformly over the
+[spatial/time bounds](#spatialtime-bounds).
 
 | Parameter | Scenarios | Range |
 |---|---|---|

@@ -14,6 +14,8 @@ import pyarrow.parquet as pq
 import sys as _sys
 _sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
 import spacetime_units  # noqa: E402  (shared EPSG:3857 -> SpaceTime radius conversion)
+import data_extent  # noqa: E402  (draws parameters where the data is)
+data_extent.use("ais")
 import sedona_crs  # noqa: E402
 
 class ScratchIdPool:
@@ -150,8 +152,10 @@ def generate_random_region_bbox(
         0.08 -> 8%
     """
     
-    min_lat, min_lon = bbox[0]
-    max_lat, max_lon = bbox[1]
+    # (2026-10-19) bbox is [[min_lon, max_lat], [max_lon, min_lat]] (see get_spatial_bounds); this read it as
+    # (lat, lon) pairs before, as the general generator once did
+    min_lon, max_lat = bbox[0]
+    max_lon, min_lat = bbox[1]
 
     lat_span = max_lat - min_lat
     lon_span = max_lon - min_lon
@@ -163,15 +167,9 @@ def generate_random_region_bbox(
     new_lon_span = lon_span * scale
 
     # Random lower-left corner
-    start_lat = rnd.uniform(
-        min_lat,
-        max_lat - new_lat_span
-    )
-
-    start_lon = rnd.uniform(
-        min_lon,
-        max_lon - new_lon_span
-    )
+    corner = data_extent.rect_start(rnd, min_lon, min_lat, max_lon, max_lat, new_lon_span, new_lat_span)
+    start_lon, start_lat = corner if corner else (rnd.uniform(min_lon, max_lon - new_lon_span),
+                                                  rnd.uniform(min_lat, max_lat - new_lat_span))
 
     return (f"ST_Transform(ST_SetSRID(ST_MakeEnvelope({start_lon}, {start_lat}, {start_lon + new_lon_span}, {start_lat + new_lat_span}), 4326), 3857)"
     )
@@ -457,7 +455,7 @@ def get_random_hour(rnd): return rnd.randint(0, 23)
 
 def generate_random_timestamp_in_bounds(rnd, lower, upper):
     delta = (upper - lower).total_seconds()
-    ts = lower + timedelta(seconds=rnd.uniform(0, delta))
+    ts = data_extent.instant(rnd) or lower + timedelta(seconds=rnd.uniform(0, delta))
     return ts.strftime("%Y-%m-%d %H:%M:%S")
 
 def generate_random_time_span_in_bounds(rnd, lower, upper, mode=0):
@@ -470,7 +468,7 @@ def generate_random_time_span_in_bounds(rnd, lower, upper, mode=0):
     seconds = min(rnd.uniform(*mode_ranges.get(mode, (0, delta))), delta)
     # (2026-10-18) the window keeps its full length: it starts early enough to end within the data
     # (before, a window running past either end was cut at it, down to a few minutes)
-    start = lower + timedelta(seconds=rnd.uniform(0, delta - seconds))
+    start = data_extent.window_start(rnd, lower, upper, seconds) or lower + timedelta(seconds=rnd.uniform(0, delta - seconds))
     end = start + timedelta(seconds=seconds)
     return [
         start.strftime("%Y-%m-%d %H:%M:%S"),
@@ -504,6 +502,9 @@ def get_spatial_bounds(table, geom_col="geom"):
     # return [[xmin, ymax], [xmax, ymin]]
 
 def get_random_lonlat(rnd, rect):
+    ll = data_extent.lonlat(rnd)
+    if ll:
+        return ll
     ul_lon, ul_lat = rect[0]
     br_lon, br_lat = rect[1]
     lon = ul_lon + rnd.random() * (br_lon - ul_lon)
@@ -515,12 +516,20 @@ def get_random_point(rnd, rect):
     return f"ST_SetSRID(ST_Point({lon}, {lat}), 3857)"
 
 def get_random_place(filename, rnd, delim=','):
+    pre = data_extent.place(filename)  # the place drawn together with this query's time parameters
+    if pre is not None:
+        return pre
     filepath = os.path.join("..", "data", f"{filename}.csv")
     try:
         with open(filepath, newline='', encoding='utf-8') as csvfile:
             reader = list(csv.reader(csvfile, delimiter=delim))
             if len(reader) <= 1: return None
-            chosen_row = rnd.choice(reader[1:])
+            rows = reader[1:]
+            ok = data_extent.allowed(filename)
+            if ok is not None:
+                col = 4 if "cities" in filepath else 0
+                rows = [r for r in rows if len(r) > col and r[col] in ok] or rows
+            chosen_row = rnd.choice(rows)
             return chosen_row[0]
     except Exception as e:
         print(f"Error reading {filepath}: {e}")
@@ -559,7 +568,12 @@ def get_random_island_id(rnd) -> int:
     -- the same file the `islands` table is actually loaded from. Returned as a plain int (not a
     string) so return_param_values()'s generic substitution leaves it unquoted, matching
     combinedBenchConf.yaml's `i.id = :island` (an integer column, not a name)."""
-    return rnd.choice(_load_island_ids())
+    pre = data_extent.place("islands")
+    if pre is not None:
+        return int(pre)
+    ok = data_extent.allowed("islands")
+    ids = [i for i in _load_island_ids() if ok is None or str(i) in ok] or _load_island_ids()
+    return rnd.choice(ids)
 
 # --- Regex helpers ---
 def convert_to_tstzspan(m): return f"tstzspan '[{m.group(1)}, {m.group(2)}]'"
@@ -622,6 +636,7 @@ def prepare_query_tasks(config, rnd):
     for q in config['queryConfigs']:
         if q['use']:
             for _ in range(q['repetition']):
+                data_extent.begin(rnd, q.get("parameters"), q.get("name"))
                 sql1, sql2, sql3, sql4, sql5, sql6, values = return_param_values(bbox, lower, upper, q['mobilitydb'], q['postgis'], q['sedona'], q['spacetime'], q['clickhouse'], q['duckdb'], q['parameters'], rnd, q['type'])
                 sql4 = spacetime_units.apply(sql4, dict(zip(q['parameters'], values)), 56.0)
                 sql1 = re.sub(r"\['([\d\-: ]+)', '([\d\-: ]+)'\]", convert_to_tstzspan, sql1)
