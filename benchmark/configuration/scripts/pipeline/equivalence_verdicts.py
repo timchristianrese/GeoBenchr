@@ -145,11 +145,13 @@ def verdict(key, d):
     if query == "kNN" and n == pn:
         return "KNN tie"
     if query == "ClosestRestaurantToPoint" and n == pn == 1:
-        # same venue (venue_id, venue_type) at the same distance: a different visit to it is an equal answer
-        if prow[0][2:4] == rows[0][2:4]:
+        # same venue (venue_id, venue_type) at the same distance: a different visit to it is an equal answer;
+        # SpaceTime returns (visit, venue_id, venue_type code, ...)
+        if prow[0][2:4] == rows[0][2:4] or (d == "spacetime" and prow[0][2] == rows[0][1]):
             return "KNN tie"
-    if query == "flightClosestToPoint" and n == pn == 1 and prow[0][0] == rows[0][0] and abs(num(prow[0][1]) - num(rows[0][1])) <= 0.15:
-        return "CLOSE (same flight, distance within 0.15 m)"
+    if query == "flightClosestToPoint" and n == pn == 1 and prow[0][0] == rows[0][0] and abs(num(prow[0][1]) - num(rows[0][1])) <= 0.2:
+        # SpaceTime's coordinates are precise to ~0.2 m: a point on a flight is 0.07-0.17 m away from it there
+        return "CLOSE (same flight, distance within 0.2 m)"
     return f"DIFF {n} vs {pn} rows, e.g. postgis={a[:1]} {d}={b[:1]}"
 
 
