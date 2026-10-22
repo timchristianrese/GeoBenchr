@@ -635,9 +635,11 @@ def prepare_query_tasks(config, rnd):
     bbox = get_spatial_bounds("crossing_points", "geom")
     for q in config['queryConfigs']:
         if q['use']:
-            for _ in range(q['repetition']):
+            for _ in data_extent.repetitions(q['repetition']):
                 data_extent.begin(rnd, q.get("parameters"), q.get("name"))
                 sql1, sql2, sql3, sql4, sql5, sql6, values = return_param_values(bbox, lower, upper, q['mobilitydb'], q['postgis'], q['sedona'], q['spacetime'], q['clickhouse'], q['duckdb'], q['parameters'], rnd, q['type'])
+                if not data_extent.accept(values):
+                    continue
                 sql4 = spacetime_units.apply(sql4, dict(zip(q['parameters'], values)), 56.0)
                 sql1 = re.sub(r"\['([\d\-: ]+)', '([\d\-: ]+)'\]", convert_to_tstzspan, sql1)
                 sql1 = re.sub(r"'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})'", convert_to_timestamptz, sql1)

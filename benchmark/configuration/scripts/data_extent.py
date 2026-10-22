@@ -136,3 +136,39 @@ def place(kind):
     """The place begin() drew for this query's parameter set, or None."""
     p = _ctx.get("place")
     return p[1] if p and p[0] == kind else None
+
+
+# --- unique parameter sets (2026-10-22) ---------------------------------------------------------------------
+# Every measured repetition of a query gets parameters no other repetition of it has. GEN_WARMUP (the most client
+# threads a jar is cut for) extra repetitions may repeat parameters: when a query has fewer distinct parameter
+# sets than repetitions (e.g. one Berlin district out of twelve), it gets all of them and GEN_WARMUP repeats.
+WARMUP = int(os.environ.get("GEN_WARMUP", "0"))
+MAX_MISSES = 500
+_acc = {}
+
+
+def repetitions(n):
+    """Loop of a query's parameter draws: runs until n were accepted (accept()), or until no new parameter set was
+    found in MAX_MISSES draws in a row and the warm-up repeats are in."""
+    _acc.clear()
+    _acc.update(n=0, unique=0, misses=0, seen=set())
+    while _acc["n"] < n:
+        if _acc["misses"] >= MAX_MISSES and _acc["n"] >= _acc["unique"] + WARMUP:
+            break
+        yield
+
+
+def accept(values):
+    """Whether this parameter set is kept (False: draw again)."""
+    key = repr(values)
+    if key in _acc["seen"]:
+        _acc["misses"] += 1
+        if _acc["misses"] < MAX_MISSES:
+            return False
+        _acc["n"] += 1          # exhausted: a repeat, for the warm-up
+        return True
+    _acc["seen"].add(key)
+    _acc["misses"] = 0
+    _acc["unique"] += 1
+    _acc["n"] += 1
+    return True

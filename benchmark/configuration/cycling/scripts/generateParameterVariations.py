@@ -518,7 +518,7 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
 
     for query_config in config['queryConfigs']:
         if query_config['use']:
-            for _ in range(query_config['repetition']):
+            for _ in data_extent.repetitions(query_config['repetition']):
                 data_extent.begin(rnd, query_config.get("parameters"), query_config.get("name"))
                 mobilitydb_sql, postgis_sql, sedona_sql, spacetime_sql, clickhouse_sql, duckdb_sql, values = return_param_values(
                     bbox,
@@ -534,6 +534,8 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
                     rnd,
                     query_config['type'],
                 )
+                if not data_extent.accept(values):
+                    continue
                 spacetime_sql = spacetime_units.apply(spacetime_sql, dict(zip(query_config['parameters'], values)), 52.5)
 
                 pattern = r"\['([\d\-: ]+)', '([\d\-: ]+)'\]"

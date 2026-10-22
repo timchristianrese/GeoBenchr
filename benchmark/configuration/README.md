@@ -129,7 +129,7 @@ scenario's data changes. Without these files the generators draw uniformly over 
 
 | Parameter | Scenarios | Range |
 |---|---|---|
-| `region`, `region1`, `second_region` | general queries | rectangle covering 3 % of the scenario's area |
+| `region`, `region1`, `second_region` | general queries | rectangle covering 1 % of the scenario's area |
 | `region_medium`, `region_medium2` | all | rectangle covering 5 % of the area |
 | `radius` (`kNN`) | general queries | 3–6 % of the diagonal of the scenario's area |
 | `period` | general queries | 3 % of the scenario's time span |

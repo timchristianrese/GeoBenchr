@@ -265,9 +265,9 @@ def return_param_values(bbox, lower,upper, sql1,sql2, sql3, sql4, sql5, sql6, pa
 
     for param in params:
         replacement = {
-            "region": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.03),  # 3 % of the area (2026-10-18, was 1 %)
-            "region1": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.03),  # 3 % of the area (2026-10-18, was 1 %)
-            "second_region": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.03),  # 3 % of the area (2026-10-18, was 1 %)
+            "region": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.01),  # 1 % of the area, placed on data
+            "region1": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.01),  # 1 % of the area, placed on data
+            "second_region": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.01),  # 1 % of the area, placed on data
             "region_medium": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.05),
             "region_medium2": lambda: generate_random_region_bbox(rnd, bbox, coverage=0.05),
             "radius": lambda: get_scaled_radius(rnd, bbox),
@@ -684,7 +684,7 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
 
     for query_config in config['queryConfigs']:
         if query_config['use']:
-            for _ in range(query_config['repetition']):
+            for _ in data_extent.repetitions(query_config['repetition']):
                 def pick(d):
                     alt = query_config.get(f"{d}_trip_summary")
                     if alt and dataset_conf.get("trip_summary"):
@@ -704,6 +704,8 @@ def prepare_query_tasks(config, rnd) -> List[QueryTask]:
                     query_config['parameters'],
                     rnd,
                 )
+                if not data_extent.accept(values):
+                    continue
                 spacetime_sql = spacetime_units.apply(spacetime_sql, dict(zip(query_config['parameters'], values)), 50.0)
 
                 # FIX (2026-09-30): some mobilitydb: blocks below reference a MobilityDB-native

@@ -1,12 +1,13 @@
 """Prepares a copy of the query configuration for a benchmark run: every query gets REPS repetitions,
-the write queries are switched off, and with "scan" ClickHouse's scan-only version is rendered in place
-of the H3 one. Edits the combinedBenchConf.yaml files under CONFIG_DIR in place -- run it on a copy
+the write queries are switched off (with "writes": left as configured -- inserts, updates and bulk inserts on,
+deletes off), and with "scan" ClickHouse's scan-only version is rendered in place of the H3 one. Edits the combinedBenchConf.yaml files under CONFIG_DIR in place -- run it on a copy
 (build_jar.sh does).
-    python3 set_reps.py CONFIG_DIR REPS h3|scan"""
+    python3 set_reps.py CONFIG_DIR REPS h3|scan [writes]"""
 import re
 import sys
 
 B, reps, swap = sys.argv[1], sys.argv[2], sys.argv[3] == "scan"
+keep_writes = sys.argv[4:5] == ["writes"]
 W = ("insert", "update", "update_single", "delete", "delete_single", "bulk_insert")
 for sc in ["ais", "aviation", "cycling", "geolife", "general"]:
     p = f"{B}/{sc}/config/combinedBenchConf.yaml"
@@ -20,7 +21,7 @@ for sc in ["ais", "aviation", "cycling", "geolife", "general"]:
                     use_j = j
                 m = re.match(r"^  type: (\w+)", out[j]); typ = m.group(1) if m else typ
                 j += 1
-            if typ in W and use_j is not None:
+            if typ in W and use_j is not None and not keep_writes:
                 out[use_j] = "  use: false"
             if swap:
                 ks = [k for k in range(i, j) if out[k] in ("  clickhouse: |", "  clickhouse_scan: |")]
