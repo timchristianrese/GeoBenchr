@@ -1,7 +1,4 @@
-# Read-write workload
+# Read-write workloads
 
-No read-write workload has been measured yet. The benchmark defines write queries (inserts of new points and
-trajectories per scenario), but they are switched off in every run so far: every run reads the same, unchanged data,
-and runs with different numbers of client threads stay comparable.
-
-The read-only results are in [`../read-only/`](../README.md#read-only).
+The read-write workloads (75 % reads / 25 % writes and 90 % reads / 10 % writes, each with 1, 2, 4 and 8 client
+threads) are part of the experiment of 2026-10-22; see the [results overview](../README.md#experiment-of-2026-10-22-parameters-where-the-data-is-three-workloads).

@@ -7,7 +7,27 @@ queries over the same data on a five-node cluster. Each system runs alone on the
 
 ## Runs
 
-### Read-only
+### Experiment of 2026-10-22: parameters where the data is, three workloads
+
+Parameters are drawn where each scenario's data is, so no query looks for data that isn't there, and every measured
+parameter set of a query is distinct (128 per query; `countFlightsInCounties` has 53 counties and
+`countRideInDistrict` 12 districts). Each workload runs with 2, 4, 8 and then 1 client threads; within a workload,
+every run measures the same parameter sets, and the read-only and mixed workloads share the same reads.
+
+| Workload | Client threads | Run | Status | Results |
+|---|---:|---|---|---|
+| read-only | 2 | 2026-10-22 to 2026-10-23 | done | [`2026-10-22/read-only/2-thread/`](2026-10-22/read-only/2-thread/README.md) |
+| read-only | 4 | 2026-10-23 to 2026-10-24 | done | [`2026-10-22/read-only/4-thread/`](2026-10-22/read-only/4-thread/README.md) |
+| read-only | 8 | 2026-10-24 | running | |
+| read-only | 1 | | pending | |
+| 75 % reads / 25 % writes | 2, 4, 8, 1 | | pending | PostGIS, MobilityDB, ClickHouse, DuckDB |
+| 90 % reads / 10 % writes | 2, 4, 8, 1 | | pending | PostGIS, MobilityDB, ClickHouse, DuckDB |
+
+In the mixed workloads, writes (inserts, updates, bulk inserts of 10 rows) make up a quarter or a tenth of the
+measured executions; after each system, everything they added is removed again (`purge_writes.sh`). Sedona has no
+write support (GeoParquet files on HDFS) and runs read-only only; SpaceTime's write support is pending.
+
+### Experiment of 2026-10-14: read-only, parameters uniform over each scenario's extent
 
 | Run | Client threads | Status | Results |
 |---|---:|---|---|
@@ -19,10 +39,7 @@ All three runs use the same queries, the same 128 parameter sets per query and t
 only in the number of client threads taking queries from one shared queue (and in the warm-up: one repetition per
 client thread).
 
-### Read-write
-
-[`read-write/`](read-write/README.md): not measured yet; the write queries are switched off, so every run reads
-the same, unchanged data.
+The read-write workloads are part of the experiment of 2026-10-22 (above).
 
 ### Superseded
 

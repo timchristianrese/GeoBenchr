@@ -1,0 +1,122 @@
+2026-10-23T09:51:43+00:00 start: 4 client thread(s), jar benchmark_client-ro-t4.jar (6582f448)
+2026-10-23T11:52:04+02:00 [svc] isolating ClickHouse
+2026-10-23T11:53:01+02:00 [svc] clickhouse max_server_memory_usage: 54.31 GiB
+2026-10-23T11:53:01+02:00 [svc] ClickHouse isolated
+postgres:   inactive inactive inactive inactive inactive 
+clickhouse: active active active active active 
+duckdb:     inactive
+hadoop:     0 master daemons on nst-1; yarn nodes: down
+minio:      inactive inactive inactive inactive inactive 
+spacetime:  up up up up up 
+2026-10-23T09:53:05+00:00 ClickHouse ais start
+2026-10-23T10:13:37+00:00 ClickHouse ais end rc=0
+2026-10-23T10:13:37+00:00 ClickHouse aviation start
+2026-10-23T10:14:48+00:00 ClickHouse aviation end rc=0
+2026-10-23T10:14:48+00:00 ClickHouse cycling start
+2026-10-23T10:26:46+00:00 ClickHouse cycling end rc=0
+2026-10-23T10:26:46+00:00 ClickHouse geolife start
+2026-10-23T10:31:04+00:00 ClickHouse geolife end rc=0
+2026-10-23T12:31:04+02:00 [svc] isolating SpaceTime
+2026-10-23T12:31:59+02:00 [svc] SpaceTime isolated
+postgres:   inactive inactive inactive inactive inactive 
+clickhouse: inactive inactive inactive inactive inactive 
+duckdb:     inactive
+hadoop:     0 master daemons on nst-1; yarn nodes: down
+minio:      inactive inactive inactive inactive inactive 
+spacetime:  up up up up up 
+2026-10-23T10:32:03+00:00 SpaceTime ais start
+2026-10-23T10:42:39+00:00 SpaceTime ais end rc=0
+2026-10-23T10:42:39+00:00 SpaceTime aviation start
+2026-10-23T10:44:11+00:00 SpaceTime aviation end rc=0
+2026-10-23T10:44:11+00:00 SpaceTime cycling start
+2026-10-23T10:50:30+00:00 SpaceTime cycling end rc=0
+2026-10-23T10:50:30+00:00 SpaceTime geolife start
+2026-10-23T10:55:59+00:00 SpaceTime geolife end rc=0
+2026-10-23T12:55:59+02:00 [svc] isolating DuckDB
+2026-10-23T12:56:10+02:00 [svc] DuckDB isolated
+postgres:   inactive inactive inactive inactive inactive 
+clickhouse: inactive inactive inactive inactive inactive 
+duckdb:     active
+hadoop:     0 master daemons on nst-1; yarn nodes: down
+minio:      inactive inactive inactive inactive inactive 
+spacetime:  up up up up up 
+2026-10-23T10:56:13+00:00 DuckDB ais start
+2026-10-23T13:09:06+02:00 [svc] restarting duckdb (query timeout)
+2026-10-23T13:09:14+02:00 [svc] duckdb back
+2026-10-23T13:19:14+02:00 [svc] restarting duckdb (query timeout)
+2026-10-23T13:19:20+02:00 [svc] duckdb back
+2026-10-23T11:52:04+00:00 DuckDB ais end rc=0
+2026-10-23T11:52:04+00:00 DuckDB aviation start
+2026-10-23T12:12:14+00:00 DuckDB aviation end rc=0
+2026-10-23T12:12:14+00:00 DuckDB cycling start
+2026-10-23T12:36:34+00:00 DuckDB cycling end rc=0
+2026-10-23T12:36:34+00:00 DuckDB geolife start
+2026-10-23T14:11:21+00:00 DuckDB geolife end rc=0
+2026-10-23T16:11:22+02:00 [svc] isolating PostGIS
+2026-10-23T16:11:43+02:00 [svc] PostGIS isolated
+postgres:   active active active active active 
+clickhouse: inactive inactive inactive inactive inactive 
+duckdb:     inactive
+hadoop:     0 master daemons on nst-1; yarn nodes: down
+minio:      inactive inactive inactive inactive inactive 
+spacetime:  up up up up up 
+2026-10-23T14:11:46+00:00 PostGIS ais start
+2026-10-23T14:28:58+00:00 PostGIS ais end rc=0
+2026-10-23T14:28:58+00:00 PostGIS aviation start
+2026-10-23T14:39:51+00:00 PostGIS aviation end rc=0
+2026-10-23T14:39:51+00:00 PostGIS cycling start
+2026-10-23T14:55:23+00:00 PostGIS cycling end rc=0
+2026-10-23T14:55:23+00:00 PostGIS geolife start
+2026-10-23T15:24:25+00:00 PostGIS geolife end rc=0
+2026-10-23T17:24:26+02:00 [svc] isolating MobilityDB
+2026-10-23T17:24:49+02:00 [svc] MobilityDB isolated
+postgres:   active active active active active 
+clickhouse: inactive inactive inactive inactive inactive 
+duckdb:     inactive
+hadoop:     0 master daemons on nst-1; yarn nodes: down
+minio:      inactive inactive inactive inactive inactive 
+spacetime:  up up up up up 
+2026-10-23T15:24:53+00:00 MobilityDB ais start
+2026-10-23T17:37:58+00:00 MobilityDB ais end rc=0
+2026-10-23T17:37:58+00:00 MobilityDB aviation start
+2026-10-23T18:02:39+00:00 MobilityDB aviation end rc=0
+2026-10-23T18:02:39+00:00 MobilityDB cycling start
+2026-10-23T19:03:18+00:00 MobilityDB cycling end rc=0
+2026-10-23T19:03:18+00:00 MobilityDB geolife start
+2026-10-23T19:03:18+00:00 MobilityDB geolife end rc=0
+2026-10-23T21:03:19+02:00 [svc] isolating Sedona
+2026-10-23T21:04:27+02:00 [svc] Sedona isolated
+postgres:   inactive inactive inactive inactive inactive 
+clickhouse: inactive inactive inactive inactive inactive 
+duckdb:     inactive
+hadoop:     3 master daemons on nst-1; yarn nodes: 5
+minio:      inactive inactive inactive inactive inactive 
+spacetime:  up up up up up 
+2026-10-23T19:04:30+00:00 Sedona ais start
+2026-10-23T23:17:33+00:00 Sedona ais end rc=0
+2026-10-23T23:17:33+00:00 Sedona aviation start
+2026-10-24T00:10:54+00:00 Sedona aviation end rc=0
+2026-10-24T00:10:54+00:00 Sedona cycling start
+2026-10-24T01:45:23+00:00 Sedona cycling end rc=0
+2026-10-24T01:45:23+00:00 Sedona geolife start
+2026-10-24T03:03:48+00:00 Sedona geolife end rc=0
+2026-10-24T03:03:48+00:00 restoring all services
+2026-10-24T05:03:48+02:00 [svc] starting everything
+namenode is running as process 2646797.  Stop it first and ensure /tmp/hadoop-tim-namenode.pid file is empty before retry.
+secondarynamenode is running as process 2646904.  Stop it first and ensure /tmp/hadoop-tim-secondarynamenode.pid file is empty before retry.
+datanode is running as process 2553812.  Stop it first and ensure /tmp/hadoop-tim-datanode.pid file is empty before retry.
+datanode is running as process 2504290.  Stop it first and ensure /tmp/hadoop-tim-datanode.pid file is empty before retry.
+datanode is running as process 457083.  Stop it first and ensure /tmp/hadoop-tim-datanode.pid file is empty before retry.
+datanode is running as process 2432211.  Stop it first and ensure /tmp/hadoop-tim-datanode.pid file is empty before retry.
+resourcemanager is running as process 2647166.  Stop it first and ensure /tmp/hadoop-tim-resourcemanager.pid file is empty before retry.
+nodemanager is running as process 2647465.  Stop it first and ensure /tmp/hadoop-tim-nodemanager.pid file is empty before retry.
+nodemanager is running as process 2553977.  Stop it first and ensure /tmp/hadoop-tim-nodemanager.pid file is empty before retry.
+nodemanager is running as process 2504454.  Stop it first and ensure /tmp/hadoop-tim-nodemanager.pid file is empty before retry.
+nodemanager is running as process 457241.  Stop it first and ensure /tmp/hadoop-tim-nodemanager.pid file is empty before retry.
+nodemanager is running as process 2432372.  Stop it first and ensure /tmp/hadoop-tim-nodemanager.pid file is empty before retry.
+postgres:   active active active active active 
+clickhouse: active active active active active 
+duckdb:     active
+hadoop:     3 master daemons on nst-1; yarn nodes: 5
+minio:      active active active active active 
+spacetime:  up up up up up 

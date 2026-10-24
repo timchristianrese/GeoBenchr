@@ -9,6 +9,7 @@ import sys
 from collections import Counter, defaultdict
 
 RUN, THREADS = sys.argv[1], int(sys.argv[2])
+MAIN_README = os.path.relpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "README.md"), RUN)
 SYSTEMS = ["PostGIS", "MobilityDB", "ClickHouse", "DuckDB", "SpaceTime", "Sedona"]
 SCEN = ["ais", "aviation", "cycling", "geolife"]
 SCEN_NAME = {"ais": "AIS", "aviation": "Aviation", "cycling": "Cycling", "geolife": "Geolife"}
@@ -49,7 +50,7 @@ out += [(f"Run of {dates[0]} to {dates[-1]}. " if dates else "") +
         f"taking the queries from one shared queue{' (so ' + str(THREADS) + ' queries run at the same time)' if THREADS > 1 else ''}. "
         f"Each of the 48 read queries runs with **128 measured parameter sets** (the same sets in every client-thread run) "
         f"after {THREADS} warm-up repetition{'s' if THREADS > 1 else ''}. Timeout 600 s per query. The configuration of every "
-        "system is described in the [main README](../../../../README.md#configuration). All numbers below come from the CSV "
+        "system is described in the [main README](" + MAIN_README + "#configuration). All numbers below come from the CSV "
         "files in this folder (`build_results.py`, `empty_results.py`); [`tables.md`](tables.md) has every table in full.", ""]
 
 # --- summary
@@ -185,15 +186,23 @@ if hw:
 
 # --- caveats
 out += ["## Caveats", "",
-        "- **SpaceTime's Geolife queries and cycling `kNN`** are ranked; their comparison with PostGIS is repeated "
-        "after the runs.",
+        ] + ([f"- **SpaceTime's Geolife data** differs slightly from the other systems'; its Geolife queries whose results "
+              f"differ from PostGIS ({', '.join(sorted({r['query'] for r in rows('equivalence.csv') if 'kept ranked' in r['verdict']}))}) "
+              "are ranked on request (`equivalence.csv`)."]
+             if any("kept ranked" in r["verdict"] for r in rows("equivalence.csv")) else
+             ["- **SpaceTime's Geolife queries and cycling `kNN`** are ranked; their comparison with PostGIS is repeated "
+              "after the runs."] if any("re-check after the runs" in r["verdict"] for r in rows("equivalence.csv")) else []) + [
         "- **Client host:** the benchmark client runs on a separate host with one CPU core and 1 GB of RAM. Results are "
         "read in batches of 100,000 rows; with several client threads, the client can become a limit for queries with "
         "large results.",
         "- **Sedona** skips GeoParquet files by their bounding box only when a query compares with a constant geometry; "
         "joins with a whole reference table (harbours, islands, districts, counties) read the whole table.",
-        "- **Parameters** are drawn uniformly over each scenario's area and time span, so some queries often find no "
-        "data (see *Empty results*); every system answers the same parameter sets.", ""]
+        ("- **Parameters** are drawn where the data is (points, regions, time windows and places from a sample of the "
+         "loaded data; see benchmark/configuration/README.md), each measured parameter set of a query distinct; every "
+         "system answers the same parameter sets."
+         if dates and dates[0] >= "2026-10-22" else
+         "- **Parameters** are drawn uniformly over each scenario's area and time span, so some queries often find no "
+         "data (see *Empty results*); every system answers the same parameter sets."), ""]
 
 out += ["## Files", "", "| File | One row per |", "|---|---|",
         "| `executions.csv` | query execution (scenario, system, query, repetition, warm-up, status, duration, parameters, SQL) |",

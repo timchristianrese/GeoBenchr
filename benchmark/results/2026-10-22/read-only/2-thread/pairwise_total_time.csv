@@ -1,0 +1,16 @@
+system_a,system_b,common_queries,total_a_s,total_b_s,ratio_a_over_b
+PostGIS,MobilityDB,36,5633.3,44792.3,0.13
+PostGIS,ClickHouse,48,10313.4,3933.2,2.62
+PostGIS,DuckDB,47,10226.9,22521.1,0.45
+PostGIS,SpaceTime,48,10313.4,2419.3,4.26
+PostGIS,Sedona,48,10313.4,59714.9,0.17
+MobilityDB,ClickHouse,36,44792.3,3393.2,13.2
+MobilityDB,DuckDB,35,39861.5,10911.3,3.65
+MobilityDB,SpaceTime,36,44792.3,1500.8,29.85
+MobilityDB,Sedona,36,44792.3,48774.6,0.92
+ClickHouse,DuckDB,47,3063.8,22521.1,0.14
+ClickHouse,SpaceTime,48,3933.2,2419.3,1.63
+ClickHouse,Sedona,48,3933.2,59714.9,0.07
+DuckDB,SpaceTime,47,22521.1,2378.7,9.47
+DuckDB,Sedona,47,22521.1,48721.4,0.46
+SpaceTime,Sedona,48,2419.3,59714.9,0.04
