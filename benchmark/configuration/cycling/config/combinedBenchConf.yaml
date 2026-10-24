@@ -766,14 +766,10 @@ queryConfigs:
   use: true
   description: "Insert a single ride point"
   type: insert
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
   mobilitydb: |
-    -- FIX: was blank. ride_points has the same id/geom/timestamp shape as crossing_points
-    -- (see postgis/clickhouse below), and MobilityDB is a Postgres extension, so plain
-    -- point-table inserts work the same way as postgis.
-    -- FIX: didn't write "rider_id" -- ride_points has a rider_id column (see postgis/clickhouse
-    -- below) that a "ride point" isn't complete without.
-    INSERT INTO ride_points (id, rider_id, geom, timestamp)
-    VALUES (:id, :rider_id, :point, :instant);
+    INSERT INTO rides (id, trip)
+    VALUES (:id, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'Europe/Berlin'));
   postgis: |
     -- FIX: didn't write "rider_id" -- see mobilitydb FIX note above.
     INSERT INTO ride_points (id, rider_id, geom, timestamp)
@@ -818,9 +814,10 @@ queryConfigs:
   # mutation; duckdb's write goes through DuckLake's snapshot-commit-with-possible-retry path;
   # sedona doesn't support live updates).
   # FIX: was blank -- filled in analogous to postgis below.
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
   mobilitydb: |
-    UPDATE ride_points
-    SET geom = :point
+    UPDATE rides
+    SET trip = tgeompoint(:point, getTime(trip))
     WHERE id = :id;
   postgis: |
     UPDATE ride_points
@@ -840,7 +837,7 @@ queryConfigs:
   clickhouse: |
     INSERT INTO ride_points (id, rider_id, timestamp, lat, lon)
     SELECT id, rider_id, timestamp, :point_lat, :point_lon FROM ride_points WHERE id = :id;
-    ALTER TABLE ride_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND lat != :point_lat;
+    DELETE FROM ride_points_local ON CLUSTER cluster_1 WHERE id = :id AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     UPDATE ride_points
     SET geom = :point
@@ -855,10 +852,11 @@ queryConfigs:
   description: "Update location of exactly one ride point, identified by id and timestamp"
   type: update_single
   # Same EQUIVALENCE NOTE as updateridePointMass above.
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
   mobilitydb: |
-    UPDATE ride_points
-    SET geom = :point
-    WHERE id = :id AND timestamp = :instant;
+    UPDATE rides
+    SET trip = update(trip, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'Europe/Berlin'))
+    WHERE id = :id AND (TIMESTAMP :instant AT TIME ZONE 'Europe/Berlin') <@ getTime(trip);
   postgis: |
     UPDATE ride_points
     SET geom = :point
@@ -870,7 +868,7 @@ queryConfigs:
   clickhouse: |
     INSERT INTO ride_points (id, rider_id, timestamp, lat, lon)
     SELECT id, rider_id, timestamp, :point_lat, :point_lon FROM ride_points WHERE id = :id AND timestamp = :instant;
-    ALTER TABLE ride_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant AND lat != :point_lat;
+    DELETE FROM ride_points_local ON CLUSTER cluster_1 WHERE id = :id AND timestamp = :instant AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     UPDATE ride_points
     SET geom = :point
@@ -934,11 +932,11 @@ queryConfigs:
   use: true
   description: "Insert multiple points in one statement"
   type: bulk_insert
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
   mobilitydb: |
-    -- FIX: was blank -- filled in analogous to postgis below.
-    -- FIX: didn't write "rider_id" -- see insertSingleridePoint's FIX note.
-    INSERT INTO ride_points (id, rider_id, geom, timestamp)
-    VALUES :bulk_values;
+    INSERT INTO rides (id, trip)
+    SELECT v.id, tgeompoint(v.geom, v.ts AT TIME ZONE 'Europe/Berlin')
+    FROM (VALUES :bulk_values) AS v(id, rider_id, geom, ts);
   postgis: |
     -- FIX: didn't write "rider_id" -- see insertSingleridePoint's FIX note.
     INSERT INTO ride_points (id, rider_id, geom, timestamp)

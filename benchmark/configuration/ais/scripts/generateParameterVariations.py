@@ -92,7 +92,7 @@ def generate_bulk_values(rnd, bbox, lower, upper, batch_size=10):
         lon, lat = get_random_lonlat(rnd, bbox)
         ts = generate_random_timestamp_in_bounds(rnd, lower, upper)
         id_val = _SCRATCH_IDS.mint(ts)
-        postgis_rows.append(f"({id_val}, ST_SetSRID(ST_Point({lon}, {lat}), 3857), TIMESTAMP '{ts}')")
+        postgis_rows.append(f"({id_val}, ST_Transform(ST_SetSRID(ST_Point({lon}, {lat}), 4326), 3857), TIMESTAMP '{ts}')")
         clickhouse_rows.append(f"({id_val}, TIMESTAMP '{ts}', {lat}, {lon})")
     #return without single quotes around the values, so that it can be used directly in the SQL statement
     return ", ".join(postgis_rows), ", ".join(clickhouse_rows)
@@ -513,7 +513,8 @@ def get_random_lonlat(rnd, rect):
 
 def get_random_point(rnd, rect):
     lon, lat = get_random_lonlat(rnd, rect)
-    return f"ST_SetSRID(ST_Point({lon}, {lat}), 3857)"
+    # (2026-10-24) lon/lat are degrees: transform them (was ST_SetSRID(..., 3857) on the degrees, near (0, 0))
+    return f"ST_Transform(ST_SetSRID(ST_Point({lon}, {lat}), 4326), 3857)"
 
 def get_random_place(filename, rnd, delim=','):
     pre = data_extent.place(filename)  # the place drawn together with this query's time parameters

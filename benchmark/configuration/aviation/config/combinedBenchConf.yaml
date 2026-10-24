@@ -519,15 +519,10 @@ queryConfigs:
   use: true
   description: "Insert a single flight point"
   type: insert
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
   mobilitydb: |
-    -- FIX: was blank for an active (use: true) query -- would have been a no-op/error at
-    -- benchmark time. Filled in analogous to postgis below, matching the equivalent insert
-    -- queries in the other three benchmark files (crossings/rides/geolife all resolve
-    -- mobilitydb writes to the flat per-point table, not the "flights" trajectory table).
-    -- FIX: didn't write "altitude" -- flight_points has an altitude column (see postgis/
-    -- clickhouse below) that a "flight point" isn't complete without.
-    INSERT INTO flight_points (id, geom, timestamp, altitude)
-    VALUES (:id, :point, :instant, :altitude);
+    INSERT INTO flights (id, trip, altitude)
+    VALUES (:id, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'), tfloat(:altitude, TIMESTAMP :instant AT TIME ZONE 'UTC'));
   postgis: |
     -- FIX: didn't write "altitude" -- see mobilitydb FIX note above.
     INSERT INTO flight_points (id, geom, timestamp, altitude)
@@ -577,9 +572,10 @@ queryConfigs:
   # flight_points table). Rewritten to match the flat-table update every other dialect uses for
   # this query, consistent with the equivalent update queries in the other three benchmark
   # files, and it no longer needs the undeclared :instant parameter.
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
   mobilitydb: |
-    UPDATE flight_points
-    SET geom = :point
+    UPDATE flights
+    SET trip = tgeompoint(:point, getTime(trip))
     WHERE id = :id;
   postgis: |
     UPDATE flight_points
@@ -599,7 +595,7 @@ queryConfigs:
   clickhouse: |
     INSERT INTO flight_points (id, timestamp, lat, lon, altitude)
     SELECT id, timestamp, :point_lat, :point_lon, altitude FROM flight_points WHERE id = :id;
-    ALTER TABLE flight_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND lat != :point_lat;
+    DELETE FROM flight_points_local ON CLUSTER cluster_1 WHERE id = :id AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     UPDATE flight_points
     SET geom = :point
@@ -614,10 +610,11 @@ queryConfigs:
   description: "Update location of exactly one flight point, identified by id and timestamp"
   type: update_single
   # Same EQUIVALENCE NOTE as updateflightPointMass above.
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
   mobilitydb: |
-    UPDATE flight_points
-    SET geom = :point
-    WHERE id = :id AND timestamp = :instant;
+    UPDATE flights
+    SET trip = update(trip, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'))
+    WHERE id = :id AND (TIMESTAMP :instant AT TIME ZONE 'UTC') <@ getTime(trip);
   postgis: |
     UPDATE flight_points
     SET geom = :point
@@ -629,7 +626,7 @@ queryConfigs:
   clickhouse: |
     INSERT INTO flight_points (id, timestamp, lat, lon, altitude)
     SELECT id, timestamp, :point_lat, :point_lon, altitude FROM flight_points WHERE id = :id AND timestamp = :instant;
-    ALTER TABLE flight_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant AND lat != :point_lat;
+    DELETE FROM flight_points_local ON CLUSTER cluster_1 WHERE id = :id AND timestamp = :instant AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     UPDATE flight_points
     SET geom = :point
@@ -695,15 +692,11 @@ queryConfigs:
   use: true
   description: "Insert multiple points in one statement"
   type: bulk_insert
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
   mobilitydb: |
-    -- FIX: was "INSERT INTO flights (id, trip, timestamp) VALUES :bulk_values" -- "trip" is the
-    -- tgeompoint trajectory column on "flights" (a temporal-typed column, not a plain point), so
-    -- flat (id, point, timestamp) tuples in :bulk_values were never going to bind against it --
-    -- the same "trip"-column mistake already found and fixed on the equivalent mobilitydb write
-    -- queries in crossings_benchmark.yaml. Corrected to the flat flight_points table.
-    -- FIX: didn't write "altitude" -- see insertSingleflightPoint's FIX note.
-    INSERT INTO flight_points (id, geom, timestamp, altitude)
-    VALUES :bulk_values;
+    INSERT INTO flights (id, trip, altitude)
+    SELECT v.id, tgeompoint(v.geom, v.ts AT TIME ZONE 'UTC'), tfloat(v.altitude, v.ts AT TIME ZONE 'UTC')
+    FROM (VALUES :bulk_values) AS v(id, geom, ts, altitude);
   postgis: |
     -- FIX: didn't write "altitude" -- see insertSingleflightPoint's FIX note.
     INSERT INTO flight_points (id, geom, timestamp, altitude)

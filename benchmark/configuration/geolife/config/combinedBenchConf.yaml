@@ -695,13 +695,6 @@ queryConfigs:
   description: "Insert a single geolife point"
   type: insert
   mobilitydb: |
-    -- FIX: was blank. geolife_points has the same id/geom/timestamp shape used by
-    -- postgis/clickhouse below, and MobilityDB is a Postgres extension, so a plain
-    -- point-table insert works the same way as postgis.
-    -- FIX: didn't write "venue_id"/"venue_type" -- geolife_points has those columns (see
-    -- postgis/clickhouse below) that a "geolife point" isn't complete without.
-    INSERT INTO geolife_points (id, geom, timestamp, venue_id, venue_type)
-    VALUES (:id, :point, :instant, :venue_id, :venue_type);
   postgis: |
     -- FIX: didn't write "venue_id"/"venue_type" -- see mobilitydb FIX note above.
     INSERT INTO geolife_points (id, geom, timestamp, venue_id, venue_type)
@@ -748,9 +741,6 @@ queryConfigs:
   # sedona doesn't support live updates).
   # FIX: was blank -- filled in analogous to postgis below.
   mobilitydb: |
-    UPDATE geolife_points
-    SET geom = :point
-    WHERE id = :id;
   postgis: |
     UPDATE geolife_points
     SET geom = :point
@@ -770,7 +760,7 @@ queryConfigs:
   clickhouse: |
     INSERT INTO geolife_points (id, timestamp, venue_id, venue_type, lat, lon)
     SELECT id, timestamp, venue_id, venue_type, :point_lat, :point_lon FROM geolife_points WHERE id = :id;
-    ALTER TABLE geolife_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND lat != :point_lat;
+    DELETE FROM geolife_points_local ON CLUSTER cluster_1 WHERE id = :id AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     UPDATE geolife_points
     SET geom = :point
@@ -786,9 +776,6 @@ queryConfigs:
   type: update_single
   # Same EQUIVALENCE NOTE as updategeolifePointMass above.
   mobilitydb: |
-    UPDATE geolife_points
-    SET geom = :point
-    WHERE id = :id AND timestamp = :instant;
   postgis: |
     UPDATE geolife_points
     SET geom = :point
@@ -800,7 +787,7 @@ queryConfigs:
   clickhouse: |
     INSERT INTO geolife_points (id, timestamp, venue_id, venue_type, lat, lon)
     SELECT id, timestamp, venue_id, venue_type, :point_lat, :point_lon FROM geolife_points WHERE id = :id AND timestamp = :instant;
-    ALTER TABLE geolife_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant AND lat != :point_lat;
+    DELETE FROM geolife_points_local ON CLUSTER cluster_1 WHERE id = :id AND timestamp = :instant AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     UPDATE geolife_points
     SET geom = :point
@@ -865,10 +852,6 @@ queryConfigs:
   description: "Insert multiple points in one statement"
   type: bulk_insert
   mobilitydb: |
-    -- FIX: was blank -- filled in analogous to postgis below.
-    -- FIX: didn't write "venue_id"/"venue_type" -- see insertSinglegeolifePoint's FIX note.
-    INSERT INTO geolife_points (id, geom, timestamp, venue_id, venue_type)
-    VALUES :bulk_values;
   postgis: |
     -- FIX: didn't write "venue_id"/"venue_type" -- see insertSinglegeolifePoint's FIX note.
     INSERT INTO geolife_points (id, geom, timestamp, venue_id, venue_type)

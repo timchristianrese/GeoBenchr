@@ -20,6 +20,8 @@
 # restart, interrupts the other threads' queries too (logged as INTERRUPTED).
 # EQUIVALENCE_JSON=<file>: the pre-run check against PostGIS (configuration/scripts/pipeline/equivalence_verdicts.py),
 # copied into the results so build_results.py can rank the systems; e.g. ~/realbench/equivalence_compare.json.
+# WORKLOAD=75|90 (real_bench_suite.sh): a mixed workload; before and after each system, purge_writes.sh on nst-1
+# removes the rows the write queries added (id < 0); a system whose tables cannot be cleaned first is skipped.
 # Before starting: this host's benchmark key must be in nst-1's ~/.ssh/authorized_keys (finish() removes it
 # unless KEEP_KEY=1), and the jar must be in ~/realbench on this host and on nst-1.
 #   THREADS=n real_bench_v3.sh   log: ~/realbench/run3_t<n>.log, client logs: ~/realbench/out3_t<n>/<system>/,
@@ -97,6 +99,9 @@ for SYS in "${SYSTEMS_ORDER[@]}"; do
     n1 "~/realbench/svc.sh only $SYS" >> $LOG 2>&1 || { log "$SYS: SKIPPED, services not healthy"; continue; }
   fi
   echo "$SYS,isolate,$t0,$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $PHASES
+  if [ "${WORKLOAD:-ro}" != ro ]; then   # mixed workload: start from a clean table (no rows with id < 0)
+    n1 "~/realbench/purge_writes.sh $SYS" >> $LOG 2>&1 || { log "$SYS: SKIPPED, rows with id < 0 could not be removed before the run"; continue; }
+  fi
   for SC in ais aviation cycling geolife; do
     s0=$(date -u +%Y-%m-%dT%H:%M:%SZ); log "$SYS $SC start"
     if [ "$SYS" = Sedona ]; then
@@ -116,6 +121,11 @@ for SYS in "${SYSTEMS_ORDER[@]}"; do
     echo "$SYS,$SC,$s0,$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $PHASES
     log "$SYS $SC end rc=$rc"
   done
+  if [ "${WORKLOAD:-ro}" != ro ]; then   # remove what this system's write queries added
+    p0=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    if n1 "~/realbench/purge_writes.sh $SYS" >> $LOG 2>&1; then log "$SYS writes purged"; else log "$SYS: PURGE FAILED, see above"; fi
+    echo "$SYS,purge,$p0,$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $PHASES
+  fi
 done
 
 DONE=1

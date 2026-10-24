@@ -775,14 +775,10 @@ queryConfigs:
   use: true
   description: "Insert a single crossing point"
   type: insert
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
   mobilitydb: |
-    -- FIX: was "INSERT INTO crossing_points (id, trip, timestamp) VALUES (:id, :trip, :instant)".
-    -- "trip" is the trajectory column on the "crossings" table elsewhere in this file --
-    -- crossing_points (a per-point table, see c.geom / c.timestamp used throughout the read
-    -- queries above) has a "geom" column, not "trip". Also the declared parameter is :point,
-    -- not :trip -- :trip was never going to bind. Aligned with postgis/clickhouse below.
-    INSERT INTO crossing_points (id, geom, timestamp)
-    VALUES (:id, :point, :instant);
+    INSERT INTO crossings (id, trip)
+    VALUES (:id, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'));
   postgis: |
     INSERT INTO crossing_points (id, geom, timestamp)
     VALUES (:id, :point, :instant);
@@ -826,9 +822,10 @@ queryConfigs:
   # throughput comparison across these isn't purely a syntax difference.
   # FIX: same "trip"/":trip" mistake as insertSingleCrossingPoint above -- corrected to the
   # "geom" column and the declared ":point" parameter.
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
   mobilitydb: |
-    UPDATE crossing_points
-    SET geom = :point
+    UPDATE crossings
+    SET trip = tgeompoint(:point, getTime(trip))
     WHERE id = :id;
   postgis: |
     UPDATE crossing_points
@@ -848,7 +845,7 @@ queryConfigs:
   clickhouse: |
     INSERT INTO crossing_points (id, timestamp, lat, lon)
     SELECT id, timestamp, :point_lat, :point_lon FROM crossing_points WHERE id = :id;
-    ALTER TABLE crossing_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND lat != :point_lat;
+    DELETE FROM crossing_points_local ON CLUSTER cluster_1 WHERE id = :id AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     -- Runs as a normal UPDATE against the DuckLake-attached table; each commit becomes a new
     -- snapshot with the retry-on-conflict behavior noted in the header above -- a different
@@ -866,10 +863,11 @@ queryConfigs:
   description: "Update location of exactly one crossing point, identified by id and timestamp"
   type: update_single
   # Same EQUIVALENCE NOTE as updateCrossingPointMass above.
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
   mobilitydb: |
-    UPDATE crossing_points
-    SET geom = :point
-    WHERE id = :id AND timestamp = :instant;
+    UPDATE crossings
+    SET trip = update(trip, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'))
+    WHERE id = :id AND (TIMESTAMP :instant AT TIME ZONE 'UTC') <@ getTime(trip);
   postgis: |
     UPDATE crossing_points
     SET geom = :point
@@ -881,7 +879,7 @@ queryConfigs:
   clickhouse: |
     INSERT INTO crossing_points (id, timestamp, lat, lon)
     SELECT id, timestamp, :point_lat, :point_lon FROM crossing_points WHERE id = :id AND timestamp = :instant;
-    ALTER TABLE crossing_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant AND lat != :point_lat;
+    DELETE FROM crossing_points_local ON CLUSTER cluster_1 WHERE id = :id AND timestamp = :instant AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     UPDATE crossing_points
     SET geom = :point
@@ -944,10 +942,11 @@ queryConfigs:
   use: true
   description: "Insert multiple points in one statement"
   type: bulk_insert
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
   mobilitydb: |
-    -- FIX: same "trip" column mistake as the other mobilitydb write queries -- corrected to "geom".
-    INSERT INTO crossing_points (id, geom, timestamp)
-    VALUES :bulk_values;
+    INSERT INTO crossings (id, trip)
+    SELECT v.id, tgeompoint(v.geom, v.ts AT TIME ZONE 'UTC')
+    FROM (VALUES :bulk_values) AS v(id, geom, ts);
   postgis: |
     INSERT INTO crossing_points (id, geom, timestamp)
     VALUES :bulk_values;

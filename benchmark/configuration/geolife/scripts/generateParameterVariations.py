@@ -106,7 +106,7 @@ def generate_bulk_values(rnd, bbox, lower, upper, batch_size=10):
         ts = generate_random_timestamp_in_bounds(rnd, lower, upper)
         venue_id, venue_type = generate_random_venue(rnd)
         id_val = _SCRATCH_IDS.mint(ts)
-        postgis_rows.append(f"({id_val}, ST_SetSRID(ST_Point({lon}, {lat}), 3857), TIMESTAMP '{ts}', {venue_id}, '{venue_type}')")
+        postgis_rows.append(f"({id_val}, ST_Transform(ST_SetSRID(ST_Point({lon}, {lat}), 4326), 3857), TIMESTAMP '{ts}', {venue_id}, '{venue_type}')")
         clickhouse_rows.append(f"({id_val}, TIMESTAMP '{ts}', {venue_id}, '{venue_type}', {lat}, {lon})")
     return ", ".join(postgis_rows), ", ".join(clickhouse_rows)
 
