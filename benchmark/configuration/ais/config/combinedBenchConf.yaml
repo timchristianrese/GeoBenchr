@@ -776,10 +776,10 @@ queryConfigs:
   description: "Insert a single crossing point"
   type: insert
   # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
-  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-32: scratch trajectories get 1 + (-id) % 32, spread over them
+  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-32: scratch trajectories get 1 + abs(id) % 32, spread over them
   mobilitydb: |
     INSERT INTO crossings (id, tile_key, trip)
-    VALUES (:id, (1 + (-:id) % 32)::int, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'));
+    VALUES (:id, (1 + abs(:id) % 32)::int, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'));
   postgis: |
     INSERT INTO crossing_points (id, geom, timestamp)
     VALUES (:id, :point, :instant);
@@ -824,7 +824,7 @@ queryConfigs:
   # FIX: same "trip"/":trip" mistake as insertSingleCrossingPoint above -- corrected to the
   # "geom" column and the declared ":point" parameter.
   # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
-  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-32: scratch trajectories get 1 + (-id) % 32, spread over them
+  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-32: scratch trajectories get 1 + abs(id) % 32, spread over them
   mobilitydb: |
     UPDATE crossings
     SET trip = tgeompoint(:point, getTime(trip))
@@ -866,7 +866,7 @@ queryConfigs:
   type: update_single
   # Same EQUIVALENCE NOTE as updateCrossingPointMass above.
   # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
-  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-32: scratch trajectories get 1 + (-id) % 32, spread over them
+  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-32: scratch trajectories get 1 + abs(id) % 32, spread over them
   mobilitydb: |
     UPDATE crossings
     SET trip = update(trip, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'))
@@ -946,10 +946,10 @@ queryConfigs:
   description: "Insert multiple points in one statement"
   type: bulk_insert
   # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
-  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-32: scratch trajectories get 1 + (-id) % 32, spread over them
+  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-32: scratch trajectories get 1 + abs(id) % 32, spread over them
   mobilitydb: |
     INSERT INTO crossings (id, tile_key, trip)
-    SELECT v.id, (1 + (-v.id) % 32)::int, tgeompoint(v.geom, v.ts AT TIME ZONE 'UTC')
+    SELECT v.id, (1 + abs(v.id) % 32)::int, tgeompoint(v.geom, v.ts AT TIME ZONE 'UTC')
     FROM (VALUES :bulk_values) AS v(id, geom, ts);
   postgis: |
     INSERT INTO crossing_points (id, geom, timestamp)
