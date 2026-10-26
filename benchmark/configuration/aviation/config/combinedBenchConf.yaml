@@ -519,10 +519,11 @@ queryConfigs:
   use: true
   description: "Insert a single flight point"
   type: insert
-  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
+  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
   mobilitydb: |
-    INSERT INTO flights (id, trip, altitude)
-    VALUES (:id, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'), tfloat(:altitude, TIMESTAMP :instant AT TIME ZONE 'UTC'));
+    INSERT INTO flights (id, tile_key, trip, altitude)
+    VALUES (:id, (:id % 64)::int, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'), tfloat(:altitude, TIMESTAMP :instant AT TIME ZONE 'UTC'));
   postgis: |
     -- FIX: didn't write "altitude" -- see mobilitydb FIX note above.
     INSERT INTO flight_points (id, geom, timestamp, altitude)
@@ -572,7 +573,8 @@ queryConfigs:
   # flight_points table). Rewritten to match the flat-table update every other dialect uses for
   # this query, consistent with the equivalent update queries in the other three benchmark
   # files, and it no longer needs the undeclared :instant parameter.
-  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
+  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
   mobilitydb: |
     UPDATE flights
     SET trip = tgeompoint(:point, getTime(trip))
@@ -610,7 +612,8 @@ queryConfigs:
   description: "Update location of exactly one flight point, identified by id and timestamp"
   type: update_single
   # Same EQUIVALENCE NOTE as updateflightPointMass above.
-  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
+  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
   mobilitydb: |
     UPDATE flights
     SET trip = update(trip, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'))
@@ -692,10 +695,11 @@ queryConfigs:
   use: true
   description: "Insert multiple points in one statement"
   type: bulk_insert
-  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
+  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
   mobilitydb: |
-    INSERT INTO flights (id, trip, altitude)
-    SELECT v.id, tgeompoint(v.geom, v.ts AT TIME ZONE 'UTC'), tfloat(v.altitude, v.ts AT TIME ZONE 'UTC')
+    INSERT INTO flights (id, tile_key, trip, altitude)
+    SELECT v.id, (v.id % 64)::int, tgeompoint(v.geom, v.ts AT TIME ZONE 'UTC'), tfloat(v.altitude, v.ts AT TIME ZONE 'UTC')
     FROM (VALUES :bulk_values) AS v(id, geom, ts, altitude);
   postgis: |
     -- FIX: didn't write "altitude" -- see insertSingleflightPoint's FIX note.

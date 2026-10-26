@@ -25,7 +25,15 @@ ch_start()  { for n in "${NODES[@]}"; do on $n "sudo systemctl start clickhouse-
               for n in "${NODES[@]}"; do on $n "sudo systemctl start clickhouse-server"; done
               for i in $(seq 1 60); do
                 c=$(clickhouse-client --port 9500 --query "SELECT count() FROM clusterAllReplicas(cluster_1, system.one)" 2>/dev/null)
-                [ "$c" = 5 ] && return 0; sleep 5; done; return 1; }
+                [ "$c" = 5 ] && break; sleep 5; done
+              [ "$c" = 5 ] || return 1
+              # (2026-10-26) the servers answer before they have loaded their tables (asynchronous loading):
+              # a write right after the start failed with "Table is not initialized yet". Wait until every
+              # replica of every point table is loaded and writable.
+              for i in $(seq 1 120); do
+                r=$(clickhouse-client --port 9500 --query "SELECT countIf(NOT is_readonly AND NOT is_session_expired) FROM clusterAllReplicas(cluster_1, system.replicas) WHERE table LIKE '%_points_local'" 2>/dev/null)
+                l=$(clickhouse-client --port 9500 --query "SELECT count() FROM clusterAllReplicas(cluster_1, system.asynchronous_loader) WHERE status != 'OK'" 2>/dev/null)
+                [ "$r" = 20 ] && [ "$l" = 0 ] && return 0; sleep 5; done; return 1; }
 duck_stop() { sudo systemctl stop duckdb-quack; }
 duck_start(){ sudo systemctl start duckdb-quack
               for i in $(seq 1 60); do

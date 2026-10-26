@@ -766,10 +766,11 @@ queryConfigs:
   use: true
   description: "Insert a single ride point"
   type: insert
-  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
+  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
   mobilitydb: |
-    INSERT INTO rides (id, trip)
-    VALUES (:id, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'Europe/Berlin'));
+    INSERT INTO rides (id, tile_key, trip)
+    VALUES (:id, (:id % 64)::int, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'Europe/Berlin'));
   postgis: |
     -- FIX: didn't write "rider_id" -- see mobilitydb FIX note above.
     INSERT INTO ride_points (id, rider_id, geom, timestamp)
@@ -814,7 +815,8 @@ queryConfigs:
   # mutation; duckdb's write goes through DuckLake's snapshot-commit-with-possible-retry path;
   # sedona doesn't support live updates).
   # FIX: was blank -- filled in analogous to postgis below.
-  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
+  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
   mobilitydb: |
     UPDATE rides
     SET trip = tgeompoint(:point, getTime(trip))
@@ -852,7 +854,8 @@ queryConfigs:
   description: "Update location of exactly one ride point, identified by id and timestamp"
   type: update_single
   # Same EQUIVALENCE NOTE as updateridePointMass above.
-  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
+  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
   mobilitydb: |
     UPDATE rides
     SET trip = update(trip, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'Europe/Berlin'))
@@ -932,10 +935,11 @@ queryConfigs:
   use: true
   description: "Insert multiple points in one statement"
   type: bulk_insert
-  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use
+  # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
+  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
   mobilitydb: |
-    INSERT INTO rides (id, trip)
-    SELECT v.id, tgeompoint(v.geom, v.ts AT TIME ZONE 'Europe/Berlin')
+    INSERT INTO rides (id, tile_key, trip)
+    SELECT v.id, (v.id % 64)::int, tgeompoint(v.geom, v.ts AT TIME ZONE 'Europe/Berlin')
     FROM (VALUES :bulk_values) AS v(id, rider_id, geom, ts);
   postgis: |
     -- FIX: didn't write "rider_id" -- see insertSingleridePoint's FIX note.
