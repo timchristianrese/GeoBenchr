@@ -1,0 +1,2 @@
+scenario,query,repetition,reason
+ais,countActiveCrossingsNearIsland,87,every system timed out

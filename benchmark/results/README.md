@@ -18,8 +18,8 @@ every run measures the same parameter sets, and the read-only and mixed workload
 |---|---:|---|---|---|
 | read-only | 2 | 2026-10-22 to 2026-10-23 | done | [`2026-10-22/read-only/2-thread/`](2026-10-22/read-only/2-thread/README.md) |
 | read-only | 4 | 2026-10-23 to 2026-10-24 | done | [`2026-10-22/read-only/4-thread/`](2026-10-22/read-only/4-thread/README.md) |
-| read-only | 8 | 2026-10-24 | running | |
-| read-only | 1 | | pending | |
+| read-only | 8 | 2026-10-24 | done | [`2026-10-22/read-only/8-thread/`](2026-10-22/read-only/8-thread/README.md) |
+| read-only | 1 | 2026-10-24 to 2026-10-26 | done | [`2026-10-22/read-only/1-thread/`](2026-10-22/read-only/1-thread/README.md) |
 | 75 % reads / 25 % writes | 2, 4, 8, 1 | | pending | PostGIS, MobilityDB, ClickHouse, DuckDB |
 | 90 % reads / 10 % writes | 2, 4, 8, 1 | | pending | PostGIS, MobilityDB, ClickHouse, DuckDB |
 
