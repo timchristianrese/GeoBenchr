@@ -767,10 +767,10 @@ queryConfigs:
   description: "Insert a single ride point"
   type: insert
   # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
-  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
+  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-16: scratch trajectories get 1 + (-id) % 16, spread over them
   mobilitydb: |
     INSERT INTO rides (id, tile_key, trip)
-    VALUES (:id, (:id % 64)::int, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'Europe/Berlin'));
+    VALUES (:id, (1 + (-:id) % 16)::int, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'Europe/Berlin'));
   postgis: |
     -- FIX: didn't write "rider_id" -- see mobilitydb FIX note above.
     INSERT INTO ride_points (id, rider_id, geom, timestamp)
@@ -816,7 +816,7 @@ queryConfigs:
   # sedona doesn't support live updates).
   # FIX: was blank -- filled in analogous to postgis below.
   # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
-  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
+  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-16: scratch trajectories get 1 + (-id) % 16, spread over them
   mobilitydb: |
     UPDATE rides
     SET trip = tgeompoint(:point, getTime(trip))
@@ -838,8 +838,8 @@ queryConfigs:
   # ClickHouseExecutor.java splits on ";" and runs each statement in turn to support this.
   clickhouse: |
     INSERT INTO ride_points (id, rider_id, timestamp, lat, lon)
-    SELECT id, rider_id, timestamp, :point_lat, :point_lon FROM ride_points WHERE id = :id;
-    DELETE FROM ride_points_local ON CLUSTER cluster_1 WHERE id = :id AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
+    SELECT id, rider_id, timestamp, :point_lat, :point_lon FROM ride_points WHERE id = toUInt64(:id);
+    DELETE FROM ride_points_local ON CLUSTER cluster_1 WHERE id = toUInt64(:id) AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     UPDATE ride_points
     SET geom = :point
@@ -855,7 +855,7 @@ queryConfigs:
   type: update_single
   # Same EQUIVALENCE NOTE as updateridePointMass above.
   # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
-  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
+  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-16: scratch trajectories get 1 + (-id) % 16, spread over them
   mobilitydb: |
     UPDATE rides
     SET trip = update(trip, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'Europe/Berlin'))
@@ -870,8 +870,8 @@ queryConfigs:
   # the one point via "AND timestamp = :instant" on both statements.
   clickhouse: |
     INSERT INTO ride_points (id, rider_id, timestamp, lat, lon)
-    SELECT id, rider_id, timestamp, :point_lat, :point_lon FROM ride_points WHERE id = :id AND timestamp = :instant;
-    DELETE FROM ride_points_local ON CLUSTER cluster_1 WHERE id = :id AND timestamp = :instant AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
+    SELECT id, rider_id, timestamp, :point_lat, :point_lon FROM ride_points WHERE id = toUInt64(:id) AND timestamp = :instant;
+    DELETE FROM ride_points_local ON CLUSTER cluster_1 WHERE id = toUInt64(:id) AND timestamp = :instant AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     UPDATE ride_points
     SET geom = :point
@@ -901,7 +901,7 @@ queryConfigs:
   # insertSingleridePoint's FIX note). Mutations have to target the underlying _local table, on
   # every shard (ON CLUSTER), same as updateridePointMass.
   clickhouse: |
-    ALTER TABLE ride_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id;
+    ALTER TABLE ride_points_local ON CLUSTER cluster_1 DELETE WHERE id = toUInt64(:id);
   duckdb: |
     DELETE FROM ride_points
     WHERE id = :id;
@@ -922,7 +922,7 @@ queryConfigs:
   sedona: |
   spacetime: |
   clickhouse: |
-    ALTER TABLE ride_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant;
+    ALTER TABLE ride_points_local ON CLUSTER cluster_1 DELETE WHERE id = toUInt64(:id) AND timestamp = :instant;
   duckdb: |
     DELETE FROM ride_points
     WHERE id = :id AND timestamp = :instant;
@@ -936,10 +936,10 @@ queryConfigs:
   description: "Insert multiple points in one statement"
   type: bulk_insert
   # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
-  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
+  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-16: scratch trajectories get 1 + (-id) % 16, spread over them
   mobilitydb: |
     INSERT INTO rides (id, tile_key, trip)
-    SELECT v.id, (v.id % 64)::int, tgeompoint(v.geom, v.ts AT TIME ZONE 'Europe/Berlin')
+    SELECT v.id, (1 + (-v.id) % 16)::int, tgeompoint(v.geom, v.ts AT TIME ZONE 'Europe/Berlin')
     FROM (VALUES :bulk_values) AS v(id, rider_id, geom, ts);
   postgis: |
     -- FIX: didn't write "rider_id" -- see insertSingleridePoint's FIX note.

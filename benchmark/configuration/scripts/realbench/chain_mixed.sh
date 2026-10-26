@@ -21,9 +21,11 @@ THREADS=1 RUN_TAG=trial_writes JAR_NAME=benchmark_client-trialw.jar WORKLOAD=75 
 failed=$(grep -rhE "\] (ERROR|TIMEOUT|INTERRUPTED):" $R/out_trial_writes 2>/dev/null | wc -l)
 purge_bad=$(grep -cE "PURGE FAILED|SKIPPED" $R/trial_writes.log)
 ok=$(grep -c "writes purged" $R/trial_writes.log)
-log "trial: $failed failed executions, $purge_bad purge failures/skipped systems, $ok of 4 systems purged"
+# every system's writes must have landed: its purge after the run removed rows
+wrote=0; for s in $SYSTEMS; do grep -qE "\[purge $s\] [a-z_]+: [1-9][0-9]* rows removed" $R/trial_writes.log && wrote=$((wrote + 1)); done
+log "trial: $failed failed executions, $purge_bad purge failures/skipped systems, $ok of 4 systems purged, $wrote of 4 systems wrote rows"
 grep -E "\[purge" $R/trial_writes.log | tail -40 >> $LOG
-if [ "$failed" = 0 ] && [ "$purge_bad" = 0 ] && [ "$ok" = 4 ]; then
+if [ "$failed" = 0 ] && [ "$purge_bad" = 0 ] && [ "$ok" = 4 ] && [ "$wrote" = 4 ]; then
   log "trial passed: starting the mixed workloads"
   SYSTEMS_LIST="$SYSTEMS" EQUIVALENCE_JSON=$R/equivalence_ro4.json "$R/real_bench_suite.sh" 75:2 75:4 75:8 75:1 90:2 90:4 90:8 90:1
   log "mixed workloads finished: $(tail -1 $R/suite.log)"

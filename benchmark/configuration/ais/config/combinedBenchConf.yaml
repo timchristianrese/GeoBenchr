@@ -776,10 +776,10 @@ queryConfigs:
   description: "Insert a single crossing point"
   type: insert
   # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
-  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
+  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-32: scratch trajectories get 1 + (-id) % 32, spread over them
   mobilitydb: |
     INSERT INTO crossings (id, tile_key, trip)
-    VALUES (:id, (:id % 64)::int, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'));
+    VALUES (:id, (1 + (-:id) % 32)::int, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'));
   postgis: |
     INSERT INTO crossing_points (id, geom, timestamp)
     VALUES (:id, :point, :instant);
@@ -824,7 +824,7 @@ queryConfigs:
   # FIX: same "trip"/":trip" mistake as insertSingleCrossingPoint above -- corrected to the
   # "geom" column and the declared ":point" parameter.
   # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
-  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
+  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-32: scratch trajectories get 1 + (-id) % 32, spread over them
   mobilitydb: |
     UPDATE crossings
     SET trip = tgeompoint(:point, getTime(trip))
@@ -846,8 +846,8 @@ queryConfigs:
   # runs each statement in turn to support this.
   clickhouse: |
     INSERT INTO crossing_points (id, timestamp, lat, lon)
-    SELECT id, timestamp, :point_lat, :point_lon FROM crossing_points WHERE id = :id;
-    DELETE FROM crossing_points_local ON CLUSTER cluster_1 WHERE id = :id AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
+    SELECT id, timestamp, :point_lat, :point_lon FROM crossing_points WHERE id = toUInt64(:id);
+    DELETE FROM crossing_points_local ON CLUSTER cluster_1 WHERE id = toUInt64(:id) AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     -- Runs as a normal UPDATE against the DuckLake-attached table; each commit becomes a new
     -- snapshot with the retry-on-conflict behavior noted in the header above -- a different
@@ -866,7 +866,7 @@ queryConfigs:
   type: update_single
   # Same EQUIVALENCE NOTE as updateCrossingPointMass above.
   # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
-  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
+  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-32: scratch trajectories get 1 + (-id) % 32, spread over them
   mobilitydb: |
     UPDATE crossings
     SET trip = update(trip, tgeompoint(:point, TIMESTAMP :instant AT TIME ZONE 'UTC'))
@@ -881,8 +881,8 @@ queryConfigs:
   # to the one point via "AND timestamp = :instant" on both statements.
   clickhouse: |
     INSERT INTO crossing_points (id, timestamp, lat, lon)
-    SELECT id, timestamp, :point_lat, :point_lon FROM crossing_points WHERE id = :id AND timestamp = :instant;
-    DELETE FROM crossing_points_local ON CLUSTER cluster_1 WHERE id = :id AND timestamp = :instant AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
+    SELECT id, timestamp, :point_lat, :point_lon FROM crossing_points WHERE id = toUInt64(:id) AND timestamp = :instant;
+    DELETE FROM crossing_points_local ON CLUSTER cluster_1 WHERE id = toUInt64(:id) AND timestamp = :instant AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     UPDATE crossing_points
     SET geom = :point
@@ -911,7 +911,7 @@ queryConfigs:
   # see insertSingleCrossingPoint's FIX note). Mutations have to target the underlying _local
   # table, on every shard (ON CLUSTER), same as updateCrossingPointMass.
   clickhouse: |
-    ALTER TABLE crossing_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id;
+    ALTER TABLE crossing_points_local ON CLUSTER cluster_1 DELETE WHERE id = toUInt64(:id);
   duckdb: |
     DELETE FROM crossing_points
     WHERE id = :id;
@@ -932,7 +932,7 @@ queryConfigs:
   sedona: |
   spacetime: |
   clickhouse: |
-    ALTER TABLE crossing_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant;
+    ALTER TABLE crossing_points_local ON CLUSTER cluster_1 DELETE WHERE id = toUInt64(:id) AND timestamp = :instant;
   duckdb: |
     DELETE FROM crossing_points
     WHERE id = :id AND timestamp = :instant;
@@ -946,10 +946,10 @@ queryConfigs:
   description: "Insert multiple points in one statement"
   type: bulk_insert
   # (2026-10-24) MobilityDB writes go to its trajectory table (scratch trajectories with negative ids), which its reads use;
-  # the table is distributed by tile_key (a spatial tile of real trips): scratch trajectories get id % 64, spread over the shards
+  # the table is distributed by tile_key (a spatial tile of real trips): its shards hold the ranges 1-32: scratch trajectories get 1 + (-id) % 32, spread over them
   mobilitydb: |
     INSERT INTO crossings (id, tile_key, trip)
-    SELECT v.id, (v.id % 64)::int, tgeompoint(v.geom, v.ts AT TIME ZONE 'UTC')
+    SELECT v.id, (1 + (-v.id) % 32)::int, tgeompoint(v.geom, v.ts AT TIME ZONE 'UTC')
     FROM (VALUES :bulk_values) AS v(id, geom, ts);
   postgis: |
     INSERT INTO crossing_points (id, geom, timestamp)

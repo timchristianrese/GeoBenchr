@@ -25,11 +25,12 @@ case $SYS in
     done ;;
   ClickHouse)
     for t in $POINTS; do
-      n=$(clickhouse-client --port 9500 --query "SELECT count() FROM $t WHERE id < 0") || exit 1
+      # id is UInt64 in ClickHouse: a negative id is stored wrapped around (>= 2^63), so test toInt64(id)
+      n=$(clickhouse-client --port 9500 --query "SELECT count() FROM $t WHERE toInt64(id) < 0") || exit 1
       if [ "$n" != 0 ]; then
-        clickhouse-client --port 9500 --query "ALTER TABLE ${t}_local ON CLUSTER cluster_1 DELETE WHERE id < 0 SETTINGS mutations_sync = 2" > /dev/null || exit 1
+        clickhouse-client --port 9500 --query "ALTER TABLE ${t}_local ON CLUSTER cluster_1 DELETE WHERE toInt64(id) < 0 SETTINGS mutations_sync = 2" > /dev/null || exit 1
       fi
-      after=$(clickhouse-client --port 9500 --query "SELECT count() FROM $t WHERE id < 0"); log "$t: $n rows removed, $after left"
+      after=$(clickhouse-client --port 9500 --query "SELECT count() FROM $t WHERE toInt64(id) < 0"); log "$t: $n rows removed, $after left"
       left=$((left + after))
     done ;;
   DuckDB)

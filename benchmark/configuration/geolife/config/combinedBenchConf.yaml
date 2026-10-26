@@ -759,8 +759,8 @@ queryConfigs:
   # this.
   clickhouse: |
     INSERT INTO geolife_points (id, timestamp, venue_id, venue_type, lat, lon)
-    SELECT id, timestamp, venue_id, venue_type, :point_lat, :point_lon FROM geolife_points WHERE id = :id;
-    DELETE FROM geolife_points_local ON CLUSTER cluster_1 WHERE id = :id AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
+    SELECT id, timestamp, venue_id, venue_type, :point_lat, :point_lon FROM geolife_points WHERE id = toUInt64(:id);
+    DELETE FROM geolife_points_local ON CLUSTER cluster_1 WHERE id = toUInt64(:id) AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     UPDATE geolife_points
     SET geom = :point
@@ -786,8 +786,8 @@ queryConfigs:
   # to the one point via "AND timestamp = :instant" on both statements.
   clickhouse: |
     INSERT INTO geolife_points (id, timestamp, venue_id, venue_type, lat, lon)
-    SELECT id, timestamp, venue_id, venue_type, :point_lat, :point_lon FROM geolife_points WHERE id = :id AND timestamp = :instant;
-    DELETE FROM geolife_points_local ON CLUSTER cluster_1 WHERE id = :id AND timestamp = :instant AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
+    SELECT id, timestamp, venue_id, venue_type, :point_lat, :point_lon FROM geolife_points WHERE id = toUInt64(:id) AND timestamp = :instant;
+    DELETE FROM geolife_points_local ON CLUSTER cluster_1 WHERE id = toUInt64(:id) AND timestamp = :instant AND lat != :point_lat SETTINGS lightweight_delete_mode = 'lightweight_update';
   duckdb: |
     UPDATE geolife_points
     SET geom = :point
@@ -817,7 +817,7 @@ queryConfigs:
   # see insertSinglegeolifePoint's FIX note). Mutations have to target the underlying _local
   # table, on every shard (ON CLUSTER), same as updategeolifePointMass.
   clickhouse: |
-    ALTER TABLE geolife_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id;
+    ALTER TABLE geolife_points_local ON CLUSTER cluster_1 DELETE WHERE id = toUInt64(:id);
   duckdb: |
     DELETE FROM geolife_points
     WHERE id = :id;
@@ -838,7 +838,7 @@ queryConfigs:
   sedona: |
   spacetime: |
   clickhouse: |
-    ALTER TABLE geolife_points_local ON CLUSTER cluster_1 DELETE WHERE id = :id AND timestamp = :instant;
+    ALTER TABLE geolife_points_local ON CLUSTER cluster_1 DELETE WHERE id = toUInt64(:id) AND timestamp = :instant;
   duckdb: |
     DELETE FROM geolife_points
     WHERE id = :id AND timestamp = :instant;
