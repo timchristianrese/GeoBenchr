@@ -21,8 +21,9 @@ every run measures the same parameter sets, and the read-only and mixed workload
 | read-only | 8 | 2026-10-24 | done | [`2026-10-22/read-only/8-thread/`](2026-10-22/read-only/8-thread/README.md) |
 | read-only | 1 | 2026-10-24 to 2026-10-26 | done | [`2026-10-22/read-only/1-thread/`](2026-10-22/read-only/1-thread/README.md) |
 | 75 % reads / 25 % writes | 2 | 2026-10-26 to 2026-10-27 | done | [`2026-10-22/75-25/2-thread/`](2026-10-22/75-25/2-thread/README.md) |
-| 75 % reads / 25 % writes | 4 | 2026-10-27 | running | |
-| 75 % reads / 25 % writes | 8, 1 | | pending | |
+| 75 % reads / 25 % writes | 4 | 2026-10-27 | done | [`2026-10-22/75-25/4-thread/`](2026-10-22/75-25/4-thread/README.md) |
+| 75 % reads / 25 % writes | 8 | 2026-10-27 | running | |
+| 75 % reads / 25 % writes | 1 | | pending | |
 | 90 % reads / 10 % writes | 2, 4, 8, 1 | | pending | |
 
 In the mixed workloads, writes (inserts, updates, bulk inserts of 10 rows) make up a quarter or a tenth of the

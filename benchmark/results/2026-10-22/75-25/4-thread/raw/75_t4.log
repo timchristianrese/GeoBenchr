@@ -1,0 +1,138 @@
+2026-10-27T04:29:18+00:00 start: 4 client thread(s), jar benchmark_client-75-t4.jar (48244651)
+2026-10-27T05:29:39+01:00 [svc] isolating ClickHouse
+2026-10-27T05:31:32+01:00 [svc] clickhouse max_server_memory_usage: 54.52 GiB
+2026-10-27T05:31:32+01:00 [svc] ClickHouse isolated
+postgres:   inactive inactive inactive inactive inactive 
+clickhouse: active active active active active 
+duckdb:     inactive
+hadoop:     0 master daemons on nst-1; yarn nodes: down
+minio:      inactive inactive inactive inactive inactive 
+spacetime:  up up up up up 
+2026-10-27T05:31:36+01:00 [purge ClickHouse] crossing_points: 0 rows removed, 0 left
+2026-10-27T05:31:36+01:00 [purge ClickHouse] flight_points: 0 rows removed, 0 left
+2026-10-27T05:31:36+01:00 [purge ClickHouse] ride_points: 0 rows removed, 0 left
+2026-10-27T05:31:36+01:00 [purge ClickHouse] geolife_points: 0 rows removed, 0 left
+2026-10-27T05:31:36+01:00 [purge ClickHouse] done, 0 rows with id < 0 left
+2026-10-27T04:31:36+00:00 ClickHouse ais start
+2026-10-27T05:07:54+00:00 ClickHouse ais end rc=0
+2026-10-27T05:07:54+00:00 ClickHouse aviation start
+2026-10-27T05:20:25+00:00 ClickHouse aviation end rc=0
+2026-10-27T05:20:25+00:00 ClickHouse cycling start
+2026-10-27T05:32:55+00:00 ClickHouse cycling end rc=0
+2026-10-27T05:32:55+00:00 ClickHouse geolife start
+2026-10-27T05:38:52+00:00 ClickHouse geolife end rc=0
+2026-10-27T06:38:59+01:00 [purge ClickHouse] crossing_points: 1453 rows removed, 0 left
+2026-10-27T06:39:02+01:00 [purge ClickHouse] flight_points: 1385 rows removed, 0 left
+2026-10-27T06:39:02+01:00 [purge ClickHouse] ride_points: 1353 rows removed, 0 left
+2026-10-27T06:39:03+01:00 [purge ClickHouse] geolife_points: 1450 rows removed, 0 left
+2026-10-27T06:39:03+01:00 [purge ClickHouse] done, 0 rows with id < 0 left
+2026-10-27T05:39:03+00:00 ClickHouse writes purged
+2026-10-27T06:39:03+01:00 [svc] isolating DuckDB
+2026-10-27T06:39:43+01:00 [svc] DuckDB isolated
+postgres:   inactive inactive inactive inactive inactive 
+clickhouse: inactive inactive inactive inactive inactive 
+duckdb:     active
+hadoop:     0 master daemons on nst-1; yarn nodes: down
+minio:      inactive inactive inactive inactive inactive 
+spacetime:  up up up up up 
+2026-10-27T06:39:47+01:00 [purge DuckDB] crossing_points: 0 rows removed, 0 left
+2026-10-27T06:39:47+01:00 [purge DuckDB] flight_points: 0 rows removed, 0 left
+2026-10-27T06:39:47+01:00 [purge DuckDB] ride_points: 0 rows removed, 0 left
+2026-10-27T06:39:47+01:00 [purge DuckDB] geolife_points: 0 rows removed, 0 left
+2026-10-27T06:40:01+01:00 [purge DuckDB] done, 0 rows with id < 0 left
+2026-10-27T05:40:01+00:00 DuckDB ais start
+2026-10-27T06:52:52+01:00 [svc] restarting duckdb (query timeout)
+2026-10-27T06:53:00+01:00 [svc] duckdb back
+2026-10-27T07:03:00+01:00 [svc] restarting duckdb (query timeout)
+2026-10-27T07:03:07+01:00 [svc] duckdb back
+2026-10-27T06:35:42+00:00 DuckDB ais end rc=0
+2026-10-27T06:35:42+00:00 DuckDB aviation start
+2026-10-27T06:52:58+00:00 DuckDB aviation end rc=0
+2026-10-27T06:52:58+00:00 DuckDB cycling start
+2026-10-27T07:14:31+00:00 DuckDB cycling end rc=0
+2026-10-27T07:14:31+00:00 DuckDB geolife start
+2026-10-27T08:31:21+00:00 DuckDB geolife end rc=0
+FATAL Error: Failed to create checkpoint because of error: Cannot bind index 'berlin_districts', unknown index type 'RTREE'. You need to load the extension that provides this index type before table 'berlin_districts' can be modified.
+2026-10-27T09:31:25+01:00 [purge DuckDB] crossing_points: 1452 rows removed, 0 left
+FATAL Error: Failed to create checkpoint because of error: Cannot bind index 'berlin_districts', unknown index type 'RTREE'. You need to load the extension that provides this index type before table 'berlin_districts' can be modified.
+2026-10-27T09:31:26+01:00 [purge DuckDB] flight_points: 1386 rows removed, 0 left
+FATAL Error: Failed to create checkpoint because of error: Cannot bind index 'berlin_districts', unknown index type 'RTREE'. You need to load the extension that provides this index type before table 'berlin_districts' can be modified.
+2026-10-27T09:31:27+01:00 [purge DuckDB] ride_points: 1352 rows removed, 0 left
+FATAL Error: Failed to create checkpoint because of error: Cannot bind index 'berlin_districts', unknown index type 'RTREE'. You need to load the extension that provides this index type before table 'berlin_districts' can be modified.
+2026-10-27T09:31:27+01:00 [purge DuckDB] geolife_points: 1452 rows removed, 0 left
+2026-10-27T09:31:41+01:00 [purge DuckDB] done, 0 rows with id < 0 left
+2026-10-27T08:31:41+00:00 DuckDB writes purged
+2026-10-27T09:31:41+01:00 [svc] isolating PostGIS
+2026-10-27T09:32:00+01:00 [svc] PostGIS isolated
+postgres:   active active active active active 
+clickhouse: inactive inactive inactive inactive inactive 
+duckdb:     inactive
+hadoop:     0 master daemons on nst-1; yarn nodes: down
+minio:      inactive inactive inactive inactive inactive 
+spacetime:  up up up up up 
+2026-10-27T09:32:04+01:00 [purge PostGIS] crossing_points: 0 rows removed, 0 left
+2026-10-27T09:32:04+01:00 [purge PostGIS] flight_points: 0 rows removed, 0 left
+2026-10-27T09:32:04+01:00 [purge PostGIS] ride_points: 0 rows removed, 0 left
+2026-10-27T09:32:05+01:00 [purge PostGIS] geolife_points: 0 rows removed, 0 left
+2026-10-27T09:32:45+01:00 [purge PostGIS] crossings: 0 rows removed, 0 left
+2026-10-27T09:32:47+01:00 [purge PostGIS] flights: 0 rows removed, 0 left
+2026-10-27T09:32:55+01:00 [purge PostGIS] rides: 0 rows removed, 0 left
+2026-10-27T09:32:55+01:00 [purge PostGIS] done, 0 rows with id < 0 left
+2026-10-27T08:32:55+00:00 PostGIS ais start
+2026-10-27T08:50:12+00:00 PostGIS ais end rc=0
+2026-10-27T08:50:12+00:00 PostGIS aviation start
+2026-10-27T09:00:59+00:00 PostGIS aviation end rc=0
+2026-10-27T09:00:59+00:00 PostGIS cycling start
+2026-10-27T09:15:43+00:00 PostGIS cycling end rc=0
+2026-10-27T09:15:43+00:00 PostGIS geolife start
+2026-10-27T09:44:36+00:00 PostGIS geolife end rc=0
+2026-10-27T10:44:52+01:00 [purge PostGIS] crossing_points: 1452 rows removed, 0 left
+2026-10-27T10:45:01+01:00 [purge PostGIS] flight_points: 1386 rows removed, 0 left
+2026-10-27T10:45:07+01:00 [purge PostGIS] ride_points: 1352 rows removed, 0 left
+2026-10-27T10:45:52+01:00 [purge PostGIS] geolife_points: 1452 rows removed, 0 left
+2026-10-27T10:46:26+01:00 [purge PostGIS] crossings: 0 rows removed, 0 left
+2026-10-27T10:46:29+01:00 [purge PostGIS] flights: 0 rows removed, 0 left
+2026-10-27T10:46:35+01:00 [purge PostGIS] rides: 0 rows removed, 0 left
+2026-10-27T10:46:35+01:00 [purge PostGIS] done, 0 rows with id < 0 left
+2026-10-27T09:46:35+00:00 PostGIS writes purged
+2026-10-27T10:46:35+01:00 [svc] isolating MobilityDB
+2026-10-27T10:47:00+01:00 [svc] MobilityDB isolated
+postgres:   active active active active active 
+clickhouse: inactive inactive inactive inactive inactive 
+duckdb:     inactive
+hadoop:     0 master daemons on nst-1; yarn nodes: down
+minio:      inactive inactive inactive inactive inactive 
+spacetime:  up up up up up 
+2026-10-27T10:47:04+01:00 [purge MobilityDB] crossing_points: 0 rows removed, 0 left
+2026-10-27T10:47:04+01:00 [purge MobilityDB] flight_points: 0 rows removed, 0 left
+2026-10-27T10:47:04+01:00 [purge MobilityDB] ride_points: 0 rows removed, 0 left
+2026-10-27T10:47:05+01:00 [purge MobilityDB] geolife_points: 0 rows removed, 0 left
+2026-10-27T10:47:41+01:00 [purge MobilityDB] crossings: 0 rows removed, 0 left
+2026-10-27T10:47:43+01:00 [purge MobilityDB] flights: 0 rows removed, 0 left
+2026-10-27T10:47:47+01:00 [purge MobilityDB] rides: 0 rows removed, 0 left
+2026-10-27T10:47:47+01:00 [purge MobilityDB] done, 0 rows with id < 0 left
+2026-10-27T09:47:47+00:00 MobilityDB ais start
+2026-10-27T13:01:37+00:00 MobilityDB ais end rc=0
+2026-10-27T13:01:37+00:00 MobilityDB aviation start
+2026-10-27T13:26:48+00:00 MobilityDB aviation end rc=0
+2026-10-27T13:26:48+00:00 MobilityDB cycling start
+2026-10-27T14:34:50+00:00 MobilityDB cycling end rc=0
+2026-10-27T14:34:50+00:00 MobilityDB geolife start
+2026-10-27T14:34:51+00:00 MobilityDB geolife end rc=0
+2026-10-27T15:34:51+01:00 [purge MobilityDB] crossing_points: 0 rows removed, 0 left
+2026-10-27T15:34:51+01:00 [purge MobilityDB] flight_points: 0 rows removed, 0 left
+2026-10-27T15:34:51+01:00 [purge MobilityDB] ride_points: 0 rows removed, 0 left
+2026-10-27T15:34:52+01:00 [purge MobilityDB] geolife_points: 0 rows removed, 0 left
+2026-10-27T15:36:10+01:00 [purge MobilityDB] crossings: 1452 rows removed, 0 left
+2026-10-27T15:36:19+01:00 [purge MobilityDB] flights: 1386 rows removed, 0 left
+2026-10-27T15:36:29+01:00 [purge MobilityDB] rides: 1352 rows removed, 0 left
+2026-10-27T15:36:29+01:00 [purge MobilityDB] done, 0 rows with id < 0 left
+2026-10-27T14:36:29+00:00 MobilityDB writes purged
+2026-10-27T14:36:29+00:00 restoring all services
+2026-10-27T15:36:30+01:00 [svc] starting everything
+postgres:   active active active active active 
+clickhouse: active active active active active 
+duckdb:     active
+hadoop:     3 master daemons on nst-1; yarn nodes: 5
+minio:      active active active active active 
+spacetime:  up up up up up 
