@@ -42,14 +42,28 @@ hw = rows("hardware_by_phase.csv")
 execs = rows("executions.csv")
 measured = [r for r in execs if r["warmup"] != "True"]
 present = [s for s in SYSTEMS if s in scores]
+WRITE_TYPES = {"insert", "update", "update_single", "delete", "delete_single", "bulk_insert"}
+writes = [r for r in summary if r["query_type"] in WRITE_TYPES and r["planned"] not in ("0", "")]
+n_reads = sum(1 for r in rows("winners.csv") if r["query_type"] not in WRITE_TYPES)
 dates = sorted(r["logged_at"][:10] for r in execs if r.get("logged_at"))
 
-out = [f"# Read-only, {THREADS} client thread{'s' if THREADS > 1 else ''}", ""]
+share = None
+if writes:
+    nr = sum(int(r["succeeded"] or 0) for r in summary if r["query_type"] not in WRITE_TYPES and r["system"] == "PostGIS")
+    nw = sum(int(r["succeeded"] or 0) for r in writes if r["system"] == "PostGIS")
+    share = round(100 * nr / (nr + nw)) if nr + nw else None
+title = f"Reads and writes {share}/{100 - share}" if share else "Read-only"
+out = [f"# {title}, {THREADS} client thread{'s' if THREADS > 1 else ''}", ""]
 out += [(f"Run of {dates[0]} to {dates[-1]}. " if dates else "") +
         f"Every system alone on the five-node cluster, one system after the other; {THREADS} client thread{'s' if THREADS > 1 else ''} "
         f"taking the queries from one shared queue{' (so ' + str(THREADS) + ' queries run at the same time)' if THREADS > 1 else ''}. "
-        f"Each of the 48 read queries runs with **128 measured parameter sets** (the same sets in every client-thread run) "
-        f"after {THREADS} warm-up repetition{'s' if THREADS > 1 else ''}. Timeout 600 s per query. The configuration of every "
+        f"Each of the {n_reads} read queries runs with **128 measured parameter sets** (the same sets in every client-thread run) "
+
+        f"after {THREADS} warm-up repetition{'s' if THREADS > 1 else ''}. "
+        + (f"Write queries (inserts, updates, bulk inserts of 10 rows) are mixed in: {100 - share} % of the measured "
+           "executions; everything they added is removed after each system (`purge_writes.sh`). Systems without write "
+           "support are not part of this workload. " if writes else "") +
+        "Timeout 600 s per query. The configuration of every "
         "system is described in the [main README](" + MAIN_README + "#configuration). All numbers below come from the CSV "
         "files in this folder (`build_results.py`, `empty_results.py`); [`tables.md`](tables.md) has every table in full.", ""]
 
@@ -64,13 +78,14 @@ for s in sorted(present, key=lambda s: (-int(scores[s]["wins"]), float(scores[s]
     failed = n - st[(s, "success")]
     out.append(f"| {s} | {r['wins']} | {r['queries_ranked']} of {r['queries_with_query']} | {num(r['geomean_slowdown_vs_best'])}× | "
                f"{num(r['median_slowdown_vs_best'])}× | {n:,} | {failed} |")
-out += ["", "*Slowdown*: a system's mean runtime on a query divided by the fastest ranked system's, over the queries the "
+out += ["", ("Wins and slowdowns count the read queries only (comparable with the read-only runs); the writes are "
+        "below (*Writes*). " if writes else "") + "*Slowdown*: a system's mean runtime on a query divided by the fastest ranked system's, over the queries the "
         "system is ranked on. A system is ranked on a query when every measured repetition succeeded and its results match "
         "PostGIS (pre-run equivalence check; accepted: nearest-neighbour ties, numbers within 1 %, an empty answer as no row "
         "or one row of zeros).", ""]
 
 # --- wins by scenario / type
-wins = Counter((w["scenario"], w["winner"]) for w in winners if w["winner"])
+wins = Counter((w["scenario"], w["winner"]) for w in winners if w["winner"] and w["query_type"] not in WRITE_TYPES)
 wt = Counter((w["query_type"], w["winner"]) for w in winners if w["winner"])
 cols = [s for s in present if any(w["winner"] == s for w in winners)]
 out += ["**Wins by scenario and by query type:**", "", "| | " + " | ".join(cols) + " |", "|---|" + "---:|" * len(cols)]
@@ -105,12 +120,39 @@ else:
 out.append("")
 
 # --- not ranked
-nr = [r for r in summary if r["planned"] not in ("0", "") and r["eligible"] != "True"]
+nr = [r for r in summary if r["planned"] not in ("0", "") and r["eligible"] != "True" and r["system"] in present]
 if nr:
     out += ["## Not ranked", "", "| Scenario | Query | System | Reason |", "|---|---|---|---|"]
     for r in nr:
         why = r["equivalence"] if r["complete"] == "True" else f"{r['succeeded']}/{r['planned']} succeeded"
         out.append(f"| {r['scenario']} | {r['query']} | {r['system']} | {why[:90]} |")
+    out.append("")
+
+# --- writes
+if writes:
+    wsys = [x for x in present if any(r["system"] == x for r in writes)]
+    out += ["## Writes", "",
+            "Mean (95th percentile) runtime of each write query, over its measured executions; **bold**: fastest. "
+            "An update moves points that an insert of the same run added; ClickHouse writes an update as a re-insert "
+            "plus a lightweight delete, MobilityDB writes into its trajectories.", "",
+            "| Scenario | Write query | " + " | ".join(wsys) + " |", "|---|---|" + "---:|" * len(wsys)]
+    byq = defaultdict(dict)
+    for r in writes:
+        byq[(r["scenario"], r["query"])][r["system"]] = r
+    for (sc, q), d in sorted(byq.items(), key=lambda kv: (SCEN.index(kv[0][0]), kv[0][1])):
+        best = min((float(r["mean_ms"]) for r in d.values() if r["mean_ms"]), default=None)
+        cells = []
+        for x in wsys:
+            r = d.get(x)
+            if not r or not r["mean_ms"]:
+                cells.append("–"); continue
+            b = "**" if float(r["mean_ms"]) == best else ""
+            cells.append(f"{b}{ms(r['mean_ms'])}{b} ({ms(r['p95_ms'])})")
+        out.append(f"| {SCEN_NAME[sc]} | {q} | " + " | ".join(cells) + " |")
+    out += ["", "| System | Write queries won | Geo-mean slowdown vs fastest |", "|---|---:|---:|"]
+    for x in wsys:
+        r = scores[x]
+        out.append(f"| {x} | {r.get('write_wins', '–')} | {num(r.get('write_geomean_slowdown_vs_best'))}× |")
     out.append("")
 
 # --- latency per scenario: box plot, then one table per scenario

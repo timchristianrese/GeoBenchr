@@ -20,11 +20,13 @@ every run measures the same parameter sets, and the read-only and mixed workload
 | read-only | 4 | 2026-10-23 to 2026-10-24 | done | [`2026-10-22/read-only/4-thread/`](2026-10-22/read-only/4-thread/README.md) |
 | read-only | 8 | 2026-10-24 | done | [`2026-10-22/read-only/8-thread/`](2026-10-22/read-only/8-thread/README.md) |
 | read-only | 1 | 2026-10-24 to 2026-10-26 | done | [`2026-10-22/read-only/1-thread/`](2026-10-22/read-only/1-thread/README.md) |
-| 75 % reads / 25 % writes | 2, 4, 8, 1 | | pending | PostGIS, MobilityDB, ClickHouse, DuckDB |
-| 90 % reads / 10 % writes | 2, 4, 8, 1 | | pending | PostGIS, MobilityDB, ClickHouse, DuckDB |
+| 75 % reads / 25 % writes | 2 | 2026-10-26 to 2026-10-27 | done | [`2026-10-22/75-25/2-thread/`](2026-10-22/75-25/2-thread/README.md) |
+| 75 % reads / 25 % writes | 4 | 2026-10-27 | running | |
+| 75 % reads / 25 % writes | 8, 1 | | pending | |
+| 90 % reads / 10 % writes | 2, 4, 8, 1 | | pending | |
 
 In the mixed workloads, writes (inserts, updates, bulk inserts of 10 rows) make up a quarter or a tenth of the
-measured executions; after each system, everything they added is removed again (`purge_writes.sh`). Sedona has no
+measured executions; after each system, everything they added is removed again (`purge_writes.sh`). The mixed workloads run on PostGIS, MobilityDB, ClickHouse and DuckDB; their wins and slowdowns count the read queries, and each run README has a table of the write latencies. Sedona has no
 write support (GeoParquet files on HDFS) and runs read-only only; SpaceTime's write support is pending.
 
 ### Experiment of 2026-10-14: read-only, parameters uniform over each scenario's extent

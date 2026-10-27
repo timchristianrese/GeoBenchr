@@ -283,22 +283,32 @@ def fmt_ms(ms):
     return f"{ms / 1000:.2f} s" if ms >= 1000 else f"{ms:.0f} ms"
 
 
+WRITE_TYPES = {"insert", "update", "update_single", "delete", "delete_single", "bulk_insert"}
+
+
 def system_scores(summary, winners):
+    """Per system: wins and slowdowns over the read queries (comparable across workloads); in a mixed workload the
+    write queries (2026-10-27) are scored the same way in write_* columns. A system with no query is left out."""
     out = []
     for s in SYSTEMS:
         rs = [r for r in summary if r["system"] == s]
-        if not rs:
-            continue
-        sd = [r["slowdown_vs_best"] for r in rs if r["slowdown_vs_best"]]
-        out.append({
-            "system": s,
-            "wins": sum(w["winner"] == s for w in winners),
-            "queries_with_query": sum(r["planned"] > 0 for r in rs),
-            "queries_complete": sum(r["complete"] for r in rs),
-            "queries_ranked": sum(r["eligible"] for r in rs),
-            "geomean_slowdown_vs_best": round(math.exp(statistics.mean(math.log(x) for x in sd)), 2) if sd else None,
-            "median_slowdown_vs_best": round(statistics.median(sd), 2) if sd else None,
-        })
+        if not any(r["planned"] > 0 for r in rs) or not any(r["succeeded"] or r["errors"] or r["timeouts"] for r in rs):
+            continue   # no query, or not part of this run (e.g. no write support in a mixed workload)
+        row = {"system": s}
+        for prefix, keep in (("", lambda t: t not in WRITE_TYPES), ("write_", lambda t: t in WRITE_TYPES)):
+            part = [r for r in rs if keep(r["query_type"])]
+            if prefix and not any(r["planned"] > 0 for r in part):
+                continue
+            sd = [r["slowdown_vs_best"] for r in part if r["slowdown_vs_best"]]
+            row.update({
+                prefix + "wins": sum(w["winner"] == s and keep(w["query_type"]) for w in winners),
+                prefix + "queries_with_query": sum(r["planned"] > 0 for r in part),
+                prefix + "queries_complete": sum(r["complete"] for r in part),
+                prefix + "queries_ranked": sum(r["eligible"] for r in part),
+                prefix + "geomean_slowdown_vs_best": round(math.exp(statistics.mean(math.log(x) for x in sd)), 2) if sd else None,
+                prefix + "median_slowdown_vs_best": round(statistics.median(sd), 2) if sd else None,
+            })
+        out.append(row)
     return out
 
 
