@@ -1,0 +1,7 @@
+system_a,system_b,common_queries,total_a_s,total_b_s,ratio_a_over_b
+PostGIS,MobilityDB,48,19078.3,87537.7,0.22
+PostGIS,ClickHouse,64,31499.3,29908.7,1.05
+PostGIS,DuckDB,58,23767.0,41030.6,0.58
+MobilityDB,ClickHouse,48,87537.7,27272.6,3.21
+MobilityDB,DuckDB,44,83363.9,24061.8,3.46
+ClickHouse,DuckDB,58,29520.9,41030.6,0.72
