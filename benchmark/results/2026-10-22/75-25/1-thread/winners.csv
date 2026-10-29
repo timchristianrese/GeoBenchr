@@ -1,0 +1,65 @@
+scenario,query,query_type,winner,winner_mean_ms,runner_up,runner_up_mean_ms,margin_x,ranking,not_ranked
+ais,CrossingsActiveAtGivenHourOfDay,temporal,DuckDB,4.9,ClickHouse,17.4,3.55,DuckDB (5 ms) > ClickHouse (17 ms) > PostGIS (35 ms) > MobilityDB (60 ms),SpaceTime: not run; Sedona: not run
+ais,HarbourActivityInPeriod,spatiotemporal,DuckDB,31.2,PostGIS,40.8,1.31,DuckDB (31 ms) > PostGIS (41 ms) > ClickHouse (53 ms) > MobilityDB (31.52 s),SpaceTime: not run; Sedona: not run
+ais,IDsInsideRegion1Andsecond_region,spatiotemporal,ClickHouse,144.3,DuckDB,1770.9,12.27,ClickHouse (144 ms) > DuckDB (1.77 s) > PostGIS (3.32 s) > MobilityDB (29.25 s),SpaceTime: not run; Sedona: not run
+ais,SpatialBBox,spatial,ClickHouse,211.1,PostGIS,6556.2,31.06,ClickHouse (211 ms) > PostGIS (6.56 s) > MobilityDB (7.46 s) > DuckDB (15.59 s),SpaceTime: not run; Sedona: not run
+ais,bulkInsertCrossingPoints,bulk_insert,DuckDB,11.8,PostGIS,33.6,2.85,DuckDB (12 ms) > PostGIS (34 ms) > ClickHouse (40 ms) > MobilityDB (199 ms),
+ais,busiestDayInWeekPeriod,temporal,DuckDB,6.0,ClickHouse,17.9,2.98,DuckDB (6 ms) > ClickHouse (18 ms) > PostGIS (47 ms) > MobilityDB (75 ms),SpaceTime: not run; Sedona: not run
+ais,countActiveCrossingsNearIsland,spatial,PostGIS,590.5,DuckDB,947.9,1.61,PostGIS (590 ms) > DuckDB (948 ms) > ClickHouse (4.29 s) > MobilityDB (48.87 s),SpaceTime: not run; Sedona: not run
+ais,crossingsAroundHarbour,spatial,ClickHouse,87.8,PostGIS,109.5,1.25,ClickHouse (88 ms) > PostGIS (110 ms) > DuckDB (390 ms) > MobilityDB (43.71 s),SpaceTime: not run; Sedona: not run
+ais,insertSingleCrossingPoint,insert,PostGIS,5.3,DuckDB,5.4,1.02,PostGIS (5 ms) > DuckDB (5 ms) > ClickHouse (7 ms) > MobilityDB (11 ms),
+ais,islandOrCoastLineCrossingsInPeriod,spatiotemporal,DuckDB,351.1,PostGIS,560.8,1.6,DuckDB (351 ms) > PostGIS (561 ms) > ClickHouse (1.19 s) > MobilityDB (27.99 s),SpaceTime: not run; Sedona: not run
+ais,kNN,spatial,PostGIS,82.6,MobilityDB,130.1,1.58,PostGIS (83 ms) > MobilityDB (130 ms) > ClickHouse (606 ms) > DuckDB (1.75 s),SpaceTime: not run; Sedona: not run
+ais,spatioTemporalRange,spatiotemporal,ClickHouse,90.6,DuckDB,480.6,5.3,ClickHouse (91 ms) > DuckDB (481 ms) > PostGIS (709 ms) > MobilityDB (28.41 s),SpaceTime: not run; Sedona: not run
+ais,timeAggregation,temporal,ClickHouse,249.4,DuckDB,290.5,1.16,ClickHouse (249 ms) > DuckDB (290 ms) > PostGIS (936 ms) > MobilityDB (28.39 s),SpaceTime: not run; Sedona: not run
+ais,timeInterval,temporal,DuckDB,8.5,ClickHouse,15.1,1.78,DuckDB (8 ms) > ClickHouse (15 ms) > PostGIS (38 ms) > MobilityDB (61 ms),SpaceTime: not run; Sedona: not run
+ais,updateCrossingPointMass,update,PostGIS,6.0,DuckDB,26.2,4.37,PostGIS (6 ms) > DuckDB (26 ms) > ClickHouse (7.41 s) > MobilityDB (18.84 s),
+ais,updateCrossingPointSingle,update_single,PostGIS,5.4,DuckDB,27.2,5.04,PostGIS (5 ms) > DuckDB (27 ms) > ClickHouse (7.36 s) > MobilityDB (18.45 s),
+aviation,CityActivityAtInstant,spatiotemporal,DuckDB,12.7,PostGIS,25.8,2.03,DuckDB (13 ms) > PostGIS (26 ms) > ClickHouse (32 ms) > MobilityDB (308 ms),SpaceTime: not run; Sedona: not run
+aviation,FlightsAtLowAltitudeInPeriod,temporal,DuckDB,133.4,ClickHouse,218.7,1.64,DuckDB (133 ms) > ClickHouse (219 ms) > PostGIS (2.06 s) > MobilityDB (6.40 s),SpaceTime: not run; Sedona: not run
+aviation,FlightsAtNightInPeriod,temporal,ClickHouse,26.7,DuckDB,76.5,2.87,ClickHouse (27 ms) > DuckDB (76 ms) > PostGIS (78 ms) > MobilityDB (90 ms),SpaceTime: not run; Sedona: not run
+aviation,IDsInsideRegion1Andsecond_region,spatiotemporal,ClickHouse,61.6,DuckDB,428.2,6.95,ClickHouse (62 ms) > DuckDB (428 ms) > MobilityDB (1.28 s) > PostGIS (4.49 s),SpaceTime: not run; Sedona: not run
+aviation,SpatialBBox,spatial,ClickHouse,46.4,PostGIS,698.6,15.06,ClickHouse (46 ms) > PostGIS (699 ms) > MobilityDB (766 ms) > DuckDB (2.69 s),SpaceTime: not run; Sedona: not run
+aviation,bulkInsertflightPoints,bulk_insert,DuckDB,3.6,ClickHouse,41.4,11.5,DuckDB (4 ms) > ClickHouse (41 ms) > PostGIS (44 ms) > MobilityDB (146 ms),
+aviation,countFlightsInCounties,spatial,ClickHouse,318.4,PostGIS,1910.8,6.0,ClickHouse (318 ms) > PostGIS (1.91 s) > DuckDB (11.00 s) > MobilityDB (26.86 s),SpaceTime: not run; Sedona: not run
+aviation,flightClosestToPoint,spatial,ClickHouse,47.8,PostGIS,79.2,1.66,ClickHouse (48 ms) > PostGIS (79 ms) > DuckDB (287 ms) > MobilityDB (8.37 s),SpaceTime: not run; Sedona: not run
+aviation,flightsInCountyInPeriod,spatiotemporal,ClickHouse,105.3,PostGIS,245.9,2.34,ClickHouse (105 ms) > PostGIS (246 ms) > DuckDB (376 ms) > MobilityDB (1.05 s),SpaceTime: not run; Sedona: not run
+aviation,insertSingleflightPoint,insert,DuckDB,3.2,PostGIS,5.6,1.75,DuckDB (3 ms) > PostGIS (6 ms) > MobilityDB (8 ms) > ClickHouse (9 ms),
+aviation,kNN,spatial,PostGIS,45.0,MobilityDB,47.8,1.06,PostGIS (45 ms) > MobilityDB (48 ms) > ClickHouse (115 ms) > DuckDB (571 ms),SpaceTime: not run; Sedona: not run
+aviation,spatioTemporalRange,spatiotemporal,ClickHouse,35.9,DuckDB,96.5,2.69,ClickHouse (36 ms) > DuckDB (96 ms) > PostGIS (239 ms) > MobilityDB (1.01 s),SpaceTime: not run; Sedona: not run
+aviation,timeAggregation,temporal,DuckDB,178.9,ClickHouse,188.0,1.05,DuckDB (179 ms) > ClickHouse (188 ms) > PostGIS (1.07 s) > MobilityDB (1.86 s),SpaceTime: not run; Sedona: not run
+aviation,timeInterval,temporal,ClickHouse,124.9,DuckDB,128.4,1.03,ClickHouse (125 ms) > DuckDB (128 ms) > PostGIS (462 ms) > MobilityDB (2.28 s),SpaceTime: not run; Sedona: not run
+aviation,updateflightPointMass,update,PostGIS,6.6,DuckDB,11.6,1.76,PostGIS (7 ms) > DuckDB (12 ms) > MobilityDB (1.29 s) > ClickHouse (3.15 s),
+aviation,updateflightPointSingle,update_single,PostGIS,4.9,DuckDB,11.8,2.41,PostGIS (5 ms) > DuckDB (12 ms) > MobilityDB (1.23 s) > ClickHouse (3.09 s),
+cycling,AverageUpdatesPerRideInDistrictInPeriod,spatiotemporal,ClickHouse,182.4,PostGIS,300.7,1.65,ClickHouse (182 ms) > PostGIS (301 ms) > DuckDB (967 ms) > MobilityDB (1.76 s),SpaceTime: not run; Sedona: not run
+cycling,CountRidesFullyInDistrictRadius,spatial,DuckDB,4123.0,ClickHouse,4298.7,1.04,DuckDB (4.12 s) > ClickHouse (4.30 s) > PostGIS (6.73 s) > MobilityDB (41.32 s),SpaceTime: not run; Sedona: not run
+cycling,IDsInsideRegion1Andsecond_region,spatiotemporal,ClickHouse,294.1,DuckDB,457.2,1.55,ClickHouse (294 ms) > DuckDB (457 ms) > MobilityDB (2.02 s) > PostGIS (2.52 s),SpaceTime: not run; Sedona: not run
+cycling,RidesAcrossMultipleHours,temporal,DuckDB,184.7,ClickHouse,483.6,2.62,DuckDB (185 ms) > ClickHouse (484 ms) > PostGIS (561 ms) > MobilityDB (33.72 s),SpaceTime: not run; Sedona: not run
+cycling,RidesDuringRushHourInPeriod,temporal,DuckDB,90.1,ClickHouse,390.0,4.33,DuckDB (90 ms) > ClickHouse (390 ms) > PostGIS (818 ms) > MobilityDB (1.88 s),SpaceTime: not run; Sedona: not run
+cycling,RidesPastOrToUniversityInPeriod,spatiotemporal,DuckDB,89.4,PostGIS,148.5,1.66,DuckDB (89 ms) > PostGIS (148 ms) > ClickHouse (1.34 s) > MobilityDB (1.72 s),SpaceTime: not run; Sedona: not run
+cycling,SpatialBBox,spatial,ClickHouse,91.7,PostGIS,505.2,5.51,ClickHouse (92 ms) > PostGIS (505 ms) > MobilityDB (649 ms) > DuckDB (3.07 s),SpaceTime: not run; Sedona: not run
+cycling,bulkInsertridePoints,bulk_insert,DuckDB,10.1,ClickHouse,27.0,2.67,DuckDB (10 ms) > ClickHouse (27 ms) > PostGIS (88 ms) > MobilityDB (224 ms),
+cycling,countRideInDistrict,spatial,ClickHouse,2673.2,PostGIS,3263.1,1.22,ClickHouse (2.67 s) > PostGIS (3.26 s) > MobilityDB (19.58 s) > DuckDB (29.57 s),SpaceTime: not run; Sedona: not run
+cycling,insertSingleridePoint,insert,DuckDB,4.4,ClickHouse,8.7,1.98,DuckDB (4 ms) > ClickHouse (9 ms) > PostGIS (10 ms) > MobilityDB (15 ms),
+cycling,kNN,spatial,PostGIS,36.1,MobilityDB,50.9,1.41,PostGIS (36 ms) > MobilityDB (51 ms) > ClickHouse (194 ms) > DuckDB (228 ms),SpaceTime: not run; Sedona: not run
+cycling,spatioTemporalRange,spatiotemporal,ClickHouse,70.4,DuckDB,135.8,1.93,ClickHouse (70 ms) > DuckDB (136 ms) > PostGIS (174 ms) > MobilityDB (754 ms),SpaceTime: not run; Sedona: not run
+cycling,timeAggregation,temporal,DuckDB,115.1,PostGIS,534.7,4.65,DuckDB (115 ms) > PostGIS (535 ms) > ClickHouse (605 ms) > MobilityDB (4.27 s),SpaceTime: not run; Sedona: not run
+cycling,timeInterval,temporal,DuckDB,70.5,PostGIS,259.7,3.68,DuckDB (70 ms) > PostGIS (260 ms) > ClickHouse (410 ms) > MobilityDB (1.39 s),SpaceTime: not run; Sedona: not run
+cycling,updateridePointMass,update,DuckDB,8.0,PostGIS,8.5,1.06,DuckDB (8 ms) > PostGIS (8 ms) > ClickHouse (705 ms) > MobilityDB (3.27 s),
+cycling,updateridePointSingle,update_single,DuckDB,8.2,PostGIS,8.6,1.05,DuckDB (8 ms) > PostGIS (9 ms) > ClickHouse (714 ms) > MobilityDB (3.39 s),
+geolife,AverageDailyActivityPerUserInPeriod,temporal,ClickHouse,289.4,DuckDB,1624.1,5.61,ClickHouse (289 ms) > DuckDB (1.62 s) > PostGIS (2.14 s),SpaceTime: not run; Sedona: not run
+geolife,ClosestRestaurantToPoint,spatial,ClickHouse,535.7,DuckDB,1561,2.91,ClickHouse (536 ms) > DuckDB (1.56 s) > PostGIS (8.70 s),SpaceTime: not run; Sedona: not run
+geolife,CountPOIsByTypeInRegion,spatial,ClickHouse,255.9,PostGIS,11226.3,43.87,ClickHouse (256 ms) > PostGIS (11.23 s) > DuckDB (27.49 s),SpaceTime: not run; Sedona: not run
+geolife,FirstAndLastActivityInPeriod,temporal,ClickHouse,219.7,DuckDB,926.4,4.22,ClickHouse (220 ms) > DuckDB (926 ms) > PostGIS (1.68 s),SpaceTime: not run; Sedona: not run
+geolife,IDsInsideRegion1Andsecond_region,spatiotemporal,ClickHouse,126.1,DuckDB,876.5,6.95,ClickHouse (126 ms) > DuckDB (876 ms) > PostGIS (2.24 s),SpaceTime: not run; Sedona: not run
+geolife,SlidingWindowActivityInRegionPerMinuteWithNonZeroID,spatiotemporal,ClickHouse,148.0,PostGIS,439.7,2.97,ClickHouse (148 ms) > PostGIS (440 ms) > DuckDB (893 ms),SpaceTime: not run; Sedona: not run
+geolife,SpatialBBox,spatial,ClickHouse,126.3,PostGIS,2285.4,18.1,ClickHouse (126 ms) > PostGIS (2.29 s) > DuckDB (7.12 s),SpaceTime: not run; Sedona: not run
+geolife,UniqueUsersPerHourInRegionInPeriod,spatiotemporal,ClickHouse,273.9,PostGIS,1073.5,3.92,ClickHouse (274 ms) > PostGIS (1.07 s) > DuckDB (2.60 s),SpaceTime: not run; Sedona: not run
+geolife,bulkInsertgeolifePoints,bulk_insert,DuckDB,11.4,ClickHouse,24.8,2.18,DuckDB (11 ms) > ClickHouse (25 ms) > PostGIS (75 ms),
+geolife,insertSinglegeolifePoint,insert,DuckDB,5.1,ClickHouse,6.9,1.35,DuckDB (5 ms) > ClickHouse (7 ms) > PostGIS (10 ms),
+geolife,kNN,spatial,PostGIS,271.8,ClickHouse,287.9,1.06,PostGIS (272 ms) > ClickHouse (288 ms) > DuckDB (1.07 s),SpaceTime: not run; Sedona: not run
+geolife,spatioTemporalRange,spatiotemporal,ClickHouse,64.1,PostGIS,141.5,2.21,ClickHouse (64 ms) > PostGIS (142 ms) > DuckDB (233 ms),SpaceTime: not run; Sedona: not run
+geolife,timeAggregation,temporal,ClickHouse,297.0,DuckDB,512.5,1.73,ClickHouse (297 ms) > DuckDB (512 ms) > PostGIS (756 ms),SpaceTime: not run; Sedona: not run
+geolife,timeInterval,temporal,ClickHouse,113.7,DuckDB,169.0,1.49,ClickHouse (114 ms) > DuckDB (169 ms) > PostGIS (405 ms),SpaceTime: not run; Sedona: not run
+geolife,updategeolifePointMass,update,DuckDB,18.1,PostGIS,122.1,6.75,DuckDB (18 ms) > PostGIS (122 ms) > ClickHouse (962 ms),
+geolife,updategeolifePointSingle,update_single,PostGIS,10.2,DuckDB,18.9,1.85,PostGIS (10 ms) > DuckDB (19 ms) > ClickHouse (933 ms),

@@ -1,0 +1,5 @@
+system,wins,queries_with_query,queries_complete,queries_ranked,geomean_slowdown_vs_best,median_slowdown_vs_best,write_wins,write_queries_with_query,write_queries_complete,write_queries_ranked,write_geomean_slowdown_vs_best,write_median_slowdown_vs_best
+PostGIS,5,48,48,48,4.35,3.73,6,16,16,16,2.08,1.41
+MobilityDB,0,36,36,36,23.96,19.48,0,12,12,12,73.54,118.23
+ClickHouse,29,48,48,48,1.56,1.0,0,16,16,16,25.9,32.34
+DuckDB,14,48,48,48,3.79,3.24,10,16,16,16,1.38,1.0

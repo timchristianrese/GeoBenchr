@@ -23,8 +23,9 @@ every run measures the same parameter sets, and the read-only and mixed workload
 | 75 % reads / 25 % writes | 2 | 2026-10-26 to 2026-10-27 | done | [`2026-10-22/75-25/2-thread/`](2026-10-22/75-25/2-thread/README.md) |
 | 75 % reads / 25 % writes | 4 | 2026-10-27 | done | [`2026-10-22/75-25/4-thread/`](2026-10-22/75-25/4-thread/README.md) |
 | 75 % reads / 25 % writes | 8 | 2026-10-27 to 2026-10-28 | done | [`2026-10-22/75-25/8-thread/`](2026-10-22/75-25/8-thread/README.md) |
-| 75 % reads / 25 % writes | 1 | 2026-10-28 | running | |
-| 90 % reads / 10 % writes | 2, 4, 8, 1 | | pending | |
+| 75 % reads / 25 % writes | 1 | 2026-10-28 to 2026-10-29 | done | [`2026-10-22/75-25/1-thread/`](2026-10-22/75-25/1-thread/README.md) |
+| 90 % reads / 10 % writes | 2 | 2026-10-29 | running | |
+| 90 % reads / 10 % writes | 4, 8, 1 | | pending | |
 
 In the mixed workloads, writes (inserts, updates, bulk inserts of 10 rows) make up a quarter or a tenth of the
 measured executions; after each system, everything they added is removed again (`purge_writes.sh`). The mixed workloads run on PostGIS, MobilityDB, ClickHouse and DuckDB; their wins and slowdowns count the read queries, and each run README has a table of the write latencies. Sedona has no

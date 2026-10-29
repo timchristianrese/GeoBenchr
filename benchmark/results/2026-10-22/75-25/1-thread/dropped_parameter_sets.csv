@@ -1,0 +1,3 @@
+scenario,query,repetition,reason
+ais,countActiveCrossingsNearIsland,80,every system timed out
+ais,countActiveCrossingsNearIsland,95,every system timed out
